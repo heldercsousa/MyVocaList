@@ -26,170 +26,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
 		version-manifest.json = version-manifest.json
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md
-		Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\plan.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\plan.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\task-log.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\task-log.md
-		Docs\Management\BusinessFeatures\backup-restore\bugs\2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open\README.md = Docs\Management\BusinessFeatures\backup-restore\bugs\2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open\README.md
-		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates\README.md
-		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness\README.md
-		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\README.md
-		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\requirements.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\requirements.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\README.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\README.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\requirements.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\requirements.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\design.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\design.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\tasks.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\tasks.md
-		Docs\Management\BusinessFeatures\about-page\bugs\2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page\README.md = Docs\Management\BusinessFeatures\about-page\bugs\2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page\README.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\README.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\README.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\requirements.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\requirements.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\design.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\design.md
-		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\tasks.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\tasks.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\tasks.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\tasks.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\plan.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\plan.md
-		Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files\README.md
-		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role\README.md
-		Docs\Management\BusinessFeatures\venues\bugs\2026-09-21-BUG-080-venuesseedfortest-migration-ships-504-fake-venues-and-its-down-wipes-the-table\README.md = Docs\Management\BusinessFeatures\venues\bugs\2026-09-21-BUG-080-venuesseedfortest-migration-ships-504-fake-venues-and-its-down-wipes-the-table\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\task-log.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\README.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\findings.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\task-log.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\plan.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\requirements.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\design.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\tasks.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\spec-changelog.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\spec-changelog.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\findings.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\findings.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\design.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\tasks.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\task-log.md
-		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-agent-type-taskcreated-taskcompleted-hooks-spawn-an-agent-per-task-event\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-agent-type-taskcreated-taskcompleted-hooks-spawn-an-agent-per-task-event\README.md
-		Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-disabled-dotnet-skills-still-listed-at-every-session-start\README.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-disabled-dotnet-skills-still-listed-at-every-session-start\README.md
-		Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-11-03-second-trim-of-claude-md-and-workflow-md\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-11-03-second-trim-of-claude-md-and-workflow-md\README.md
-		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations\README.md
-		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-rotate-the-devexpress-license-key\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-rotate-the-devexpress-license-key\README.md
-		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-move-the-playwright-mcp-token-to-env-local\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-move-the-playwright-mcp-token-to-env-local\README.md
-		Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions\README.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions\README.md
-		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start\README.md
-		Docs\Management\cross-cutting\large-volume-data-stress-test\changes\2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand\README.md = Docs\Management\cross-cutting\large-volume-data-stress-test\changes\2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand\README.md
-		Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\changes\2026-11-04-screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars\README.md = Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\changes\2026-11-04-screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars\README.md
-		Docs\Management\BusinessFeatures\persons\changes\2026-11-06-person-form-follow-ups-from-acf-t7-run-2\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-06-person-form-follow-ups-from-acf-t7-run-2\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-song-list-item-shows-artist-name-version-and-featured-artists\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-song-list-item-shows-artist-name-version-and-featured-artists\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-group-songs-list-by-artist\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-group-songs-list-by-artist\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-show-similar-records-in-autocomplete-results\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-show-similar-records-in-autocomplete-results\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-ai-intent-matching-for-mistyped-titles-and-artists\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-ai-intent-matching-for-mistyped-titles-and-artists\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments\README.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\README.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\requirements.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\requirements.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\design.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\design.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\plan.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\plan.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\tasks.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\tasks.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\task-log.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\task-log.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-release-tag-discipline-mechanically-enforced-tag-creation\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-release-tag-discipline-mechanically-enforced-tag-creation\README.md
-		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-10-retire-changelog-md-and-its-references\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-10-retire-changelog-md-and-its-references\README.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-trim-always-loaded-context-and-enforce-process-steps-by-checks\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-trim-always-loaded-context-and-enforce-process-steps-by-checks\README.md
-		Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-11-10-ledger-cleanup-one-short-line-per-row-archive-row-length-check\README.md = Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-11-10-ledger-cleanup-one-short-line-per-row-archive-row-length-check\README.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-process-step-checks-sln-moves-and-deletes-safeareaedges-task-log-changed-files\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-process-step-checks-sln-moves-and-deletes-safeareaedges-task-log-changed-files\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\design.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\plan.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\requirements.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\requirements.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\task-log.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\tasks.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\tasks.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\design.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\tasks.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-11-autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-11-autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\design.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\findings.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\findings.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\tasks.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log-archive-2026-11.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log-archive-2026-11.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\task-log.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-fab-placement-size-and-color-when-alone-and-when-paired-with-the-floating-toolbar\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-fab-placement-size-and-color-when-alone-and-when-paired-with-the-floating-toolbar\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crudlistview-one-list-mode-at-a-time-multi-action-browse-multi-select-selection-with-toolbar-edit-for-exactly-one\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crudlistview-one-list-mode-at-a-time-multi-action-browse-multi-select-selection-with-toolbar-edit-for-exactly-one\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-listitemcheckbox-leading-slot-when-the-row-has-a-trailing-action-trailing-otherwise\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-listitemcheckbox-leading-slot-when-the-row-has-a-trailing-action-trailing-otherwise\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-correct-the-md3-list-selection-and-toolbar-rules-in-the-library-guidelines-with-verbatim-official-quotes\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-correct-the-md3-list-selection-and-toolbar-rules-in-the-library-guidelines-with-verbatim-official-quotes\README.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-12-venues-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-12-venues-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md
-		Docs\Management\BusinessFeatures\persons\changes\2026-11-12-people-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-12-people-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading\README.md
-		Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-12-listitem-empty-slots-not-rendered-content-fills-the-freed-width-spacing-aligned-to-md3-list-common-tokens\README.md = Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-12-listitem-empty-slots-not-rendered-content-fills-the-freed-width-spacing-aligned-to-md3-list-common-tokens\README.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion\README.md
-		Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar\README.md = Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar\README.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artists-list-rows-show-the-artist-picture-as-a-leading-avatar\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artists-list-rows-show-the-artist-picture-as-a-leading-avatar\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-backfill-deezer-images-for-songs-and-artists-saved-before-the-artwork-item\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-backfill-deezer-images-for-songs-and-artists-saved-before-the-artwork-item\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artist-form-picture-at-the-top-and-name-as-tap-to-edit-text\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artist-form-picture-at-the-top-and-name-as-tap-to-edit-text\README.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-new-component-taptoeditfield-a-defined-value-shows-as-text-a-tap-opens-its-editor\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-new-component-taptoeditfield-a-defined-value-shows-as-text-a-tap-opens-its-editor\README.md
-		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\README.md
-		Docs\Management\BusinessFeatures\backup-restore\changes\2026-11-13-backups-include-uploaded-pictures\README.md = Docs\Management\BusinessFeatures\backup-restore\changes\2026-11-13-backups-include-uploaded-pictures\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\design.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\tasks.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-song-form-picture-at-the-top-title-and-artist-as-tap-to-edit-text-artist-editable-in-edit-mode\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-song-form-picture-at-the-top-title-and-artist-as-tap-to-edit-text-artist-editable-in-edit-mode\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-14-BUG-087-song-form-and-artist-form-freeze-the-app-on-open-taptoeditfield\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-14-BUG-087-song-form-and-artist-form-freeze-the-app-on-open-taptoeditfield\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\README.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\design.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\tasks.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\task-log.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\README.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\requirements.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\requirements.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\design.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\design.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\tasks.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\tasks.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log-archive-2026-11.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log-archive-2026-11.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused\README.md
-		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name\README.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-14-targeted-file-reads-and-task-log-rotation-hooks\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-14-targeted-file-reads-and-task-log-rotation-hooks\README.md
-		Docs\Management\DevCycleCraft\hamburger-nav-pattern\changes\2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon\README.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\changes\2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon\README.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\README.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\requirements.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\requirements.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\design.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\design.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\plan.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\plan.md
-		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\task-log.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Changelog\Archive\changelog-2025-2026.md = Docs\Changelog\Archive\changelog-2025-2026.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4}"
@@ -312,17 +152,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-000
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md = Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md
 		Docs\Management\BusinessFeatures\artists-songs\design.md = Docs\Management\BusinessFeatures\artists-songs\design.md
 		Docs\Management\BusinessFeatures\artists-songs\form-validation-task-log.md = Docs\Management\BusinessFeatures\artists-songs\form-validation-task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md = Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md
-		Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md
-		Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md
-		Docs\Management\BusinessFeatures\artists-songs\archive\plan-spec-revision.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-spec-revision.md
 		Docs\Management\BusinessFeatures\artists-songs\plan.md = Docs\Management\BusinessFeatures\artists-songs\plan.md
 		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\archive\session-plan-phase16c-work-queue.md = Docs\Management\BusinessFeatures\artists-songs\archive\session-plan-phase16c-work-queue.md
-		Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md = Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\README.md = Docs\Management\BusinessFeatures\artists-songs\README.md
@@ -373,16 +206,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toolbar-fab-vibrant", "tool
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "crud-list-deduplication", "{FA1234BC-0001-4000-8000-000000000019}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7c.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7c.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md
-		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\README.md
 	EndProjectSection
 EndProject
@@ -422,8 +247,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-015-016-fixes", "bug-015-016-fixes", "{FA1234BC-0001-4000-8000-000000000030}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\bug-015-016-fixes\plan.md = Docs\Management\DevCycleCraft\bug-015-016-fixes\plan.md
-		Docs\Management\DevCycleCraft\bug-015-016-fixes\task-log.md = Docs\Management\DevCycleCraft\bug-015-016-fixes\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-form-validation-guide", "ui-form-validation-guide", "{FA1234BC-0001-4000-8000-000000000033}"
@@ -445,22 +268,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\01-analysis-A.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\01-analysis-A.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\02-analysis-B.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\02-analysis-B.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\03-plan-1.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\03-plan-1.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\04-plan-2.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\04-plan-2.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\05-final-plan-synthesis.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\05-final-plan-synthesis.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\06-review-1.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\06-review-1.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\07-review-2.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\07-review-2.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\08-orchestrator-final-judgment.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\08-orchestrator-final-judgment.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\09-final-consolidated-plan.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\09-final-consolidated-plan.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\10-resume-handoff.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\10-resume-handoff.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\design.md = Docs\Management\DevCycleCraft\backlog-first-registration\design.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\findings.md = Docs\Management\DevCycleCraft\backlog-first-registration\findings.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\plan.md = Docs\Management\DevCycleCraft\backlog-first-registration\plan.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\proposed-diffs.md = Docs\Management\DevCycleCraft\backlog-first-registration\proposed-diffs.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\requirements.md = Docs\Management\DevCycleCraft\backlog-first-registration\requirements.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\task-log.md = Docs\Management\DevCycleCraft\backlog-first-registration\task-log.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\tasks.md = Docs\Management\DevCycleCraft\backlog-first-registration\tasks.md
@@ -492,20 +303,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "a
 		Docs\Management\DevCycleCraft\autocomplete-component\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\plan.md
 		Docs\Management\DevCycleCraft\autocomplete-component\README.md = Docs\Management\DevCycleCraft\autocomplete-component\README.md
 		Docs\Management\DevCycleCraft\autocomplete-component\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\requirements.md
-		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
 		Docs\Management\DevCycleCraft\autocomplete-component\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\task-log.md
 		Docs\Management\DevCycleCraft\autocomplete-component\ux-no-match-add-new-analysis.md = Docs\Management\DevCycleCraft\autocomplete-component\ux-no-match-add-new-analysis.md
+		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompleteedit-replacement", "2026-07-19-dx-autocompleteedit-replacement", "{FA1234BC-0001-4000-8000-000000000053}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
-		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-trivial-fix", "inline-trivial-fix", "{FA1234BC-0001-4000-8000-000000000056}"
@@ -575,9 +379,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000034}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
 		Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg = Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg
-		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md
 		Docs\Management\BusinessFeatures\persons\bugs\singer-bithday-validation-error.jpg = Docs\Management\BusinessFeatures\persons\bugs\singer-bithday-validation-error.jpg
 	EndProjectSection
 EndProject
@@ -657,17 +459,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-appbar-pattern", "se
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-044-duplicate-personformpage-after-save", "2026-07-15-BUG-044-duplicate-personformpage-after-save", "{FA1234BC-0001-4000-8000-0000000000CE}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "{FA1234BC-0001-4000-8000-0000000000CF}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "{FA1234BC-0001-4000-8000-0000000000D0}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
@@ -708,23 +507,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-search-launch", "yo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "song-import-resolution", "song-import-resolution", "{FA1234BC-0001-4000-8000-000000000023}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md
-		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\findings.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\findings.md
-		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\plan.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\task-log.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\tasks.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\tasks.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-form-ux-redesign", "2026-07-10-form-ux-redesign", "{FA1234BC-0001-4000-8000-000000000045}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\design.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\handoff.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\handoff.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-create", "2026-07-21-inline-artist-create", "{FA1234BC-0001-4000-8000-000000000055}"
@@ -992,9 +778,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg = Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-008-songform-artist-autocomplete", "2026-06-01-BUG-008-songform-artist-autocomplete", "{FA1234BC-0001-4000-8000-0000000000B5}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\BUG-008-songform-artist-autocomplete.md
@@ -1065,13 +851,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-015-artistsp
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md
 	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-016-songspage-fab-crash", "2026-06-27-BUG-016-songspage-fab-crash", "{FA1234BC-0001-4000-8000-000000000084}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\BUG-016-songspage-fab-crash.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\README.md
 	EndProjectSection
-EndProject
-EndProject
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-050-suggestion-not-locked", "2026-07-21-BUG-050-suggestion-not-locked", "{FA1234BC-0001-4000-8000-000000000073}"
 	ProjectSection(SolutionItems) = preProject
@@ -1127,40 +912,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-out
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-017-artistscrud-emulator-debug-often-stops", "BUG-017-artistscrud-emulator-debug-often-stops", "{B92F4F42-00C3-44C3-BC6E-E340782C7183}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-018-artistformpage-edit-save-crash", "BUG-018-artistformpage-edit-save-crash", "{FA1234BC-0001-4000-8000-000000000031}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-019-artistspage-listitem-button-noop", "BUG-019-artistspage-listitem-button-noop", "{FA1234BC-0001-4000-8000-000000000032}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-021-songspage-fab-crash", "BUG-021-songspage-fab-crash", "{92D65ADE-A1E0-4220-AE25-06691B50D86D}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-024-songform-edit-data-loss", "BUG-024-songform-edit-data-loss", "{FA1234BC-0001-4000-8000-000000000035}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-023-songform-bottomsheet-broken", "BUG-023-songform-bottomsheet-broken", "{FA1234BC-0001-4000-8000-000000000036}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000038}"
@@ -1172,13 +943,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-026-hwui-sigabrt-render-teardown", "BUG-026-hwui-sigabrt-render-teardown", "{FA1234BC-0001-4000-8000-000000000040}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
-		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Archive", "Archive", "{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md = Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rules-file-refactoring", "rules-file-refactoring", "{FA1234BC-0001-4000-8000-000000000041}"
@@ -1204,7 +972,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning",
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\plan.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\plan.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md
-		Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\T13-proposed-diffs.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\T13-proposed-diffs.md
@@ -1246,14 +1013,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bugs", "Bugs", "{1AAD9972-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941D280-F5AE-428A-AC78-42246F3BF3F8}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt
-		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Extensions", "MyVocaList.Extensions\MyVocaList.Extensions.csproj", "{9380343D-7BB2-4832-A406-ED77FF9AAEB2}"
@@ -1262,6 +1021,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{D544
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompleteedit-replacement", "2026-07-19-dx-autocompleteedit-replacement", "{DB5ECBBC-566B-4A00-9791-E18E11F49B55}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md
@@ -1284,17 +1044,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (autocomplete-componen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{FA1234BC-0001-4000-8000-0000000000BD}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-041-search-view-duplicate-on-back", "2026-07-12-BUG-041-search-view-duplicate-on-back", "{FA1234BC-0001-4000-8000-0000000000BE}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-042-back-tap-repeat-cycle", "2026-07-12-BUG-042-back-tap-repeat-cycle", "{FA1234BC-0001-4000-8000-0000000000BF}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
@@ -1520,6 +1277,728 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "emulator-testing", "emulato
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\emulator-testing\Chat with Opus about frozen UI in emulator - TO DO.txt = Docs\Management\cross-cutting\emulator-testing\Chat with Opus about frozen UI in emulator - TO DO.txt
 		Docs\Management\cross-cutting\emulator-testing\EMULATOR_TEST_MASTER_LIST.md = Docs\Management\cross-cutting\emulator-testing\EMULATOR_TEST_MASTER_LIST.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Changelog", "Changelog", "{AF868E58-4DB1-5636-8BB6-614964BBA192}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Archive", "Archive", "{B68CA4C6-5A8B-5AAF-A338-ACC3E955699B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Changelog\Archive\changelog-2025-2026.md = Docs\Changelog\Archive\changelog-2025-2026.md
+		Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md = Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{869E9F71-DCA1-5BA0-8A84-9E9A92158B93}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page", "2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page", "{E30F7C02-8512-537A-B232-BA014D9F7900}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\about-page\bugs\2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page\README.md = Docs\Management\BusinessFeatures\about-page\bugs\2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{3F070FFB-AF89-5A81-8D43-D8DBF1C4C367}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-20-about-page-copyright-year-auto-extending-range", "2026-08-20-about-page-copyright-year-auto-extending-range", "{FF926150-64BE-5936-9135-EFBFA4030A8A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\README.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\README.md
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\design.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\design.md
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\requirements.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\requirements.md
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\tasks.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-copyright-year-auto-extending-range\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-20-about-page-license-text-mit", "2026-08-20-about-page-license-text-mit", "{EE6F7627-F31F-532A-920A-CC63ECD8B578}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\README.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\README.md
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\design.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\design.md
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\requirements.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\requirements.md
+		Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\tasks.md = Docs\Management\BusinessFeatures\about-page\changes\2026-08-20-about-page-license-text-mit\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "archive", "archive", "{40CA6929-6744-5DC2-A694-CE8AF75E0BCD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md = Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md
+		Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md = Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md
+		Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md
+		Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md
+		Docs\Management\BusinessFeatures\artists-songs\archive\plan-spec-revision.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-spec-revision.md
+		Docs\Management\BusinessFeatures\artists-songs\archive\session-plan-phase16c-work-queue.md = Docs\Management\BusinessFeatures\artists-songs\archive\session-plan-phase16c-work-queue.md
+		Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md = Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops", "2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops", "{2A5D566D-C91D-530B-A90B-B4B2F84C93C8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-018-artistformpage-edit-save-crash", "2026-06-27-BUG-018-artistformpage-edit-save-crash", "{FC6A4DC1-30DA-53AC-8AF0-1E4954BBBF9C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-BUG-019-artistspage-listitem-button-noop", "2026-06-30-BUG-019-artistspage-listitem-button-noop", "{CF7CCA1D-C89B-50BD-B8C0-2C68E36AEF4B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-01-BUG-021-songspage-fab-crash", "2026-07-01-BUG-021-songspage-fab-crash", "{5E48AAAA-9606-58C4-8EA5-B6203924C484}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-02-BUG-023-songform-bottomsheet-broken", "2026-07-02-BUG-023-songform-bottomsheet-broken", "{2221E818-569F-5733-967C-4F74A0FF2438}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-02-BUG-024-songform-edit-data-loss", "2026-07-02-BUG-024-songform-edit-data-loss", "{A29F45CE-31E7-5CE5-8375-2D7D8EE50D15}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical", "2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical", "{57CE369B-8A6C-52BA-8A5A-8BF28B482126}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced", "2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced", "{C6A90017-5B21-534B-B550-8BEE8C8A3C66}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient", "2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient", "{181C4077-1A21-5FCE-8D34-64DE8DDB879E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows", "2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows", "{FB3AE4FC-F56A-5F0D-B26D-5BA77585DF2E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one", "2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one", "{8B020DB5-0033-5495-B7F2-B1AAEF955D5E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028", "2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028", "{00100F3F-D83B-5DEF-B1FC-78339573078E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-14-BUG-087-song-form-and-artist-form-freeze-the-app-on-open-taptoeditfield", "2026-11-14-BUG-087-song-form-and-artist-form-freeze-the-app-on-open-taptoeditfield", "{58B97A0C-BE2C-552A-83BC-001AD30E119E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-14-BUG-087-song-form-and-artist-form-freeze-the-app-on-open-taptoeditfield\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-14-BUG-087-song-form-and-artist-form-freeze-the-app-on-open-taptoeditfield\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-form-ux-redesign", "2026-07-10-form-ux-redesign", "{BC5003A9-E3F8-523C-B81E-02A297DBFA7B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\handoff.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\handoff.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-04-song-writes-propagate-to-the-artist-catalog", "2026-08-04-song-writes-propagate-to-the-artist-catalog", "{05001611-A05D-588E-8BD9-A058BA9F4AE3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-24-song-form-title-first-one-search-over-local-and-music-apis", "2026-09-24-song-form-title-first-one-search-over-local-and-music-apis", "{DAA25DC3-31F5-5F11-B9D7-183B7E948BFE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\findings.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\findings.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments", "2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments", "{F79C945F-0FB0-57EE-B576-560F06DB2E5A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-post-mvp-ai-intent-matching-for-mistyped-titles-and-artists", "2026-11-09-post-mvp-ai-intent-matching-for-mistyped-titles-and-artists", "{5765D6A9-35E5-50BA-8625-94E6A659B8B9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-ai-intent-matching-for-mistyped-titles-and-artists\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-ai-intent-matching-for-mistyped-titles-and-artists\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-post-mvp-group-songs-list-by-artist", "2026-11-09-post-mvp-group-songs-list-by-artist", "{D24490C2-1A69-523A-BD9C-F7CD33E8DC58}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-group-songs-list-by-artist\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-group-songs-list-by-artist\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-post-mvp-show-similar-records-in-autocomplete-results", "2026-11-09-post-mvp-show-similar-records-in-autocomplete-results", "{D51BFBC5-52C7-5301-A24D-E04B9233FECC}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-show-similar-records-in-autocomplete-results\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-post-mvp-show-similar-records-in-autocomplete-results\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-song-list-item-shows-artist-name-version-and-featured-artists", "2026-11-09-song-list-item-shows-artist-name-version-and-featured-artists", "{07D4E3CB-0EFF-58C0-9128-493EF5B4E27A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-song-list-item-shows-artist-name-version-and-featured-artists\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-09-song-list-item-shows-artist-name-version-and-featured-artists\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3", "2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3", "{0350817C-C5EB-5ADD-BC71-1AB02E93854A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line", "2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line", "{0A653ECC-BE5E-53A0-8360-140945A29274}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux", "2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux", "{575C853D-9B3B-5932-9B1B-97D3954E5AF7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields", "2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields", "{B9BFB19E-ED0B-51CD-8BE7-5C8572E8922A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "{E260291E-7885-5298-8FF1-F7F717ABA8E3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results", "2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results", "{B9E91996-1005-5F32-958D-D573A6E50802}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\findings.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\findings.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log-archive-2026-11.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log-archive-2026-11.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-song-title-limit-raised-from-100-to-250-characters", "2026-11-11-song-title-limit-raised-from-100-to-250-characters", "{B6F0D158-8ED8-5C88-8FB0-7C8A8EE61B84}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu", "2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu", "{507D1DDA-5651-5EA8-A7D2-CFE8E53725DE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion", "2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion", "{1AEAE66D-879E-5862-9708-FD682B368FE4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading", "2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading", "{0D8BFAC9-6917-562E-9401-063111D0ABA3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-artist-form-picture-at-the-top-and-name-as-tap-to-edit-text", "2026-11-13-artist-form-picture-at-the-top-and-name-as-tap-to-edit-text", "{CC336040-11AC-59D0-9120-A32810E740A1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artist-form-picture-at-the-top-and-name-as-tap-to-edit-text\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artist-form-picture-at-the-top-and-name-as-tap-to-edit-text\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-artists-list-rows-show-the-artist-picture-as-a-leading-avatar", "2026-11-13-artists-list-rows-show-the-artist-picture-as-a-leading-avatar", "{EFE40EA8-9D75-545D-9F6E-862461E550C0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artists-list-rows-show-the-artist-picture-as-a-leading-avatar\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-artists-list-rows-show-the-artist-picture-as-a-leading-avatar\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-backfill-deezer-images-for-songs-and-artists-saved-before-the-artwork-item", "2026-11-13-backfill-deezer-images-for-songs-and-artists-saved-before-the-artwork-item", "{E220D40F-0548-5F81-9972-7F8160E5E75C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-backfill-deezer-images-for-songs-and-artists-saved-before-the-artwork-item\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-backfill-deezer-images-for-songs-and-artists-saved-before-the-artwork-item\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files", "2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files", "{E8CC06AE-4DE2-567A-A4D0-52D7BA5EEBD6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-pictures-for-songs-and-artists-upload-with-automatic-crop-kept-as-app-private-files\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-song-form-picture-at-the-top-title-and-artist-as-tap-to-edit-text-artist-editable-in-edit-mode", "2026-11-13-song-form-picture-at-the-top-title-and-artist-as-tap-to-edit-text-artist-editable-in-edit-mode", "{042ED980-5DA1-53A7-BCC1-43CFBF5081EE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-song-form-picture-at-the-top-title-and-artist-as-tap-to-edit-text-artist-editable-in-edit-mode\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-13-song-form-picture-at-the-top-title-and-artist-as-tap-to-edit-text-artist-editable-in-edit-mode\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists", "2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists", "{AC9EF7EF-C21D-565F-9ED1-5379F46CC3F7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "song-import-resolution", "song-import-resolution", "{DA743FB0-3563-5CEF-A91B-0404AC4C2D39}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\findings.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\findings.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\plan.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\task-log.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\tasks.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{C98F4FB5-4969-5C75-B7FA-0F1BD1751B6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open", "2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open", "{3EF4076E-8BF4-5AC7-B138-F392FD65C0AF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\backup-restore\bugs\2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open\README.md = Docs\Management\BusinessFeatures\backup-restore\bugs\2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-backups-include-uploaded-pictures", "2026-11-13-backups-include-uploaded-pictures", "{497626C4-A538-5539-8245-B308B49051A7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\backup-restore\changes\2026-11-13-backups-include-uploaded-pictures\README.md = Docs\Management\BusinessFeatures\backup-restore\changes\2026-11-13-backups-include-uploaded-pictures\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-026-hwui-sigabrt-render-teardown", "2026-07-03-BUG-026-hwui-sigabrt-render-teardown", "{3B48689B-0D47-5BD7-A2E2-7359C35FDAA3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-01-BUG-022-singerform-birthday-mask", "2026-07-01-BUG-022-singerform-birthday-mask", "{E7317527-64A7-5859-9625-129D883BEBAA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-06-person-form-follow-ups-from-acf-t7-run-2", "2026-11-06-person-form-follow-ups-from-acf-t7-run-2", "{FE97208C-1BB5-57E4-8A84-97574D5DCEB7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-06-person-form-follow-ups-from-acf-t7-run-2\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-06-person-form-follow-ups-from-acf-t7-run-2\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-people-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset", "2026-11-12-people-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset", "{9C359603-D869-5E56-8052-953375F353DC}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-12-people-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-12-people-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-21-BUG-080-venuesseedfortest-migration-ships-504-fake-venues-and-its-down-wipes-the-table", "2026-09-21-BUG-080-venuesseedfortest-migration-ships-504-fake-venues-and-its-down-wipes-the-table", "{F938C8DD-961D-53B2-9E82-E7B0FFBDE63B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\bugs\2026-09-21-BUG-080-venuesseedfortest-migration-ships-504-fake-venues-and-its-down-wipes-the-table\README.md = Docs\Management\BusinessFeatures\venues\bugs\2026-09-21-BUG-080-venuesseedfortest-migration-ships-504-fake-venues-and-its-down-wipes-the-table\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-venues-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset", "2026-11-12-venues-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset", "{25255F9F-180A-55B2-AFF5-18D18294BF35}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-12-venues-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-12-venues-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused", "2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused", "{B7A13E19-FC46-551A-A324-4E4B88DDB9B9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name", "2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name", "{EAFAE4AA-20F0-5E31-91E7-C94E5DA712D4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form", "2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form", "{F2634770-1EB8-54C5-8169-203A06FC446C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\README.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\design.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\design.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\requirements.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\requirements.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log-archive-2026-11.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log-archive-2026-11.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\task-log.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\tasks.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode", "2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode", "{3A193A4F-7E10-56DF-93D9-8BE594BE0CBB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\README.md
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\design.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\design.md
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\plan.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\plan.md
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\requirements.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\requirements.md
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\task-log.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\task-log.md
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\tasks.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-09-release-tag-discipline-mechanically-enforced-tag-creation", "2026-11-09-release-tag-discipline-mechanically-enforced-tag-creation", "{7E82FD89-9092-5F4C-B3C4-03FA3EBFC70B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-release-tag-discipline-mechanically-enforced-tag-creation\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-release-tag-discipline-mechanically-enforced-tag-creation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-10-retire-changelog-md-and-its-references", "2026-11-10-retire-changelog-md-and-its-references", "{7E650721-BD81-52BB-83F4-529A02C3D43A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-10-retire-changelog-md-and-its-references\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-10-retire-changelog-md-and-its-references\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{CD50E32E-8C1D-5DD8-8497-EBACACC62267}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{915BA353-CE8B-55C2-8D71-30542A0C2075}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-041-search-view-duplicate-on-back", "2026-07-12-BUG-041-search-view-duplicate-on-back", "{7CB84C15-3882-5E82-90ED-26B2B28E1EB6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-042-back-tap-repeat-cycle", "2026-07-12-BUG-042-back-tap-repeat-cycle", "{E39D8024-BDA5-5EEB-BD8A-ACC41572B8F4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-043-release-build-zero-suggestions", "2026-07-12-BUG-043-release-build-zero-suggestions", "{60A5A361-441D-5185-A9C7-880AEFFA821B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-044-duplicate-personformpage-after-save", "2026-07-15-BUG-044-duplicate-personformpage-after-save", "{41156B92-7625-5174-B0E8-327AEAD9F0FD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "{20418C78-A7C3-5BB1-BF48-515FB187B3E8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "{CBEDA274-E457-52FA-A946-F00168F4B260}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour", "2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour", "{1FE7428A-DDA2-5CD3-8AD8-D4E45F681309}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\README.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\design.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\findings.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\plan.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\requirements.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\spec-changelog.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\spec-changelog.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\task-log.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it", "2026-11-11-autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it", "{C59FB33E-1166-5F02-83DC-A29F40E332DF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-11-autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-11-autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text", "2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text", "{EA9987BC-8CF3-5D52-AA4B-39EBF55534F4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-new-component-taptoeditfield-a-defined-value-shows-as-text-a-tap-opens-its-editor", "2026-11-13-new-component-taptoeditfield-a-defined-value-shows-as-text-a-tap-opens-its-editor", "{577635D3-E7D5-54AB-9105-888F397A3278}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-new-component-taptoeditfield-a-defined-value-shows-as-text-a-tap-opens-its-editor\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-11-13-new-component-taptoeditfield-a-defined-value-shows-as-text-a-tap-opens-its-editor\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "analysis-pipeline", "analysis-pipeline", "{083F0C21-C23B-5A73-BA4E-72903BC4FE9A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\01-analysis-A.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\01-analysis-A.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\02-analysis-B.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\02-analysis-B.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\03-plan-1.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\03-plan-1.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\04-plan-2.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\04-plan-2.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\05-final-plan-synthesis.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\05-final-plan-synthesis.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\06-review-1.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\06-review-1.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\07-review-2.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\07-review-2.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\08-orchestrator-final-judgment.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\08-orchestrator-final-judgment.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\09-final-consolidated-plan.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\09-final-consolidated-plan.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\10-resume-handoff.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\10-resume-handoff.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-015-016-fixes", "bug-015-016-fixes", "{AFB6ED95-0EBE-50D5-9282-CA73BCB83416}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\bug-015-016-fixes\plan.md = Docs\Management\DevCycleCraft\bug-015-016-fixes\plan.md
+		Docs\Management\DevCycleCraft\bug-015-016-fixes\task-log.md = Docs\Management\DevCycleCraft\bug-015-016-fixes\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove", "2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove", "{60384D3A-1291-563A-A6E7-C6E38CFBE1BB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-crud-list-selection-gestures", "2026-11-11-crud-list-selection-gestures", "{EFB6508C-31C2-5330-AF8A-1E59C049CE84}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\design.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\plan.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\requirements.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\requirements.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\task-log.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\tasks.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{17881260-217D-56CB-AB12-DB84C765ED42}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-correct-the-md3-list-selection-and-toolbar-rules-in-the-library-guidelines-with-verbatim-official-quotes", "2026-11-12-correct-the-md3-list-selection-and-toolbar-rules-in-the-library-guidelines-with-verbatim-official-quotes", "{41268837-7E9D-5523-AED7-5E47AC4AB2C0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-correct-the-md3-list-selection-and-toolbar-rules-in-the-library-guidelines-with-verbatim-official-quotes\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-correct-the-md3-list-selection-and-toolbar-rules-in-the-library-guidelines-with-verbatim-official-quotes\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-listitemcheckbox-leading-slot-when-the-row-has-a-trailing-action-trailing-otherwise", "2026-11-12-listitemcheckbox-leading-slot-when-the-row-has-a-trailing-action-trailing-otherwise", "{DB3FF0F7-ACFE-5967-8F93-F5D2D1BAA23A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-listitemcheckbox-leading-slot-when-the-row-has-a-trailing-action-trailing-otherwise\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\changes\2026-11-12-listitemcheckbox-leading-slot-when-the-row-has-a-trailing-action-trailing-otherwise\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count", "2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count", "{913D9F27-0C37-584A-BFFC-9488A2252FC6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-crud-list-fab-placement-size-and-color-when-alone-and-when-paired-with-the-floating-toolbar", "2026-11-12-crud-list-fab-placement-size-and-color-when-alone-and-when-paired-with-the-floating-toolbar", "{FAE78AB3-4A90-5916-B616-D161D3207D50}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-fab-placement-size-and-color-when-alone-and-when-paired-with-the-floating-toolbar\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-fab-placement-size-and-color-when-alone-and-when-paired-with-the-floating-toolbar\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise", "2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise", "{CE151661-5028-57A4-94D5-3F5E326474E0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-crudlistview-one-list-mode-at-a-time-multi-action-browse-multi-select-selection-with-toolbar-edit-for-exactly-one", "2026-11-12-crudlistview-one-list-mode-at-a-time-multi-action-browse-multi-select-selection-with-toolbar-edit-for-exactly-one", "{651B8AB0-4F40-5224-B014-08EC1E2BCEFF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crudlistview-one-list-mode-at-a-time-multi-action-browse-multi-select-selection-with-toolbar-edit-for-exactly-one\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crudlistview-one-list-mode-at-a-time-multi-action-browse-multi-select-selection-with-toolbar-edit-for-exactly-one\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet", "2026-11-12-list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet", "{B45B6E49-91E4-52DC-8225-1719382BEEAB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-md3-overflow-menu-for-list-item-actions", "2026-11-12-md3-overflow-menu-for-list-item-actions", "{E7175041-820E-54A2-AAA7-84C86EFD6F67}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset", "2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset", "{3F256686-ADBB-5258-8AEF-536101DAA8C6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xaml-sharing", "xaml-sharing", "{C9D1B585-273B-5286-965F-89A1DBBF3608}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7c.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7c.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{47E1E835-6E93-5164-9B6F-74B16DBE4FA6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-10-process-step-checks-sln-moves-and-deletes-safeareaedges-task-log-changed-files", "2026-11-10-process-step-checks-sln-moves-and-deletes-safeareaedges-task-log-changed-files", "{0F605669-CCCF-576C-A146-BE35C238032C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-process-step-checks-sln-moves-and-deletes-safeareaedges-task-log-changed-files\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-process-step-checks-sln-moves-and-deletes-safeareaedges-task-log-changed-files\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-10-trim-always-loaded-context-and-enforce-process-steps-by-checks", "2026-11-10-trim-always-loaded-context-and-enforce-process-steps-by-checks", "{F2D8E4C2-0151-5BE2-B1D8-B9AFF132F39C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-trim-always-loaded-context-and-enforce-process-steps-by-checks\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-10-trim-always-loaded-context-and-enforce-process-steps-by-checks\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-14-targeted-file-reads-and-task-log-rotation-hooks", "2026-11-14-targeted-file-reads-and-task-log-rotation-hooks", "{C94057D2-38DE-598A-81CC-A74C945B2FEC}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-14-targeted-file-reads-and-task-log-rotation-hooks\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-14-targeted-file-reads-and-task-log-rotation-hooks\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context", "2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context", "{49867433-6319-51DA-942F-926F9B87D201}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\README.md
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\design.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\design.md
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\plan.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\plan.md
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\requirements.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\requirements.md
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\task-log.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{2474DF12-F568-5F71-A97F-3316844552B3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon", "2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon", "{B08EB4CC-CAA8-5086-B23F-3D42EC944585}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\changes\2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon\README.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\changes\2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{C50CCECB-4050-5F01-8F47-1059D20A13BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates", "2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates", "{F614A5C7-2006-5762-AAE2-7803D44D723F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147", "2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147", "{93555BFF-26E1-5376-9205-E9618BD71E50}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start", "2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start", "{6815C0F5-86E5-5946-A7F3-A6985C2AB4E3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{D1857E15-8246-59C9-B7A0-F65C1A6CA937}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify", "2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify", "{11C79960-6D11-5FD9-B825-C3783A32BD7B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-agent-type-taskcreated-taskcompleted-hooks-spawn-an-agent-per-task-event", "2026-11-03-agent-type-taskcreated-taskcompleted-hooks-spawn-an-agent-per-task-event", "{69DD6164-AE6A-5193-AAF1-4117EBC0F3F6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-agent-type-taskcreated-taskcompleted-hooks-spawn-an-agent-per-task-event\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-agent-type-taskcreated-taskcompleted-hooks-spawn-an-agent-per-task-event\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-move-the-playwright-mcp-token-to-env-local", "2026-11-03-move-the-playwright-mcp-token-to-env-local", "{93AB7B7D-B2E1-5562-BF79-3AECC60378DD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-move-the-playwright-mcp-token-to-env-local\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-move-the-playwright-mcp-token-to-env-local\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-rotate-the-devexpress-license-key", "2026-11-03-rotate-the-devexpress-license-key", "{B5576625-1D0E-5864-BEAB-FD68C2CCCBFD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-rotate-the-devexpress-license-key\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-rotate-the-devexpress-license-key\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{1960FC2D-CD9C-5FAB-8A85-766182E79E52}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia", "2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia", "{7FEA96B0-08A2-5020-8696-4B7DCE12F0F7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\README.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\requirements.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\requirements.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations", "2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations", "{6D95F621-621F-5066-8E61-0348D6F22675}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{091872FD-D42A-51DF-A385-BD45FDADF61A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-listitem-empty-slots-not-rendered-content-fills-the-freed-width-spacing-aligned-to-md3-list-common-tokens", "2026-11-12-listitem-empty-slots-not-rendered-content-fills-the-freed-width-spacing-aligned-to-md3-list-common-tokens", "{BE8F9013-D3D5-518A-A645-2AFEFF86D406}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-12-listitem-empty-slots-not-rendered-content-fills-the-freed-width-spacing-aligned-to-md3-list-common-tokens\README.md = Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-12-listitem-empty-slots-not-rendered-content-fills-the-freed-width-spacing-aligned-to-md3-list-common-tokens\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar", "2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar", "{39738584-FD45-54A5-AD57-116BF682A3C3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar\README.md = Docs\Management\DevCycleCraft\m3-lists\changes\2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{F4D9CA14-BD25-50C7-8D84-F7B3E520C776}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-disabled-dotnet-skills-still-listed-at-every-session-start", "2026-11-03-disabled-dotnet-skills-still-listed-at-every-session-start", "{AF0A3329-82BD-5E72-9D40-FD7865776FBE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-disabled-dotnet-skills-still-listed-at-every-session-start\README.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-disabled-dotnet-skills-still-listed-at-every-session-start\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions", "2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions", "{4BB1804C-0E96-5F0D-B523-426812AFAED4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions\README.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files", "2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files", "{0027C993-B5E7-59BF-9502-F7FEA38DBF87}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-03-second-trim-of-claude-md-and-workflow-md", "2026-11-03-second-trim-of-claude-md-and-workflow-md", "{CC2D2CA5-7BA3-56E4-AD8B-C9C97AD6C759}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-11-03-second-trim-of-claude-md-and-workflow-md\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-11-03-second-trim-of-claude-md-and-workflow-md\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-10-ledger-cleanup-one-short-line-per-row-archive-row-length-check", "2026-11-10-ledger-cleanup-one-short-line-per-row-archive-row-length-check", "{D3F338D2-58AC-596F-B294-23678DE15BA5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-11-10-ledger-cleanup-one-short-line-per-row-archive-row-length-check\README.md = Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-11-10-ledger-cleanup-one-short-line-per-row-archive-row-length-check\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{C26D75B4-8AC3-5F32-9495-63F095B5DBB7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root", "2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root", "{4BD3F3C7-14CB-52FF-A76E-A882599ECBC2}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration", "migration", "{C40EAE96-3951-5646-9204-486E6A4E85C8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{B5A2D812-4691-5275-B21C-EAB532E36326}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand", "2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand", "{4542A580-6397-57CA-A91D-8E795AEFC55D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\large-volume-data-stress-test\changes\2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand\README.md = Docs\Management\cross-cutting\large-volume-data-stress-test\changes\2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{A45A8193-92BD-51EB-A98D-A5C748A70904}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-04-screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars", "2026-11-04-screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars", "{9DF8A960-CFEE-503F-B859-2DFE9C872BF6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\changes\2026-11-04-screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars\README.md = Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\changes\2026-11-04-screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{BEC01628-DE2F-53EB-B398-E9EFBEF02FA8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness", "2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness", "{7A2C3B94-611F-5FDE-9755-1196111B3087}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks", "2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks", "{0FC9F5DE-0999-5082-ABD5-B404A4C9F57D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role", "2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role", "{F8CC09A6-CEE6-5947-8326-F09F152FCD19}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{E192492E-8D42-599B-844A-78FA6124DA0E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope", "2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope", "{59AC753C-B093-5D60-AB34-05AD3BCD77F6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\plan.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\plan.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\task-log.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-24-scope-all-service-reads-through-iunitofwork", "2026-08-24-scope-all-service-reads-through-iunitofwork", "{3E6041DA-9147-51DE-AEA9-045E2D5E9AB5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\README.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\plan.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\plan.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\tasks.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\tasks.md
 	EndProjectSection
 EndProject
 Global
@@ -1820,6 +2299,137 @@ Global
 		{FA1234BC-0001-4000-8000-000000000087} = {FA1234BC-0001-4000-8000-000000000085}
 		{FA1234BC-0001-4000-8000-000000000088} = {FA1234BC-0001-4000-8000-000000000085}
 		{FA1234BC-0001-4000-8000-000000000089} = {FA1234BC-0001-4000-8000-000000000085}
+		{AF868E58-4DB1-5636-8BB6-614964BBA192} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{B68CA4C6-5A8B-5AAF-A338-ACC3E955699B} = {AF868E58-4DB1-5636-8BB6-614964BBA192}
+		{869E9F71-DCA1-5BA0-8A84-9E9A92158B93} = {FA1234BC-0001-4000-8000-000000000017}
+		{E30F7C02-8512-537A-B232-BA014D9F7900} = {869E9F71-DCA1-5BA0-8A84-9E9A92158B93}
+		{3F070FFB-AF89-5A81-8D43-D8DBF1C4C367} = {FA1234BC-0001-4000-8000-000000000017}
+		{FF926150-64BE-5936-9135-EFBFA4030A8A} = {3F070FFB-AF89-5A81-8D43-D8DBF1C4C367}
+		{EE6F7627-F31F-532A-920A-CC63ECD8B578} = {3F070FFB-AF89-5A81-8D43-D8DBF1C4C367}
+		{40CA6929-6744-5DC2-A694-CE8AF75E0BCD} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{2A5D566D-C91D-530B-A90B-B4B2F84C93C8} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FC6A4DC1-30DA-53AC-8AF0-1E4954BBBF9C} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{CF7CCA1D-C89B-50BD-B8C0-2C68E36AEF4B} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{5E48AAAA-9606-58C4-8EA5-B6203924C484} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{2221E818-569F-5733-967C-4F74A0FF2438} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{A29F45CE-31E7-5CE5-8375-2D7D8EE50D15} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{57CE369B-8A6C-52BA-8A5A-8BF28B482126} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{C6A90017-5B21-534B-B550-8BEE8C8A3C66} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{181C4077-1A21-5FCE-8D34-64DE8DDB879E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FB3AE4FC-F56A-5F0D-B26D-5BA77585DF2E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{8B020DB5-0033-5495-B7F2-B1AAEF955D5E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{00100F3F-D83B-5DEF-B1FC-78339573078E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{58B97A0C-BE2C-552A-83BC-001AD30E119E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{BC5003A9-E3F8-523C-B81E-02A297DBFA7B} = {FA1234BC-0001-4000-8000-00000000007F}
+		{05001611-A05D-588E-8BD9-A058BA9F4AE3} = {FA1234BC-0001-4000-8000-00000000007F}
+		{DAA25DC3-31F5-5F11-B9D7-183B7E948BFE} = {FA1234BC-0001-4000-8000-00000000007F}
+		{F79C945F-0FB0-57EE-B576-560F06DB2E5A} = {FA1234BC-0001-4000-8000-00000000007F}
+		{5765D6A9-35E5-50BA-8625-94E6A659B8B9} = {FA1234BC-0001-4000-8000-00000000007F}
+		{D24490C2-1A69-523A-BD9C-F7CD33E8DC58} = {FA1234BC-0001-4000-8000-00000000007F}
+		{D51BFBC5-52C7-5301-A24D-E04B9233FECC} = {FA1234BC-0001-4000-8000-00000000007F}
+		{07D4E3CB-0EFF-58C0-9128-493EF5B4E27A} = {FA1234BC-0001-4000-8000-00000000007F}
+		{0350817C-C5EB-5ADD-BC71-1AB02E93854A} = {FA1234BC-0001-4000-8000-00000000007F}
+		{0A653ECC-BE5E-53A0-8360-140945A29274} = {FA1234BC-0001-4000-8000-00000000007F}
+		{575C853D-9B3B-5932-9B1B-97D3954E5AF7} = {FA1234BC-0001-4000-8000-00000000007F}
+		{B9BFB19E-ED0B-51CD-8BE7-5C8572E8922A} = {FA1234BC-0001-4000-8000-00000000007F}
+		{E260291E-7885-5298-8FF1-F7F717ABA8E3} = {FA1234BC-0001-4000-8000-00000000007F}
+		{B9E91996-1005-5F32-958D-D573A6E50802} = {FA1234BC-0001-4000-8000-00000000007F}
+		{B6F0D158-8ED8-5C88-8FB0-7C8A8EE61B84} = {FA1234BC-0001-4000-8000-00000000007F}
+		{507D1DDA-5651-5EA8-A7D2-CFE8E53725DE} = {FA1234BC-0001-4000-8000-00000000007F}
+		{1AEAE66D-879E-5862-9708-FD682B368FE4} = {FA1234BC-0001-4000-8000-00000000007F}
+		{0D8BFAC9-6917-562E-9401-063111D0ABA3} = {FA1234BC-0001-4000-8000-00000000007F}
+		{CC336040-11AC-59D0-9120-A32810E740A1} = {FA1234BC-0001-4000-8000-00000000007F}
+		{EFE40EA8-9D75-545D-9F6E-862461E550C0} = {FA1234BC-0001-4000-8000-00000000007F}
+		{E220D40F-0548-5F81-9972-7F8160E5E75C} = {FA1234BC-0001-4000-8000-00000000007F}
+		{E8CC06AE-4DE2-567A-A4D0-52D7BA5EEBD6} = {FA1234BC-0001-4000-8000-00000000007F}
+		{042ED980-5DA1-53A7-BCC1-43CFBF5081EE} = {FA1234BC-0001-4000-8000-00000000007F}
+		{AC9EF7EF-C21D-565F-9ED1-5379F46CC3F7} = {FA1234BC-0001-4000-8000-00000000007F}
+		{DA743FB0-3563-5CEF-A91B-0404AC4C2D39} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{C98F4FB5-4969-5C75-B7FA-0F1BD1751B6F} = {FA1234BC-0001-4000-8000-000000000011}
+		{3EF4076E-8BF4-5AC7-B138-F392FD65C0AF} = {C98F4FB5-4969-5C75-B7FA-0F1BD1751B6F}
+		{497626C4-A538-5539-8245-B308B49051A7} = {FA1234BC-0001-4000-8000-0000000000A0}
+		{3B48689B-0D47-5BD7-A2E2-7359C35FDAA3} = {FA1234BC-0001-4000-8000-000000000039}
+		{E7317527-64A7-5859-9625-129D883BEBAA} = {FA1234BC-0001-4000-8000-000000000034}
+		{FE97208C-1BB5-57E4-8A84-97574D5DCEB7} = {FA1234BC-0001-4000-8000-00000000007D}
+		{9C359603-D869-5E56-8052-953375F353DC} = {FA1234BC-0001-4000-8000-00000000007D}
+		{F938C8DD-961D-53B2-9E82-E7B0FFBDE63B} = {FA1234BC-0001-4000-8000-000000000024}
+		{25255F9F-180A-55B2-AFF5-18D18294BF35} = {FA1234BC-0001-4000-8000-00000000007B}
+		{B7A13E19-FC46-551A-A324-4E4B88DDB9B9} = {FA1234BC-0001-4000-8000-00000000007B}
+		{EAFAE4AA-20F0-5E31-91E7-C94E5DA712D4} = {FA1234BC-0001-4000-8000-00000000007B}
+		{F2634770-1EB8-54C5-8169-203A06FC446C} = {FA1234BC-0001-4000-8000-00000000007B}
+		{53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D} = {893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}
+		{3A193A4F-7E10-56DF-93D9-8BE594BE0CBB} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
+		{7E82FD89-9092-5F4C-B3C4-03FA3EBFC70B} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
+		{7E650721-BD81-52BB-83F4-529A02C3D43A} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
+		{CD50E32E-8C1D-5DD8-8497-EBACACC62267} = {FA1234BC-0001-4000-8000-000000000046}
+		{915BA353-CE8B-55C2-8D71-30542A0C2075} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{7CB84C15-3882-5E82-90ED-26B2B28E1EB6} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{E39D8024-BDA5-5EEB-BD8A-ACC41572B8F4} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{60A5A361-441D-5185-A9C7-880AEFFA821B} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{41156B92-7625-5174-B0E8-327AEAD9F0FD} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{20418C78-A7C3-5BB1-BF48-515FB187B3E8} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{CBEDA274-E457-52FA-A946-F00168F4B260} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{1FE7428A-DDA2-5CD3-8AD8-D4E45F681309} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{C59FB33E-1166-5F02-83DC-A29F40E332DF} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{EA9987BC-8CF3-5D52-AA4B-39EBF55534F4} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{577635D3-E7D5-54AB-9105-888F397A3278} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{083F0C21-C23B-5A73-BA4E-72903BC4FE9A} = {FA1234BC-0001-4000-8000-000000000029}
+		{AFB6ED95-0EBE-50D5-9282-CA73BCB83416} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{60384D3A-1291-563A-A6E7-C6E38CFBE1BB} = {FA1234BC-0001-4000-8000-0000000000B8}
+		{EFB6508C-31C2-5330-AF8A-1E59C049CE84} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{17881260-217D-56CB-AB12-DB84C765ED42} = {EFB6508C-31C2-5330-AF8A-1E59C049CE84}
+		{41268837-7E9D-5523-AED7-5E47AC4AB2C0} = {17881260-217D-56CB-AB12-DB84C765ED42}
+		{DB3FF0F7-ACFE-5967-8F93-F5D2D1BAA23A} = {17881260-217D-56CB-AB12-DB84C765ED42}
+		{913D9F27-0C37-584A-BFFC-9488A2252FC6} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{FAE78AB3-4A90-5916-B616-D161D3207D50} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{CE151661-5028-57A4-94D5-3F5E326474E0} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{651B8AB0-4F40-5224-B014-08EC1E2BCEFF} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{B45B6E49-91E4-52DC-8225-1719382BEEAB} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{E7175041-820E-54A2-AAA7-84C86EFD6F67} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{3F256686-ADBB-5258-8AEF-536101DAA8C6} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{C9D1B585-273B-5286-965F-89A1DBBF3608} = {FA1234BC-0001-4000-8000-000000000019}
+		{47E1E835-6E93-5164-9B6F-74B16DBE4FA6} = {A1B2C3D4-0001-4000-8000-000000000008}
+		{0F605669-CCCF-576C-A146-BE35C238032C} = {47E1E835-6E93-5164-9B6F-74B16DBE4FA6}
+		{F2D8E4C2-0151-5BE2-B1D8-B9AFF132F39C} = {47E1E835-6E93-5164-9B6F-74B16DBE4FA6}
+		{C94057D2-38DE-598A-81CC-A74C945B2FEC} = {47E1E835-6E93-5164-9B6F-74B16DBE4FA6}
+		{49867433-6319-51DA-942F-926F9B87D201} = {47E1E835-6E93-5164-9B6F-74B16DBE4FA6}
+		{2474DF12-F568-5F71-A97F-3316844552B3} = {FA1234BC-0001-4000-8000-000000000047}
+		{B08EB4CC-CAA8-5086-B23F-3D42EC944585} = {2474DF12-F568-5F71-A97F-3316844552B3}
+		{C50CCECB-4050-5F01-8F47-1059D20A13BB} = {A1B2C3D4-0001-4000-8000-000000000005}
+		{F614A5C7-2006-5762-AAE2-7803D44D723F} = {C50CCECB-4050-5F01-8F47-1059D20A13BB}
+		{93555BFF-26E1-5376-9205-E9618BD71E50} = {C50CCECB-4050-5F01-8F47-1059D20A13BB}
+		{6815C0F5-86E5-5946-A7F3-A6985C2AB4E3} = {C50CCECB-4050-5F01-8F47-1059D20A13BB}
+		{D1857E15-8246-59C9-B7A0-F65C1A6CA937} = {A1B2C3D4-0001-4000-8000-000000000005}
+		{11C79960-6D11-5FD9-B825-C3783A32BD7B} = {D1857E15-8246-59C9-B7A0-F65C1A6CA937}
+		{69DD6164-AE6A-5193-AAF1-4117EBC0F3F6} = {D1857E15-8246-59C9-B7A0-F65C1A6CA937}
+		{93AB7B7D-B2E1-5562-BF79-3AECC60378DD} = {D1857E15-8246-59C9-B7A0-F65C1A6CA937}
+		{B5576625-1D0E-5864-BEAB-FD68C2CCCBFD} = {D1857E15-8246-59C9-B7A0-F65C1A6CA937}
+		{1960FC2D-CD9C-5FAB-8A85-766182E79E52} = {FA1234BC-0001-4000-8000-000000000056}
+		{7FEA96B0-08A2-5020-8696-4B7DCE12F0F7} = {1960FC2D-CD9C-5FAB-8A85-766182E79E52}
+		{6D95F621-621F-5066-8E61-0348D6F22675} = {1960FC2D-CD9C-5FAB-8A85-766182E79E52}
+		{091872FD-D42A-51DF-A385-BD45FDADF61A} = {F58ED7A0-0186-4187-9FCF-78A464FB01C5}
+		{BE8F9013-D3D5-518A-A645-2AFEFF86D406} = {091872FD-D42A-51DF-A385-BD45FDADF61A}
+		{39738584-FD45-54A5-AD57-116BF682A3C3} = {091872FD-D42A-51DF-A385-BD45FDADF61A}
+		{F4D9CA14-BD25-50C7-8D84-F7B3E520C776} = {FA1234BC-0001-4000-8000-000000000044}
+		{AF0A3329-82BD-5E72-9D40-FD7865776FBE} = {F4D9CA14-BD25-50C7-8D84-F7B3E520C776}
+		{4BB1804C-0E96-5F0D-B523-426812AFAED4} = {F4D9CA14-BD25-50C7-8D84-F7B3E520C776}
+		{0027C993-B5E7-59BF-9502-F7FEA38DBF87} = {FA1234BC-0001-4000-8000-0000000000C7}
+		{CC2D2CA5-7BA3-56E4-AD8B-C9C97AD6C759} = {FA1234BC-0001-4000-8000-0000000000C7}
+		{D3F338D2-58AC-596F-B294-23678DE15BA5} = {FA1234BC-0001-4000-8000-000000000081}
+		{C26D75B4-8AC3-5F32-9495-63F095B5DBB7} = {FA1234BC-0001-4000-8000-000000000043}
+		{4BD3F3C7-14CB-52FF-A76E-A882599ECBC2} = {C26D75B4-8AC3-5F32-9495-63F095B5DBB7}
+		{C40EAE96-3951-5646-9204-486E6A4E85C8} = {FA1234BC-0001-4000-8000-000000000043}
+		{B5A2D812-4691-5275-B21C-EAB532E36326} = {FA1234BC-0001-4000-8000-000000000069}
+		{4542A580-6397-57CA-A91D-8E795AEFC55D} = {B5A2D812-4691-5275-B21C-EAB532E36326}
+		{A45A8193-92BD-51EB-A98D-A5C748A70904} = {FA1234BC-0001-4000-8000-00000000006C}
+		{9DF8A960-CFEE-503F-B859-2DFE9C872BF6} = {A45A8193-92BD-51EB-A98D-A5C748A70904}
+		{BEC01628-DE2F-53EB-B398-E9EFBEF02FA8} = {FA1234BC-0001-4000-8000-00000000006E}
+		{7A2C3B94-611F-5FDE-9755-1196111B3087} = {BEC01628-DE2F-53EB-B398-E9EFBEF02FA8}
+		{0FC9F5DE-0999-5082-ABD5-B404A4C9F57D} = {BEC01628-DE2F-53EB-B398-E9EFBEF02FA8}
+		{F8CC09A6-CEE6-5947-8326-F09F152FCD19} = {BEC01628-DE2F-53EB-B398-E9EFBEF02FA8}
+		{E192492E-8D42-599B-844A-78FA6124DA0E} = {FA1234BC-0001-4000-8000-00000000006E}
+		{59AC753C-B093-5D60-AB34-05AD3BCD77F6} = {E192492E-8D42-599B-844A-78FA6124DA0E}
+		{3E6041DA-9147-51DE-AEA9-045E2D5E9AB5} = {E192492E-8D42-599B-844A-78FA6124DA0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
