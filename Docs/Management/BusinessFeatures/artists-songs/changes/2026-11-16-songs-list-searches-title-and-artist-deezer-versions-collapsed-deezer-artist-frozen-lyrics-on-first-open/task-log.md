@@ -7,13 +7,13 @@ Branch `feature/songs-list-deezer`, worktree `.claude/worktrees/songs-list-deeze
 
 - **Updated:** 2026-11-16, after the merge.
 - **Phase:** close-out done. **Waiting for Helder's device check (T14).** The item stays In Progress until then.
-- **Done:** T0 to T13. Branch `feature/songs-list-deezer` (head efa30c1b) merged into `develop` as 1631fca9. Full suite on merged `develop`: 1,823 passed, 0 failed. Android build of the branch head: 0 errors.
+- **Done:** T0 to T13 and T15. Branch `feature/songs-list-deezer` merged into `develop` twice: 1631fca9 (T1 to T13) and 1be5e035 (T15, head 896c95c3). Full suite on merged `develop`: 1,829 passed, 0 failed. Android build of the branch head: 0 errors.
 - **Next:** T14 device check by Helder; then status Done, worktree removal, and the separate time-boxed trial of the Deezer section in the Songs list.
 - **Context manifest (≤ 8 files):** `tasks.md`, `requirements.md`, `design.md`, this file.
 
 ## Device check (T14, Helder)
 
-Build from `develop` at or after 1631fca9. The database gets one new migration (`AddSongLyricsOrigin`) on first start.
+Build from `develop` at or after 1be5e035. The database gets one new migration (`AddSongLyricsOrigin`) on first start.
 
 - [ ] **Songs list search by artist.** Type an artist name of 3 or more letters: that artist's songs appear, best match first. Type 1 or 2 letters: songs whose title starts with them, by title. Scroll a long result: no song twice.
 - [ ] **One Deezer row per song.** In the song form (add), search a well-known title: each song appears once, with no "Live"/"Remix" label; the row still shows artist and album with "Deezer".
@@ -24,6 +24,7 @@ Build from `develop` at or after 1631fca9. The database gets one new migration (
 - [ ] **Lyrics, no match.** Open a Deezer song the lyrics source does not know: the hint disappears, no message; reopening does not show the hint again.
 - [ ] **Typing wins.** Open a Deezer song without lyrics and type lyrics at once, then Save: your text is stored.
 - [ ] **Leaving during the lookup.** Open a Deezer song without lyrics and immediately open the picture picker or the YouTube search: lyrics may not arrive on that screen; they arrive on the next open.
+- [ ] **Loading placeholder.** Open any stored song: a grey shimmer placeholder shows briefly in place of the fields, then the filled form; Back works while it shows; the toolbar Save does nothing while it shows. Add mode shows no placeholder.
 - [ ] **Look of the frozen artist.** The plain artist text has the same size, colour and position as the editable artist's text state (not verified on a device by the agents).
 
 ## T0 — Spec and plan (2026-11-16) — Done
@@ -208,4 +209,38 @@ Implementation locations are files and members; tests are classes (method names 
 | 29 | Lookup keeps the REQ-LYR rules | `SongLyricsService.LookupLyricsAsync` | `SongLyricsServiceLookupTests`; existing `SongLyricsServiceTests` unchanged |
 | 30 | Frozen edit sends the stored artist | `SongFormViewModel.BuildSaveRequest`, `InitializeArtistField`; `SongService.SaveFromFormAsync` | `SongFormViewModelFrozenArtistTests`, `SongServiceArtistFreezeTests` |
 | 31 | Save waits for the lookup on open | `SongFormViewModel.SaveAsync` (wait step) | `SongFormViewModelLyricsOnOpenTests`; stored origins by `SongServiceLyricsOriginTests` |
+| 32 | Loading indicator in edit mode | `SongFormViewModel.IsSongLoading`; `SongFormPage.xaml` (`dx:ShimmerView`) | `SongFormViewModelLoadingTests`; device check |
+| 33 | Save does nothing while the song loads | `SongFormViewModel.SaveAsync` | `SongFormViewModelLoadingTests` |
+| 34 | A failed load closes the form with a message | `SongFormViewModel.LoadSongForEditAsync`, `FailSongLoadAsync` | `SongFormViewModelLoadingTests` |
+
+## T15 — loading indicator and wrapped load (2026-11-16) — To Review
+
+Helder's decision after the first merge: "wrap the load. Also, a loading indicator without freezing UI". Spec: REQ-SLD-32 to 34, `design.md § 1.3` (C29 to C32).
+
+### Changed files
+
+| Part | Commit | Files |
+|------|--------|-------|
+| ViewModel | e4a77167 | `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, new test `Unit/ViewModels/SongFormViewModelLoadingTests.cs` |
+| Page | 896c95c3 | `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (fields wrapped in `dx:ShimmerView`; the large diff is re-indentation) |
+| Merge | 1be5e035 | into `develop` |
+
+### Verification evidence
+
+- Five of the six new tests were red on their assertion first (written as one batch, not one at a time); `AddMode_IsSongLoadingIsFalse` is a guard.
+- `SongFormViewModel` filter 238 passed; full suite 1,829 passed, 0 failed, before and after the XAML change.
+- Android build: 0 errors, 34 warnings (NuGet advisories).
+- Merged `develop` (1be5e035): full suite 1,829 passed, 0 failed (run by the main agent).
+- Not verified by an independent verifier (small follow-up); the shimmer's look is a device check.
+
+### Notes
+
+- The message and the navigation use the members the form already uses after a successful Save (`ShowErrorAsync`, `GoToAsync("..")`).
+- `IsSongLoading` stays true until the failure message and the navigation back have run, so Save is ignored for that whole time.
+- Not handled: a second song id set on the same form instance before the first load ends would let the first load clear the flag early. The form receives its song id once per instance; left as is.
+- After a load that throws, the artist stays frozen on that instance; the form has navigated back by then.
+
+## Intermittent pre-commit failure (2026-11-16)
+
+Twenty consecutive full runs on `develop` with result files: 20 of 20 passed (1,823 each). The two failures of the day both happened inside the pre-commit hook and passed on an unchanged retry; the failing test, if it was a test, was never named. Possible cause, not shown: the hook builds and tests while other processes use the same folder. **Pending Helder:** let the pre-commit hook save its build and test output to a file so the next failure names itself.
 
