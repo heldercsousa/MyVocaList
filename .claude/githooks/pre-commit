@@ -45,7 +45,7 @@ fi
 # Does the commit touch BACKLOG frontmatter (item README.md, BACKLOG.md itself,
 # or an archive month file)?
 BACKLOG_TOUCHED=$(printf '%s\n' "$STAGED" | grep -E \
-  '(^Docs/Management/.*/README\.md$|^Docs/Management/BACKLOG\.md$|^Docs/Management/backlog-archive/.*\.md$)') || true
+  '(^Docs/Management/.*/README\.md$|^Docs/Management/BACKLOG(-POST-MVP)?\.md$|^Docs/Management/backlog-archive/.*\.md$)') || true
 
 if [ -n "$BACKLOG_TOUCHED" ]; then
   echo "pre-commit: BACKLOG-relevant files staged — running regen --check..."

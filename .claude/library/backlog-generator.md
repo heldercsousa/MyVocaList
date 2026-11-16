@@ -28,6 +28,7 @@ overwritten on the next regeneration, not merge-conflicted.
 | Change a status | `backlog_gen.py status <ID> "🟡 In Progress"` (terminal statuses also need `--closed YYYY-MM`) |
 | Refresh the rendered file | `backlog_gen.py regen` (`--check` = verify only, writes nothing) |
 | Find the active work set | `backlog_gen.py query --status "🟡,🟢"` |
+| List post-MVP items | `backlog_gen.py query --horizon post-mvp` |
 
 ## Row and frontmatter rules
 
@@ -38,6 +39,7 @@ Moved here from the `BACKLOG.md` header on 2026-11-15.
 - **Banned from frontmatter text:** commit hashes, file paths, root-cause narrative, review verdicts, test counts, step trails, AC numbers. Branch and phase tracking belongs to `LEDGER.md`; execution history to the item's `task-log.md`.
 - **Archive rotation:** an item reaching `✅ Done` / `✅ Fixed` / superseded-closed moves to `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-YYYY-MM.md`, keyed by its `closed:` month. A Done sub-row archives independently of a still-active parent. Archive rows keep the Notes cell (Goal, Gate, Pointer).
 - **Lookups:** past `BUG-NNN` and feature history live in `backlog-archive/`; grep those files too.
+- **Post-MVP items:** an item with `horizon: post-mvp` in its frontmatter (a child inherits it from its parent) is rendered in `Docs/Management/BACKLOG-POST-MVP.md`, not in `BACKLOG.md`. `query` leaves these items out unless `--horizon post-mvp` or `--horizon all` is passed. Register one with `register ... --horizon post-mvp`. Archiving is the same as for any item.
 - **Fences:** the `<!-- BACKLOG:GENERATED:BEGIN/END -->` comment lines are the generator's markers. Removing one makes `regen` fail.
 
 | Status | Meaning |

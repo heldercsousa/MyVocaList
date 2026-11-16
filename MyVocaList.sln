@@ -769,6 +769,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
+		Docs\Management\BACKLOG-POST-MVP.md = Docs\Management\BACKLOG-POST-MVP.md
 		Docs\Management\LEDGER.md = Docs\Management\LEDGER.md
 		Docs\Management\LEDGER-archive.md = Docs\Management\LEDGER-archive.md
 	EndProjectSection

@@ -1,12 +1,13 @@
 ---
 id: post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc
-title: "Post-MVP: import an artist's song catalog from files (PDF etc.)"
+title: "import an artist's song catalog from files (PDF etc.)"
 status: 💡 Pending
 target: 2026-11-11
 section: BusinessFeatures
 parent: artists-songs
 goal: "An artist uploads files such as PDFs holding their song catalog; the app extracts title, artist and lyric, registers the songs as that artist's catalog, and skips songs already registered, attaching them to the uploading artist's catalog. Gate: Post-MVP; design before any code."
 kind: change
+horizon: post-mvp
 ---
 
 # Post-MVP: import an artist's song catalog from files (PDF etc.)
