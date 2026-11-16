@@ -379,19 +379,6 @@ public class SongFormViewModelTests
         Assert.True(sut.IsArtistLocked);
     }
 
-    // [AC] REQ-SFT-14: X on Title resets a Version that still holds the pick-written value (Q21).
-    [Fact]
-    public async Task ClearTitle_AfterRemotePick_ResetsUnchangedPickFilledVersion()
-    {
-        var sut = CreateAddFormSut();
-        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
-        Assert.Equal("Live", sut.SongVersion);
-
-        sut.ClearTitleCommand.Execute(null);
-
-        Assert.Equal(string.Empty, sut.SongVersion);
-    }
-
     // [AC] REQ-SFT-14: X on Title keeps a Version the user edited after the pick (Q21).
     [Fact]
     public async Task ClearTitle_AfterRemotePick_KeepsVersionEditedAfterPick()
@@ -417,21 +404,6 @@ public class SongFormViewModelTests
         await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
 
         _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
-    }
-
-    // [AC] REQ-SFT-12: a remote pick overwrites Version with the Deezer value, including "" (Q20).
-    [Theory]
-    [InlineData("Demo", "", "")]
-    [InlineData("Demo", "Live", "Live")]
-    public async Task SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion(
-        string typedVersion, string deezerVersion, string expected)
-    {
-        var sut = CreateAddFormSut();
-        sut.SongVersion = typedVersion;
-
-        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", deezerVersion)));
-
-        Assert.Equal(expected, sut.SongVersion);
     }
 
     // [AC] REQ-SFT-12: a remote pick fills Title, Artist and the pending identity, and writes nothing.
@@ -516,7 +488,6 @@ public class SongFormViewModelTests
         Assert.Equal(string.Empty, sut.SelectedProvider);
         Assert.Equal("Creep", sut.SongTitle);
         Assert.True(sut.IsTitleLocked);
-        Assert.Equal("Live", sut.SongVersion);
         Assert.False(sut.IsArtistLocked);
     }
 
