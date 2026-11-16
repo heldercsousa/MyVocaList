@@ -1,13 +1,14 @@
 ---
 id: BUG-079
 title: DbLoadGate removal dropped its _currentPage serialisation role
-status: 💡 Pending
+status: 🔵 Superseded
 severity: Major
 target: 2026-09-19
 section: BusinessFeatures
 parent: read-model-notracking-guidelines
 goal: Gate removal accounted for only one of the gate's two documented responsibilities; LoadFirstPageAsync can now reset _currentPage while a LoadMoreAsync is in flight, risking a duplicated or skipped page.
 gate: Helder rules whether this is a real regression; if so a guard is added and a regression test proves the interleaving.
+closed: 2026-11
 kind: bug
 ---
 
@@ -291,3 +292,8 @@ Recorded before any BUG-079 code change, as the baseline the fix is judged again
    Shell renders its own flyout icon on top of `SmallAppBar`'s navigation icon, and
    `BackButtonBehavior IsVisible="False"` hides it only once the page is reached by navigation.
    Not yet registered. Severity awaits Helder: Minor if the smaller icon counts as a workaround.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was not delivered. Reopen it by registering a new item if the work is wanted again.

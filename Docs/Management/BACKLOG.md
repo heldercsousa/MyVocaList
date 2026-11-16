@@ -39,7 +39,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | **Social features** | 💡 Pending |
 | 2026-07-03 | **Cross-cutting** | — |
 | 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending |
-| 2026-09-19 | ↳ DbLoadGate removal dropped its _currentPage serialisation role | 💡 Pending |
 | 2026-11-06 | ↳ Person form follow-ups from ACF T7 run 2 | 💡 Pending |
 | 2026-11-12 | ↳ People list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
 | 2026-11-12 | ↳ Venues list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
