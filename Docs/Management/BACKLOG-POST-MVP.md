@@ -19,4 +19,8 @@
 <!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->
 | Target | Activity | Status |
 |--------|----------|--------|
+| — | **Inline Undo Pattern — UX Standard** | 💡 Pending |
+| — | **UI-2nd-refactor** | 📋 Spec |
+| — | Cross-device / OS version compatibility test | 💡 Pending |
+| — | ↳ Dev and QA data tooling — seed and empty app data on demand | 💡 Pending |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->

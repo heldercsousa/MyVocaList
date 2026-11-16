@@ -2,7 +2,8 @@
 id: dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand
 title: Dev and QA data tooling — seed and empty app data on demand
 status: 💡 Pending
-target: 2026-11-04
+target: —
+horizon: post-mvp
 section: DevCycleCraft
 parent: large-volume-data-stress-test
 goal: "Post-MVP idea to discuss: give developers and QA a way to fill the app with seed data or empty it, per build or test context, so testing needs no manual data entry."
