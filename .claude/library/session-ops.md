@@ -187,7 +187,7 @@ A ping is a 30-second edit — never batch pings "for later"; later may not come
 ```markdown
 ### Checkpoint (live — overwrite on each ping)
 **Pinged:** YYYY-MM-DD HH:MM
-**Branch / worktree:** <branch> / <.worktrees/name or main tree>
+**Branch / worktree:** <branch> / <.claude/worktrees/name or main tree>
 **Step:** <N of M> — last completed: <one line> — now attempting: <one line>
 **Build/test state:** <last known: build 0 errors | test failure X | not yet run>
 **Next command:** <the literal next command or edit, e.g. "dotnet test after fixing VenueServiceTests.Save_...">
@@ -229,3 +229,9 @@ Context window exhaustion degrades output quality before the window is fully use
 **Response protocol:**
 1. If the subagent shows warning signs: kill it (see Kill criteria in `agents/orchestrator.md`), re-read the spec, produce a tighter briefing, dispatch a fresh subagent.
 2. If the orchestrator shows warning signs: stop. Re-read MASTER_PLAN.md, the spec, and the task-log. Resume from verified ground truth.
+
+## Task-log rotation
+
+Moved here from `CLAUDE.md § Docs/ Folder Layout` on 2026-11-15.
+
+`task-log.md` is capped at 300 lines (`tasklog-size-guard.py`: a note after an edit, a block at commit when entries can be rotated). When the cap is passed, run `python .claude/scripts/tasklog_rotate.py "<path>/task-log.md"` (`--dry-run` to preview): it moves closed or merged entries to `task-log-archive-YYYY-MM.md` in the same folder (mirroring `backlog-archive/`) and keeps active tasks and open manual device checklists. Never move entries by hand.

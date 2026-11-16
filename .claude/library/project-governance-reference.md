@@ -149,3 +149,10 @@ User-preference overrides apply to superpowers skill *defaults* (folder location
 built-in and plugin skills (project `review` vs built-in `/review`), and survives copying these settings
 to bootstrap another solution. `/sln-review` reviews this solution's task output; the built-in `/review`
 reviews GitHub PRs.
+
+## Stack notes (not needed in every session)
+
+Moved here from `CLAUDE.md § App` on 2026-11-15.
+
+- **Planned, not registered:** MediatR · FluentValidation.
+- **Post-MVP, under evaluation:** Blazor Hybrid + MudBlazor + shared RCL (`Docs/Management/DevCycleCraft/UI-2nd-refactor/`).

@@ -28,6 +28,12 @@ SEVERITIES = ("Critical", "Major", "Minor")
 SECTIONS = ("BusinessFeatures", "DevCycleCraft")
 KINDS = ("feature", "bug", "change", "milestone", "group")
 
+# Optional `horizon:` key (2026-11-15). An item marked post-MVP is rendered into
+# BACKLOG-POST-MVP.md instead of BACKLOG.md, and `query` leaves it out by default.
+# A child with no key takes its parent's value (see `horizon_of`).
+HORIZON_POST_MVP = "post-mvp"
+HORIZONS = (HORIZON_POST_MVP,)
+
 REQUIRED = ("id", "title", "status", "target", "goal")
 
 MAX_SENTENCES = 3
@@ -69,6 +75,7 @@ class Item(object):
         self.closed = self.keys.get("closed")
         self.kind = self.keys.get("kind", "feature")
         self.order = self.keys.get("order")
+        self.horizon = self.keys.get("horizon")
         self.pointer = self.keys.get("pointer") or self.rel_path
         self.depth = _depth(self.rel_path)
 
@@ -113,6 +120,23 @@ def _depth(rel_path):
     """Render depth = number of bugs/ or changes/ segments above this folder."""
     parts = [p for p in _norm(rel_path).split("/") if p]
     return sum(1 for p in parts if p in ("bugs", "changes"))
+
+
+def horizon_of(item, all_items):
+    """An item's horizon: its own `horizon:` key, else the nearest ancestor's, else None."""
+    by_id = dict((i.id, i) for i in all_items if i.id)
+    node = item
+    guard = 0
+    while node is not None and guard < 50:
+        if node.horizon:
+            return node.horizon
+        node = by_id.get(node.parent) if node.parent else None
+        guard += 1
+    return None
+
+
+def is_post_mvp(item, all_items):
+    return horizon_of(item, all_items) == HORIZON_POST_MVP
 
 
 def validate(items):
@@ -161,6 +185,9 @@ def _validate_all(items):
             err("invalid section '{0}'".format(it.section))
         if not it.section and not it.parent:
             err("row resolves to no section -- set 'section' or 'parent'")
+        if it.horizon is not None and it.horizon not in HORIZONS:
+            err("invalid horizon '{0}' (allowed: {1})".format(
+                it.horizon, ", ".join(HORIZONS)))
 
         if it.is_separator:
             continue

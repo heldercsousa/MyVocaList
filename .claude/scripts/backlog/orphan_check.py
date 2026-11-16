@@ -230,7 +230,9 @@ def main(device_memory_dir=None, signal_source=None):
         classified = [classify_memory_change(name, line) for name, line in changed]
         remind, msg = should_remind(classified, backlog_changed_this_session())
         if remind:
-            print(msg)
+            # systemMessage: shown to the user; plain stdout from a Stop hook reaches nobody.
+            import json
+            sys.stdout.write(json.dumps({"systemMessage": msg}) + "\n")
     except Exception:
         pass
     return 0

@@ -5,14 +5,19 @@ one short status line (see `/sln-ledger § Row-length rule`). Detail belongs in 
 task-log.md / README.md.
 
 Modes:
-  python ledger-row-guard.py --check    -> CLI / pre-commit: exit 1 when any row is too long
-  python ledger-row-guard.py (stdin)    -> PostToolUse hook: warn-only when the edited file is LEDGER.md
+  python ledger-row-guard.py --check    -> CLI / pre-commit: exit 1 when any row is too long, or when Completed
+                                           holds over 15 rows and some can be rotated (ledger_rotate.py)
+  python ledger-row-guard.py (stdin)    -> PostToolUse hook: warn-only (additionalContext) when the edited file is LEDGER.md
 """
 import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hook_out  # noqa: E402
+
 LIMIT = 450
+MAX_COMPLETED_ROWS = 15
 LEDGER = os.path.join("Docs", "Management", "LEDGER.md")
 
 
@@ -44,7 +49,7 @@ def main():
             return 0
         bad = long_rows(fp)
         if bad:
-            print("LEDGER ROW-LENGTH WARNING:\n" + report(bad))
+            hook_out.additional_context("PostToolUse", "LEDGER ROW-LENGTH WARNING:\n" + report(bad))
         return 0
     root = os.environ.get("CLAUDE_PROJECT_DIR", ".")
     path = os.path.join(root, LEDGER)
@@ -54,6 +59,23 @@ def main():
     if bad:
         print("ledger-row-guard: FAILED\n" + report(bad))
         return 1
+    return completed_cap(root, path)
+
+
+def completed_cap(root, path):
+    """Completed table cap: fail only when rows can be rotated (same model as the task-log cap)."""
+    import ledger_rotate
+    with open(path, encoding="utf-8", newline="") as f:
+        count = ledger_rotate.completed_count(f.read())
+    if count <= MAX_COMPLETED_ROWS:
+        return 0
+    movable = ledger_rotate.movable_count(root)
+    head = "  LEDGER.md has {0} Completed rows (cap {1}).".format(count, MAX_COMPLETED_ROWS)
+    if movable:
+        print("ledger-row-guard: FAILED\n" + head +
+              " {0} can be rotated. Run: python .claude/scripts/ledger_rotate.py".format(movable))
+        return 1
+    print("ledger-row-guard: WARNING\n" + head + " None can be rotated yet; commit allowed.")
     return 0
 
 

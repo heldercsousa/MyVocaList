@@ -17,14 +17,14 @@ The main agent updates the ledger at every one of these moments, on `develop`:
 A ledger row is **one short status line**: what it is, where it stands, the next action, and a pointer to the item folder. **Max 450 characters per table row.**
 - History, rulings, verifier findings, merge narratives and "updated on <date>" chains do NOT go in the ledger — append them to the item's `task-log.md` (or `README.md` for a change/spec item) and point to it. Never delete detail; move it.
 - Update a row by **replacing** its text, not appending to it.
-- Merged/closed → move the row to `Completed` (one line: id, branch, date + merge sha, test count). Closed rows from an earlier month move verbatim to `Docs/Management/LEDGER-archive.md` at the next `update`.
+- Merged/closed → move the row to `Completed` (one line: id, branch, date + merge sha, test count). `python .claude/scripts/ledger_rotate.py` moves a Completed row verbatim to `Docs/Management/LEDGER-archive.md` once its branch is deleted or 7 days after the merge (`--dry-run` lists what would move).
 - Enforced by `.claude/scripts/ledger-row-guard.py` (pre-commit gate, blocks; PostToolUse warning on edit). Check manually: `python .claude/scripts/ledger-row-guard.py --check`.
 
 ## `update` (default)
 
 1. `git branch -a --no-merged develop` + `git worktree list` — enumerate live task branches/worktrees.
 2. For each Active row: verify the branch still exists; refresh `Last commit` (`git log -1 --format=%h <branch>`); reconcile `Status` with the task-log entry for that task.
-3. Archive: move Completed rows older than the current month to `LEDGER-archive.md`; shorten any row over the limit (detail → item task-log).
+3. Archive: run `python .claude/scripts/ledger_rotate.py` (never move rows by hand); shorten any row over the limit (detail → item task-log).
 4. For each live task branch with NO row: add one (this is drift — note it).
 5. Commit the ledger on develop: `git add Docs/Management/LEDGER.md && git commit -m "docs: ledger update — <what changed>"` (push with the session's normal flow).
 
@@ -32,7 +32,7 @@ A ledger row is **one short status line**: what it is, where it stands, the next
 
 ## `resume`
 
-For resuming interrupted work: read the Active table, and for the chosen row output: branch, worktree path (recreate if removed: `git worktree add .worktrees/<name> <branch>`), status, last commit, and `Next action`. Then follow the no-glob resume chain: the feature's `task-log.md` `### Checkpoint` block → read ONLY its Context manifest files (`session-ops.md § Checkpoint Ping & Context Manifest`). Cross-check lease state (`workflow.md § Rule 4` reclaim protocol) before continuing. Never Glob to reconstruct state — a manifest gap is logged as a checkpoint-quality defect.
+For resuming interrupted work: read the Active table, and for the chosen row output: branch, worktree path (recreate if removed: `git worktree add .claude/worktrees/<name> <branch>`), status, last commit, and `Next action`. Then follow the no-glob resume chain: the feature's `task-log.md` `### Checkpoint` block → read ONLY its Context manifest files (`session-ops.md § Checkpoint Ping & Context Manifest`). Cross-check lease state (`workflow.md § Rule 4` reclaim protocol) before continuing. Never Glob to reconstruct state — a manifest gap is logged as a checkpoint-quality defect.
 
 ## `audit`
 

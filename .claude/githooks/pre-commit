@@ -45,7 +45,7 @@ fi
 # Does the commit touch BACKLOG frontmatter (item README.md, BACKLOG.md itself,
 # or an archive month file)?
 BACKLOG_TOUCHED=$(printf '%s\n' "$STAGED" | grep -E \
-  '(^Docs/Management/.*/README\.md$|^Docs/Management/BACKLOG\.md$|^Docs/Management/backlog-archive/.*\.md$)') || true
+  '(^Docs/Management/.*/README\.md$|^Docs/Management/BACKLOG(-POST-MVP)?\.md$|^Docs/Management/backlog-archive/.*\.md$)') || true
 
 if [ -n "$BACKLOG_TOUCHED" ]; then
   echo "pre-commit: BACKLOG-relevant files staged — running regen --check..."
@@ -120,6 +120,24 @@ if printf '%s
     exit 1
   fi
   echo "pre-commit: ledger row lengths OK."
+fi
+
+# --- Task-log size gate ---
+# A task-log.md over 300 lines costs tokens on every read. Checks only the
+# task-log.md files staged in this commit (staged content), whatever tool
+# wrote them. Rule: CLAUDE.md "Task-log rotation".
+if printf '%s
+' "$STAGED" | grep -Eq '(^|/)task-log\.md$'; then
+  echo "pre-commit: task-log.md staged — checking the 300-line cap..."
+  if ! python .claude/scripts/tasklog-size-guard.py --check; then
+    echo ""
+    echo "pre-commit: BLOCKED — a staged task-log.md is over 300 lines and has closed"
+    echo "            entries. Run: python .claude/scripts/tasklog_rotate.py <that file>"
+    echo "            (moves only closed entries; open ones stay), then stage and retry."
+    echo "            To commit anyway: git commit --no-verify"
+    exit 1
+  fi
+  echo "pre-commit: task-log size OK."
 fi
 
 echo "pre-commit: commit allowed."
