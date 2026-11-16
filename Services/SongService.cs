@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
+using MyVocaList.Contracts.Enums;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Resolution;
@@ -47,6 +48,83 @@ public class SongService : ISongService
         _urlService = urlService;
         _uow = uow;
         _logger = logger;
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> EnsureLyricsAsync(int songId, CancellationToken ct = default)
+    {
+        // Step 1 (read scope, REQ-SLD-19, 24): the preconditions, in order. Any failure returns null with no request.
+        // The lyrics service is resolved here, after the preconditions, with the non-throwing GetService: a missing
+        // registration means no lookup, and no other SongService path resolves it.
+        var request = await _uow.ExecuteReadAsync<(LyricsQuery query, ISongLyricsService lyrics)?>(async sp =>
+        {
+            var song = await sp.GetRequiredService<ISongRepository>().GetByIdAsync(songId, ct);
+            if (song is null
+                || !MyVocaList.Domain.Rules.LyricsOriginRules.NeedsLookupOnOpen(
+                    song.ExternalProvider, song.ExternalId, song.Lyrics, song.LyricsOrigin))
+                return null;
+
+            var title = song.Title;
+            var artistName = song.OriginalArtist?.Name;
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(artistName))
+                return null;
+
+            var lyricsService = sp.GetService<ISongLyricsService>();
+            if (lyricsService is null)
+                return null;
+
+            return (new LyricsQuery(title, artistName), lyricsService);
+        }, ct);
+
+        if (request is not { } found)
+            return null;
+
+        // Step 2 (no unit of work open, REQ-SLD-20): the lookup may take seconds, so no scope, context or
+        // transaction is held while it runs. The lyrics service and its provider hold nothing the scope disposes
+        // (a network-status reader and an HTTP client from the factory), which is why the instance may be used
+        // after the read scope has closed; the HTTP wait must not hold a scope open.
+        // Caller cancellation propagates as OperationCanceledException.
+        var answer = await found.lyrics.LookupLyricsAsync(found.query, ct);
+        if (answer.Status == LyricsLookupStatus.NoAnswer)
+            return null;
+
+        // Step 3 (write scope, not cancellable: the answer is already in hand). The song is re-read; a change made
+        // meanwhile (lyrics typed, origin recorded) wins and nothing is saved.
+        try
+        {
+            var stored = await _uow.ExecuteAsync<(bool success, string message, string? lyrics)>(async sp =>
+            {
+                var songRepository = sp.GetRequiredService<ISongRepository>();
+                var song = await songRepository.GetByIdAsync(songId, CancellationToken.None);
+                if (song is null)
+                    return (false, "Song not found", null);
+
+                if (!string.IsNullOrWhiteSpace(song.Lyrics) || song.LyricsOrigin is not null)
+                    return (false, string.Empty, song.Lyrics);
+
+                // BUG-067 (see UpdateSongCoreAsync): the eager-loaded artist navigation is detached before the write.
+                song.OriginalArtist = null;
+                if (answer.Status == LyricsLookupStatus.Found)
+                {
+                    song.Lyrics = answer.Lyrics;
+                    song.LyricsOrigin = LyricsOrigin.LyricsSource;
+                }
+                else
+                {
+                    song.LyricsOrigin = LyricsOrigin.NoneFound;
+                }
+
+                await songRepository.UpdateAsync(song, CancellationToken.None);
+                return (true, string.Empty, answer.Status == LyricsLookupStatus.Found ? answer.Lyrics : null);
+            }, CancellationToken.None);
+
+            return stored.lyrics;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lyrics found on open could not be stored for song {SongId}", songId);
+            return null;
+        }
     }
 
     /// <inheritdoc />
