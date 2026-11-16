@@ -1,13 +1,14 @@
 ---
 id: crud-page-structural-reduction
-title: "CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar"
-status: "💡 Pending"
+title: CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar
+status: 🔵 Superseded
 target: 2026-06-12
 section: DevCycleCraft
-kind: feature
-order: 250
-goal: "faster Debug page loads; deferred — Release already instantaneous."
+goal: faster Debug page loads; deferred — Release already instantaneous.
 pointer: cross-cutting/crud-page-structural-reduction/
+closed: 2026-11
+order: 250
+kind: feature
 ---
 
 # CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar

@@ -56,32 +56,22 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 |--------|----------|--------|
 | 2026-07-12 | **Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception** | 🟡 In Progress |
 | 2026-11-03 | ↳ Post-ship review — did the agent-dispatch recalibration meet its expectations | 💡 Pending |
-| 2026-06-27 | **Mandatory Worktree Rule Enforcement — ALL Subagent Work** | 💡 Pending |
-| 2026-06 | **IAsyncRelayCommand Standardization** | 💡 Pending |
 | 2026-07-19 | **`MyVocaList.Extensions` layer guidelines — placement criteria + rules-file promotion** | 💡 Pending |
-| 2026-06 | **Bug: Shell navigation swallows button tap animations** | 💡 Pending |
-| 2026-06-12 | CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar | 💡 Pending |
 | 2026-06-12 | Large-volume data stress test (1–2 year seed) | 💡 Pending |
 | — | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
 | — | ↳ Screen coverage — keyboard, safe area and snackbars hiding inputs and bottom bars | 💡 Pending |
 | 2026-06-13 | **Session Continuity — Task Leasing & Auto-Resume** | 🟡 In Progress |
-| 2026-06-27 | **Infra Repository Folder Consolidation** | 💡 Pending |
-| 2026-06-27 | **Read Model + Global NoTracking Pattern — Guidelines Update** | 💡 Pending |
-| 2026-08-03 | ↳ DbContext lifetime & unit-of-work pattern — MAUI has no per-page scope | 🟡 In Progress |
-| 2026-08-18 | ↳ Flaky ObjectDisposedException in the UOW SQLite test harness | 💡 Pending |
-| 2026-08-24 | ↳ Service read paths still use the captive AppDbContext; one of them tracks | 💡 Pending |
-| 2026-06-27 | **CRUD Read Model Refactoring — Persons, Songs, Venues** | 💡 Pending |
 | 2026-06-30 | **Form validation** | 🟡 In Progress |
 | 2026-08-04 | ↳ Pre-commit test gate blocks the RED-first commit that bug-tracking mandates | 💡 Pending |
 | 2026-08-18 | ↳ Pre-commit hook inoperative in worktrees: dotnet test without --no-restore aborts on NETSDK1147 | 💡 Pending |
+| 2026-08-18 | ↳ Flaky ObjectDisposedException in the UOW SQLite test harness | 💡 Pending |
 | 2026-09-18 | ↳ Pre-commit hook: allow TDD Red commits without --no-verify | 💡 Pending |
 | 2026-11-09 | ↳ Release tag discipline — mechanically enforced tag creation | 💡 Pending |
 | 2026-11-11 | ↳ AutocompleteDXField is the app-wide autocomplete pattern, whatever page uses it | 💡 Pending |
 | 2026-11-12 | ↳↳ Correct the MD3 list, selection and toolbar rules in the library guidelines with verbatim official quotes | 💡 Pending |
 | 2026-11-12 | ↳ CRUD list FAB: placement, size and color when alone and when paired with the floating toolbar | 💡 Pending |
 | 2026-11-12 | ↳ CrudListView: one list mode at a time (multi-action browse, multi-select selection) with toolbar Edit for exactly one | 💡 Pending |
-| 2026-11-12 | ↳ List item overflow icon button in the ListItem trailing slot, opening the item actions menu | 💡 Pending |
 | 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ Move the Playwright MCP token to .env.local | 💡 Pending |
