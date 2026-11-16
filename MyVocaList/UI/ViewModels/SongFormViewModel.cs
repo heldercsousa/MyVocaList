@@ -73,6 +73,8 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isLyricsLoading;
     /// <summary>The running lyrics lookup; tests await it. The pick itself never awaits it (design § 2.5).</summary>
     public Task LyricsLookupTask { get; private set; } = Task.CompletedTask;
+    /// <summary>REQ-SLD-19: the lookup on open; a completed null task when none runs. Tests await it.</summary>
+    public Task<string?> LyricsOnOpenTask { get; private set; } = Task.FromResult<string?>(null);
     /// <summary>REQ-LYR-09: the Lyrics placeholder while a lookup runs.</summary>
     public string LyricsPlaceholder => IsLyricsLoading ? "Looking for lyrics…" : "Song lyrics (optional)";
 
@@ -103,6 +105,7 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isTitleLocked;
 
     private CancellationTokenSource? _lyricsLookupCts;   // REQ-LYR-10: the running lyrics lookup, if any
+    private CancellationTokenSource? _openLyricsLookupCts;   // REQ-SLD-19/23: the lookup on open of this form, if one was started
     private string? _pickFilledLyrics;                   // REQ-LYR-11/12: the Lyrics text the last lookup wrote
     private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
     private string? _pendingArtistImageUrl;  // REQ-ART-11: Deezer artist picture held between a pick and Save
@@ -874,6 +877,64 @@ public partial class SongFormViewModel : ViewModelBase
             }
             NotifyArtistFrozenChanged();
         });
+
+        // REQ-SLD-19: a Deezer song without lyrics or recorded origin looks for them on open; the form stays usable.
+        if (_openLyricsLookupCts is null
+            && LyricsOriginRules.NeedsLookupOnOpen(song.ExternalProvider, song.ExternalId, song.Lyrics, song.LyricsOrigin))
+            StartLyricsLookupOnOpen(songId);
+    }
+
+    /// <summary>Called by the page when the form is left: asks the lookup on open to stop (REQ-SLD-23).</summary>
+    public void CancelLyricsLookupOnOpen() => _openLyricsLookupCts?.Cancel();
+
+    /// <summary>REQ-SLD-19: starts the lookup on open without awaiting it. At most one per form instance.</summary>
+    private void StartLyricsLookupOnOpen(int songId)
+    {
+        var cts = new CancellationTokenSource();
+        _openLyricsLookupCts = cts;
+        RunOnUiThread(() => IsLyricsLoading = true);
+        LyricsOnOpenTask = RunLyricsLookupOnOpenAsync(songId, cts);
+    }
+
+    /// <summary>
+    /// Asks the service on a background thread (Microsoft.Data.Sqlite runs "async" calls synchronously) and hands the
+    /// answer to the UI thread. A cancelled lookup yields null; the service does not throw for expected failures, so any
+    /// other exception is logged and yields null. The answer is applied on the UI thread before this task ends.
+    /// </summary>
+    private async Task<string?> RunLyricsLookupOnOpenAsync(int songId, CancellationTokenSource cts)
+    {
+        string? found;
+        try
+        {
+            found = await Task.Run(() => _songService.EnsureLyricsAsync(songId, cts.Token));
+        }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            found = null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Lyrics lookup on open failed for song {SongId}", songId);
+            found = null;
+        }
+
+        await RunOnUiThreadAsync(() =>
+        {
+            ApplyLyricsOnOpenAnswer(songId, found);
+            return Task.CompletedTask;
+        });
+        return found;
+    }
+
+    /// <summary>
+    /// REQ-SLD-21/25: hides the hint; writes the lookup's lyrics only into a blank Lyrics field of the song still shown,
+    /// so text the user typed meanwhile is kept.
+    /// </summary>
+    private void ApplyLyricsOnOpenAnswer(int songId, string? found)
+    {
+        IsLyricsLoading = false;
+        if (found is not null && string.IsNullOrWhiteSpace(Lyrics) && SongId == songId)
+            Lyrics = found;
     }
 
     // ── Save orchestration (Task 4.4 BUG-005 + Task 4.5 resolution) ──────
