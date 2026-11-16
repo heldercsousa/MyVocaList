@@ -2001,6 +2001,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-24-scope-all-servic
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\tasks.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost", "2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost", "{2F0297B6-7811-5F5B-B39C-225AAA695026}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2430,6 +2435,7 @@ Global
 		{E192492E-8D42-599B-844A-78FA6124DA0E} = {FA1234BC-0001-4000-8000-00000000006E}
 		{59AC753C-B093-5D60-AB34-05AD3BCD77F6} = {E192492E-8D42-599B-844A-78FA6124DA0E}
 		{3E6041DA-9147-51DE-AEA9-045E2D5E9AB5} = {E192492E-8D42-599B-844A-78FA6124DA0E}
+		{2F0297B6-7811-5F5B-B39C-225AAA695026} = {47E1E835-6E93-5164-9B6F-74B16DBE4FA6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

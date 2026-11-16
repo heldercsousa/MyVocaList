@@ -6,7 +6,7 @@ Plan: `plan.md` (approved by Helder 2026-11-15; workstreams A, B, C now; D and E
 
 - **Updated:** 2026-11-15
 - **Branch / worktree:** develop / main tree (hooks and docs only)
-- **Step:** A, B, C done; D and E done in part. Next: discuss the "Pending Helder" list in `README.md`
+- **Step:** item closed 2026-11-15; nothing in flight
 - **Context manifest:** `plan.md` · `README.md` (this item) · `.claude/settings.json` · `.claude/scripts/backlog/render.py` · `CLAUDE.md`
 
 ## Steps 2 + 3 — B, A1, A4: one worktree location, worktree-aware guard, Bash notice
@@ -112,3 +112,24 @@ So every reminder listed in workstream C was invisible to the model, and so is t
 - Generator tests: 183 OK. `backlog_gen.py regen --check`: clean. `BACKLOG.md`: 35,182 to 8,322 bytes.
 - Each changed hook command was run under Git Bash: health check prints OK; the compact line prints; the prompt gate fires for "implement task 3", "resume SFT", "start the next wave", "start a task" and stays silent for "continue", "fix the typo and add a note", "what does this code do?", "let us start".
 - Not checked live: the `SessionStart` `compact` hook (it needs a real compaction) and the `artifact-*` overrides (they need a fresh process).
+
+## Step 6 — Remaining D and E work after Helder's decisions
+
+**Status:** Done (2026-11-15)
+
+### Changed files
+
+- Ledger (`de18316a`): `.claude/scripts/ledger_rotate.py` (new), `tests/test_ledger_rotate.py` (new), `ledger-row-guard.py`, `LEDGER.md`, `LEDGER-archive.md`, `.claude/commands/sln-ledger.md`
+- Post-MVP (`0e4e4275`): `backlog/model.py`, `backlog/render.py`, `backlog/backlog_gen.py`, `backlog/tests/test_horizon.py` (new), `BACKLOG-POST-MVP.md` (new), 4 item `README.md`, `.claude/githooks/pre-commit`, `backlog-generator.md`
+- Solution view (`97909bfc`): `.claude/scripts/sln_nest.py` (new), `sln-register-doc.py` (new, replaces `sync-docs-to-sln.ps1`), `tests/test_sln_nest.py` (new), `MyVocaList.sln`, `constraints-reference.md`
+- `CLAUDE.md` (`c6be7255`): `CLAUDE.md`, `session-ops.md`, `project-governance-reference.md`
+
+### Verification evidence
+
+- Ledger: 11 tests OK. Dry run listed 44 rows; after the run the ledger diff holds 0 added lines and 44 removed, the archive gained the 44 rows; 3 recent rows and the Active table stay. The guard fails on the pre-rotation ledger ("47 Completed rows, 44 can be rotated") and passes after.
+- Post-MVP: 10 tests OK (193 generator tests in total). `regen --check` clean. `query --horizon post-mvp` lists the 4 items; the default query does not.
+- Solution view: 10 tests OK. `dotnet sln list` identical before and after (7 projects). `process_checks.py` passes. 337 `Project` and 337 `EndProject` lines; project GUIDs unique. A second run reports 0 misplaced. The Write hook was exercised on a scratch file: it was listed under its mirrored folder; the scratch file and the entry were then removed.
+- The solution file was already malformed before this work: two folder blocks without `EndProject` and two stray `EndProject` lines. The script repaired them.
+- `CLAUDE.md`: 7 `[HARD RULE]`/`[Unamendable]` markers before and after; Helder approved the diff before the commit.
+- Clean-up: each of the 37 branches was re-checked for commits outside `develop` and `main` (0) immediately before deletion.
+- Context: `claude -p "/context"` from a fresh process, figures in `README.md`.
