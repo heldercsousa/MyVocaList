@@ -2,7 +2,7 @@
 id: store-presubmission-compliance
 title: "Play Store + Samsung Galaxy Store pre-submission compliance"
 status: "💡 Pending"
-target: 2026-06-12
+target: —
 section: DevCycleCraft
 kind: feature
 order: 320

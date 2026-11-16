@@ -2,7 +2,8 @@
 id: cross-device-os-compatibility-test
 title: "Cross-device / OS version compatibility test"
 status: "💡 Pending"
-target: 2026-06-12
+target: —
+horizon: post-mvp
 section: DevCycleCraft
 kind: feature
 order: 310

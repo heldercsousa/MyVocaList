@@ -2,7 +2,7 @@
 id: pre-release-mobile-testing-checklist
 title: "Full pre-release mobile testing checklist (all categories)"
 status: "💡 Pending"
-target: 2026-06-12
+target: —
 section: DevCycleCraft
 kind: feature
 order: 330

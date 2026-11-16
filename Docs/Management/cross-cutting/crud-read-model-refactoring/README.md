@@ -1,14 +1,15 @@
 ---
 id: crud-read-model-refactoring
-title: "**CRUD Read Model Refactoring — Persons, Songs, Venues**"
-status: "💡 Pending"
+title: **CRUD Read Model Refactoring — Persons, Songs, Venues**
+status: 🔵 Superseded
 target: 2026-06-27
 section: DevCycleCraft
-kind: feature
-order: 440
-goal: "apply the read-model pattern to the remaining CRUD entities and retire the list DTOs."
-gate: "Guidelines Update done first."
+goal: apply the read-model pattern to the remaining CRUD entities and retire the list DTOs.
+gate: Guidelines Update done first.
 pointer: cross-cutting/crud-read-model-refactoring/
+closed: 2026-11
+order: 440
+kind: feature
 ---
 
 # CRUD Read Model Refactoring — Persons, Songs, Venues

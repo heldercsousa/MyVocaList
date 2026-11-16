@@ -1,15 +1,16 @@
 ---
 id: inline-artist-create
 title: **Song artist field — correctness fixes + inline "create new artist"**
-status: "🟡 In Progress"
+status: 🔵 Superseded
 target: 2026-07-21
 section: BusinessFeatures
 parent: artists-songs
-kind: change
-order: 70
-goal: "make the Song Artist autocomplete correct (folding in BUG-050, BUG-051, BUG-052 and retain-text) and add inline create-new-artist (➕ row), closing BUG-027."
-gate: "on-device re-run #5 failed 2026-08-02 — an EF Core tracking conflict blocks every edit-mode save; three split fix sessions plus a green re-run gate closeout."
+goal: make the Song Artist autocomplete correct (folding in BUG-050, BUG-051, BUG-052 and retain-text) and add inline create-new-artist (➕ row), closing BUG-027.
+gate: on-device re-run #5 failed 2026-08-02 — an EF Core tracking conflict blocks every edit-mode save; three split fix sessions plus a green re-run gate closeout.
 pointer: BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md
+closed: 2026-11
+order: 70
+kind: change
 ---
 
 # Song artist field — correctness fixes + inline "create new artist"
@@ -32,3 +33,8 @@ pushed.
 
 Detail: `task-log.md` § T10 outcome, plus `requirements.md`, `design.md`, `tasks.md`,
 `plan.md`, `handoff.md` in this folder.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup. Inline artist create was removed and the artist fields were rebuilt. Reopen it by registering a new item if the work is wanted again.

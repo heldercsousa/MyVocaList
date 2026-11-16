@@ -7,6 +7,13 @@
 <!-- BACKLOG:GENERATED:BEGIN business-features -->
 | Target | Feature | Status |
 |--------|---------|--------|
+| 2026-06 | **User Tutorial/Learning** | 💡 Pending |
+| 2026-06 | **Website** | 💡 Pending |
+| — | **Data Backup & Restore — Tier 2 (WiFi Mirror)** | 💡 Pending |
+| 2026-08-04 | ↳ RestoreFromBundleAsync overwrites the live SQLite file while AppDbContext holds it open | 💡 Pending |
+| 2026-11-13 | ↳ Backups include uploaded pictures | 💡 Pending |
+| — | **Singer self-registration** | 💡 Pending |
+| — | **Social features** | 💡 Pending |
 | 2026-11-09 | ↳ AI intent matching for mistyped titles and artists | 💡 Pending |
 | 2026-11-09 | ↳ group Songs list by artist | 💡 Pending |
 | 2026-11-09 | ↳ show similar records in autocomplete results | 💡 Pending |
@@ -19,4 +26,8 @@
 <!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->
 | Target | Activity | Status |
 |--------|----------|--------|
+| — | **Inline Undo Pattern — UX Standard** | 💡 Pending |
+| — | **UI-2nd-refactor** | 📋 Spec |
+| — | Cross-device / OS version compatibility test | 💡 Pending |
+| — | ↳ Dev and QA data tooling — seed and empty app data on demand | 💡 Pending |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->

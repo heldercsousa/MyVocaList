@@ -1,15 +1,16 @@
 ---
 id: form-ux-redesign
-title: "**Artist & Song Form UX Redesign — autocomplete, similar-match warning, search-strip removal**"
-status: "🔵 Deferred"
+title: **Artist & Song Form UX Redesign — autocomplete, similar-match warning, search-strip removal**
+status: 🔵 Superseded
 target: 2026-07-10
 section: BusinessFeatures
 parent: artists-songs
-kind: change
-order: 180
-goal: "friction-free artist/song name entry (local + API autocomplete, never clear typed text, similar-match warning before create)."
-gate: "parked by Helder only — the autocomplete foundations that once gated it are both retired; partial work sits on branch `feature/form-ux-redesign`. Now also owns cancelled BUG-028, BUG-029, BUG-031 and BUG-032."
+goal: friction-free artist/song name entry (local + API autocomplete, never clear typed text, similar-match warning before create).
+gate: parked by Helder only — the autocomplete foundations that once gated it are both retired; partial work sits on branch `feature/form-ux-redesign`. Now also owns cancelled BUG-028, BUG-029, BUG-031 and BUG-032.
 pointer: BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/
+closed: 2026-11
+order: 180
+kind: change
 ---
 
 # Artist & Song Form UX Redesign
@@ -47,3 +48,8 @@ Detail: `requirements.md`, `design.md`, `tasks.md`, `plan.md`, `task-log.md` in 
 > ① + ②"*. Both are gone — ① was retired 🔵 Superseded on 2026-08-04 and ② was
 > absorbed by the 2026-07-19 DX adoption decision. The only thing holding this item now is
 > Helder's own prioritisation.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup. Autocomplete shipped and the search strip is gone. Reopen it by registering a new item if the work is wanted again.

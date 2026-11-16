@@ -1,13 +1,14 @@
 ---
 id: infra-repository-folder-consolidation
-title: "**Infra Repository Folder Consolidation**"
-status: "💡 Pending"
+title: **Infra Repository Folder Consolidation**
+status: ✅ Done
 target: 2026-06-27
 section: DevCycleCraft
-kind: feature
-order: 420
-goal: "merge `Infra/Repository/` and `Infra/Repositories/` into one folder (moves + namespaces only)."
+goal: merge `Infra/Repository/` and `Infra/Repositories/` into one folder (moves + namespaces only).
 pointer: cross-cutting/infra-repository-folder-consolidation/
+closed: 2026-11
+order: 420
+kind: feature
 ---
 
 # Infra Repository Folder Consolidation

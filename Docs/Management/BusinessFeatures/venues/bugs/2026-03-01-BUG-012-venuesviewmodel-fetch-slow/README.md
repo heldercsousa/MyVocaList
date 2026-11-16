@@ -1,13 +1,14 @@
 ---
 id: BUG-012
 title: "Bug: Venues list fetch slow — 2.2s paged query (BUG-012)"
-status: "💡 Pending"
+status: 🔵 Superseded
 target: 2026-03
 section: BusinessFeatures
-kind: bug
-order: 10
-goal: "restore fast venue list loading (N+1 query suspected)."
+goal: restore fast venue list loading (N+1 query suspected).
 pointer: BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/
+closed: 2026-11
+order: 10
+kind: bug
 ---
 
 > **Spec updated [2026-07-22]:** this file was the flat
@@ -64,3 +65,8 @@ Additionally, the Microsoft.Data.Sqlite provider executes "async" EF methods syn
 
 - Other ViewModels with similar patterns (investigate separately once this is fixed)
 - SQLite → MSSQL migration (tracked separately; this fix targets current SQLite infra)
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup. It was never re-measured on device. Reopen it by registering a new item if the work is wanted again.
