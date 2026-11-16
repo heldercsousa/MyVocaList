@@ -51,7 +51,7 @@ From fresh headless processes (`claude -p "/context"`), 2026-11-15:
 
 The larger saving is in reads, not in the always-loaded part: a full `BACKLOG.md` read (about 9k tokens) is now refused, the ledger read costs about a third, `limit: 5000` no longer reads a whole file, and files inside a worktree are guarded. AC-05.3 set 7,300 bytes for `CLAUDE.md`; the result is 7,573 because the sentence that tells `/sln-review` from the built-in `/review` was kept.
 
-### Helder's decisions (2026-11-15)
+### Helder's decisions (2026-11-15; spec gate approved 2026-11-16; follow-up item left for another session by his choice)
 
 - Ledger rotation: as specified. Solution view: logical folder equals physical folder, for every file. `CLAUDE.md` cuts, memory prune and the post-MVP file: approved. Leftovers: delete the empty folders and the branches, keep `.worktrees/_orch`.
 - Short status codes: not asked again; the recommendation stands (keep the statuses).
@@ -61,7 +61,7 @@ The larger saving is in reads, not in the always-loaded part: a full `BACKLOG.md
 
 1. `.worktrees/_orch`: Helder saw the list of its 22 files (commit-message drafts, test output captures, one briefing note and five one-off helper scripts, all from the SFT work merged on 2026-11-11) and ruled to delete them. The `.worktrees/` folder and its `.gitignore` line are gone.
 2. Remote `worktree-agent-*` branches: all 24 deleted on `origin` (Helder ruling). 23 held no commit outside `develop` and `main`. One held a commit unique by hash only (2026-07-01, form-validation standard); its content was compared line by line and is on `develop`, except one sentence in `dialogs-validation.md` that was reworded later. Helder approved its deletion separately.
-3. Visual Studio: the solution was loaded in Visual Studio 18 Insiders from the command line (`devenv.com MyVocaList.sln /Command "File.Exit" /Log`). Exit code 0; the activity log shows a `SolutionLoad` run; its 5 error entries concern C++ components, a source-control user option and the recent-projects list, none the solution file; the `.sln` was not modified by the load. Solution Explorer itself was not looked at by a person.
+3. Visual Studio: the solution was loaded in Visual Studio 18 Insiders from the command line (`devenv.com MyVocaList.sln /Command "File.Exit" /Log`). Exit code 0; the activity log shows a `SolutionLoad` run; its 5 error entries concern C++ components, a source-control user option and the recent-projects list, none the solution file; the `.sln` was not modified by the load. Looking at Solution Explorer is Helder's own check, to do when he next opens the IDE (his answer of 2026-11-16); it is not an open task of this item.
 4. The official parser check, the compaction-hook test, the "before" measurement and the base-check fix: see `task-log.md § Step 7`.
 5. Left as found, by choice: `MyVocaList.sln` starts with two byte-order marks; `CLAUDE.md` says hand-edits of BACKLOG rows are "hook-blocked" although only the pre-commit staleness check catches them.
 
