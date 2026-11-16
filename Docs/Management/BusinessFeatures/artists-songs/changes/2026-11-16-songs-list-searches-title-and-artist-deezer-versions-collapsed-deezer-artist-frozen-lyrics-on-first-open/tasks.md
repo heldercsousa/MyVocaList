@@ -10,7 +10,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T0 Discussion with Helder, code maps, requirements, design, spec review, Deezer API check, plan.
 
 ## Phase 1 — Contracts and Domain
-- [ ] T1 **Lyrics origin types and rules.** (REQ-SLD-12, 13, 19, 24, 26, 27) Level A.
+- [~] T1 **Lyrics origin types and rules.** (REQ-SLD-12, 13, 19, 24, 26, 27) Level A.
   - Files owned: new `Contracts/Enums/LyricsOrigin.cs`, `Contracts/DTOs/LyricsLookupResult.cs`, `Domain/Rules/SongIdentityRules.cs`, `Domain/Rules/LyricsOriginRules.cs`; `Domain/Resolution/SongFormSaveRequest.cs`; new tests `Unit/Domain/LyricsOriginRulesTests.cs`, `Unit/Domain/SongIdentityRulesTests.cs`.
   - Demo: `LyricsOriginRules.OnCreate("A", LyricsLookupResult.Found("A"))` is `LyricsSource`; `OnUpdate("A", LyricsSource, "")` is `User`.
 - [ ] T2 **Deezer artist id on the search DTO and the fetch-count constant.** (REQ-SLD-06, 10, types only) Level C, no test.
