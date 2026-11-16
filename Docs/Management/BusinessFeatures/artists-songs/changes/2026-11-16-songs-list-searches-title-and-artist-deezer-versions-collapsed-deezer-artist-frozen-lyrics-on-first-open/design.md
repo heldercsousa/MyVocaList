@@ -41,6 +41,14 @@
 | C17 | "None found" after the user corrected the title, or for lyrics over the limit | Permanent, as for any no-match | No stored data tells these cases apart; the user can type or paste lyrics | Low |
 | C18 | No page-size parameter in the Deezer API | Group the rows of the default answer (REQ-SLD-10) | The feature still works with fewer rows | Low |
 | C19 | Exact member names and signatures | Fixed in `plan.md`, from the shapes in § 3 | Names follow the code style reference, read at plan time | None |
+| C20 | Page-size parameter of the Deezer request | Not sent; up to 25 rows of the default answer are grouped | The official reference could not be read; a recorded real answer shows 25 rows by default; the existing REQ-SFT-35 URL test stays valid. Replaces the "to confirm" of C12 | Low |
+| C21 | Shape of the list search in the repository | Inside the existing `GetPagedAsync`; no new interface member, no Service change | Keeps two existing tests and a hand-written repository fake valid; every REQ is met | Low |
+| C22 | The form's pick lookup calls the new lookup method | Yes; mocks in `SongFormViewModelLyricsTests` are re-pointed without changing any assertion | The form must tell "no match" from "no answer" (REQ-SLD-26 rule 3) | Low |
+| C23 | Existing test of the Version reset on X | Removed with the code it tests | Its precondition no longer exists (REQ-SLD-08) | Low |
+| C24 | How the song service gets the lyrics service | Optional trailing constructor parameter | No scoped service is used outside its scope; no existing construction site changes | Low |
+| C25 | Add mode: change the Title, edit the artist, type the picked title back | Not closed; the form holds the pick again with the edited artist | Closing it changes the identity rule of REQ-PIC-27/28. **Known gap for Helder** | Low |
+| C26 | Pick outcome after a changed Title text | Kept; dropped only by X and by a newer pick | Lyrics that still equal the lyrics source's text are a source copy | Low |
+| C27 | Album part of a Deezer option row | Stays (REQ-ART-07) | Only the version label was decided | Low |
 
 ## 2. Approaches considered
 
@@ -90,29 +98,31 @@ Order of work follows the layers: Contracts and Domain, then Infra, then Service
 - **Migration** `AddSongLyricsOrigin`: nullable column on `Songs`, no default, no backfill (REQ-SLD-28). `Migrations/*` and `AppDbContext.cs` are sequential-only files: one writer.
 - `SongConfiguration`: map the enum (stored as a short string so the database stays readable).
 - `ISongRepository` / `SongRepository`: new paged search for the list (REQ-SLD-01 to 04), built on the existing `SearchTitleCoreAsync` logic:
+  (As built, per C21: this lives inside the existing `GetPagedAsync`, with no new interface member.)
   - full-text branch: the existing `SongSearch MATCH` query with the existing `bm25(SongSearch, 10.0, 1.0), length(s.Title)` order, plus `s.Id` as a last tie-breaker so pages never overlap, `LIMIT/OFFSET`, and a count query with the same `MATCH`;
   - prefix branch (no word of 3+ characters, or the index table is missing): today's `GetPagedAsync` query;
   - projection to `SongListItemDto` exactly as `GetPagedAsync` does (including `s.ImageUrl ?? artist.ImageUrl`).
   All matching stays in the database (collation and the full-text index); no text is normalised in C#.
-- No new repository write method: `EnsureLyricsAsync` (§ 3.4) loads the tracked song through the existing `GetByIdAsync` inside the song service's unit of work, sets lyrics and origin, and commits. It writes those two columns only (REQ-SFT-46 as extended in the Supersedes table).
+- No new repository write method: `EnsureLyricsAsync` (§ 3.4) re-reads the song through the existing `GetByIdAsync` inside a write scope of the song service's unit of work, sets lyrics and origin, and saves through the existing `UpdateAsync` (the context does not track). The row is written with the values just read in the same transaction, so only those two columns change value (REQ-SFT-46 as extended in the Supersedes table).
 
 ### 3.4 Services
 
-- **`DeezerProvider.SearchSongsAsync`**: reads `artist.id`; takes the number of rows from the caller (or the new constant) instead of the shared `MaxResults = 5`, and sends it to Deezer as the page size (C12). `SearchArtistsAsync` keeps 5. The provider still maps one API row to one DTO.
+- **`DeezerProvider.SearchSongsAsync`**: reads `artist.id`; keeps up to the new constant's number of rows instead of the shared `MaxResults = 5`. The request URL is unchanged (C20). `SearchArtistsAsync` keeps 5. The provider still maps one API row to one DTO.
 - **`SongSuggestionService.SearchTitleRemoteAsync`** (shared by every caller, H3): after the Deezer fetch and before `DedupAgainstLibraryAsync`, group the rows (REQ-SLD-06, 07, 11), set `Version` to blank on the kept rows (REQ-SLD-08), then run the existing library check and the existing `Take(MaxSearchResults)`. Grouping is a pure private step with ordinal comparison only.
-- **`SongService.GetPagedSongsForListAsync`**: calls the new repository search when the query is non-blank. Signature unchanged for the ViewModel.
+- **`SongService.GetPagedSongsForListAsync`**: unchanged (C21); the repository decides by the query.
 - **`SongService` edit branch of `SaveFromFormAsync` and `UpdateSongCoreAsync`**: for a Deezer song the only accepted artist is the stored artist id. The check runs right after the song is loaded and **before any artist resolution**: a request with another artist id, with a typed name and no id, or with a new artist name is refused (REQ-SLD-15) with the existing failure tuple and the existing Artist member of the save-field enum. Ids are compared; names never are. When the id matches, artist resolution is skipped altogether (REQ-SLD-30).
 - **`SongService` create and update**: set `LyricsOrigin` through `LyricsOriginRules` (REQ-SLD-26, 27). One write path as today (REQ-SFT-46).
 - **`ISongLyricsService`**: new method returning `LyricsLookupResult`; the existing `FindLyricsAsync` becomes a thin wrapper over it so REQ-LYR behaviour and its tests stay as they are. `NoMatch` only for a definite answer of the source (404, instrumental, blank, over the limit); everything else is `NoAnswer`.
 - **`SongService.EnsureLyricsAsync(songId, ct)`** (new, REQ-SLD-19 to 24): loads the song; returns at once unless it is a Deezer song with blank lyrics and no origin; runs the lookup with title and artist name; on `Found` stores lyrics + origin *lyrics source*; on `NoMatch` stores origin *none found*; on `NoAnswer` stores nothing. Before storing it re-reads the song and stores only when its lyrics are still blank and its origin still null, so a Save that happened meanwhile wins. Never throws for expected failures; rethrows caller cancellation only.
   - Preconditions checked in order: song exists; is a Deezer song; lyrics blank; origin null; stored title and artist name non-blank. Any failing precondition returns "nothing" with no request.
   - Cancellation is honoured while waiting for the lyrics source. Once the answer is in hand, the store step runs to its end with a non-cancellable token (REQ-SLD-20).
-  - Returns the lyrics now stored on the song (also when another call stored them first), or nothing.
+  - Returns the lyrics stored on the song during this call (by it, or by a concurrent call found at the re-read), or nothing. A song that already had lyrics returns nothing at the precondition; the form has them from its own load.
+  - The HTTP request runs outside any unit-of-work scope; no transaction is open while waiting.
 - **Lyrics origin on update** compares the saved lyrics with the row as read inside the update (REQ-SLD-27), not with what the form loaded. Because the form applies a stored match to its blank field before Save (§ 3.6), an untouched copy compares equal and keeps *lyrics source*.
 
 ### 3.5 Integration contracts
 
-- **Deezer** `GET search/track?q=…` — additionally read `data[].artist.id`; send the page-size parameter. Both to be confirmed against the Deezer API reference before coding (task 0); if the page-size parameter does not exist, the provider keeps whatever one answer returns and the constant only documents the expectation.
+- **Deezer** `GET search/track?q=…` — request unchanged; additionally read `data[].artist.id` (present in a recorded real answer, which also shows 25 rows by default). The official reference is behind a login wall and was not read (C20).
 - **LRCLIB** `GET api/get?track_name=&artist_name=` — unchanged; one request per lookup on open.
 
 ### 3.6 ViewModels
@@ -171,7 +181,7 @@ None is edited. `CrudListView`, `ListItem`, `TapToEditField` and `AutocompleteDX
 | Paged list search (REQ-SLD-01 to 04) | B | Repository tests on real SQLite: artist match, ranking order, disjoint pages, count, prefix branch, missing index table |
 | Migration (REQ-SLD-28) | B | Existing rows keep null |
 | `SongFormViewModel` (REQ-SLD-08, 12 to 14, 19, 21, 25, 26, 30, 31) | A | Unit: frozen state per mode, X releases, Title text change releases and keeps the artist text, frozen edit request carries the stored artist id, lookup on open applied only to a blank field, hint only while the lookup runs, the three outcomes of REQ-SLD-31, request carries the pick outcome and none after a released pick, Version untouched by a pick |
-| Page and option row (REQ-SLD-08, 12, 13) | — | On-device check by Helder: Deezer song shows plain artist text; local-only song opens the editor; a Deezer option row reads "artist · Deezer" with no version |
+| Page and option row (REQ-SLD-08, 12, 13) | — | On-device check by Helder: Deezer song shows plain artist text; local-only song opens the editor; a Deezer option row shows no version label |
 
 Every test's first comment line carries its AC id (`// [AC] REQ-SLD-NN: …`). The traceability matrix goes in `task-log.md` at review.
 
@@ -179,5 +189,5 @@ Every test's first comment line carries its AC id (`// [AC] REQ-SLD-NN: …`). T
 
 ## 8. Open points for the plan
 
-- Task 0: confirm in the Deezer API reference the page-size parameter of `search/track` and the `artist.id` field (C12, § 3.5).
+- Task 0 is closed by C20.
 - Exact names of the new members and the shape of the save-request addition follow the code style reference at plan time.
