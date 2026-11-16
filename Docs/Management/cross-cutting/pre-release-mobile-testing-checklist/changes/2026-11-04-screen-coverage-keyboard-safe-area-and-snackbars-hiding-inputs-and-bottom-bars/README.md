@@ -2,7 +2,7 @@
 id: screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars
 title: Screen coverage — keyboard, safe area and snackbars hiding inputs and bottom bars
 status: 💡 Pending
-target: 2026-11-04
+target: —
 section: DevCycleCraft
 parent: pre-release-mobile-testing-checklist
 goal: Make sure the keyboard, system bars and success/error snackbars never hide what the user is typing or the list bottom bar's buttons; test every page and settle the SafeAreaEdges rule.

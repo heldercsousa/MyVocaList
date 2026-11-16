@@ -3,6 +3,7 @@ id: website
 title: "**Website**"
 status: "💡 Pending"
 target: 2026-06
+horizon: post-mvp
 section: BusinessFeatures
 kind: feature
 order: 340

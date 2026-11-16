@@ -3,6 +3,7 @@ id: singer-self-registration
 title: "**Singer self-registration**"
 status: "💡 Pending"
 target: —
+horizon: post-mvp
 section: BusinessFeatures
 kind: feature
 order: 370

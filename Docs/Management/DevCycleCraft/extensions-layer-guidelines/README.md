@@ -1,14 +1,15 @@
 ---
 id: extensions-layer-guidelines
-title: "**`MyVocaList.Extensions` layer guidelines — placement criteria + rules-file promotion**"
-status: "💡 Pending"
+title: **`MyVocaList.Extensions` layer guidelines — placement criteria + rules-file promotion**
+status: 🔵 Superseded
 target: 2026-07-19
 section: DevCycleCraft
-kind: feature
-order: 110
-goal: "formalize when a helper belongs in the new dependency-free `MyVocaList.Extensions` project (created by D4 above) vs. Services/Domain, beyond the one worked example."
-gate: "Unblocked 2026-08-04 — the project now exists and is in use on develop; what remains is promoting the criteria into a rules or library file."
+goal: formalize when a helper belongs in the new dependency-free `MyVocaList.Extensions` project (created by D4 above) vs. Services/Domain, beyond the one worked example.
+gate: Unblocked 2026-08-04 — the project now exists and is in use on develop; what remains is promoting the criteria into a rules or library file.
 pointer: DevCycleCraft/extensions-layer-guidelines/
+closed: 2026-11
+order: 110
+kind: feature
 ---
 
 **Notes overflow (transcribed from the pre-migration BACKLOG row):** Promote into `code-principles.md` once stable.
@@ -107,3 +108,8 @@ the existing routing-table pattern) is tracked as a follow-up in
 > dedicated `.claude/library/` reference routed from it) following the Amending These Rules
 > process — `amend:` commit prefix, rationale in the body, changelog entry. The draft here is
 > the input; it is not the deliverable.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was still useful and not delivered. Reopen it by registering a new item if the work is wanted again.

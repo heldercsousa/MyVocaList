@@ -1,13 +1,14 @@
 ---
 id: iasyncrelaycommand-standardization
-title: "**IAsyncRelayCommand Standardization**"
-status: "💡 Pending"
+title: **IAsyncRelayCommand Standardization**
+status: 🔵 Superseded
 target: 2026-06
 section: DevCycleCraft
-kind: feature
-order: 70
-goal: "one async-command pattern across all ViewModels (picker VMs are the reference)."
+goal: one async-command pattern across all ViewModels (picker VMs are the reference).
 pointer: cross-cutting/iasyncrelaycommand-standardization/
+closed: 2026-11
+order: 70
+kind: feature
 ---
 
 # IAsyncRelayCommand Standardization

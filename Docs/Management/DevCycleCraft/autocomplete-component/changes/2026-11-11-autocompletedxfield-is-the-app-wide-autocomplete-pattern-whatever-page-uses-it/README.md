@@ -1,12 +1,13 @@
 ---
 id: autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it
 title: AutocompleteDXField is the app-wide autocomplete pattern, whatever page uses it
-status: 💡 Pending
+status: 🔵 Superseded
 target: 2026-11-11
 section: DevCycleCraft
 parent: autocomplete-component
 goal: "Every autocomplete or suggestion field in the app uses AutocompleteDXField, and its timing uses shared constants: no page-level DX AutoCompleteEdit glue and no literal debounce values."
 gate: A census finds no raw AutoCompleteEdit or suggestion glue outside the component (Artist form included), and the list-search debounce uses a shared constant.
+closed: 2026-11
 kind: change
 ---
 
@@ -29,3 +30,8 @@ here as one rule: `AutocompleteDXField` is the pattern for the component, whatev
   constant, as `SearchConstants.AutocompleteDebounceMilliseconds` does for the component.
 - **Governance:** once the Song form binds, the component has two consumers and is governed; every change here goes through
   the four gates in `component-change-governance.md`.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was still useful and not delivered. Reopen it by registering a new item if the work is wanted again.
