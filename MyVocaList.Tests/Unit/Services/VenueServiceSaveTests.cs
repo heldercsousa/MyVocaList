@@ -15,8 +15,8 @@ public class VenueServiceSaveTests
 
     public VenueServiceSaveTests()
     {
-        _repoMock.Setup(r => r.GetByNameAsync(It.IsAny<string>())).ReturnsAsync((Venue?)null);
-        _repoMock.Setup(r => r.AddressExistsAsync(It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync(
+                    It.IsAny<string>(), It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(false);
         _repoMock.Setup(r => r.AddAsync(It.IsAny<Venue>()))
                  .Callback<Venue>(v => _added = v)
@@ -150,7 +150,8 @@ public class VenueServiceSaveTests
         var result = await sut.SaveVenueAsync(AddRequest(name: new string('x', 61)));
 
         Assert.Equal((false, "Name is too long. Maximum 60 characters.", VenueField.Name), result);
-        _repoMock.Verify(r => r.GetByNameAsync(It.IsAny<string>()), Times.Never);
+        _repoMock.Verify(r => r.NameAndAddressExistsAsync(
+            It.IsAny<string>(), It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Venue>()), Times.Never);
     }
 
@@ -207,8 +208,9 @@ public class VenueServiceSaveTests
     // [AC] REQ-VEN-14: an invalid address is reported before a duplicate name.
     public async Task SaveVenueAsync_InvalidAddressAndDuplicateName_ReportsAddressFirst()
     {
-        _repoMock.Setup(r => r.GetByNameAsync(It.IsAny<string>()))
-                 .ReturnsAsync(new Venue { Id = 2, Name = "Jazz Club" });
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync(
+                    It.IsAny<string>(), It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(true);
         var sut = CreateSut();
 
         var result = await sut.SaveVenueAsync(AddRequest(name: "Jazz Club", address: Addr(country: "Brasil")));
@@ -217,29 +219,27 @@ public class VenueServiceSaveTests
     }
 
     [Fact]
-    // [AC] REQ-VEN-19: a duplicate name is reported before a duplicate address.
-    public async Task SaveVenueAsync_DuplicateNameAndDuplicateAddress_ReportsNameFirst()
+    // [AC] REQ-VEN-41: a name and address pair already stored is refused on Name with the address message.
+    public async Task SaveVenueAsync_NameAndAddressPairExists_RefusedOnNameWithAddressMessage()
     {
-        _repoMock.Setup(r => r.GetByNameAsync(It.IsAny<string>()))
-                 .ReturnsAsync(new Venue { Id = 2, Name = "Jazz Club" });
-        _repoMock.Setup(r => r.AddressExistsAsync(It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync(
+                    It.IsAny<string>(), It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(true);
         var sut = CreateSut();
         var address = Addr(line1: "Rua Augusta, 100", city: "São Paulo");
 
         var result = await sut.SaveVenueAsync(AddRequest(name: "Jazz Club", address: address));
 
-        Assert.Equal((false, "There is another venue registered with this name", VenueField.Name), result);
-        _repoMock.Verify(r => r.AddressExistsAsync(It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+        Assert.Equal((false, "There is another venue registered with this name at this address", VenueField.Name), result);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Venue>()), Times.Never);
     }
 
     // ── SaveVenueAsync: add mode ─────────────────────────────────────────────
 
     [Fact]
     // [AC] REQ-VEN-13: a venue saves with an empty address.
-    // [AC] REQ-VEN-21: an empty address never runs the duplicate-address check.
-    public async Task SaveVenueAsync_EmptyAddress_SavesWithoutAddressDuplicateCheck()
+    // [AC] REQ-VEN-44: an empty address runs the pair check with the empty address, and saves when no venue has the same name.
+    public async Task SaveVenueAsync_EmptyAddress_RunsPairCheckWithEmptyAddressAndSaves()
     {
         var sut = CreateSut();
 
@@ -248,8 +248,8 @@ public class VenueServiceSaveTests
         Assert.True(result.success);
         Assert.Equal(VenueField.None, result.field);
         Assert.NotNull(_added);
-        _repoMock.Verify(r => r.AddressExistsAsync(It.IsAny<VenueAddress>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+        _repoMock.Verify(r => r.NameAndAddressExistsAsync(
+            "New Venue", VenueAddress.Empty, null, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -335,11 +335,11 @@ public class VenueServiceSaveTests
     }
 
     [Fact]
-    // [AC] REQ-VEN-19: a duplicate name on add is refused on Name and nothing is stored.
-    public async Task SaveVenueAsync_AddMode_DuplicateName_RefusedOnNameAndNothingStored()
+    // [AC] REQ-VEN-44: two venues without an address cannot share a name; the add is refused on Name and nothing is stored.
+    public async Task SaveVenueAsync_AddMode_SameNameBothAddressesEmpty_RefusedOnNameAndNothingStored()
     {
-        _repoMock.Setup(r => r.GetByNameAsync(It.IsAny<string>()))
-                 .ReturnsAsync(new Venue { Id = 5, Name = "Jazz Club" });
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync("Jazz Club", VenueAddress.Empty, null, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(true);
         var sut = CreateSut();
 
         var result = await sut.SaveVenueAsync(AddRequest(name: "Jazz Club"));
@@ -350,30 +350,48 @@ public class VenueServiceSaveTests
     }
 
     [Fact]
-    // [AC] REQ-VEN-20: a duplicate address on add is refused on Street address, checked without excluding any venue.
-    public async Task SaveVenueAsync_AddMode_DuplicateAddress_RefusedOnStreetAddressAndNothingStored()
+    // [AC] REQ-VEN-42: the same name at another address is saved (the pair check finds no equal pair).
+    public async Task SaveVenueAsync_AddMode_SameNameAtAnotherAddress_IsSaved()
     {
-        _repoMock.Setup(r => r.AddressExistsAsync(It.IsAny<VenueAddress>(), null, It.IsAny<CancellationToken>()))
-                 .ReturnsAsync(true);
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync("Jazz Club", It.IsAny<VenueAddress>(), null, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(false);
         var sut = CreateSut();
-        var address = Addr(line1: "Rua Augusta, 100", city: "São Paulo", region: "SP", postalCode: "01304-001", country: "Brasil");
+        var address = Addr(line1: "Rua Augusta, 200", city: "São Paulo", region: "SP", postalCode: "01304-001", country: "Brasil");
 
-        var result = await sut.SaveVenueAsync(AddRequest(address: address));
+        var result = await sut.SaveVenueAsync(AddRequest(name: "Jazz Club", address: address));
 
-        Assert.Equal((false, "There is another venue registered at this address", VenueField.AddressLine1), result);
-        _repoMock.Verify(r => r.AddAsync(It.IsAny<Venue>()), Times.Never);
+        Assert.True(result.success);
+        Assert.NotNull(_added);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Venue>()), Times.Once);
     }
 
     [Fact]
-    // [AC] REQ-VEN-20: the duplicate-address check receives the normalised address.
-    public async Task SaveVenueAsync_AddMode_AddressCheckReceivesNormalisedAddress()
+    // [AC] REQ-VEN-43: a different name at an address already stored is saved (the pair check finds no equal pair).
+    public async Task SaveVenueAsync_AddMode_SameAddressUnderAnotherName_IsSaved()
+    {
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync("Blues Bar", It.IsAny<VenueAddress>(), null, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(false);
+        var sut = CreateSut();
+        var address = Addr(line1: "Rua Augusta, 100", city: "São Paulo", region: "SP", postalCode: "01304-001", country: "Brasil");
+
+        var result = await sut.SaveVenueAsync(AddRequest(name: "Blues Bar", address: address));
+
+        Assert.True(result.success);
+        Assert.NotNull(_added);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Venue>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-41: the pair check receives the trimmed name and the normalised address, with no venue excluded on add.
+    public async Task SaveVenueAsync_AddMode_PairCheckReceivesTrimmedNameAndNormalisedAddress()
     {
         var sut = CreateSut();
         var address = Addr(line1: "  Rua Augusta, 100  ", city: " São Paulo ");
 
-        await sut.SaveVenueAsync(AddRequest(address: address));
+        await sut.SaveVenueAsync(AddRequest(name: "  Jazz Club  ", address: address));
 
-        _repoMock.Verify(r => r.AddressExistsAsync(
+        _repoMock.Verify(r => r.NameAndAddressExistsAsync(
+            "Jazz Club",
             It.Is<VenueAddress>(a => a.Line1 == "Rua Augusta, 100" && a.Line2 == null && a.City == "São Paulo"
                                      && a.Region == null && a.PostalCode == null && a.Country == null),
             null,
@@ -407,11 +425,12 @@ public class VenueServiceSaveTests
     }
 
     [Fact]
-    // [AC] REQ-VEN-19: the venue's own stored name is accepted on edit.
-    public async Task SaveVenueAsync_EditMode_OwnName_IsAccepted()
+    // [AC] REQ-VEN-41: the venue's own stored name and address are excluded from the pair check, so the edit is accepted.
+    public async Task SaveVenueAsync_EditMode_OwnNameAndAddress_IsAccepted()
     {
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(StoredVenue(1, "Jazz Club"));
-        _repoMock.Setup(r => r.GetByNameAsync("Jazz Club")).ReturnsAsync(StoredVenue(1, "Jazz Club"));
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync("Jazz Club", It.IsAny<VenueAddress>(), 1, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(false);
         var sut = CreateSut();
 
         var result = await sut.SaveVenueAsync(EditRequest(name: "Jazz Club", id: 1));
@@ -421,22 +440,24 @@ public class VenueServiceSaveTests
     }
 
     [Fact]
-    // [AC] REQ-VEN-19: another venue's name is refused on edit.
-    public async Task SaveVenueAsync_EditMode_OtherVenuesName_RefusedOnName()
+    // [AC] REQ-VEN-41: another venue with the same name at the same non-empty address is refused on edit, and nothing is updated.
+    public async Task SaveVenueAsync_EditMode_OtherVenuePairExists_RefusedOnNameWithAddressMessage()
     {
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(StoredVenue(1, "Jazz Club"));
-        _repoMock.Setup(r => r.GetByNameAsync("Blues Bar")).ReturnsAsync(new Venue { Id = 2, Name = "Blues Bar" });
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync("Blues Bar", It.IsAny<VenueAddress>(), 1, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(true);
         var sut = CreateSut();
+        var address = Addr(line1: "Rua Augusta, 100", city: "São Paulo");
 
-        var result = await sut.SaveVenueAsync(EditRequest(name: "Blues Bar", id: 1));
+        var result = await sut.SaveVenueAsync(EditRequest(name: "Blues Bar", address: address, id: 1));
 
-        Assert.Equal((false, "There is another venue registered with this name", VenueField.Name), result);
+        Assert.Equal((false, "There is another venue registered with this name at this address", VenueField.Name), result);
         _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Venue>()), Times.Never);
     }
 
     [Fact]
-    // [AC] REQ-VEN-20: the duplicate-address check excludes the venue being edited.
-    public async Task SaveVenueAsync_EditMode_AddressCheckExcludesOwnId()
+    // [AC] REQ-VEN-41: the pair check excludes the venue being edited.
+    public async Task SaveVenueAsync_EditMode_PairCheckExcludesOwnId()
     {
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(StoredVenue(1));
         var sut = CreateSut();
@@ -444,24 +465,24 @@ public class VenueServiceSaveTests
 
         await sut.SaveVenueAsync(EditRequest(address: address, id: 1));
 
-        _repoMock.Verify(r => r.AddressExistsAsync(It.IsAny<VenueAddress>(), 1, It.IsAny<CancellationToken>()), Times.Once);
+        _repoMock.Verify(r => r.NameAndAddressExistsAsync("Jazz Club", It.IsAny<VenueAddress>(), 1, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
-    // [AC] REQ-VEN-20: another venue's address is refused on edit, and nothing is updated.
-    public async Task SaveVenueAsync_EditMode_DuplicateAddress_RefusedOnStreetAddress()
+    // [AC] REQ-VEN-42: an edit whose name and address match no other venue is saved.
+    public async Task SaveVenueAsync_EditMode_NoOtherVenueWithPair_IsSaved()
     {
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(StoredVenue(1));
-        _repoMock.Setup(r => r.AddressExistsAsync(It.IsAny<VenueAddress>(), 1, It.IsAny<CancellationToken>()))
-                 .ReturnsAsync(true);
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync("Jazz Club", It.IsAny<VenueAddress>(), 1, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(false);
         var sut = CreateSut();
         var address = Addr(line1: "Rua Augusta, 100", city: "São Paulo");
 
         var result = await sut.SaveVenueAsync(EditRequest(address: address, id: 1));
 
-        Assert.Equal((false, "There is another venue registered at this address", VenueField.AddressLine1), result);
-        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Venue>()), Times.Never);
-        _repoMock.Verify(r => r.AddAsync(It.IsAny<Venue>()), Times.Never);
+        Assert.True(result.success);
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Venue>()), Times.Once);
     }
 
     [Fact]
@@ -541,7 +562,8 @@ public class VenueServiceSaveTests
     public async Task SaveVenueAsync_EditMode_FailedSave_WritesNothing()
     {
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(StoredVenue(1));
-        _repoMock.Setup(r => r.GetByNameAsync("Blues Bar")).ReturnsAsync(new Venue { Id = 2, Name = "Blues Bar" });
+        _repoMock.Setup(r => r.NameAndAddressExistsAsync("Blues Bar", It.IsAny<VenueAddress>(), 1, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(true);
         var sut = CreateSut();
 
         var result = await sut.SaveVenueAsync(EditRequest(name: "Blues Bar", imageChanged: true, image: ValidLocalReference, id: 1));

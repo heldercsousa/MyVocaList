@@ -41,14 +41,15 @@ namespace MyVocaList.Domain.RepositoryInterface
             string? query = null);
 
         /// <summary>
-        /// Checks whether another venue has all six address fields equal (case and accent insensitive under the
-        /// database collation; a blank field equals only a blank field). The caller passes a normalised address;
-        /// an empty address never collides and returns false without a query (REQ-VEN-20, 21).
+        /// Checks whether another venue has an equal name and all six address fields equal (case and accent
+        /// insensitive under the database collation; a blank field equals only a blank field, so two empty
+        /// addresses match). The caller passes a normalised name and address (REQ-VEN-41 to 44).
         /// </summary>
-        /// <param name="address">Normalised, non-empty address to look for</param>
+        /// <param name="name">Trimmed venue name to look for</param>
+        /// <param name="address">Normalised address to look for; may be empty</param>
         /// <param name="excludeId">Id of the venue being edited, or null when adding</param>
         /// <param name="ct">Cancellation token</param>
-        Task<bool> AddressExistsAsync(VenueAddress address, int? excludeId, CancellationToken ct = default);
+        Task<bool> NameAndAddressExistsAsync(string name, VenueAddress address, int? excludeId, CancellationToken ct = default);
 
         /// <summary>
         /// Gets every stored local image reference of venues (<c>ImageUrl</c> starting with <c>local:</c>),
