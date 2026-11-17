@@ -67,7 +67,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T15 **Song form: loading indicator and wrapped load.** (REQ-SLD-32, 33, 34) Level A for the ViewModel, device check for the shimmer. Added 2026-11-16 on Helder's decision.
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`, new test `Unit/ViewModels/SongFormViewModelLoadingTests.cs`.
   - Demo: opening a stored song shows a shimmer until it has loaded; a failed load shows "This song could not be loaded." and goes back.
-- [ ] T16 **Songs list: a short text matches inside title or artist.** (REQ-SLD-35) Level B. Added 2026-11-17 after the device check.
+- [x] T16 **Songs list: a short text matches inside title or artist.** (REQ-SLD-35) Level B. Added 2026-11-17 after the device check.
   - Files owned: `Infra/Repository/SongRepository.cs`, the repository test file of the paged list search.
   - Demo: "es" finds "Yesterday"; "u2" finds the songs of U2; title-prefix matches come first.
 - [x] T17 **Service: a Deezer song's title cannot be changed.** (REQ-SLD-37) Level A. Added 2026-11-17.
