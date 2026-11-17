@@ -640,13 +640,13 @@ public class SongServiceSaveFromFormTests
             .ReturnsAsync(stored);
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            songId: 50, title: "Corrected title", artistId: 3,
+            songId: 50, title: "Old title", artistId: 3,
             provider: DeezerProvider, externalId: "999"));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
         VerifySongGuardNeverCalled();
         _songRepoMock.Verify(r => r.UpdateAsync(
-            It.Is<Song>(s => s.Id == 50 && s.Title == "Corrected title"
+            It.Is<Song>(s => s.Id == 50 && s.Title == "Old title"
                              && s.ExternalProvider == DeezerProvider && s.ExternalId == DeezerTrackId),
             It.IsAny<CancellationToken>()), Times.Once);
         _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);

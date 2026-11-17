@@ -70,7 +70,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [ ] T16 **Songs list: a short text matches inside title or artist.** (REQ-SLD-35) Level B. Added 2026-11-17 after the device check.
   - Files owned: `Infra/Repository/SongRepository.cs`, the repository test file of the paged list search.
   - Demo: "es" finds "Yesterday"; "u2" finds the songs of U2; title-prefix matches come first.
-- [ ] T17 **Service: a Deezer song's title cannot be changed.** (REQ-SLD-37) Level A. Added 2026-11-17.
+- [x] T17 **Service: a Deezer song's title cannot be changed.** (REQ-SLD-37) Level A. Added 2026-11-17.
   - Files owned: `Services/SongService.cs`, new test `Unit/Services/SongServiceTitleFreezeTests.cs`; the existing tests of REQ-SLD-17.
   - Demo: an update of a Deezer song with another title is refused on the Title field; a local-only song is renamed.
 - [ ] T18 **Song form: frozen Deezer title, pick released for good.** After T17. (REQ-SLD-36, 38, 39) Level A for the ViewModel, device check for the page. Added 2026-11-17.
