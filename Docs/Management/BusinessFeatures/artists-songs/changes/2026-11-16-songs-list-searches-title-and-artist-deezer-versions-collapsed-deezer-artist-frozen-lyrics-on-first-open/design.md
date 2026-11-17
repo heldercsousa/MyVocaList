@@ -64,6 +64,26 @@ Helder decided: wrap the edit-mode load so a failure cannot leave the form half-
 
 Design: `SongFormViewModel` gains `IsSongLoading` (true from the moment edit mode is entered until `LoadSongForEditAsync` ends, in a `try/finally`); the load body is wrapped in `try/catch` that logs, shows the message and navigates back through the navigation service the ViewModel already uses; `SaveAsync` returns at once while `IsSongLoading`. `SongFormPage.xaml` wraps the field area in `dx:ShimmerView` bound to `IsSongLoading`, with a loading view of a few rounded blocks. No shared component is edited. Tests: ViewModel unit tests for the flag (pending load, completed load), Save ignored while loading, failed load and not-found (message shown once, navigation back, no save); the shimmer itself is a device check.
 
+### 1.4 After Helder's device check (2026-11-17)
+
+Helder's decisions: a short search text matches inside the title; a Deezer song's title cannot be
+changed; the C25 gap must be closed. REQ-SLD-35 to 40. Claude's decisions for him:
+
+| # | Question | Decision | Why |
+|---|----------|----------|-----|
+| C33 | Does a short text also search the artist name? | Yes, title or artist name contains | The long-text search already finds by artist; "U2" has two characters. Helder named titles only: overrule if unwanted |
+| C34 | Order of short-text results | Title starts with the text first, then title, then id | The old prefix results stay on top; the id keeps pages disjoint |
+| C35 | How the short-text match is done | `LIKE '%text%'` under the column collation, in the database, with `%`, `_` and the escape character of the typed text escaped | The trigram index needs 3 characters; a scan of a single-device library is cheap. No text is normalised in C# |
+| C36 | Title of a Deezer song, edit mode | Plain text; the Service refuses a change (same shape as the artist rule) | Helder. C1 is withdrawn |
+| C37 | Title after a Deezer pick, add mode | Stays editable; any change of the text drops the pick for good (REQ-SLD-39) | Closes C25 in the ViewModel alone. Locking the field against typing would need a change of the shared autocomplete component (governed). The X on Title keeps working as Helder checked it |
+| C38 | A Deezer song whose title was already changed | Left as it is (REQ-SLD-40) | Restoring it needs a Deezer request by id for one known row; delete and add again does it today |
+
+Architecture notes:
+- **Repository** (`SongRepository.GetPagedAsync`, the branch for a text without a 3-character word and the missing-index fallback): contains match on `Title` or the artist `Name`, order of C34, count query with the same filter. Catalog mode's query is not touched.
+- **`SongService`** edit branch: for a Deezer song, the title check runs beside the artist check of REQ-SLD-15, before any other work; failure on the Title member of the save-field enum.
+- **`SongFormViewModel`**: `IsTitleFrozen` (edit mode: the loaded song is a Deezer song, and true until the load ended, as `IsArtistFrozen`), `IsTitleEditable`; the edit request of a frozen title carries the loaded title; in add mode a Title text different from the picked title clears the pending identity and the picked title (the lyrics pick outcome is kept, REQ-SLD-26).
+- **Page**: a plain `Label` in the Title's text style visible when `IsTitleFrozen`; `titleTapField` visible otherwise. No shared component is edited.
+
 ## 2. Approaches considered
 
 **Songs list search**

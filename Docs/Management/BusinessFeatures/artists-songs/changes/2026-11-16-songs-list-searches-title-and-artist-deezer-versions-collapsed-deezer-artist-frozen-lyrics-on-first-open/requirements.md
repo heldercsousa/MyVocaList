@@ -4,7 +4,9 @@
 > advance to proceed with all next needed steps. Be autonomous."). Helder's own decisions are marked
 > "(Helder)". Every decision Claude took for him is listed in `design.md § 1.2` so he can overrule it.
 > The on-device check stays his. Ids run REQ-SLD-01 to 31; 30 and 31 were added by the spec review and
-> sit beside the criteria they belong to.
+> sit beside the criteria they belong to. REQ-SLD-32 to 34 (section E) and REQ-SLD-35 to 40 (section F,
+> after Helder's device check of 2026-11-17) were added later; section F replaces parts of REQ-SLD-01,
+> 02, 14 and all of REQ-SLD-17. History: `spec-changelog.md`.
 
 Predecessor specs (shipped, not edited): Song form title-first
 `../2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/` (REQ-SFT-NN), pictures
@@ -234,6 +236,49 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
   navigate back to where it was opened from. Nothing is stored. The form is never left open in edit
   mode without its stored values.
 
+### F. After Helder's device check (added 2026-11-17)
+
+Helder checked the build on a device on 2026-11-17. Three results change the requirements above; the
+replaced texts are named in each criterion and stay above for the record.
+
+- **REQ-SLD-35: A short search text finds songs that contain it.** (Helder: "search titles that
+  contains the 1 or 2 chars typed, not starts with") *Replaces the short-text sentences of REQ-SLD-01
+  and REQ-SLD-02.*
+  Given the Songs list with a non-blank search text that has no word of 3 or more characters, When the
+  list loads, Then it SHALL show the songs whose title **or artist name** contains the text anywhere
+  (collated: letter case and accents ignored). The results SHALL be ordered: songs whose title starts
+  with the text first, then by title, then by song id. Paging (REQ-SLD-03) and the empty state
+  (REQ-SLD-04) are unchanged. The same rule is the fallback when the full-text index is not present.
+  Catalog mode (REQ-SLD-05), the Song form's Title search and a blank search text are unchanged.
+  - Given songs "Yesterday", "Let It Be" and "One" by "U2", When the text is "es", Then "Yesterday" is
+    shown; When the text is "u2", Then "One" is shown; When the text is "le", Then "Let It Be" is shown.
+- **REQ-SLD-36: The title of a Deezer song is shown as plain text in edit mode.** (Helder: "a deezer
+  song saved locally can't have its title changed to another completely different name"; "better deny
+  editing as now done for artist field") *Replaces REQ-SLD-17.*
+  WHILE the Song form shows a stored Deezer song, the Title SHALL be shown as plain text in the text
+  style the Title has today. A tap on it does nothing; there is no editor, no edit icon, no X, no
+  search and no error state. The Title of a local-only song behaves as today.
+- **REQ-SLD-37: The Service refuses a title change on a Deezer song.**
+  IF an update of a Deezer song carries a title that is not exactly the stored title (compared
+  character by character after the trimming every title gets), THEN the song service SHALL change
+  nothing and return the failure "The title of a song from the music database cannot be changed.",
+  pointing at the Title field. The rule holds whatever the screen sends. A song created from the form
+  ("Save as new version", "Save as new song", REQ-SLD-18) is not an update and is not affected.
+- **REQ-SLD-38: Saving a Deezer song in edit mode sends the stored title.**
+  WHEN the user saves a Deezer song in edit mode, the form SHALL send the title it loaded.
+- **REQ-SLD-39: A changed Title releases the Deezer pick for good.** (Helder: "C25 we need to avoid
+  such pitfall") *Replaces the "exactly while" sentence of REQ-SLD-14 and narrows REQ-PIC-27.*
+  In add mode, WHEN the Title text becomes different from the picked title, the pick SHALL be released
+  as by X on Title, except that the Title text is kept: the external identity is dropped, the Artist
+  becomes editable and keeps its text. Typing the picked title back SHALL NOT restore the pick; only a
+  new Deezer pick makes the form a Deezer song again. A song saved after such a change is a local-only
+  song. The lyrics rule of REQ-SLD-26 ("a changed Title text does not drop the pick lookup") is
+  unchanged.
+- **REQ-SLD-40: Deezer songs whose title was changed before this rule.**
+  A stored Deezer song keeps the title it has. Its title is plain text from now on (REQ-SLD-36). To
+  get the Deezer title back, the song is deleted and added again (no stored data references a song
+  yet; Helder, 2026-11-16).
+
 ## Validation rules
 
 | Field | Rule | Where |
@@ -282,7 +327,8 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
 | REQ-SFT-05 (library check on title, artist, version) | **Kept**, applied after grouping with a blank version (REQ-SLD-09). |
 | REQ-SFT-37 ("No manual-edit flag … SHALL NOT exist") | **Narrowed**: a lyrics origin is stored for the Lyrics field only (REQ-SLD-26 to 28). No flag exists for any other field. |
 | REQ-PIC-23, 26, 28, 31 (Artist text state with edit icon; a tap on Artist opens the editor and releases the pick; the artist of a stored song can be changed) | **Limited to local-only songs** by REQ-SLD-12, 13, 15. After a Deezer pick the Artist cannot be tapped or cleared, so releasing a picked artist by a tap or by X on Artist no longer happens while the pick is held. |
-| REQ-PIC-27 (changing the Title text after a pick saves a song with no external identity) | **Kept, and extended** by REQ-SLD-14: the Artist becomes editable at that moment. |
+| REQ-PIC-27 (changing the Title text after a pick saves a song with no external identity) | **Kept, and extended** by REQ-SLD-14: the Artist becomes editable at that moment. **Narrowed 2026-11-17** by REQ-SLD-39: the identity no longer survives a Title that was changed and typed back. |
+| REQ-SFT-27 (the Title of a stored song is editable in edit mode) | **Limited to local-only songs** by REQ-SLD-36, 37 (2026-11-17). |
 | REQ-SFT-14 (X on Title: "the other field keeps its value and state"; X resets a Version the pick filled) | **Extended** by REQ-SLD-14: the Artist keeps its value; its state changes from plain text to the editable field. The Version reset no longer applies, because a pick fills no Version (REQ-SLD-08). |
 | REQ-SFT-46 (one write path for a song) | **Extended**: the lookup on open writes lyrics and lyrics origin only, inside the song service, through the same unit of work. Lyrics are not part of any identity, duplicate or catalog rule, so no other check of the write path applies. |
 | REQ-LYR-13 ("Nothing is stored before Save") | **Kept for the pick lookup in add mode.** The lookup on open stores a match at once (REQ-SLD-20). |

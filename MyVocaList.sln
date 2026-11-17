@@ -2006,6 +2006,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-16-songs-list-searc
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\plan.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\spec-changelog.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\spec-changelog.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed", "2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed", "{8DB9392D-441E-53D6-8135-FA909998E452}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\README.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\requirements.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\requirements.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\design.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\design.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\tasks.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\tasks.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\task-log.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\task-log.md
 	EndProjectSection
 EndProject
 Global
@@ -2436,6 +2446,7 @@ Global
 		{A7F0B821-1B0C-550F-A72E-0F7502BB6679} = {FA1234BC-0001-4000-8000-00000000007F}
 		{E97B9141-1344-5B4D-93A8-0C3823B6E2EB} = {FA1234BC-0001-4000-8000-00000000007F}
 		{C70D1D55-6B49-5D3A-9151-A2D66D8A5AD4} = {FA1234BC-0001-4000-8000-00000000007F}
+		{8DB9392D-441E-53D6-8135-FA909998E452} = {FA1234BC-0001-4000-8000-00000000007B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
