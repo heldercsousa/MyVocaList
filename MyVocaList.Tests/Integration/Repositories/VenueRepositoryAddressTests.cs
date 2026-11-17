@@ -7,8 +7,8 @@ using MyVocaList.Tests.Infrastructure;
 namespace MyVocaList.Tests.Integration.Repositories;
 
 /// <summary>
-/// Duplicate-address query and local image references of <see cref="VenueRepository"/> (REQ-VEN-20, 21, 04).
-/// Real SQLite temp file via <see cref="TestDbContextFactory"/>, never the in-memory provider.
+/// Name-and-address duplicate query (REQ-VEN-41 to 44) and local image references of <see cref="VenueRepository"/>
+/// (REQ-VEN-04). Real SQLite temp file via <see cref="TestDbContextFactory"/>, never the in-memory provider.
 /// </summary>
 public class VenueRepositoryAddressTests : IAsyncLifetime
 {
@@ -48,112 +48,144 @@ public class VenueRepositoryAddressTests : IAsyncLifetime
         return venue;
     }
 
-    // ── AddressExistsAsync ───────────────────────────────────────────────────
+    // ── NameAndAddressExistsAsync ────────────────────────────────────────────
 
     [Fact]
-    public async Task AddressExistsAsync_SameSixFields_ReturnsTrue()
+    public async Task NameAndAddressExistsAsync_SameNameAndSixFields_ReturnsTrue()
     {
-        // [AC] REQ-VEN-20: another venue with all six address fields equal makes the address a duplicate
-        await SeedVenueAsync("Bar Brahma", RuaAugusta);
+        // [AC] REQ-VEN-41: another venue with an equal name and all six address fields equal is a duplicate
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
 
-        var exists = await _repo.AddressExistsAsync(RuaAugusta, excludeId: null);
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", RuaAugusta, excludeId: null);
 
         Assert.True(exists);
     }
 
     [Fact]
-    public async Task AddressExistsAsync_DifferentLetterCaseAndAccents_ReturnsTrue()
+    public async Task NameAndAddressExistsAsync_DifferentLetterCaseAndAccents_ReturnsTrue()
     {
-        // [AC] REQ-VEN-20: fields equal under the database collation NOCASE_NOACCENT (case and accents ignored) are duplicates
-        await SeedVenueAsync("Bar Brahma", RuaAugusta);
+        // [AC] REQ-VEN-41: name and address equal under the database collation (case and accents ignored) are duplicates
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
         var typed = new VenueAddress("rua augusta, 100", null, "Sao Paulo", "sp", "01304-000", "brasil");
 
-        var exists = await _repo.AddressExistsAsync(typed, excludeId: null);
+        var exists = await _repo.NameAndAddressExistsAsync("jazz club", typed, excludeId: null);
 
         Assert.True(exists);
     }
 
     [Fact]
-    public async Task AddressExistsAsync_OnlyLine2Differs_ReturnsFalse()
+    public async Task NameAndAddressExistsAsync_NullLine2OnBothSides_ReturnsTrue()
     {
-        // [AC] REQ-VEN-20: an address line 2 that differs ("Loja 2" vs none) is not a duplicate
-        await SeedVenueAsync("Bar Brahma", RuaAugusta);
-        var withLine2 = RuaAugusta with { Line2 = "Loja 2" };
-
-        var exists = await _repo.AddressExistsAsync(withLine2, excludeId: null);
-
-        Assert.False(exists);
-    }
-
-    [Fact]
-    public async Task AddressExistsAsync_NullLine2OnBothSides_ReturnsTrue()
-    {
-        // [AC] REQ-VEN-20: a blank field equals only a blank field, so two null line 2 values with the other five equal are a duplicate
-        await SeedVenueAsync("Bar Brahma", RuaAugusta with { Line2 = null });
+        // [AC] REQ-VEN-41: a blank field equals only a blank field, so two null line 2 values with the other fields equal are a duplicate
+        await SeedVenueAsync("Jazz Club", RuaAugusta with { Line2 = null });
         var searched = RuaAugusta with { Line2 = null };
 
-        var exists = await _repo.AddressExistsAsync(searched, excludeId: null);
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", searched, excludeId: null);
 
         Assert.True(exists);
     }
 
     [Fact]
-    public async Task AddressExistsAsync_DifferentCity_ReturnsFalse()
+    public async Task NameAndAddressExistsAsync_SameNameOtherAddress_ReturnsFalse()
     {
-        // [AC] REQ-VEN-20: a different city means the address is not a duplicate
-        await SeedVenueAsync("Bar Brahma", RuaAugusta);
+        // [AC] REQ-VEN-42: the same name at a different address (City differs) is allowed
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
         var otherCity = RuaAugusta with { City = "Rio de Janeiro" };
 
-        var exists = await _repo.AddressExistsAsync(otherCity, excludeId: null);
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", otherCity, excludeId: null);
 
         Assert.False(exists);
     }
 
     [Fact]
-    public async Task AddressExistsAsync_StoredPostalCodeSearchedNull_ReturnsFalse()
+    public async Task NameAndAddressExistsAsync_SameNameOnlyLine2Differs_ReturnsFalse()
     {
-        // [AC] REQ-VEN-20: a stored postal code does not equal a blank searched postal code
-        await SeedVenueAsync("Bar Brahma", RuaAugusta);
+        // [AC] REQ-VEN-42: the same name where only address line 2 differs ("Loja 2" vs none) is allowed
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
+        var withLine2 = RuaAugusta with { Line2 = "Loja 2" };
+
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", withLine2, excludeId: null);
+
+        Assert.False(exists);
+    }
+
+    [Fact]
+    public async Task NameAndAddressExistsAsync_SameNameStoredPostalCodeSearchedNull_ReturnsFalse()
+    {
+        // [AC] REQ-VEN-42: the same name where the stored postal code is searched as blank is allowed
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
         var withoutPostal = RuaAugusta with { PostalCode = null };
 
-        var exists = await _repo.AddressExistsAsync(withoutPostal, excludeId: null);
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", withoutPostal, excludeId: null);
 
         Assert.False(exists);
     }
 
     [Fact]
-    public async Task AddressExistsAsync_ExcludeIdOfTheOnlyMatch_ReturnsFalse()
+    public async Task NameAndAddressExistsAsync_SameNameStoredWithAddressSearchedEmpty_ReturnsFalse()
     {
-        // [AC] REQ-VEN-20: in edit mode the venue being edited is excluded, so its own address is not a duplicate
-        var venue = await SeedVenueAsync("Bar Brahma", RuaAugusta);
+        // [AC] REQ-VEN-42: the same name with an empty address is allowed when the stored venue has an address
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
 
-        var exists = await _repo.AddressExistsAsync(RuaAugusta, excludeId: venue.Id);
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", VenueAddress.Empty, excludeId: null);
 
         Assert.False(exists);
     }
 
     [Fact]
-    public async Task AddressExistsAsync_ExcludeIdOfAnotherVenue_ReturnsTrue()
+    public async Task NameAndAddressExistsAsync_SameAddressOtherName_ReturnsFalse()
     {
-        // [AC] REQ-VEN-20: excluding a different venue leaves the matching venue in the check
-        await SeedVenueAsync("Bar Brahma", RuaAugusta);
-        var other = await SeedVenueAsync("Jazz Club");
+        // [AC] REQ-VEN-43: a different name at the same six address fields is allowed
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
 
-        var exists = await _repo.AddressExistsAsync(RuaAugusta, excludeId: other.Id);
+        var exists = await _repo.NameAndAddressExistsAsync("Blues Bar", RuaAugusta, excludeId: null);
+
+        Assert.False(exists);
+    }
+
+    [Fact]
+    public async Task NameAndAddressExistsAsync_SameNameBothAddressesEmpty_ReturnsTrue()
+    {
+        // [AC] REQ-VEN-44: two venues without an address cannot share a name (empty equals empty)
+        await SeedVenueAsync("Jazz Club");
+
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", VenueAddress.Empty, excludeId: null);
 
         Assert.True(exists);
     }
 
     [Fact]
-    public async Task AddressExistsAsync_EmptyAddress_ReturnsFalseEvenWithEmptyVenuesStored()
+    public async Task NameAndAddressExistsAsync_SameNameAddressless_OtherNameAddressless_ReturnsFalse()
     {
-        // [AC] REQ-VEN-21: an empty address never collides, even when other venues also have empty addresses
+        // [AC] REQ-VEN-44: an empty address with a different name is not a duplicate
         await SeedVenueAsync("Jazz Club");
-        await SeedVenueAsync("Rock Arena");
 
-        var exists = await _repo.AddressExistsAsync(VenueAddress.Empty, excludeId: null);
+        var exists = await _repo.NameAndAddressExistsAsync("Rock Arena", VenueAddress.Empty, excludeId: null);
 
         Assert.False(exists);
+    }
+
+    [Fact]
+    public async Task NameAndAddressExistsAsync_ExcludeIdOfTheOnlyMatch_ReturnsFalse()
+    {
+        // [AC] REQ-VEN-41: in edit mode the venue being edited is excluded, so its own name and address are not a duplicate
+        var venue = await SeedVenueAsync("Jazz Club", RuaAugusta);
+
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", RuaAugusta, excludeId: venue.Id);
+
+        Assert.False(exists);
+    }
+
+    [Fact]
+    public async Task NameAndAddressExistsAsync_ExcludeIdOfAnotherVenue_ReturnsTrue()
+    {
+        // [AC] REQ-VEN-41: excluding a different venue leaves the matching venue in the check
+        await SeedVenueAsync("Jazz Club", RuaAugusta);
+        var other = await SeedVenueAsync("Blues Bar");
+
+        var exists = await _repo.NameAndAddressExistsAsync("Jazz Club", RuaAugusta, excludeId: other.Id);
+
+        Assert.True(exists);
     }
 
     // ── GetLocalImageReferencesAsync ─────────────────────────────────────────
