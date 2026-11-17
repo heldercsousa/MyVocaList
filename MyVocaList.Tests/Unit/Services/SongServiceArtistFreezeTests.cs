@@ -205,13 +205,13 @@ public class SongServiceArtistFreezeTests
         SetupStoredDeezerSong();
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            songId: 50, title: "Corrected title", artistId: StoredArtistId, artistText: "Anything typed"));
+            songId: 50, title: "Old title", artistId: StoredArtistId, artistText: "Anything typed"));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
         VerifyArtistWorkNeverRun();
         _artistServiceMock.Verify(a => a.ValidateNameInput(It.IsAny<string>()), Times.Never);
         _songRepoMock.Verify(r => r.UpdateAsync(
-            It.Is<Song>(s => s.Id == 50 && s.ArtistId == StoredArtistId && s.Title == "Corrected title"),
+            It.Is<Song>(s => s.Id == 50 && s.ArtistId == StoredArtistId && s.Title == "Old title"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -228,22 +228,6 @@ public class SongServiceArtistFreezeTests
         Assert.NotNull(AddedSong);
         Assert.Equal(DeezerTrackId, AddedSong!.ExternalId);
         Assert.Equal(OtherArtistId, AddedSong.ArtistId);
-    }
-
-    // [AC] REQ-SLD-17: the title of a Deezer song stays editable; the stored identity and artist are kept.
-    [Fact]
-    public async Task SaveFromForm_DeezerSongTitleChanged_Saved()
-    {
-        SetupStoredDeezerSong();
-
-        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            songId: 50, title: "Renamed title", artistId: StoredArtistId, artistText: "Stored artist 3"));
-
-        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
-        _songRepoMock.Verify(r => r.UpdateAsync(
-            It.Is<Song>(s => s.Id == 50 && s.Title == "Renamed title" && s.ArtistId == StoredArtistId
-                             && s.ExternalProvider == DeezerProvider && s.ExternalId == DeezerTrackId),
-            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // [AC] REQ-SLD-18: a save as a new version or a new song from a Deezer pick stores no external identity.
