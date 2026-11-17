@@ -71,9 +71,9 @@ namespace MyVocaList.Services
                 // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
                 // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
                 // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-                var existing = await venueRepository.GetByNameAsync(name);
-                if (existing != null)
-                    return (false, "There is another venue registered with this name");
+                // A venue created by name has no address yet, so the pair check runs with the empty address (REQ-VEN-45).
+                if (await venueRepository.NameAndAddressExistsAsync(name, VenueAddress.Empty, null))
+                    return (false, DuplicateNameAndAddressMessage(VenueAddress.Empty));
 
                 var venue = new Venue { Name = name };
                 await venueRepository.AddAsync(venue);
@@ -103,9 +103,10 @@ namespace MyVocaList.Services
                 // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
                 // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
                 // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-                var existing = await venueRepository.GetByNameAsync(newName);
-                if (existing != null && existing.Id != id)
-                    return (false, "There is another venue registered with this name");
+                // A rename keeps the stored address, so the pair check runs with it (REQ-VEN-45).
+                var storedAddress = AddressOf(venue);
+                if (await venueRepository.NameAndAddressExistsAsync(newName, storedAddress, id))
+                    return (false, DuplicateNameAndAddressMessage(storedAddress));
 
                 venue.Name = newName;
                 // Explicit UpdateAsync: GetByIdAsync's FindAsync only returns an already-tracked
@@ -266,13 +267,9 @@ namespace MyVocaList.Services
                 }
 
                 // Venue.Name trimming is enforced by the EF Core ValueConverter (design.md § D3), as in the other paths.
-                var sameName = await venueRepository.GetByNameAsync(trimmedName);
-                if (sameName != null && (request.Id is not int ownId || sameName.Id != ownId))
-                    return (false, "There is another venue registered with this name", VenueField.Name);
-
-                if (!VenueAddressRules.IsEmpty(address)
-                    && await venueRepository.AddressExistsAsync(address, request.Id, ct))
-                    return (false, "There is another venue registered at this address", VenueField.AddressLine1);
+                // One pair check: another venue with an equal name AND an equal address (REQ-VEN-41 to 44).
+                if (await venueRepository.NameAndAddressExistsAsync(trimmedName, address, request.Id, ct))
+                    return (false, DuplicateNameAndAddressMessage(address), VenueField.Name);
 
                 if (venue == null)
                 {
@@ -298,6 +295,17 @@ namespace MyVocaList.Services
 
         public (bool isValid, string message, VenueField field) ValidateAddressInput(VenueAddress address)
             => VenueAddressRules.Validate(VenueAddressRules.Normalize(address));
+
+        /// <summary>
+        /// Message for a refused name-and-address pair (REQ-VEN-41): the address variant when the address is not empty.
+        /// </summary>
+        private static string DuplicateNameAndAddressMessage(VenueAddress address)
+            => VenueAddressRules.IsEmpty(address)
+                ? "There is another venue registered with this name"
+                : "There is another venue registered with this name at this address";
+
+        private static VenueAddress AddressOf(Venue venue)
+            => new(venue.AddressLine1, venue.AddressLine2, venue.City, venue.Region, venue.PostalCode, venue.Country);
 
         private static void ApplyAddressAndCoordinates(
             Venue venue, VenueAddress address, double? latitude, double? longitude)
