@@ -5,27 +5,26 @@ Branch `feature/songs-list-deezer`, worktree `.claude/worktrees/songs-list-deeze
 
 ### Checkpoint
 
-- **Updated:** 2026-11-16, after the merge.
-- **Phase:** close-out done. **Waiting for Helder's device check (T14).** The item stays In Progress until then.
-- **Done:** T0 to T13 and T15. Branch `feature/songs-list-deezer` merged into `develop` twice: 1631fca9 (T1 to T13) and 1be5e035 (T15, head 896c95c3). Full suite on merged `develop`: 1,829 passed, 0 failed. Android build of the branch head: 0 errors.
-- **Next:** T14 device check by Helder; then status Done, worktree removal, and the separate time-boxed trial of the Deezer section in the Songs list.
-- **Context manifest (≤ 8 files):** `tasks.md`, `requirements.md`, `design.md`, this file.
+- **Updated:** 2026-11-17, after the second device round.
+- **Phase:** T16 to T18 merged (`develop` 78da0df9; full suite 1,855 passed, 0 failed). **Waiting for Helder's second device check (T14)** and his choice on the edit-mode load (below).
+- **Parked, uncommitted, in the worktree:** the fix that moves the edit-mode load off the UI thread (`SongFormViewModel.cs` diff and new test `SongFormViewModelLoadOffUiThreadTests.cs`). It breaks 24 existing test cases whose helper assumes a synchronous load; changing that helper needs Helder's yes.
+- **Context manifest (≤ 8 files):** `tasks.md`, `requirements.md`, `design.md`, `spec-changelog.md`, this file.
 
 ## Device check (T14, Helder)
 
-Build from `develop` at or after 1be5e035. The database gets one new migration (`AddSongLyricsOrigin`) on first start.
+### Round 1 (2026-11-17), Helder's results
 
-- [ ] **Songs list search by artist.** Type an artist name of 3 or more letters: that artist's songs appear, best match first. Type 1 or 2 letters: songs whose title starts with them, by title. Scroll a long result: no song twice.
-- [ ] **One Deezer row per song.** In the song form (add), search a well-known title: each song appears once, with no "Live"/"Remix" label; the row still shows artist and album with "Deezer".
-- [ ] **Deezer pick.** Pick a Deezer row: the artist is plain text and cannot be tapped; Version stays as you left it (blank on a fresh form). Tap X on Title: the artist becomes the editable field again and keeps its text. Pick again, then change the Title text by hand: the artist becomes editable.
-- [ ] **Edit a Deezer song.** Save, reopen: the artist is plain text from the first moment and cannot be edited; the title can; Save works and shows no artist sheet.
-- [ ] **Edit a local-only song.** A song typed by hand keeps the tap-to-edit artist; changing its artist still works.
-- [ ] **Lyrics on first open.** Open an older Deezer song that has no lyrics, online: "Looking for lyrics…" shows and lyrics arrive. Go back without saving, switch to airplane mode, reopen: the lyrics are there.
-- [ ] **Lyrics, no match.** Open a Deezer song the lyrics source does not know: the hint disappears, no message; reopening does not show the hint again.
-- [ ] **Typing wins.** Open a Deezer song without lyrics and type lyrics at once, then Save: your text is stored.
-- [ ] **Leaving during the lookup.** Open a Deezer song without lyrics and immediately open the picture picker or the YouTube search: lyrics may not arrive on that screen; they arrive on the next open.
-- [ ] **Loading placeholder.** Open any stored song: a grey shimmer placeholder shows briefly in place of the fields, then the filled form; Back works while it shows; the toolbar Save does nothing while it shows. Add mode shows no placeholder.
-- [ ] **Look of the frozen artist.** The plain artist text has the same size, colour and position as the editable artist's text state (not verified on a device by the agents).
+Search by artist, Deezer pick, fixed artist in add mode and the airplane-mode copy: ok. Short search text showed "No results found" (fixed by REQ-SLD-35). A Deezer title could be changed into another song's name (fixed by REQ-SLD-36 to 39). Emptied lyrics stay empty: by design (REQ-SLD-27, origin *user*). No lookup on some songs without lyrics: most likely their stored origin is *none found* or *user* (no code fault found; open below). No shimmer seen: the load runs on the UI thread (parked fix).
+
+### Round 2 — build from `develop` at or after 78da0df9
+
+- [ ] **Short search.** Type 1 or 2 letters from the middle of a title, or of an artist name ("u2"): matching songs appear; titles that start with the letters come first.
+- [ ] **Deezer title fixed in edit mode.** Open a stored Deezer song: title and artist are plain text, nothing to tap; Save works.
+- [ ] **Hand-typed song.** Its title and artist are still tap-to-edit and can be changed.
+- [ ] **C25 closed.** Add mode: pick a Deezer song, change one letter of the title, change it back: the artist stays editable; Save stores a hand-typed song (no Deezer mark).
+- [ ] **X on Title after a pick** still clears and lets you search again.
+- [ ] **Look of the frozen title.** Same size, colour and position as the title's text state.
+- [ ] **Venues** (separate item): same name at two addresses saves; another name at an existing address saves; same name and same address is refused with the message on Name.
 
 ## T0 — Spec and plan (2026-11-16) — Done
 
@@ -243,4 +242,57 @@ Helder's decision after the first merge: "wrap the load. Also, a loading indicat
 ## Intermittent pre-commit failure (2026-11-16)
 
 Twenty consecutive full runs on `develop` with result files: 20 of 20 passed (1,823 each). The two failures of the day both happened inside the pre-commit hook and passed on an unchanged retry; the failing test, if it was a test, was never named. Possible cause, not shown: the hook builds and tests while other processes use the same folder. **Pending Helder:** let the pre-commit hook save its build and test output to a file so the next failure names itself.
+
+## T16, T17, T18 (2026-11-17) — To Review
+
+After Helder's first device round. Spec: REQ-SLD-35 to 40, `design.md § 1.4` (C33 to C39), `spec-changelog.md`.
+
+### Changed files
+
+| Task | Commit | Files |
+|------|--------|-------|
+| T17 | 8e912d3a | `Services/SongService.cs`, new `Unit/Services/SongServiceTitleFreezeTests.cs`; title inputs in `SongServiceArtistFreezeTests.cs`, `SongServiceSaveFromFormTests.cs`, `SongServiceTests.cs` |
+| T16 | a188e68b | `Infra/Repository/SongRepository.cs` (`GetPagedPrefixAsync`), `Integration/Repositories/SongRepositoryListSearchTests.cs` |
+| T18 | 956c0fc1 | `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`, new `Unit/ViewModels/SongFormViewModelFrozenTitleTests.cs`; `SongFormViewModelTests.cs`, `SongFormViewModelFrozenArtistTests.cs` |
+| Merge | 78da0df9 | into `develop` |
+
+### Verification evidence
+
+- T17: 3 of 8 new tests red on the rule first; suite 1,836 passed. T16: 5 new tests red first; suite 1,841 passed. T18: compile red, then 3 of 9 red on the rule; suite 1,855 passed. Android build 0 errors after each.
+- Merged `develop` 78da0df9: full suite 1,855 passed, 0 failed (main agent).
+- Not independently verified; the page is a device check.
+
+### Existing tests changed (each encodes a replaced requirement)
+
+| File | Test | Change | Authority |
+|------|------|--------|-----------|
+| `SongServiceArtistFreezeTests.cs` | `SaveFromForm_DeezerSongTitleChanged_Saved` | removed; replaced by the refusal test | REQ-SLD-17 → 37 |
+| `SongServiceArtistFreezeTests.cs` | `SaveFromForm_DeezerSongStoredArtistId_SavesWithoutArtistResolution` | input title = stored title | REQ-SLD-37 |
+| `SongServiceSaveFromFormTests.cs` | `SaveFromForm_EditMode_RunsNoSongGuard_CallsUpdateWithNullIdentity` | input title = stored title | REQ-SLD-37 |
+| `SongServiceTests.cs` | `UpdateSongAsync_TitleEditedOnApiSourcedSong_KeepsExternalIdentity` | now `..._TitleEditedOnDeezerSong_RefusedAndIdentityKept` | REQ-SFT-27 → SLD-37 |
+| `SongServiceTests.cs` | `UpdateSongAsync_WithNullExternalIdentity_DoesNotOverwriteExistingIdentity` | input title = stored title | REQ-SLD-37 (C39) |
+| `SongRepositoryListSearchTests.cs` | `GetPagedAsync_ShortQuery_MatchesTitlePrefixOnly` | replaced by `..._ShortQueryMatchesArtistNameAnywhere_...` | REQ-SLD-01 → 35 |
+| `SongFormViewModelFrozenArtistTests.cs` | `EditMode_DeezerSong_TitleEditKeepsTheArtistFrozen` | renamed; title assertion = loaded title | REQ-SLD-17 → 38 |
+| `SongFormViewModelTests.cs` | `EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity` | theory → fact (local-only case); Deezer case moved to a REQ-SLD-38 test | REQ-SLD-17 → 38 |
+
+### Decisions during implementation
+
+- C35 revised: no LIKE escape (the app's `like` override takes two arguments); `%`/`_` act as wildcards, as before. C39: the title rule covers every external identity, like the artist rule.
+- Titles are compared after `Trim()`, ordinal. Artist refusal is checked before title refusal.
+- `ApplyRemotePick` clears the picked title before writing the Title, so the pick never releases itself.
+
+### Traceability (additions)
+
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| 35 | Short text contains, title or artist, prefix first | `SongRepository.GetPagedPrefixAsync` | `SongRepositoryListSearchTests` (6 new) |
+| 36 | Deezer title plain text in edit mode | `IsTitleFrozen`; page `Label` | `SongFormViewModelFrozenTitleTests`; device |
+| 37 | Service refuses a title change | `SongService.SaveFromFormAsync`, `UpdateSongCoreAsync` | `SongServiceTitleFreezeTests` |
+| 38 | Edit save sends the loaded title | `SongFormViewModel.RunSaveAsync` | `SongFormViewModelFrozenTitleTests`, `SongFormViewModelTests` |
+| 39 | Changed title drops the pick for good | `OnSongTitleChanged` → `ReleaseDeezerPickOnTitleChange` | `SongFormViewModelFrozenTitleTests` |
+| 40 | Old changed titles kept | no code | — |
+
+### Intermittent test, named
+
+`SongFormViewModelTests.TitleOptionSource_SetsNoteThroughUiThreadHelper` (expected 1, actual 2) failed in 2 of 4 full runs of the venue implementor and passes alone. Not edited; it is the likely cause of the earlier unnamed pre-commit failures.
 
