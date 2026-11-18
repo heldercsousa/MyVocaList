@@ -317,9 +317,9 @@ public class SongServiceTests
     }
 
     [Fact]
-    // [AC] REQ-SFT-27: editing the title of an API-sourced song changes only the local title; the
-    // stored ("Deezer","3135556") identity is untouched when the call passes null/null.
-    public async Task UpdateSongAsync_TitleEditedOnApiSourcedSong_KeepsExternalIdentity()
+    // [AC] REQ-SLD-37: a title edit of a Deezer song is refused with the title message; the title and the
+    // stored ("Deezer","3135556") identity are untouched.
+    public async Task UpdateSongAsync_TitleEditedOnDeezerSong_RefusedAndIdentityKept()
     {
         var song = new Song
         {
@@ -332,8 +332,9 @@ public class SongServiceTests
         var (success, message) = await sut.UpdateSongAsync(
             1, "Creep (Remastered)", null, null, externalId: null, externalProvider: null);
 
-        Assert.True(success, message);
-        Assert.Equal("Creep (Remastered)", song.Title);
+        Assert.False(success);
+        Assert.Equal("The title of a song from the music database cannot be changed.", message);
+        Assert.Equal("Creep", song.Title);
         Assert.Equal("Deezer", song.ExternalProvider);
         Assert.Equal("3135556", song.ExternalId);
     }
@@ -581,6 +582,7 @@ public class SongServiceTests
     public async Task UpdateSongAsync_WithNullExternalIdentity_DoesNotOverwriteExistingIdentity()
     {
         var song = new Song { Id = 1, ArtistId = 1, Title = "Old Title", ExternalId = "keep-me", ExternalProvider = "spotify" };
+        // REQ-SLD-37: the request carries the stored title (a title change of an identified song is refused).
         _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                      .ReturnsAsync(song);
         _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
@@ -590,7 +592,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, _) = await sut.UpdateSongAsync(
-            1, "New Title", null, null,
+            1, "Old Title", null, null,
             externalId: null, externalProvider: null);
 
         Assert.True(success);

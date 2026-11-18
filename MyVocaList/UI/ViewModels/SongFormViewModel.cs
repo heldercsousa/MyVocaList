@@ -195,15 +195,22 @@ public partial class SongFormViewModel : ViewModelBase
     public bool IsArtistFrozen => IsEditMode ? (!_storedSongLoaded || _storedIsDeezerSong) : HoldsDeezerPick;
     public bool IsArtistEditable => !IsArtistFrozen;   // for the page, no converter needed
 
+    /// <summary>REQ-SLD-36: the Title of a stored Deezer song is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: editable (C37).</summary>
+    public bool IsTitleFrozen => IsEditMode && (!_storedSongLoaded || _storedIsDeezerSong);
+    public bool IsTitleEditable => !IsTitleFrozen;   // for the page, no converter needed
+
     private bool _storedSongLoaded;     // false until LoadSongForEditAsync has set the stored song (or found none)
     private bool _storedIsDeezerSong;   // set in LoadSongForEditAsync from the loaded entity
     private int _storedArtistId;        // set in LoadSongForEditAsync
+    private string _storedTitle = string.Empty;   // REQ-SLD-38: the title as loaded; a frozen Title is saved with it
 
-    /// <summary>Raises the change of the frozen state; called wherever the pick, the Title or the stored song changes it.</summary>
+    /// <summary>Raises the change of the frozen state of the Artist and the Title; called wherever the pick, the Title or the stored song changes it.</summary>
     private void NotifyArtistFrozenChanged()
     {
         OnPropertyChanged(nameof(IsArtistFrozen));
         OnPropertyChanged(nameof(IsArtistEditable));
+        OnPropertyChanged(nameof(IsTitleFrozen));   // REQ-SLD-36
+        OnPropertyChanged(nameof(IsTitleEditable));
     }
 
     /// <summary>REQ-SFT-27/02: Title is the search box in add mode only; edit mode shows plain editable text.</summary>
@@ -365,6 +372,10 @@ public partial class SongFormViewModel : ViewModelBase
         // so trailing whitespace cannot inflate the count (counter threshold alignment).
         UpdateCharacterCounter(value?.Trim().Length ?? 0);
         UpdateCanLaunchYouTubeSearch();
+        // REQ-SLD-39 (closes C25): in add mode a Title text that differs from the picked title releases the pick for
+        // good. The Title text, the pending song image and the pick lyrics outcome (REQ-SLD-26) stay.
+        if (!IsEditMode && _pickedTitle is not null && !string.Equals(value, _pickedTitle, StringComparison.Ordinal))
+            ReleaseDeezerPickOnTitleChange();
         NotifyArtistFrozenChanged();   // REQ-SLD-14: a Title text change away from the picked title releases the artist
 
         if (_isHydrating)
@@ -611,8 +622,17 @@ public partial class SongFormViewModel : ViewModelBase
         return OpenSongAsync(dto.LocalId.Value);
     }
 
+    /// <summary>REQ-SLD-39: a Title text change releases the pick: the identity and the picked title go, the Title text stays.</summary>
+    private void ReleaseDeezerPickOnTitleChange()
+    {
+        SelectedExternalId = string.Empty;
+        SelectedProvider = string.Empty;
+        _pickedTitle = null;
+    }
+
     private void ApplyRemotePick(SongSuggestionDto dto)
     {
+        _pickedTitle = null;         // the pick's own Title write must not release the pick it is making
         SongTitle = dto.Title;
         IsTitleLocked = true;
         SelectedExternalId = dto.ExternalId ?? string.Empty;
@@ -881,6 +901,7 @@ public partial class SongFormViewModel : ViewModelBase
         // REQ-SLD-12/30: the frozen state and the stored artist come from the loaded entity, not from the pick fields.
         _storedIsDeezerSong = SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId);
         _storedArtistId = song.ArtistId;
+        _storedTitle = song.Title ?? string.Empty;   // REQ-SLD-38: the title a frozen Title is saved with
         _storedSongLoaded = true;   // set before the UI block below, whose NotifyArtistFrozenChanged raises the change
 
         RunOnUiThread(() =>
@@ -1021,7 +1042,8 @@ public partial class SongFormViewModel : ViewModelBase
     {
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
-        var title = SongTitle?.Trim() ?? string.Empty;
+        // REQ-SLD-38: a frozen Title (plain text of a stored Deezer song) is saved as it was loaded.
+        var title = IsTitleFrozen ? _storedTitle.Trim() : (SongTitle?.Trim() ?? string.Empty);
         var version = SongVersion?.Trim() ?? string.Empty;
 
         // Safety net: re-run the Title and Version validators on every call, regardless of dirty

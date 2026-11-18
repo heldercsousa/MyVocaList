@@ -307,9 +307,10 @@ public class SongFormViewModelFrozenArtistTests
         Assert.Equal("Queen", sut.ArtistSearchText);
     }
 
-    // [AC] REQ-SLD-17: editing the Title of a Deezer song keeps its Artist frozen and its stored id on Save.
+    // [AC] REQ-SLD-30: a Title text change on a Deezer song keeps its Artist frozen and its stored id on Save.
+    // [AC] REQ-SLD-38: the same save sends the Title as loaded, not the changed text.
     [Fact]
-    public async Task EditMode_DeezerSong_TitleEditKeepsTheArtistFrozen()
+    public async Task EditMode_DeezerSong_TitleTextChangeKeepsTheArtistFrozenAndSavesTheLoadedTitle()
     {
         var sut = await CreateEditSutAsync(DeezerSong(artistId: 7));
 
@@ -319,7 +320,7 @@ public class SongFormViewModelFrozenArtistTests
 
         var request = Assert.Single(_requests);
         Assert.Equal(7, request.ArtistId);
-        Assert.Equal("Bohemian Rhapsody (Remastered)", request.Title);
+        Assert.Equal("Bohemian Rhapsody", request.Title);
     }
 
     // [AC] REQ-SLD-12: in edit mode the Artist stays plain text until the stored song has loaded, so a Deezer song is never shown editable.

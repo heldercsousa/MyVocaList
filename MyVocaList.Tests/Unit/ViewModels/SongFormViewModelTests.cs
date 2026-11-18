@@ -2096,14 +2096,12 @@ public class SongFormViewModelTests
         Assert.True(sut.IsTitleSearchEnabled);
     }
 
-    // [AC] REQ-SFT-27: saving an edited Title sends the new title and leaves the external identity to the Service
+    // [AC] REQ-SFT-27: saving an edited Title of a local-only song sends the new title and leaves the external identity to the Service
     // ("keep existing" = null, design.md § 5 flow F6). Manual-song row: identity is null already.
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity(bool apiSourced)
+    [Fact]
+    public async Task EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity()
     {
-        var song = StoredSong(apiSourced);
+        var song = StoredSong(apiSourced: false);
         var requests = new List<SongFormSaveRequest>();
         var songService = MakeSongServiceWithSong(song);
         SetupSave(songService, requests, _ => SavedOutcome(42));
@@ -2115,6 +2113,26 @@ public class SongFormViewModelTests
         var request = Assert.Single(requests);
         Assert.Equal(42, request.SongId);
         Assert.Equal("Corrected Title", request.Title);
+        Assert.Null(request.ExternalId);
+        Assert.Null(request.ExternalProvider);
+    }
+
+    // [AC] REQ-SLD-38: a Deezer song saves the loaded title and keeps its identity (the Service keeps the stored identity on a null identity).
+    [Fact]
+    public async Task EditMode_DeezerSong_SaveSendsTheLoadedTitleAndKeepsIdentity()
+    {
+        var song = StoredSong(apiSourced: true);
+        var requests = new List<SongFormSaveRequest>();
+        var songService = MakeSongServiceWithSong(song);
+        SetupSave(songService, requests, _ => SavedOutcome(42));
+        var sut = await CreateEditSutAsync(song, songService);
+
+        sut.SongTitle = "Changed in the text";
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(requests);
+        Assert.Equal(42, request.SongId);
+        Assert.Equal("Stored Title", request.Title);
         Assert.Null(request.ExternalId);
         Assert.Null(request.ExternalProvider);
     }
