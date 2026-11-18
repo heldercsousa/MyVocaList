@@ -2,10 +2,10 @@
 
 ### Checkpoint
 
-- **Updated:** 2026-11-17, after the merge.
-- **Phase:** close-out done. **Waiting for Helder's device check (VD4).**
+- **Updated:** 2026-11-18, item closed.
+- **Phase:** Done. Helder confirmed the item done on 2026-11-18 (VD4 passed).
 - **Done:** VD1, VD2 committed as 4d38bf97 on `feature/venue-duplicate-pair` (pre-commit full suite green on the first try), merged into `develop` as 766eb860.
-- **Next:** VD4 device check by Helder; then status Done and worktree removal.
+- **Next:** none. Worktree and local branch were already gone; remote branch `feature/venue-duplicate-pair` deleted on 2026-11-18 after confirming it is fully merged.
 - **Context manifest (≤ 8 files):** `requirements.md`, `design.md`, `tasks.md`, this file.
 
 ---
