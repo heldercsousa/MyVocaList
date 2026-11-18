@@ -6,4 +6,4 @@
 - [x] DLH3 **Shimmer on every list load that replaces the rows.** After DLH1. (REQ-DLH-05) Level B. Added 2026-11-17 on Helder's decision.
   - Files owned: `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs`, its test file(s); `ICrudListViewModel.cs` only if a member must be added. `CrudListView` (governed) is not edited: it already binds the shimmer to `IsInitialLoading`. Added on coordinator decision: `MyVocaList/UI/ViewModels/SongsViewModel.cs` (artist-change guard, BUG-086 intent kept) and the replaced revisit test `CrudListViewModelBaseTests.InitializeAsync_SecondCall_TogglesIsInitialLoading`.
   - Demo: a search, a filter change and a later visit show the shimmer while loading (1.5 s in debug builds); pull-to-refresh and load-more do not.
-- [ ] DLH2 **Device check (Helder).**
+- [x] DLH2 **Device check (Helder).** Passed 2026-11-18. Helder: "shimmer works like a charm on every places we've agreed."
