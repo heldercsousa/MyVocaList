@@ -32,3 +32,37 @@ Governed component change (`component-change-governance`): Helder pre-authorised
 - **SongFormPage** (`UI/Pages/Songs/SongFormPage.xaml:93`, inside `dx:ShimmerView`): add mode with a Deezer pick (corner button shows); edit mode; remove then Save; check the side is correct on first display (the width may arrive after the first layout).
 - **ArtistFormPage** (`UI/Pages/Artists/ArtistFormPage.xaml:64`, `IsCircle`): add, replace and remove on the circle; check the corner button over the circle edge.
 - All three: hint text shows only with no picture; screen reader says "Double tap to choose a picture" when empty and "Double tap to replace the picture" when filled.
+
+---
+## Task: Device-check fix 1 — corner remove icon off-centre and read as an X
+**Plan:** `Docs/Management/DevCycleCraft/crud-form-action-pattern/changes/2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove/changes/2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button/README.md`
+**Status:** To Review (device check pending)
+**Started:** 2026-11-18
+**Completed:** 2026-11-18
+
+Level C (no test): pure visual change to one XAML button (icon, padding, icon size, alignment). No Service, ViewModel or Repository logic changed; no AC behaviour changed (REQ-IPF-03 already in the spec). Existing tests do not cover XAML layout.
+
+### Changed files:
+- `MyVocaList/UI/Components/Media/ImagePickerField.xaml`
+- `Docs/Management/DevCycleCraft/crud-form-action-pattern/changes/2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove/changes/2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button/task-log.md`
+
+### Cause found
+- Icon: `close_outlined` read as an "X". Changed to `delete_outlined`, the icon already used in `UI/Components/CrudListView.xaml`.
+- Off-centre: Context7 (DevExpress MAUI docs, `DXContentPresenter.IconWidth` / `IconHeight`) gives the default icon size as 18x18 for non-ToolButton types. The docs do not state the default `Padding` value. The 40 dp button with default padding and an unset vertical content alignment left the icon off-centre. Likely cause from the docs; not verified on the emulator, so confirm on device.
+
+### Fix (on `removeButton` only; `StandardIconButton` untouched)
+- `Icon="delete_outlined"`
+- `Padding="0"`
+- `IconWidth="24"` / `IconHeight="24"` (explicit, instead of the 18 dp default)
+- `HorizontalContentAlignment="Center"` (also inherited from the style; set locally) and `VerticalContentAlignment="Center"`
+- `IconIndent` not changed: the button has no text.
+- Comment above the button lists the centring overrides and says the icon is the trash can.
+
+### Verification
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -nodeReuse:false`: 0 errors, 34 warnings (pre-existing NuGet advisories).
+- Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`: 1869 passed, 0 failed (no flaky song-form failures this run).
+- Re-read: removeButton block (ImagePickerField.xaml lines 56-80) confirmed after the edit.
+- Manual: device check still required for centring and icon look (VenueFormPage, SongFormPage, ArtistFormPage circle).
+
+### Spec note
+- The device-check note at the end of the README is already on develop (`> **Spec updated 2026-11-18**`); no further spec change needed.
