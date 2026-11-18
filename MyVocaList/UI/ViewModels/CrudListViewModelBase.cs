@@ -1,4 +1,5 @@
 using MyVocaList.UI.Collections;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -119,7 +120,8 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         {
             IsInitialLoading = true;
             await Task.Yield();
-            await LoadFirstPageAsync(CancellationToken.None);
+            // REQ-DLH-01: the debug-only shimmer hold applies to this first load only (refresh, search, load-more are unchanged).
+            await LoadFirstPageAsync(CancellationToken.None, holdShimmer: true);
             RunOnUiThread(() => IsInitialLoading = false);
         }
 
@@ -128,12 +130,16 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         _logger.LogInformation("[PageLoad] {ViewModel} initAsync={Ms}ms", GetType().Name, initSw.ElapsedMilliseconds);
     }
 
-    private async Task LoadFirstPageAsync(CancellationToken cancellationToken)
+    private async Task LoadFirstPageAsync(CancellationToken cancellationToken, bool holdShimmer = false)
     {
         try
         {
             _currentPage = 1;
             _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
+
+            // REQ-DLH-01: the hold starts with the fetch and is awaited after it, so the shimmer lasts max(fetch, hold)
+            // and the UI thread never waits. Zero duration (every build but Debug, and every unit test) = completed task.
+            var hold = holdShimmer ? LoadingHold.WaitAsync(cancellationToken) : Task.CompletedTask;
 
             // SQLITE-WORKAROUND: Microsoft.Data.Sqlite completes async methods synchronously
             // on the calling thread — offload fetch AND enumeration (services return lazy
@@ -151,6 +157,8 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             fetchSw.Stop();
             _logger.LogInformation("[PageLoad] {ViewModel} fetch={Ms}ms", GetType().Name, fetchSw.ElapsedMilliseconds);
             // PHASE2-INSTRUMENTATION end
+
+            await hold;
 
             if (cancellationToken.IsCancellationRequested) return;
 

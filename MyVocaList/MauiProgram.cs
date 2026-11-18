@@ -49,6 +49,8 @@ public static class MauiProgram
 
 #if DEBUG
         builder.AddMauiDevFlowAgent();
+        // REQ-DLH-01..04: debug builds keep the loading shimmer on screen; release builds have no hold (zero default).
+        MyVocaList.UI.Services.LoadingHold.Duration = TimeSpan.FromMilliseconds(1500);
 #endif
 
         // Database

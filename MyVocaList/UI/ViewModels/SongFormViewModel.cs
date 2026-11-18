@@ -9,6 +9,7 @@ using MyVocaList.Domain.Rules;
 using MyVocaList.UI.Collections;
 using MyVocaList.UI.Constants;
 using MyVocaList.UI.Models;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -852,6 +853,9 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task LoadSongForEditAsync(int songId)
     {
+        // REQ-DLH-01: the debug-only shimmer hold starts with the load; it is awaited in finally, so the placeholder
+        // lasts max(load, hold). Zero duration (every build but Debug, and every unit test) = completed task.
+        var hold = LoadingHold.WaitAsync(CancellationToken.None);
         try
         {
             if (await HydrateStoredSongAsync(songId))
@@ -867,6 +871,7 @@ public partial class SongFormViewModel : ViewModelBase
         }
         finally
         {
+            await hold;
             IsSongLoading = false;   // REQ-SLD-32: the placeholder ends however the load ended
         }
     }

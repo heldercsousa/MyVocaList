@@ -40,6 +40,7 @@ unchanged.
   the existing `Task.Run` (`Task.WhenAll`), so the shimmer lasts max(fetch, hold).
 - `SongFormViewModel` edit-mode load: the same, inside its off-UI-thread load (after the load fix of
   2026-11-17 is merged).
+> **Spec updated 2026-11-17:** `LoadingHold` lives in `MyVocaList/UI/Services/LoadingHold.cs` (shared UI helper folder). The first-load hold starts with the fetch and is awaited after it (not inside `Task.Run`), so the fetch metric stays fetch-only; the song-form hold starts with the load and is awaited in `finally` before `IsSongLoading` clears. Release builds keep the zero default: only the `Duration` assignment is compiled out.
 - `CrudListView` (governed) is not edited. `CrudListViewModelBase` is a shared base class, not a
   governed UI component; its consumers are the four list view models (Venues, Songs, Artists, Persons):
   risk per consumer is the same — the first load waits 1.5 s in debug only; check: each list shows the
