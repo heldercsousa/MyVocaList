@@ -11,8 +11,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private CancellationTokenSource _searchCts;
     private Func<Task> _pendingConfirmAction;
     private volatile bool _isLoading;
-    private bool _hasLoadedOnce;
+    // Bumped (on the UI thread) by every load that shows the shimmer; only the newest one may end it (REQ-DLH-05).
+    private int _loadGeneration;
     private readonly ILogger _logger;
+
+    /// <summary>True once a load has applied its rows, i.e. the first load completed. Set on the UI thread.</summary>
+    protected bool HasCompletedFirstLoad { get; private set; }
 
     [ObservableProperty] private string _appBarNavigationIcon = "arrow_back_outlined";
     [ObservableProperty] private ICommand _appBarNavigationCommand;
@@ -23,6 +27,11 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     [ObservableProperty] private int _selectedCount;
     [ObservableProperty] private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
     [ObservableProperty] private bool _hasMoreItems = true;
+    /// <summary>
+    /// True while the list is replacing its rows: first load, later visit, debounced search, filter reload. CrudListView
+    /// shows the shimmer in place of the rows until the newest such load applies them (REQ-DLH-05). Pull-to-refresh
+    /// and load-more never set it.
+    /// </summary>
     [ObservableProperty] private bool _isInitialLoading = true;
     [ObservableProperty] private string _confirmMessage = string.Empty;
     [ObservableProperty] private string _confirmActionText = "Delete";
@@ -109,29 +118,25 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
         var initSw = System.Diagnostics.Stopwatch.StartNew();
 
-        if (_hasLoadedOnce)
-        {
-            // Shell-cached page revisit: data is already present — refresh silently
-            // without touching IsInitialLoading (no shimmer subtree swap on revisit).
-            // Residual: the silent ReplaceRange Reset is still visible (accepted — see plan.md T3).
-            await LoadFirstPageAsync(CancellationToken.None);
-        }
-        else
-        {
-            IsInitialLoading = true;
-            await Task.Yield();
-            // REQ-DLH-01: the debug-only shimmer hold applies to this first load only (refresh, search, load-more are unchanged).
-            await LoadFirstPageAsync(CancellationToken.None, holdShimmer: true);
-            RunOnUiThread(() => IsInitialLoading = false);
-        }
+        // REQ-DLH-05: the first load and every later visit replace the rows, so both show the shimmer until the
+        // new rows apply; REQ-DLH-01: the debug-only hold applies to each of them.
+        var generation = BeginShimmeredLoad();
+        await Task.Yield();
+        await LoadFirstPageAsync(CancellationToken.None, generation);
 
         // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
         initSw.Stop();
         _logger.LogInformation("[PageLoad] {ViewModel} initAsync={Ms}ms", GetType().Name, initSw.ElapsedMilliseconds);
     }
 
-    private async Task LoadFirstPageAsync(CancellationToken cancellationToken, bool holdShimmer = false)
+    /// <summary>
+    /// Fetches the first page and replaces the rows. <paramref name="shimmerGeneration"/> comes from
+    /// <see cref="BeginShimmeredLoad"/> for a load that shows the shimmer (REQ-DLH-05); null is pull-to-refresh, which
+    /// neither shows the shimmer nor takes the debug hold (REQ-DLH-05, REQ-DLH-01).
+    /// </summary>
+    private async Task LoadFirstPageAsync(CancellationToken cancellationToken, int? shimmerGeneration = null)
     {
+        var applied = false;
         try
         {
             _currentPage = 1;
@@ -139,7 +144,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
             // REQ-DLH-01: the hold starts with the fetch and is awaited after it, so the shimmer lasts max(fetch, hold)
             // and the UI thread never waits. Zero duration (every build but Debug, and every unit test) = completed task.
-            var hold = holdShimmer ? LoadingHold.WaitAsync(cancellationToken) : Task.CompletedTask;
+            var hold = shimmerGeneration.HasValue ? LoadingHold.WaitAsync(cancellationToken) : Task.CompletedTask;
 
             // SQLITE-WORKAROUND: Microsoft.Data.Sqlite completes async methods synchronously
             // on the calling thread — offload fetch AND enumeration (services return lazy
@@ -160,7 +165,8 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
             await hold;
 
-            if (cancellationToken.IsCancellationRequested) return;
+            // A superseded shimmered load (a newer search or reload started) applies nothing: the newest load owns the rows and the shimmer.
+            if (cancellationToken.IsCancellationRequested || IsSuperseded(shimmerGeneration)) return;
 
             _totalCount = totalCount;
             var hasMore = totalCount > list.Count;
@@ -174,19 +180,44 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
                     SelectedItems.ClearRange();
                     SelectedCount = 0;
                 }
+                // REQ-DLH-05: the newest shimmered load ends the shimmer in the same block that applies its rows.
+                if (shimmerGeneration.HasValue && shimmerGeneration.Value == CurrentLoadGeneration)
+                    IsInitialLoading = false;
+                HasCompletedFirstLoad = true;
                 NotifyEmptyStates();
             });
-
-            // Set AFTER the RunOnUiThread block — this point is reached only when the
-            // fetch completed without cancellation and the list was applied successfully.
-            // Cancellation paths (IsCancellationRequested early return and OperationCanceledException
-            // catch) do NOT set this flag, so a cancelled first load retries the shimmer cycle.
-            _hasLoadedOnce = true;
+            applied = true;
 
             OnAfterLoad(list);
         }
         catch (OperationCanceledException) { }
+        finally
+        {
+            // A shimmered load that ends without applying its rows (cancelled or failed) ends the shimmer only while it is still the newest.
+            if (!applied && shimmerGeneration.HasValue)
+                RunOnUiThread(() =>
+                {
+                    if (shimmerGeneration.Value == CurrentLoadGeneration)
+                        IsInitialLoading = false;
+                });
+        }
     }
+
+    /// <summary>
+    /// Starts a load that replaces the rows and shows the shimmer (REQ-DLH-05). Returns its generation; only the newest
+    /// generation may end the shimmer. Called on the UI thread.
+    /// </summary>
+    private int BeginShimmeredLoad()
+    {
+        var generation = Interlocked.Increment(ref _loadGeneration);
+        RunOnUiThread(() => IsInitialLoading = true);
+        return generation;
+    }
+
+    private int CurrentLoadGeneration => Volatile.Read(ref _loadGeneration);
+
+    private bool IsSuperseded(int? shimmerGeneration) =>
+        shimmerGeneration.HasValue && shimmerGeneration.Value != CurrentLoadGeneration;
 
     protected async Task RefreshAsync()
     {
@@ -195,8 +226,8 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         RunOnUiThread(() => IsRefreshing = false);
     }
 
-    // Reload without triggering IsInitialLoading — use in response to filter changes.
-    protected Task ReloadAsync() => LoadFirstPageAsync(CancellationToken.None);
+    // Filter reload: shows the shimmer until its rows apply (REQ-DLH-05). Called on the UI thread.
+    protected Task ReloadAsync() => LoadFirstPageAsync(CancellationToken.None, BeginShimmeredLoad());
 
     private async Task LoadMoreAsync()
     {
@@ -252,13 +283,16 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         _searchCts = new CancellationTokenSource();
         var token = _searchCts.Token;
 
+        // REQ-DLH-05: the shimmer shows from the keystroke until the newest search applies its rows.
+        var generation = BeginShimmeredLoad();
+
         _ = Task.Run(async () =>
         {
             try
             {
                 await Task.Delay(400, token);
                 if (token.IsCancellationRequested) return;
-                await LoadFirstPageAsync(token);
+                await LoadFirstPageAsync(token, generation);
             }
             catch (OperationCanceledException) { }
         }, token);
