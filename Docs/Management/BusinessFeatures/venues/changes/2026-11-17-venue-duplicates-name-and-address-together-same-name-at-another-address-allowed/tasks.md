@@ -6,5 +6,5 @@
 - [x] VD2 **Service: one pair check in every save path.** After VD1. (REQ-VEN-41 to 45) Level A.
   - Files owned: `Services/VenueService.cs`, `MyVocaList.Tests/Unit/Services/VenueServiceSaveTests.cs`, `MyVocaList.Tests/Unit/Services/VenueServiceTests.cs`.
   - Demo: the same name at another address saves; the same name at the same address is refused on the Name field.
-- [ ] VD3 Full test run, Android build, merge to `develop`.
+- [x] VD3 Full test run, Android build, merge to `develop`.
 - [ ] VD4 **Device check (Helder)** — `design.md § Device check`.
