@@ -1,7 +1,7 @@
 ---
 id: imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button
 title: "ImagePickerField: bigger centred picture, tap to pick, corner remove button"
-status: 🟢 Ready
+status: 🟡 In Progress
 target: 2026-11-18
 section: DevCycleCraft
 parent: new-component-imagepickerfield-form-picture-with-add-replace-and-remove
