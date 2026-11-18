@@ -2,6 +2,8 @@
 
 > Section file split from `crud-pages.md` on 2026-07-14 (token-scoped reads). Index + never-miss rules: `crud-pages.md`.
 
+> **Loading pattern (mandatory, Helder 2026-11-17):** a list ViewModel derives from `CrudListViewModelBase<TItem>` and never hand-rolls loading, threading or the shimmer — `code-style-reference.md § Loading Pattern — Lists and Data Loads`.
+
 ## CrudListView — The Standard List Shell
 
 As of Step 7 of the CRUD list deduplication effort, all **new** CRUD list pages **must** use `CrudListView` (`MyVocaList/UI/Views/CrudListView.xaml`) as the page body. The old manual pattern of writing `ShimmerView` + `DXCollectionView` + `FloatingToolbar` + FAB + `EmptyState` + `dx:BottomSheet` directly in each page XAML is **deprecated**. Pages are now thin shells: a `Shell.TitleView` (SmallAppBar + SearchAppBar) plus one `<views:CrudListView>` element with entity-specific `DataTemplate` slots.

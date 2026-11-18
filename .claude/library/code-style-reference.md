@@ -15,6 +15,7 @@
 - [Pagination](#pagination)
 - [DI Registration Conventions](#di-registration-conventions-mauiprogramcs)
 - [UI Thread Performance — ObservableRangeCollection](#ui-thread-performance--observablerangecollection)
+- [Loading Pattern — Lists and Data Loads](#loading-pattern--lists-and-data-loads)
 - [Static Analysis Suppressions](#static-analysis-suppressions)
 
 ---
@@ -246,6 +247,26 @@ RunOnUiThread(() =>
     NotifyEmptyStates();
 });
 ```
+
+## Loading Pattern — Lists and Data Loads
+
+> Helder, 2026-11-17: the way the lists load is the app pattern "whenever a list is loaded", for every
+> current and future list, so that no agent bypasses it. Specs: REQ-SLD-32 to 34 (song form),
+> `Docs/Management/BusinessFeatures/cross-cutting/changes/2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while/` (REQ-DLH-01 to 05).
+
+**Lists — never hand-roll loading.**
+- Every list ViewModel derives from `CrudListViewModelBase<TItem>` and overrides only `FetchPageAsync` / `FetchMoreAsync` (one service call each, passing the `CancellationToken`). Every list page derives from `CrudListPageBase` and uses `CrudListView`.
+- The base owns: the fetch inside `Task.Run` (Microsoft.Data.Sqlite runs "async" calls synchronously, so a direct await freezes the UI thread), the 400 ms search debounce, the shimmer flag bound by `CrudListView`, result application in one `RunOnUiThread` block, and the debug-build hold. A list that needs other loading behaviour changes the base in its own task — never a copy in the derived class.
+- Shimmer: shown whenever the list replaces its rows (first load, later visit, search, filter reload) until the new rows are applied, in **every build**. Pull-to-refresh keeps the DevExpress refresh circle and load-more keeps the DevExpress load-more indicator; neither shows the shimmer.
+
+**Any other screen that loads data before it can be used** (an edit form, a picker):
+- The service call runs off the UI thread (`Task.Run`); a loading flag is set before it and cleared only after the results are applied on the UI thread (`RunOnUiThreadAsync`); the page shows a `dx:ShimmerView` (or the DX loading control of that screen) bound to the flag.
+- Commands that would write (Save) do nothing while the flag is true. A failed load is caught, logged, shown with a message, and the screen navigates back — it never stays open half-filled.
+- Tests wait for the load to end (`WaitUntilAsync(() => !vm.IsXxxLoading)` or an exposed load task), never `Task.Yield()` alone.
+
+**Field searches** (autocomplete, remote APIs): the search runs off the UI thread and the field shows that a search is running. Pending item: `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-17-remote-and-local-field-searches-show-a-loading-indicator/`.
+
+**Debug-build hold:** in debug builds only, the app start-up sets a minimum loading time (1,500 ms) so the shimmer can be checked; release builds compile no hold; unit tests run with no hold. New loads that show a shimmer use the same hold, never their own delay.
 
 ## Static Analysis Suppressions
 
