@@ -77,14 +77,15 @@ public class CrudListViewModelBaseTests
     }
 
     [Fact]
-    // Regression: page-load-frozen phase 2 — revisit should not toggle IsInitialLoading (no shimmer flash)
-    public async Task InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading()
+    // [AC] REQ-DLH-05: a later visit (second InitializeAsync) shows the shimmer until its rows apply.
+    // Replaces InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading (old "shimmer only on first load", replaced by REQ-DLH-05).
+    public async Task InitializeAsync_SecondCall_TogglesIsInitialLoading()
     {
         var sut = new TestCrudListViewModel();
 
         // First call — establishes the loaded state
         await sut.InitializeAsync();
-        Assert.False(sut.IsInitialLoading); // sanity: first load left shimmer off
+        Assert.False(sut.IsInitialLoading);
 
         // Capture PropertyChanged events for IsInitialLoading raised by the second call
         var isInitialLoadingChanges = new List<bool>();
@@ -97,8 +98,9 @@ public class CrudListViewModelBaseTests
         // Second call — simulates Shell-cached page revisit (OnAppearing fires again)
         await sut.InitializeAsync();
 
-        // No PropertyChanged for IsInitialLoading must have been raised on the second call
-        Assert.Empty(isInitialLoadingChanges);
+        // The revisit shows the shimmer (true) and ends it when the rows apply (false)
+        Assert.Equal(new[] { true, false }, isInitialLoadingChanges);
+        Assert.False(sut.IsInitialLoading);
     }
 
     [Fact]
