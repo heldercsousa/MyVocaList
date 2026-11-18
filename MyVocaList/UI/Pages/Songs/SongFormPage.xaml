@@ -44,12 +44,17 @@
                              opens the editor with the text kept and releases a picked Title (REQ-PIC-23..27). Add mode:
                              the search box over local songs and Deezer (REQ-SFT-02). Edit mode: plain editable text for
                              every song (IsSearchEnabled false, REQ-SFT-27, REQ-PIC-29). Blur validation runs
-                             ValidateTitle (the VM's first check). -->
+                             ValidateTitle (the VM's first check). A stored Deezer song shows its Title as plain text
+                             (REQ-SLD-36): the Label below, in the same text style; the tap-to-edit field is hidden. -->
+                        <Label Text="{Binding SongTitle}"
+                               StyleClass="Headline.Medium"
+                               IsVisible="{Binding IsTitleFrozen}" />
                         <textfields:TapToEditField x:Name="titleTapField"
                                                    Text="{Binding SongTitle}"
                                                    TextStyleClass="Headline.Medium"
                                                    HasError="{Binding TitleHasError}"
-                                                   IsEditing="{Binding IsTitleEditing, Mode=TwoWay}">
+                                                   IsEditing="{Binding IsTitleEditing, Mode=TwoWay}"
+                                                   IsVisible="{Binding IsTitleEditable}">
                             <textfields:AutocompleteDXField x:Name="titleField"
                                                             LabelText="Title"
                                                             PlaceholderText="Enter song title"
