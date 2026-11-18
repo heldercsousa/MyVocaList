@@ -2018,6 +2018,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-venue-duplicates
 		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\task-log.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\task-log.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics", "2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics", "{D3DA5A0A-B4C6-5F28-8A43-BB329531349C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-remote-and-local-field-searches-show-a-loading-indicator", "2026-11-17-remote-and-local-field-searches-show-a-loading-indicator", "{4F5023D3-21EE-5EDC-AF2A-EDFE6889C56C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-remote-and-local-field-searches-show-a-loading-indicator\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-remote-and-local-field-searches-show-a-loading-indicator\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{0720A89A-CD49-57EF-9597-BE5572A82705}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while", "2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while", "{C994C33D-A7F6-53F0-8D83-39A8E8720626}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\README.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\README.md
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\requirements.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\requirements.md
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\tasks.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\tasks.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2447,6 +2466,10 @@ Global
 		{E97B9141-1344-5B4D-93A8-0C3823B6E2EB} = {FA1234BC-0001-4000-8000-00000000007F}
 		{C70D1D55-6B49-5D3A-9151-A2D66D8A5AD4} = {FA1234BC-0001-4000-8000-00000000007F}
 		{8DB9392D-441E-53D6-8135-FA909998E452} = {FA1234BC-0001-4000-8000-00000000007B}
+		{D3DA5A0A-B4C6-5F28-8A43-BB329531349C} = {FA1234BC-0001-4000-8000-00000000007F}
+		{4F5023D3-21EE-5EDC-AF2A-EDFE6889C56C} = {FA1234BC-0001-4000-8000-00000000007F}
+		{0720A89A-CD49-57EF-9597-BE5572A82705} = {FA1234BC-0001-4000-8000-000000000038}
+		{C994C33D-A7F6-53F0-8D83-39A8E8720626} = {0720A89A-CD49-57EF-9597-BE5572A82705}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

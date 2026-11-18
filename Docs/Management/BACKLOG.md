@@ -20,10 +20,12 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-13 | ↳ Backfill Deezer images for songs and artists saved before the artwork item | 💡 Pending |
 | 2026-11-16 | ↳ Songs list searches Deezer: one tap saves a thin song row, lyrics copy with edit mark | 💡 Pending |
 | 2026-11-16 | ↳ Songs list searches title and artist; Deezer versions collapsed; Deezer artist frozen; lyrics on first open | 🟡 In Progress |
+| 2026-11-17 | ↳ Remote and local field searches show a loading indicator | 💡 Pending |
 | 2026-06 | **Queue Entry Point Redesign — QueuePage as CRUD event list** | 💡 Pending |
 | 2026-06 | | 🏁 **MVP release** |
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | 2026-07-03 | **Cross-cutting** | — |
+| 2026-11-17 | ↳ Debug builds hold the loading shimmer for a while | 🟢 Ready |
 | 2026-11-06 | ↳ Person form follow-ups from ACF T7 run 2 | 💡 Pending |
 | 2026-11-12 | ↳ People list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
 | 2026-11-12 | ↳ Venues list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
