@@ -19,6 +19,7 @@ match one half, which is not a duplicate); a unique index (decision D3).
   (REQ-VEN-44). No text is normalised in C#.
 - `AddressExistsAsync` loses its only production caller. It is removed together with its tests if
   nothing else calls it; `GetByNameAsync` stays if another caller remains.
+  > **Spec updated 2026-11-17:** `AddressExistsAsync` removed (no other caller). `GetByNameAsync` kept, but after this change its only callers are tests (`VenueRepositoryTests`, `UnitOfWorkCompositionTests`); flagged for Helder to decide whether to remove it.
 
 ## Services
 
