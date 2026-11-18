@@ -6,8 +6,8 @@ Branch `feature/songs-list-deezer`, worktree `.claude/worktrees/songs-list-deeze
 ### Checkpoint
 
 - **Updated:** 2026-11-17, after the second device round.
-- **Phase:** T16 to T18 merged (`develop` 78da0df9; full suite 1,855 passed, 0 failed). **Waiting for Helder's second device check (T14)** and his choice on the edit-mode load (below).
-- **Parked, uncommitted, in the worktree:** the fix that moves the edit-mode load off the UI thread (`SongFormViewModel.cs` diff and new test `SongFormViewModelLoadOffUiThreadTests.cs`). It breaks 24 existing test cases whose helper assumes a synchronous load; changing that helper needs Helder's yes.
+- **Phase:** T16 to T18 merged (`develop` 78da0df9; full suite 1,855 passed, 0 failed). **Waiting for Helder's second device check (T14)** (round 2 below).
+- **Load fix merged** (Helder approved the test waits, 2026-11-17): 53678a5f moves the edit-mode load off the UI thread; waits changed in 6 song-form test files, no assertion changed; `SongFormViewModelImageTests.Save_EditModeAfterDeezerPick_SendsNullImages` had no wait at all and so saved during a pending load. Merge ccbaa4af, full suite 1,856 passed.
 - **Context manifest (≤ 8 files):** `tasks.md`, `requirements.md`, `design.md`, `spec-changelog.md`, this file.
 
 ## Device check (T14, Helder)
