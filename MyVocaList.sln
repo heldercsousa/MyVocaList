@@ -2035,6 +2035,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-debug-builds-hol
 		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\README.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\README.md
 		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\requirements.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\requirements.md
 		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\tasks.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\tasks.md
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\task-log.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\task-log.md
 	EndProjectSection
 EndProject
 Global
