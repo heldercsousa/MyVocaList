@@ -80,8 +80,14 @@ public class SongFormViewModelPictureTests
 
         var sut = CreateSut(songService);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
         return sut;
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 500 && !condition(); i++)
+            await Task.Delay(10);
     }
 
     private Mock<ISongService> SaveService(Func<SongFormSaveRequest, SongFormSaveOutcome>? decide = null)
