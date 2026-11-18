@@ -885,12 +885,18 @@ public partial class SongFormViewModel : ViewModelBase
     {
         await LoadKaraokeUrlsAsync();
 
-        var song = await _songService.GetSongByIdAsync(songId);
+        // Bug fix: the database call runs on a background thread (Microsoft.Data.Sqlite runs "async" calls synchronously,
+        // which blocked the UI thread before the loading indicator was drawn). The continuation is back on the UI thread.
+        var song = await Task.Run(() => _songService.GetSongByIdAsync(songId));
         if (song is null)
         {
             _logger.LogWarning("Edit mode: song {SongId} not found during hydration", songId);
             _storedSongLoaded = true;   // nothing stored to freeze the Artist for: the form stays editable
-            RunOnUiThread(NotifyArtistFrozenChanged);
+            await RunOnUiThreadAsync(() =>
+            {
+                NotifyArtistFrozenChanged();
+                return Task.CompletedTask;
+            });
             return false;
         }
 
@@ -904,7 +910,8 @@ public partial class SongFormViewModel : ViewModelBase
         _storedTitle = song.Title ?? string.Empty;   // REQ-SLD-38: the title a frozen Title is saved with
         _storedSongLoaded = true;   // set before the UI block below, whose NotifyArtistFrozenChanged raises the change
 
-        RunOnUiThread(() =>
+        // Awaited, so IsSongLoading (LoadSongForEditAsync, finally) turns false only after the stored values are applied.
+        await RunOnUiThreadAsync(() =>
         {
             // This may run after the page's OnAppearing already called CompleteHydration()
             // (the entity load is async) — re-open the hydration window while applying stored
@@ -943,6 +950,7 @@ public partial class SongFormViewModel : ViewModelBase
                 _isHydrating = wasHydrating;
             }
             NotifyArtistFrozenChanged();
+            return Task.CompletedTask;
         });
 
         // REQ-SLD-19: a Deezer song without lyrics or recorded origin looks for them on open; the form stays usable.
@@ -1300,7 +1308,9 @@ public partial class SongFormViewModel : ViewModelBase
         if (!SongId.HasValue) return;
         var apiKey = await _secureStorage.GetAsync("youtube_api_key");
         HasYouTubeApiKey = !string.IsNullOrWhiteSpace(apiKey);
-        var urls = await _karaokeUrlService.GetUrlsForSongAsync(SongId.Value, ct);
+        var songId = SongId.Value;
+        // Bug fix: the database read runs on a background thread (see HydrateStoredSongAsync).
+        var urls = await Task.Run(() => _karaokeUrlService.GetUrlsForSongAsync(songId, ct));
         foreach (var u in urls) _addedVideoIds.Add(u.VideoId);
         RunOnUiThread(() => KaraokeUrls.ReplaceRange(urls));
     }
