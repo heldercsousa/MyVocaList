@@ -25,7 +25,7 @@
     <views:CrudListView
         ItemsSource="{Binding Persons}"
         SelectedItemsSource="{Binding SelectedPersonsRaw}"
-        IsEmptyNoItems="{Binding IsEmptyNoPeople}"
+        IsEmptyNoItems="{Binding IsEmptyNoPersons}"
         SearchText="{Binding SearchText, Mode=TwoWay}"
         IsSearchBarElevated="{Binding IsScrolled}"
         SearchPlaceholder="Search people..."
