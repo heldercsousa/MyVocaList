@@ -17,8 +17,9 @@ unchanged.
   and the edit-mode load of the song form SHALL take at least the hold time of 1,500 ms before the
   loaded content replaces the shimmer. The wait happens off the UI thread: the screen stays usable
   and Back works during it.
-- **REQ-DLH-02: Release builds are unchanged.** WHEN the app is a release build, no hold exists: the
-  code path is compiled out, not switched off at run time.
+- **REQ-DLH-02: Release builds are unchanged.** WHEN the app is a release build, no hold exists: the only code that sets a hold time is compiled out,
+  so the hold is always zero (wording corrected 2026-11-17 to match the design). The shimmer itself
+  stays in release builds and shows for as long as a load takes (Helder, 2026-11-17).
 - **REQ-DLH-03: Tests are not slowed.** The hold is switched on only by the app's start-up code, so
   unit tests that build view models directly run with no hold, in any build configuration.
 - **REQ-DLH-04: One place.** The hold time is one named value in one place.
