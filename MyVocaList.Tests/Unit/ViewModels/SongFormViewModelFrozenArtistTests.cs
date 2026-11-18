@@ -68,8 +68,14 @@ public class SongFormViewModelFrozenArtistTests
         songService.Setup(s => s.GetSongByIdAsync(song.Id, It.IsAny<CancellationToken>())).ReturnsAsync(song);
         var sut = CreateSut(songService);
         sut.SongIdRaw = song.Id.ToString();
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
         return sut;
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 500 && !condition(); i++)
+            await Task.Delay(10);
     }
 
     private static Song DeezerSong(int artistId = 7, string artistName = "Queen") => new()

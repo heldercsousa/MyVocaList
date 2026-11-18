@@ -409,6 +409,12 @@ public class SongFormViewModelImageTests
         Assert.Equal(ArtistPic, request.ArtistImageUrl);
     }
 
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 500 && !condition(); i++)
+            await Task.Delay(10);
+    }
+
     [Fact]
     public async Task Save_EditModeAfterDeezerPick_SendsNullImages()
     {
@@ -416,6 +422,7 @@ public class SongFormViewModelImageTests
         var sut = CreateSut(SaveService());
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto()));
         sut.SongIdRaw = "42";
+        await WaitUntilAsync(() => !sut.IsSongLoading);
 
         await SaveAsync(sut);
 
