@@ -73,6 +73,27 @@ public sealed class VenueService : IVenueService
 - Commands: verb + noun + `Command` e.g. `AddVenueCommand`
 - Async methods: `VerbNounAsync` e.g. `CreateVenueAsync`
 
+### Projects and folders
+- Each layer project lives in a folder named after its layer only. The project file, assembly and root
+  namespace keep the `MyVocaList.` prefix:
+
+  | Folder | Project file | Root namespace |
+  |--------|--------------|----------------|
+  | `Domain/` | `MyVocaList.Domain.csproj` | `MyVocaList.Domain` |
+  | `Contracts/` | `MyVocaList.Contracts.csproj` | `MyVocaList.Contracts` |
+  | `Services/` | `MyVocaList.Services.csproj` | `MyVocaList.Services` |
+  | `Infra/` | `MyVocaList.Infra.csproj` | `MyVocaList.Infra` |
+  | `Extensions/` | `MyVocaList.Extensions.csproj` | `MyVocaList.Extensions` (e.g. `MyVocaList.Extensions.Strings`) |
+  | `MyVocaList/` | `MyVocaList.csproj` (MAUI app) | `MyVocaList` |
+  | `MyVocaList.Tests/` | `MyVocaList.Tests.csproj` | `MyVocaList.Tests` |
+
+- A new layer project follows the same rule: folder `<Layer>/`, project `MyVocaList.<Layer>.csproj`.
+  A `ProjectReference` uses the folder path, e.g. `..\Extensions\MyVocaList.Extensions.csproj`.
+- The `Extensions/` project holds extension methods shared by more than one layer (string trimming
+  used by Services, Infra and the app). The app's own `MyVocaList/Extensions/` folder (DI
+  registration, logging setup, XAML markup extensions) is a different thing: it is app-only code,
+  even though it also uses the `MyVocaList.Extensions` namespace.
+
 ### Async
 - Always `async/await` for I/O — never `.Result` or `.Wait()`
 - Use `CancellationToken` on all async service methods
