@@ -2,21 +2,18 @@
 
 ### Checkpoint
 
-- **Updated:** 2026-11-17, spec written.
-- **Phase:** implementation dispatched (VD1, VD2) on branch `feature/venue-duplicate-pair`.
-- **Next:** VD3 close-out, then Helder's device check (VD4).
+- **Updated:** 2026-11-17, after the merge.
+- **Phase:** close-out done. **Waiting for Helder's device check (VD4).**
+- **Done:** VD1, VD2 committed as 4d38bf97 on `feature/venue-duplicate-pair` (pre-commit full suite green on the first try), merged into `develop` as 766eb860.
+- **Next:** VD4 device check by Helder; then status Done and worktree removal.
 - **Context manifest (≤ 8 files):** `requirements.md`, `design.md`, `tasks.md`, this file.
-- **Implementor (VD1, VD2) — worktree `.claude/worktrees/venue-duplicate-pair`, branch `feature/venue-duplicate-pair`:** status `blocked: unrelated flaky test`. Code and tests for VD1 and VD2 are done; nothing committed (pre-commit hook runs the suite).
-- **Last build/test:** Android build 0 errors. `dotnet test` after the final test edits: 1833 passed, 1 failed (`SongFormViewModelTests.TitleOptionSource_SetsNoteThroughUiThreadHelper`, song form, not touched by this change). Same test failed in 2 of 4 full runs and passes alone; not edited.
-- **Next command (Helder's decision first):** `git add` the 8 changed files, commit with `Item:` trailer, push.
-- **Context manifest (≤ 8 files):** `Services/VenueService.cs`, `Infra/Repository/VenueRepository.cs`, `Domain/RepositoryInterface/IVenueRepository.cs`, `MyVocaList.Tests/Integration/Repositories/VenueRepositoryAddressTests.cs`, `MyVocaList.Tests/Unit/Services/VenueServiceSaveTests.cs`, `MyVocaList.Tests/Unit/Services/VenueServiceTests.cs`, `requirements.md`, `design.md` (in the spec folder).
 
 ---
-## VD1, VD2 (2026-11-17) — blocked: unrelated flaky test
+## VD1, VD2 (2026-11-17) — To Review
 **Plan:** `Docs/Management/BusinessFeatures/venues/changes/2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed/tasks.md`
-**Status:** blocked: unrelated flaky test (nothing committed; awaiting Helder)
+**Status:** To Review. Committed 4d38bf97 by the main agent after the implementor stopped on an unrelated intermittent song-form test; the pre-commit full suite passed on the first try.
 **Started:** 2026-11-17
-**Completed:** —
+**Completed:** 2026-11-17
 
 ### Changed files:
 - `Domain/RepositoryInterface/IVenueRepository.cs` (VD1: `AddressExistsAsync` replaced by `NameAndAddressExistsAsync`)
