@@ -561,7 +561,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, snackbar: snackbar, secureStorage: secureStorage);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
 
         var dto = MakeDto();
         sut.KaraokeUrls.Add(dto);
@@ -592,7 +592,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, snackbar: snackbar, secureStorage: secureStorage);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
 
         var dto = MakeDto();
         sut.KaraokeUrls.Add(dto);
@@ -617,7 +617,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, snackbar: snackbar, secureStorage: secureStorage);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
 
         var dto = MakeDto();
         sut.KaraokeUrls.Add(dto);
@@ -1522,7 +1522,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
 
         Assert.Equal("Feat A", sut.FeaturedArtists);
         Assert.Equal("Stored lyrics", sut.Lyrics);
@@ -1550,7 +1550,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
 
         Assert.True(sut.IsArtistLocked);
     }
@@ -1580,7 +1580,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
         sut.CompleteHydration();
         sut.SelectedArtistId = 1;
         sut.SelectedArtistName = "Artist";
@@ -1619,7 +1619,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
         sut.CompleteHydration();
 
         // User clears the locked field (REQ-ACREATE-15) and selects a different artist
@@ -1988,7 +1988,7 @@ public class SongFormViewModelTests
         var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
             songService: songService, artistService: artistService);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
 
         Assert.Equal(7, sut.SelectedArtistId);
         Assert.Equal("Queen", sut.SelectedArtistName);
@@ -2022,7 +2022,7 @@ public class SongFormViewModelTests
 
         var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
         sut.SongIdRaw = "42";
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
         sut.CompleteHydration();
 
         await sut.SaveCommand.ExecuteAsync(null);
@@ -2036,6 +2036,13 @@ public class SongFormViewModelTests
     // ── Task 5.4: edit-mode title and hydration (REQ-SFT-27, REQ-SFT-02) ─────────────────────
 
     /// <summary>A stored song: API-sourced (Deezer identity) or manual (no identity), artist "Queen".</summary>
+    /// <summary>Waits until the edit-mode load has ended (the load runs on a background thread, REQ-SLD-32).</summary>
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 500 && !condition(); i++)
+            await Task.Delay(10);
+    }
+
     private static Song StoredSong(bool apiSourced) => new()
     {
         Id = 42,
@@ -2058,7 +2065,7 @@ public class SongFormViewModelTests
         var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
             songService: songService, artistService: artistService);
         sut.SongIdRaw = song.Id.ToString();
-        await Task.Yield();
+        await WaitUntilAsync(() => !sut.IsSongLoading);
         sut.CompleteHydration();
         return sut;
     }
