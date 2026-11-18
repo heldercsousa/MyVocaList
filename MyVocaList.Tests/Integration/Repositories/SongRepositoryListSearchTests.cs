@@ -46,19 +46,98 @@ public class SongRepositoryListSearchTests : IAsyncLifetime
         Assert.DoesNotContain("Time After Time", titles);
     }
 
-    // [AC] REQ-SLD-01: a shorter query matches the title prefix only, never the artist name
+    // [AC] REQ-SLD-35: a short query matches the artist name anywhere (replaces the REQ-SLD-01 prefix-only test)
     [Fact]
-    public async Task GetPagedAsync_ShortQuery_MatchesTitlePrefixOnly()
+    public async Task GetPagedAsync_ShortQueryMatchesArtistNameAnywhere_ReturnsThatArtistsSongs()
     {
         var abba = await SeedArtistAsync(_db, "ABBA");
+        var beatles = await SeedArtistAsync(_db, "Beatles");
         await SeedSongAsync(_db, abba.Id, "Abba Song");
         await SeedSongAsync(_db, abba.Id, "Dancing Queen");
+        await SeedSongAsync(_db, beatles.Id, "Yesterday");
 
         var (items, _) = await _repo.GetPagedAsync(1, 20, "ab", CancellationToken.None);
 
         var titles = items.Select(i => i.Title).ToList();
         Assert.Contains("Abba Song", titles);
-        Assert.DoesNotContain("Dancing Queen", titles);
+        Assert.Contains("Dancing Queen", titles);
+        Assert.DoesNotContain("Yesterday", titles);
+    }
+
+    // [AC] REQ-SLD-35: a short query finds a title that contains it, not only one that starts with it
+    [Fact]
+    public async Task GetPagedAsync_ShortQueryInsideTitle_IsFound()
+    {
+        // The artist name has no "es", so only the titles match.
+        var quartet = await SeedArtistAsync(_db, "Quartet");
+        await SeedSongAsync(_db, quartet.Id, "Yesterday");
+        await SeedSongAsync(_db, quartet.Id, "Let It Be");
+
+        var (items, _) = await _repo.GetPagedAsync(1, 20, "es", CancellationToken.None);
+
+        Assert.Equal(new[] { "Yesterday" }, items.Select(i => i.Title).ToArray());
+    }
+
+    // [AC] REQ-SLD-35: a short query finds the songs of an artist whose name contains it
+    [Fact]
+    public async Task GetPagedAsync_ShortQueryInsideArtistName_FindsThatArtistsSongs()
+    {
+        var u2 = await SeedArtistAsync(_db, "U2");
+        var beatles = await SeedArtistAsync(_db, "Beatles");
+        await SeedSongAsync(_db, u2.Id, "One");
+        await SeedSongAsync(_db, beatles.Id, "Yesterday");
+
+        var (items, _) = await _repo.GetPagedAsync(1, 20, "u2", CancellationToken.None);
+
+        Assert.Equal(new[] { "One" }, items.Select(i => i.Title).ToArray());
+    }
+
+    // [AC] REQ-SLD-35: songs whose title starts with the short text come first, then by title, then by id
+    [Fact]
+    public async Task GetPagedAsync_ShortQueryPrefixMatchesFirst_ThenTitle()
+    {
+        // The artist name has no "le", so only the titles match.
+        var quartet = await SeedArtistAsync(_db, "Quartet");
+        await SeedSongAsync(_db, quartet.Id, "Bleed");
+        await SeedSongAsync(_db, quartet.Id, "Let It Be");
+        await SeedSongAsync(_db, quartet.Id, "Zebra Crossing");
+
+        var (items, _) = await _repo.GetPagedAsync(1, 20, "le", CancellationToken.None);
+
+        Assert.Equal(new[] { "Let It Be", "Bleed" }, items.Select(i => i.Title).ToArray());
+    }
+
+    // [AC] REQ-SLD-35: a short query ignores letter case and accents
+    [Fact]
+    public async Task GetPagedAsync_ShortQueryCaseAndAccentInsensitive_IsFound()
+    {
+        var quartet = await SeedArtistAsync(_db, "Quartet");
+        await SeedSongAsync(_db, quartet.Id, "Été");
+
+        // "TÉ" is inside "Été", not at its start: the match needs the contains rule and folded case and accents.
+        var (items, _) = await _repo.GetPagedAsync(1, 20, "TÉ", CancellationToken.None);
+
+        Assert.Equal(new[] { "Été" }, items.Select(i => i.Title).ToArray());
+    }
+
+    // [AC] REQ-SLD-35: pages of a short-text search are disjoint and the count covers every match
+    [Fact]
+    public async Task GetPagedAsync_ShortQueryPages_AreDisjointAndCountEveryMatch()
+    {
+        var quartet = await SeedArtistAsync(_db, "Quartet");
+        for (var i = 1; i <= 45; i++)
+            await SeedSongAsync(_db, quartet.Id, $"Cab {i:D2}");
+
+        var ids = new List<int>();
+        for (var page = 1; page <= 3; page++)
+        {
+            var (items, totalCount) = await _repo.GetPagedAsync(page, 20, "ab", CancellationToken.None);
+            Assert.Equal(45, totalCount);
+            ids.AddRange(items.Select(i => i.Id));
+        }
+
+        Assert.Equal(45, ids.Count);
+        Assert.Equal(45, ids.Distinct().Count());
     }
 
     // [AC] REQ-SLD-01: without the search index the list falls back to the title prefix and does not throw

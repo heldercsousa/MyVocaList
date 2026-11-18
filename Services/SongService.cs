@@ -33,6 +33,7 @@ public class SongService : ISongService
     private const string ArtistRequiredMessage = "Artist is required";
     private const string ArtistNotFoundMessage = "Artist not found";
     private const string DeezerArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
+    private const string DeezerTitleFrozenMessage = "The title of a song from the music database cannot be changed.";
 
     public SongService(
         ISongRepository songRepository,
@@ -258,10 +259,16 @@ public class SongService : ISongService
                 return (false, "Song not found", SaveField.None);
 
             // REQ-SLD-15: the artist of a Deezer song cannot change, whatever the caller sends; checked before
-            // the identity check and before any artist is created. The title stays editable (REQ-SLD-17).
+            // the identity check and before any artist is created.
             if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
                 && (hasNewArtistName || (artistId.HasValue && artistId.Value != song.ArtistId)))
                 return (false, DeezerArtistFrozenMessage, SaveField.Artist);
+
+            // REQ-SLD-37: the title of a Deezer song cannot change either; compared after the trimming every
+            // title gets (ValidateTitleInput above), ordinal, character by character.
+            if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
+                && !string.Equals(title.Trim(), song.Title, StringComparison.Ordinal))
+                return (false, DeezerTitleFrozenMessage, SaveField.Title);
 
             // REQ-SFT-26: an external identity held by ANOTHER song (self excluded) is rejected before
             // any artist is created, so a refused save never leaves a new artist behind.
@@ -561,9 +568,15 @@ public class SongService : ISongService
                 if (storedSong is not null
                     && MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(storedSong.ExternalProvider, storedSong.ExternalId))
                 {
-                    return request.ArtistId == storedSong.ArtistId
-                        ? SaveFormResolution.Proceed(storedSong.ArtistId, null, fillArtistImage: false)
-                        : SaveFormResolution.Stop(SaveFailed(DeezerArtistFrozenMessage, SaveField.Artist));
+                    if (request.ArtistId != storedSong.ArtistId)
+                        return SaveFormResolution.Stop(SaveFailed(DeezerArtistFrozenMessage, SaveField.Artist));
+
+                    // REQ-SLD-37: the title of a Deezer song cannot change either; the trimmed request title is
+                    // compared ordinally with the stored one (the same rule as UpdateSongCoreAsync).
+                    if (!string.Equals(request.Title.Trim(), storedSong.Title, StringComparison.Ordinal))
+                        return SaveFormResolution.Stop(SaveFailed(DeezerTitleFrozenMessage, SaveField.Title));
+
+                    return SaveFormResolution.Proceed(storedSong.ArtistId, null, fillArtistImage: false);
                 }
             }
 

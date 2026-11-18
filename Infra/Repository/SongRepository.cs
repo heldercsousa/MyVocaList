@@ -114,26 +114,31 @@ public class SongRepository : ISongRepository
     }
 
     /// <summary>
-    /// Collated title-prefix list query (REQ-SLD-01 short text), ordered by title, then id, so pages are
-    /// disjoint (REQ-SLD-02/03). Only called with a non-blank query.
+    /// REQ-SLD-35 short text (no word of 3+ characters, or the index missing): the title or the artist name
+    /// contains the text, collated (case and accents ignored, the custom LIKE). Ordered: title starts with the
+    /// text first, then title, then id, so pages are disjoint (REQ-SLD-02/03). Only called with a non-blank query.
     /// </summary>
     private async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedPrefixAsync(
         int pageNumber, int pageSize, string? query, CancellationToken ct)
     {
-        var q = _db.Songs.AsQueryable();
+        var containsPattern = "%" + query + "%";
+        var startsPattern = query + "%";
 
-        if (!string.IsNullOrEmpty(query))
-        {
-            var pattern = query + "%";
-            q = q.Where(s => EF.Functions.Like(
+        var q = _db.Songs.Where(s =>
+            EF.Functions.Like(
                 EF.Functions.Collate(s.Title, CollationConstants.Default),
-                EF.Functions.Collate(pattern, CollationConstants.Default)));
-        }
+                EF.Functions.Collate(containsPattern, CollationConstants.Default))
+            || EF.Functions.Like(
+                EF.Functions.Collate(s.OriginalArtist.Name, CollationConstants.Default),
+                EF.Functions.Collate(containsPattern, CollationConstants.Default)));
 
         var totalCount = await q.CountAsync(ct);
 
         var items = await q
-            .OrderBy(s => s.Title)
+            .OrderBy(s => EF.Functions.Like(
+                EF.Functions.Collate(s.Title, CollationConstants.Default),
+                EF.Functions.Collate(startsPattern, CollationConstants.Default)) ? 0 : 1)
+            .ThenBy(s => s.Title)
             .ThenBy(s => s.Id)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
