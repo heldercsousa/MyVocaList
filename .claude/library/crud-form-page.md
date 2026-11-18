@@ -2,6 +2,8 @@
 
 > Section file split from `crud-pages.md` on 2026-07-14 (token-scoped reads). Index + never-miss rules: `crud-pages.md`.
 
+> **Loading pattern (mandatory, Helder 2026-11-17):** an edit form loads its record off the UI thread behind a loading flag and a `dx:ShimmerView`, ignores Save while loading, and closes with a message on a failed load — `code-style-reference.md § Loading Pattern — Lists and Data Loads`.
+
 ## Form Page — Laws and Variants
 
 ### Law
