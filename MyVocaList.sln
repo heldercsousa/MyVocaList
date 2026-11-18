@@ -2043,6 +2043,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button", "2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button", "{601FB201-2EA4-57D6-980E-0E3167C0800A}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\task-log.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\task-log.md
 	EndProjectSection
 EndProject
 Global

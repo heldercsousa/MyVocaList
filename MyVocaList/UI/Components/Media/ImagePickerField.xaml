@@ -6,75 +6,71 @@
     x:Class="MyVocaList.UI.Components.Media.ImagePickerField"
     x:Name="self">
 
-    <!-- Form picture field (REQ-PIC-13..16): a centred column of the 120 dp picture, the actions and the
-         size hint. Button and hint visibility, enabled state and the frame shape are applied in
+    <!-- Form picture field (REQ-IPF-01..04, supersedes REQ-PIC-13/15 and REQ-VEN-07..09): a centred square picture
+         (a circle when IsCircle), the corner remove button and the size hint. The side is computed from the
+         allocated width in code-behind (OnSizeAllocated / ApplySide) and applied to the host, the frame and both
+         image layers. Button and hint visibility, enabled state, semantic hint and the frame shape are applied in
          code-behind (ApplyState / ApplyShape), never by triggers. -->
-    <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+    <VerticalStackLayout Spacing="12">
 
-        <!-- The picture: RoundRectangle 12 (song) or Ellipse (artist), set in code from IsCircle.
-             Layering copies ListItemLeadingImage: the placeholder sits under the thumbnail, the thumbnail
-             under the large picture. A loaded picture covers what is under it; a missing or failed one
-             leaves it visible (REQ-PIC-14). A tap runs PickCommand (REQ-PIC-15). -->
-        <Border x:Name="pictureFrame"
-                WidthRequest="120"
-                HeightRequest="120"
-                HorizontalOptions="Center"
-                Stroke="Transparent"
-                StrokeThickness="0"
-                StrokeShape="RoundRectangle 12"
-                BackgroundColor="{StaticResource SurfaceContainerHighest}"
-                SemanticProperties.Description="Picture"
-                SemanticProperties.Hint="Double tap to choose a picture">
-            <Border.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnPictureTapped" />
-            </Border.GestureRecognizers>
+        <!-- The picture host: holds the frame and the remove button overlaid on its top-end corner. Its size is set in code. -->
+        <Grid x:Name="pictureHost"
+              HorizontalOptions="Center"
+              VerticalOptions="Start">
 
-            <Grid>
-                <dx:DXImage Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
-                            TintColor="{StaticResource OnSurfaceVariant}"
-                            WidthRequest="48"
-                            HeightRequest="48"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
+            <!-- The picture: RoundRectangle 12 (song) or Ellipse (artist), set in code from IsCircle.
+                 Layering copies ListItemLeadingImage: the placeholder sits under the thumbnail, the thumbnail
+                 under the large picture. A loaded picture covers what is under it; a missing or failed one
+                 leaves it visible (REQ-PIC-14). A tap runs PickCommand (REQ-IPF-02). -->
+            <Border x:Name="pictureFrame"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Stroke="Transparent"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                    SemanticProperties.Description="Picture"
+                    SemanticProperties.Hint="Double tap to choose a picture">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPictureTapped" />
+                </Border.GestureRecognizers>
 
-                <Image Source="{Binding ThumbnailSource, Source={x:Reference self}}"
-                       Aspect="AspectFill"
-                       WidthRequest="120"
-                       HeightRequest="120" />
+                <Grid>
+                    <dx:DXImage Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
+                                TintColor="{StaticResource OnSurfaceVariant}"
+                                WidthRequest="48"
+                                HeightRequest="48"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
 
-                <Image Source="{Binding ImageSource, Source={x:Reference self}}"
-                       Aspect="AspectFill"
-                       WidthRequest="120"
-                       HeightRequest="120" />
-            </Grid>
-        </Border>
+                    <Image x:Name="thumbnailImage"
+                           Source="{Binding ThumbnailSource, Source={x:Reference self}}"
+                           Aspect="AspectFill" />
 
-        <!-- The actions (REQ-PIC-15): "Add picture" with no picture; "Replace picture" + "Remove picture" with one.
-             HeightRequest 48 keeps the touch target at 48 dp. -->
-        <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
-            <dx:DXButton x:Name="addButton"
-                         Content="Add picture"
-                         Style="{StaticResource OutlinedButton}"
-                         HeightRequest="48"
-                         Padding="24,0"
-                         Command="{Binding PickCommand, Source={x:Reference self}}" />
+                    <Image x:Name="largeImage"
+                           Source="{Binding ImageSource, Source={x:Reference self}}"
+                           Aspect="AspectFill" />
+                </Grid>
+            </Border>
 
-            <dx:DXButton x:Name="replaceButton"
-                         Content="Replace picture"
-                         Style="{StaticResource OutlinedButton}"
-                         HeightRequest="48"
-                         Padding="24,0"
-                         IsVisible="False"
-                         Command="{Binding PickCommand, Source={x:Reference self}}" />
-
+            <!-- The remove button (REQ-IPF-03): a round tonal icon button over the top-end corner of the picture.
+                 Visible only with a form picture (ApplyState); disabled while busy (REQ-IPF-04). Style reuses
+                 StandardIconButton; the tonal background, the 40 dp size and the icon colour are local overrides. -->
             <dx:DXButton x:Name="removeButton"
-                         Content="Remove picture"
-                         Style="{StaticResource TextButton}"
-                         HeightRequest="48"
-                         Padding="12,0"
+                         Icon="close_outlined"
+                         Style="{StaticResource StandardIconButton}"
+                         WidthRequest="40"
+                         HeightRequest="40"
+                         CornerRadius="20"
+                         BackgroundColor="{StaticResource SecondaryContainer}"
+                         IconColor="{StaticResource OnSecondaryContainer}"
+                         HorizontalOptions="End"
+                         VerticalOptions="Start"
+                         Margin="4"
                          IsVisible="False"
+                         SemanticProperties.Description="Remove picture"
                          Command="{Binding RemoveCommand, Source={x:Reference self}}" />
-        </HorizontalStackLayout>
+        </Grid>
 
         <!-- The size hint (REQ-PIC-16): only while there is no picture and the text is not empty. -->
         <Label x:Name="hintLabel"
