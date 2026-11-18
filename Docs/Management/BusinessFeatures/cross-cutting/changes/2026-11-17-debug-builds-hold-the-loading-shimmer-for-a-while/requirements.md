@@ -23,9 +23,18 @@ unchanged.
   unit tests that build view models directly run with no hold, in any build configuration.
 - **REQ-DLH-04: One place.** The hold time is one named value in one place.
 
+- **REQ-DLH-05: Every slow list load shows the shimmer, in every build.** (Helder, 2026-11-17: "any
+  slow list load, excluding those already built-in from the DX component, is welcome") WHILE a list
+  replaces its rows — first load, a later visit, a search, or a filter reload (Artists role filter,
+  a singer's or artist's catalog) — the list SHALL show the shimmer in place of the rows until the
+  new rows are applied. Pull-to-refresh keeps the DevExpress refresh circle and loading more on
+  scroll keeps the DevExpress load-more indicator: neither shows the shimmer. In debug builds the
+  hold of REQ-DLH-01 applies to every load that shows the shimmer.
+  - A load that is superseded (a newer search started) does not end the shimmer; the newest load does.
+
 ## Out of scope
 
-- Searches, refresh, load-more and later visits of a list (they show no shimmer today).
+- Pull-to-refresh and load-more (DevExpress shows its own indicators).
 - A minimum shimmer time in release builds (Helder: lists load instantly today; revisit when a list
   becomes slow).
 - Field search indicators (separate item `../../../artists-songs/changes/2026-11-17-remote-and-local-field-searches-show-a-loading-indicator/`).
