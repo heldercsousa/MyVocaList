@@ -55,13 +55,20 @@
 
             <!-- The remove button (REQ-IPF-03): a round tonal icon button over the top-end corner of the picture.
                  Visible only with a form picture (ApplyState); disabled while busy (REQ-IPF-04). Style reuses
-                 StandardIconButton; the tonal background, the 40 dp size and the icon colour are local overrides. -->
+                 StandardIconButton; the tonal background, the 40 dp size, the icon colour and the centring
+                 (Padding 0, explicit 24 dp icon, vertical content centring) are local overrides. Icon is the
+                 trash can (delete_outlined), not the close icon (device check fix 1). -->
             <dx:DXButton x:Name="removeButton"
-                         Icon="close_outlined"
+                         Icon="delete_outlined"
                          Style="{StaticResource StandardIconButton}"
                          WidthRequest="40"
                          HeightRequest="40"
                          CornerRadius="20"
+                         Padding="0"
+                         IconWidth="24"
+                         IconHeight="24"
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center"
                          BackgroundColor="{StaticResource SecondaryContainer}"
                          IconColor="{StaticResource OnSecondaryContainer}"
                          HorizontalOptions="End"
