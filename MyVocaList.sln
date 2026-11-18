@@ -2038,6 +2038,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-debug-builds-hol
 		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\task-log.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\task-log.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{E89362B8-1919-5AA6-81D0-47C38A70CC1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button", "2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button", "{601FB201-2EA4-57D6-980E-0E3167C0800A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2471,6 +2478,8 @@ Global
 		{4F5023D3-21EE-5EDC-AF2A-EDFE6889C56C} = {FA1234BC-0001-4000-8000-00000000007F}
 		{0720A89A-CD49-57EF-9597-BE5572A82705} = {FA1234BC-0001-4000-8000-000000000038}
 		{C994C33D-A7F6-53F0-8D83-39A8E8720626} = {0720A89A-CD49-57EF-9597-BE5572A82705}
+		{E89362B8-1919-5AA6-81D0-47C38A70CC1A} = {60384D3A-1291-563A-A6E7-C6E38CFBE1BB}
+		{601FB201-2EA4-57D6-980E-0E3167C0800A} = {E89362B8-1919-5AA6-81D0-47C38A70CC1A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
