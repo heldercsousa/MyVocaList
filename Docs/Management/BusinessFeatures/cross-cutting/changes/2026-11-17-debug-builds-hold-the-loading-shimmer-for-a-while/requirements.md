@@ -32,6 +32,7 @@ unchanged.
   scroll keeps the DevExpress load-more indicator: neither shows the shimmer. In debug builds the
   hold of REQ-DLH-01 applies to every load that shows the shimmer.
   - A load that is superseded (a newer search started) does not end the shimmer; the newest load does.
+  > **Spec updated 2026-11-17:** the shimmer flag is set at the keystroke (debounce start) and at each reload or later visit start; a superseded load applies no rows; a load that fails or is cancelled as the newest ends the shimmer. The `IsInitialLoading` flag keeps its name, with a broadened XML doc on `CrudListViewModelBase`.
 
 ## Out of scope
 

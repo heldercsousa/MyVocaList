@@ -101,7 +101,8 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>, IQ
 
         // BUG-086: a Shell-cached page that receives a new artist context (query applied without OnAppearing)
         // must reload. Before the first load, InitializeAsync (OnAppearing) performs that load instead.
-        if (!IsInitialLoading)
+        // Guards on HasCompletedFirstLoad, not IsInitialLoading: the shimmer is also on during searches and reloads (REQ-DLH-05).
+        if (HasCompletedFirstLoad)
             _ = ReloadAsync();
     }
 
