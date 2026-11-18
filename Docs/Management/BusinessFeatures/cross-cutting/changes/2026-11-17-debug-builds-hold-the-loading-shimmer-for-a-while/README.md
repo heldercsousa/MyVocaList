@@ -1,7 +1,7 @@
 ---
 id: debug-builds-hold-the-loading-shimmer-for-a-while
 title: Debug builds hold the loading shimmer for a while
-status: 🟢 Ready
+status: 🟡 In Progress
 target: 2026-11-17
 section: BusinessFeatures
 parent: cross-cutting

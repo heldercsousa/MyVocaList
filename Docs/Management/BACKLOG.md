@@ -25,7 +25,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-06 | | 🏁 **MVP release** |
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | 2026-07-03 | **Cross-cutting** | — |
-| 2026-11-17 | ↳ Debug builds hold the loading shimmer for a while | 🟢 Ready |
+| 2026-11-17 | ↳ Debug builds hold the loading shimmer for a while | 🟡 In Progress |
 | 2026-11-06 | ↳ Person form follow-ups from ACF T7 run 2 | 💡 Pending |
 | 2026-11-12 | ↳ People list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
 | 2026-11-12 | ↳ Venues list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
