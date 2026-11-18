@@ -36,8 +36,8 @@ component edit; he checks it on a device and asks for enhancements if anything l
 - **REQ-IPF-02 Tap.** WHEN there is no form picture, tapping the picture opens the picker
   (add). WHEN there is one, tapping it opens the picker and a pick replaces it. There are no
   "Add picture", "Replace picture" or "Remove picture" buttons.
-- **REQ-IPF-03 Remove.** WHEN there is a form picture, a small round icon button (close icon,
-  tonal background) sits over the top-right corner of the picture. Tapping it removes the form
+- **REQ-IPF-03 Remove.** WHEN there is a form picture, a small round icon button (trash-can
+  icon, tonal background, icon centred) sits over the top-right corner of the picture. Tapping it removes the form
   picture: the placeholder shows. WHEN there is no form picture, the button is hidden. The
   record changes on Save only (REQ-PIC-17 / REQ-VEN-10); no file is deleted at tap or Save —
   unreferenced files are removed by the startup sweep (REQ-PIC-11).
@@ -51,8 +51,8 @@ component edit; he checks it on a device and asks for enhancements if anything l
 - **Sizing:** the component computes the side from its own allocated width
   (`SizeChanged`/`OnSizeAllocated`): `side = Math.Min(width - 2 * 40, 360)`, applied to the
   frame and both image layers (width and height). The 120 dp literals go.
-- **Corner button:** `dx:DXButton` with the project's icon-button style and `close_outlined`
-  icon, tonal background, about 40 dp, overlaid in a `Grid` with the frame, aligned top-end
+- **Corner button:** `dx:DXButton` with the project's icon-button style and `delete_outlined`
+  (trash-can) icon, centred in the button, tonal background, about 40 dp, overlaid in a `Grid` with the frame, aligned top-end
   with a small inset so it stays inside the square's corner. On the circle it sits at the
   bounding-box corner over the edge (the usual badge spot). Accessibility description:
   "Remove picture".
@@ -70,3 +70,7 @@ component edit; he checks it on a device and asks for enhancements if anything l
 ## Approval
 Pre-authorised by Helder on 2026-11-18 (component edit included); he can overrule after the
 device check. Size and icon are Claude's calls, open to Helder's adjustment.
+
+> **Spec updated 2026-11-18 (after Helder's device check):** the corner icon is the trash can
+> (`delete_outlined`), not the close icon, which read as an "X" character; and the icon must sit
+> centred in the round button (it showed off-centre horizontally).
