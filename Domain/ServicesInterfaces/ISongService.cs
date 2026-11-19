@@ -101,6 +101,14 @@ public interface ISongService
     /// <returns>The song when found; <c>null</c> when no song has the given id.</returns>
     Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default);
 
+    /// <summary>
+    /// Lookup on open (REQ-SLD-19..24): for a Deezer song with blank lyrics and no recorded origin, looks the lyrics up
+    /// with the stored title and artist name and stores a match (origin LyricsSource) or a definite no-match
+    /// (origin NoneFound). Returns the lyrics now stored on the song, or null.
+    /// </summary>
+    /// <remarks>Never throws except OperationCanceledException when the caller's token is cancelled before the answer arrives.</remarks>
+    Task<string?> EnsureLyricsAsync(int songId, CancellationToken ct = default);
+
     /// <summary>Checks per-artist title uniqueness (a song title must be unique per original artist).</summary>
     Task<bool> ExistsByTitleForArtistAsync(string title, int artistId, int? excludeId = null, CancellationToken ct = default);
 

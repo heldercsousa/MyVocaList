@@ -3,6 +3,7 @@ id: user-tutorial-learning
 title: "**User Tutorial/Learning**"
 status: "💡 Pending"
 target: 2026-06
+horizon: post-mvp
 section: BusinessFeatures
 kind: feature
 order: 330

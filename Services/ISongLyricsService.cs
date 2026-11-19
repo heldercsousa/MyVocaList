@@ -11,4 +11,7 @@ public interface ISongLyricsService
     /// <summary>Lyrics for the query, or null (offline, no match, over the limit, bound reached, source failure).</summary>
     /// <remarks>Never throws except <see cref="OperationCanceledException"/> when the caller's token is cancelled.</remarks>
     Task<string?> FindLyricsAsync(LyricsQuery query, CancellationToken ct = default);
+
+    /// <summary>As FindLyricsAsync, but tells a definite "no match" from "no answer" (REQ-SLD-22, 23).</summary>
+    Task<LyricsLookupResult> LookupLyricsAsync(LyricsQuery query, CancellationToken ct = default);
 }

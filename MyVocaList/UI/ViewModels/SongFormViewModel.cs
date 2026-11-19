@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.Constants;
@@ -8,6 +9,7 @@ using MyVocaList.Domain.Rules;
 using MyVocaList.UI.Collections;
 using MyVocaList.UI.Constants;
 using MyVocaList.UI.Models;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -47,6 +49,7 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isCharacterCounterWarning;
     [ObservableProperty] private bool _isCharacterCounterError;
     [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private bool _isSongLoading;   // REQ-SLD-32: edit-mode load of the stored song is running
 
     // ── Version field (Task 4.5) ──────────────────────────────────────────
     [ObservableProperty] private string _songVersion = string.Empty;
@@ -73,6 +76,8 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isLyricsLoading;
     /// <summary>The running lyrics lookup; tests await it. The pick itself never awaits it (design § 2.5).</summary>
     public Task LyricsLookupTask { get; private set; } = Task.CompletedTask;
+    /// <summary>REQ-SLD-19: the lookup on open; a completed null task when none runs. Tests await it.</summary>
+    public Task<string?> LyricsOnOpenTask { get; private set; } = Task.FromResult<string?>(null);
     /// <summary>REQ-LYR-09: the Lyrics placeholder while a lookup runs.</summary>
     public string LyricsPlaceholder => IsLyricsLoading ? "Looking for lyrics…" : "Song lyrics (optional)";
 
@@ -102,9 +107,10 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private string _titleSupportingText = string.Empty;
     [ObservableProperty] private bool _isTitleLocked;
 
-    private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
     private CancellationTokenSource? _lyricsLookupCts;   // REQ-LYR-10: the running lyrics lookup, if any
+    private CancellationTokenSource? _openLyricsLookupCts;   // REQ-SLD-19/23: the lookup on open of this form, if one was started
     private string? _pickFilledLyrics;                   // REQ-LYR-11/12: the Lyrics text the last lookup wrote
+    private LyricsLookupResult? _pickLyricsLookup;       // REQ-SLD-26: the outcome of the pick lookup of the held pick
     private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
     private string? _pendingArtistImageUrl;  // REQ-ART-11: Deezer artist picture held between a pick and Save
     private const string SongPlaceholderIcon = "music_note_outlined";
@@ -115,6 +121,7 @@ public partial class SongFormViewModel : ViewModelBase
     // ── Form picture (REQ-PIC-17..22) ─────────────────────────────────────
     private const string ImageHint = "Square picture (1:1), 512 x 512 px or larger. Other shapes are cropped to the centre.";
     private const string ImagePickFailedMessage = "Could not use this picture.";
+    private const string SongLoadFailedMessage = "This song could not be loaded.";   // REQ-SLD-34
 
     private string? _uploadedImageReference;   // REQ-PIC-18 (1): the picture uploaded in this form
     private string? _storedImageReference;     // REQ-PIC-18 (2), edit mode: the song's stored picture
@@ -179,6 +186,33 @@ public partial class SongFormViewModel : ViewModelBase
 
     public bool IsEditMode => SongId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Song" : "New Song";
+
+    /// <summary>Add mode: a Save now would store the pick's external identity (REQ-PIC-27, REQ-SLD-14).</summary>
+    private bool HoldsDeezerPick =>
+        !IsEditMode && SongIdentityRules.IsDeezerSong(SelectedProvider, SelectedExternalId)
+        && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
+
+    /// <summary>REQ-SLD-12/14: the Artist is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: the pick is held.</summary>
+    public bool IsArtistFrozen => IsEditMode ? (!_storedSongLoaded || _storedIsDeezerSong) : HoldsDeezerPick;
+    public bool IsArtistEditable => !IsArtistFrozen;   // for the page, no converter needed
+
+    /// <summary>REQ-SLD-36: the Title of a stored Deezer song is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: editable (C37).</summary>
+    public bool IsTitleFrozen => IsEditMode && (!_storedSongLoaded || _storedIsDeezerSong);
+    public bool IsTitleEditable => !IsTitleFrozen;   // for the page, no converter needed
+
+    private bool _storedSongLoaded;     // false until LoadSongForEditAsync has set the stored song (or found none)
+    private bool _storedIsDeezerSong;   // set in LoadSongForEditAsync from the loaded entity
+    private int _storedArtistId;        // set in LoadSongForEditAsync
+    private string _storedTitle = string.Empty;   // REQ-SLD-38: the title as loaded; a frozen Title is saved with it
+
+    /// <summary>Raises the change of the frozen state of the Artist and the Title; called wherever the pick, the Title or the stored song changes it.</summary>
+    private void NotifyArtistFrozenChanged()
+    {
+        OnPropertyChanged(nameof(IsArtistFrozen));
+        OnPropertyChanged(nameof(IsArtistEditable));
+        OnPropertyChanged(nameof(IsTitleFrozen));   // REQ-SLD-36
+        OnPropertyChanged(nameof(IsTitleEditable));
+    }
 
     /// <summary>REQ-SFT-27/02: Title is the search box in add mode only; edit mode shows plain editable text.</summary>
     public bool IsTitleSearchEnabled => !IsEditMode;
@@ -316,9 +350,13 @@ public partial class SongFormViewModel : ViewModelBase
 
     partial void OnSongIdChanged(int? value)
     {
+        _storedSongLoaded = false;          // a new song id: the stored song of the previous id no longer counts
+        _storedIsDeezerSong = false;
+        IsSongLoading = value.HasValue;     // REQ-SLD-32: edit mode shows the placeholder until the load ends
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(IsTitleSearchEnabled));
         OnPropertyChanged(nameof(PageTitle));
+        NotifyArtistFrozenChanged();
         NotifyFormImageChanged();   // REQ-PIC-18: the mode decides the second source of the form picture
         if (value.HasValue)
             _ = LoadSongForEditAsync(value.Value);
@@ -335,6 +373,11 @@ public partial class SongFormViewModel : ViewModelBase
         // so trailing whitespace cannot inflate the count (counter threshold alignment).
         UpdateCharacterCounter(value?.Trim().Length ?? 0);
         UpdateCanLaunchYouTubeSearch();
+        // REQ-SLD-39 (closes C25): in add mode a Title text that differs from the picked title releases the pick for
+        // good. The Title text, the pending song image and the pick lyrics outcome (REQ-SLD-26) stay.
+        if (!IsEditMode && _pickedTitle is not null && !string.Equals(value, _pickedTitle, StringComparison.Ordinal))
+            ReleaseDeezerPickOnTitleChange();
+        NotifyArtistFrozenChanged();   // REQ-SLD-14: a Title text change away from the picked title releases the artist
 
         if (_isHydrating)
             return;   // edit-mode pre-population — do not mark dirty
@@ -487,6 +530,7 @@ public partial class SongFormViewModel : ViewModelBase
     private void ClearArtist()
     {
         CancelLyricsLookup();            // REQ-LYR-10
+        _pickLyricsLookup = null;        // REQ-SLD-26: X on Artist drops the pick and its outcome
         DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SelectedArtistId = null;
         SelectedArtistName = null;
@@ -511,6 +555,7 @@ public partial class SongFormViewModel : ViewModelBase
         _pickedTitle = null;
         _pickedArtistName = null;
         NotifyFormImageChanged();            // REQ-PIC-19: an upload stays the form picture
+        NotifyArtistFrozenChanged();
     }
 
     // ── Title-first search and picks (Task 5.2) ───────────────────────────
@@ -578,18 +623,26 @@ public partial class SongFormViewModel : ViewModelBase
         return OpenSongAsync(dto.LocalId.Value);
     }
 
+    /// <summary>REQ-SLD-39: a Title text change releases the pick: the identity and the picked title go, the Title text stays.</summary>
+    private void ReleaseDeezerPickOnTitleChange()
+    {
+        SelectedExternalId = string.Empty;
+        SelectedProvider = string.Empty;
+        _pickedTitle = null;
+    }
+
     private void ApplyRemotePick(SongSuggestionDto dto)
     {
+        _pickedTitle = null;         // the pick's own Title write must not release the pick it is making
         SongTitle = dto.Title;
         IsTitleLocked = true;
-        SongVersion = dto.Version;
-        _pickFilledVersion = dto.Version;
         SelectedExternalId = dto.ExternalId ?? string.Empty;
         SelectedProvider = dto.ExternalProvider ?? string.Empty;
         _pendingImageUrl = dto.ImageUrl;             // REQ-ART-11: the cover, not the row-image fallback
         _pendingArtistImageUrl = dto.ArtistImageUrl;
         _imageRemoved = false;                       // REQ-PIC-20: a later pick sets a picture again
         _pickedTitle = dto.Title;                    // REQ-PIC-27: the identity survives an unchanged Title
+        NotifyArtistFrozenChanged();                 // REQ-SLD-14: the pick now holds the identity
         NotifyFormImageChanged();                    // REQ-PIC-19: an upload stays first
         StartLyricsLookup(dto);                      // REQ-LYR-01: before the artist branch, so every pick starts it
 
@@ -623,6 +676,7 @@ public partial class SongFormViewModel : ViewModelBase
     private void StartLyricsLookup(SongSuggestionDto dto)
     {
         CancelLyricsLookup();
+        _pickLyricsLookup = null;   // REQ-SLD-26: a newer pick replaces the outcome of the held pick
         DropUntouchedPickFilledLyrics();
         if (!string.IsNullOrWhiteSpace(Lyrics))
             return;
@@ -640,30 +694,31 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task RunLyricsLookupAsync(LyricsQuery query, CancellationTokenSource cts)
     {
-        string? found;
+        LyricsLookupResult answer;
         try
         {
-            found = await _songLyricsService.FindLyricsAsync(query, cts.Token);
+            answer = await _songLyricsService.LookupLyricsAsync(query, cts.Token);
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
             return;
         }
 
-        RunOnUiThread(() => ApplyLyricsAnswer(cts, found));
+        RunOnUiThread(() => ApplyLyricsAnswer(cts, answer));
     }
 
     /// <summary>
     /// Writes a lookup answer into the form only while that lookup is still the current one (REQ-LYR-10):
     /// a stale answer touches nothing, so a newer pick keeps its hint.
     /// </summary>
-    private void ApplyLyricsAnswer(CancellationTokenSource cts, string? found)
+    private void ApplyLyricsAnswer(CancellationTokenSource cts, LyricsLookupResult answer)
     {
         if (!ReferenceEquals(_lyricsLookupCts, cts) || cts.IsCancellationRequested)
             return;
 
+        _pickLyricsLookup = answer;   // REQ-SLD-26: kept for Save; a Title text change does not clear it
         IsLyricsLoading = false;
-        if (found is not null && string.IsNullOrWhiteSpace(Lyrics))
+        if (answer is { Status: LyricsLookupStatus.Found, Lyrics: { } found } && string.IsNullOrWhiteSpace(Lyrics))
         {
             Lyrics = found;
             _pickFilledLyrics = found;   // REQ-LYR-11/12: remembered so X or a new pick can take it back
@@ -695,18 +750,17 @@ public partial class SongFormViewModel : ViewModelBase
     private void ClearTitle()
     {
         CancelLyricsLookup();            // REQ-LYR-10
+        _pickLyricsLookup = null;        // REQ-SLD-26: X on Title drops the pick and its outcome
         DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SongTitle = string.Empty;
         IsTitleLocked = false;
         SelectedExternalId = string.Empty;
         SelectedProvider = string.Empty;
         TitleSupportingText = string.Empty;
-        if (_pickFilledVersion is not null && SongVersion == _pickFilledVersion)
-            SongVersion = string.Empty;
-        _pickFilledVersion = null;
         _pickedTitle = null;
         _pendingImageUrl = null;             // REQ-ART-13: X on Title drops the song image, keeps the artist image
         NotifyFormImageChanged();            // REQ-PIC-19: an upload stays the form picture
+        NotifyArtistFrozenChanged();
     }
 
     // ── Form picture commands (REQ-PIC-05, 10, 15, 17, 20) ────────────────
@@ -775,6 +829,10 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     public void InitializeArtistField()
     {
+        // REQ-SLD-30: the stored artist of a Deezer song is loaded from the entity; catalog query values must not replace it.
+        if (IsEditMode && _storedIsDeezerSong)
+            return;
+
         if (ArtistId > 0)
         {
             SelectedArtistId = ArtistId;
@@ -795,20 +853,70 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task LoadSongForEditAsync(int songId)
     {
+        // REQ-DLH-01: the debug-only shimmer hold starts with the load; it is awaited in finally, so the placeholder
+        // lasts max(load, hold). Zero duration (every build but Debug, and every unit test) = completed task.
+        var hold = LoadingHold.WaitAsync(CancellationToken.None);
+        try
+        {
+            if (await HydrateStoredSongAsync(songId))
+                return;
+
+            // REQ-SLD-34: a missing song is a failed load, the same as an exception.
+            await FailSongLoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Loading song {SongId} for edit failed", songId);
+            await FailSongLoadAsync();
+        }
+        finally
+        {
+            await hold;
+            IsSongLoading = false;   // REQ-SLD-32: the placeholder ends however the load ended
+        }
+    }
+
+    /// <summary>REQ-SLD-34: the message through the snackbar, then back to where the form was opened from. Nothing is stored.</summary>
+    private async Task FailSongLoadAsync()
+    {
+        await _snackbarService.ShowErrorAsync(SongLoadFailedMessage);
+        await _navigationService.GoToAsync("..");
+    }
+
+    /// <summary>
+    /// Hydrates the form from the stored song. Returns false when the song does not exist (the caller treats it as a failed load).
+    /// </summary>
+    private async Task<bool> HydrateStoredSongAsync(int songId)
+    {
         await LoadKaraokeUrlsAsync();
 
-        var song = await _songService.GetSongByIdAsync(songId);
+        // Bug fix: the database call runs on a background thread (Microsoft.Data.Sqlite runs "async" calls synchronously,
+        // which blocked the UI thread before the loading indicator was drawn). The continuation is back on the UI thread.
+        var song = await Task.Run(() => _songService.GetSongByIdAsync(songId));
         if (song is null)
         {
             _logger.LogWarning("Edit mode: song {SongId} not found during hydration", songId);
-            return;
+            _storedSongLoaded = true;   // nothing stored to freeze the Artist for: the form stays editable
+            await RunOnUiThreadAsync(() =>
+            {
+                NotifyArtistFrozenChanged();
+                return Task.CompletedTask;
+            });
+            return false;
         }
 
         // Stash external identity so the edit Save round-trips it unchanged.
         SelectedExternalId = song.ExternalId ?? string.Empty;
         SelectedProvider = song.ExternalProvider ?? string.Empty;
 
-        RunOnUiThread(() =>
+        // REQ-SLD-12/30: the frozen state and the stored artist come from the loaded entity, not from the pick fields.
+        _storedIsDeezerSong = SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId);
+        _storedArtistId = song.ArtistId;
+        _storedTitle = song.Title ?? string.Empty;   // REQ-SLD-38: the title a frozen Title is saved with
+        _storedSongLoaded = true;   // set before the UI block below, whose NotifyArtistFrozenChanged raises the change
+
+        // Awaited, so IsSongLoading (LoadSongForEditAsync, finally) turns false only after the stored values are applied.
+        await RunOnUiThreadAsync(() =>
         {
             // This may run after the page's OnAppearing already called CompleteHydration()
             // (the entity load is async) — re-open the hydration window while applying stored
@@ -846,7 +954,68 @@ public partial class SongFormViewModel : ViewModelBase
             {
                 _isHydrating = wasHydrating;
             }
+            NotifyArtistFrozenChanged();
+            return Task.CompletedTask;
         });
+
+        // REQ-SLD-19: a Deezer song without lyrics or recorded origin looks for them on open; the form stays usable.
+        if (_openLyricsLookupCts is null
+            && LyricsOriginRules.NeedsLookupOnOpen(song.ExternalProvider, song.ExternalId, song.Lyrics, song.LyricsOrigin))
+            StartLyricsLookupOnOpen(songId);
+        return true;
+    }
+
+    /// <summary>Called by the page when the form is left: asks the lookup on open to stop (REQ-SLD-23).</summary>
+    public void CancelLyricsLookupOnOpen() => _openLyricsLookupCts?.Cancel();
+
+    /// <summary>REQ-SLD-19: starts the lookup on open without awaiting it. At most one per form instance.</summary>
+    private void StartLyricsLookupOnOpen(int songId)
+    {
+        var cts = new CancellationTokenSource();
+        _openLyricsLookupCts = cts;
+        RunOnUiThread(() => IsLyricsLoading = true);
+        LyricsOnOpenTask = RunLyricsLookupOnOpenAsync(songId, cts);
+    }
+
+    /// <summary>
+    /// Asks the service on a background thread (Microsoft.Data.Sqlite runs "async" calls synchronously) and hands the
+    /// answer to the UI thread. A cancelled lookup yields null; the service does not throw for expected failures, so any
+    /// other exception is logged and yields null. The answer is applied on the UI thread before this task ends.
+    /// </summary>
+    private async Task<string?> RunLyricsLookupOnOpenAsync(int songId, CancellationTokenSource cts)
+    {
+        string? found;
+        try
+        {
+            found = await Task.Run(() => _songService.EnsureLyricsAsync(songId, cts.Token));
+        }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            found = null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Lyrics lookup on open failed for song {SongId}", songId);
+            found = null;
+        }
+
+        await RunOnUiThreadAsync(() =>
+        {
+            ApplyLyricsOnOpenAnswer(songId, found);
+            return Task.CompletedTask;
+        });
+        return found;
+    }
+
+    /// <summary>
+    /// REQ-SLD-21/25: hides the hint; writes the lookup's lyrics only into a blank Lyrics field of the song still shown,
+    /// so text the user typed meanwhile is kept.
+    /// </summary>
+    private void ApplyLyricsOnOpenAnswer(int songId, string? found)
+    {
+        IsLyricsLoading = false;
+        if (found is not null && string.IsNullOrWhiteSpace(Lyrics) && SongId == songId)
+            Lyrics = found;
     }
 
     // ── Save orchestration (Task 4.4 BUG-005 + Task 4.5 resolution) ──────
@@ -857,11 +1026,25 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task SaveAsync()
     {
+        if (IsSongLoading) return;   // REQ-SLD-33: a Save of a form not yet filled would overwrite the stored song with blanks
         CancelLyricsLookup();   // REQ-LYR-10: Save starts; a late lookup answer must not reach the form
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
+        await WaitForLyricsOnOpenAsync();   // REQ-SLD-31: the write never races a lookup on open
+        if (IsBusy) return;   // a second tap during the wait is the same Save
+
         ClearSaveDecisions();
         await RunSaveAsync();
+    }
+
+    /// <summary>
+    /// REQ-SLD-31: stops a lookup on open that still runs and waits for it to end. The answer is applied on the UI
+    /// thread before the task ends (REQ-SLD-21), so a stored match reaches the request.
+    /// </summary>
+    private async Task WaitForLyricsOnOpenAsync()
+    {
+        CancelLyricsLookupOnOpen();
+        await LyricsOnOpenTask;
     }
 
     /// <summary>
@@ -872,7 +1055,8 @@ public partial class SongFormViewModel : ViewModelBase
     {
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
-        var title = SongTitle?.Trim() ?? string.Empty;
+        // REQ-SLD-38: a frozen Title (plain text of a stored Deezer song) is saved as it was loaded.
+        var title = IsTitleFrozen ? _storedTitle.Trim() : (SongTitle?.Trim() ?? string.Empty);
         var version = SongVersion?.Trim() ?? string.Empty;
 
         // Safety net: re-run the Title and Version validators on every call, regardless of dirty
@@ -912,10 +1096,15 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private SongFormSaveRequest BuildSaveRequest(string title, string version)
     {
-        var artistId = SelectedArtistId is { } id && id != 0 ? id : (int?)null;
+        // REQ-SLD-30: a frozen (Deezer) song in edit mode sends the stored artist id, never artist text or a decision.
+        var frozenEdit = IsEditMode && IsArtistFrozen;
+        var artistId = frozenEdit
+            ? (int?)_storedArtistId
+            : SelectedArtistId is { } id && id != 0 ? id : (int?)null;
 
-        // REQ-PIC-27: after a release by a tap the Deezer identity travels only with the unchanged picked title.
-        var keepsIdentity = !IsEditMode && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
+        // REQ-PIC-27 / REQ-SLD-14: the Deezer identity travels as a pair, and only while HoldsDeezerPick
+        // (one source of truth with the frozen state of the screen).
+        var holdsIdentity = HoldsDeezerPick;
 
         // REQ-PIC-28: the Deezer artist picture travels only while the Artist text is the picked name.
         var artistImage = !IsEditMode && string.Equals(ArtistSearchText, _pickedArtistName, StringComparison.Ordinal)
@@ -931,16 +1120,18 @@ public partial class SongFormViewModel : ViewModelBase
             artistId,
             artistId.HasValue ? null : ArtistSearchText?.Trim(),
             // REQ-SFT-27 / design F6: edit mode sends a null identity = keep the stored identity.
-            keepsIdentity && !string.IsNullOrEmpty(SelectedProvider) ? SelectedProvider : null,
-            keepsIdentity && !string.IsNullOrEmpty(SelectedExternalId) ? SelectedExternalId : null,
+            holdsIdentity ? SelectedProvider : null,
+            holdsIdentity ? SelectedExternalId : null,
             _pendingRawUrls.ToArray(),
-            _artistDecision,
+            frozenEdit ? new ArtistDecision.None() : _artistDecision,
             _songDecision,
             // REQ-PIC-21: the form picture; edit mode stores it only when uploaded or removed (ImageChanged).
             ImageUrl: FormImageReference,
             // REQ-ART-16: the Deezer artist picture exists in add mode only (edit mode has no Deezer pick).
             ArtistImageUrl: artistImage,
-            ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved));
+            ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved),
+            // REQ-SLD-26: the outcome of the held pick's lookup; the Service decides the origin from it.
+            PickLyricsLookup: IsEditMode ? null : _pickLyricsLookup);
     }
 
     /// <summary>Maps the Service outcome to fields, sheets, the snackbar and navigation (REQ-SFT-51).</summary>
@@ -1122,7 +1313,9 @@ public partial class SongFormViewModel : ViewModelBase
         if (!SongId.HasValue) return;
         var apiKey = await _secureStorage.GetAsync("youtube_api_key");
         HasYouTubeApiKey = !string.IsNullOrWhiteSpace(apiKey);
-        var urls = await _karaokeUrlService.GetUrlsForSongAsync(SongId.Value, ct);
+        var songId = SongId.Value;
+        // Bug fix: the database read runs on a background thread (see HydrateStoredSongAsync).
+        var urls = await Task.Run(() => _karaokeUrlService.GetUrlsForSongAsync(songId, ct));
         foreach (var u in urls) _addedVideoIds.Add(u.VideoId);
         RunOnUiThread(() => KaraokeUrls.ReplaceRange(urls));
     }

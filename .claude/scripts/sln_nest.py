@@ -83,17 +83,61 @@ class Sln(object):
                 out[a] = b
         return out
 
-    def paths(self):
-        """{logical path tuple: guid} for every solution folder."""
-        folders, nested, out = self.folders(), self.nested(), {}
+    def guid_paths(self):
+        """[(logical path tuple, guid)] for every solution folder, in file order."""
+        folders, nested, out = self.folders(), self.nested(), []
         for g in folders:
             parts, node, guard = [], g, 0
             while node in folders and guard < 60:
                 parts.append(folders[node][0])
                 node = nested.get(node)
                 guard += 1
-            out.setdefault(tuple(reversed(parts)), g)
+            out.append((tuple(reversed(parts)), g))
         return out
+
+    def paths(self):
+        """{logical path tuple: guid}; the first folder wins when two share a path."""
+        out = {}
+        for parts, g in self.guid_paths():
+            out.setdefault(parts, g)
+        return out
+
+    def paths_ci(self):
+        """`paths()` keyed case-insensitively: Visual Studio and the .slnx parser treat
+        `Docs/ChangeLog` and `Docs/Changelog` as the same folder."""
+        out = {}
+        for parts, g in self.paths().items():
+            out.setdefault(tuple(x.lower() for x in parts), g)
+        return out
+
+    def merge_case_duplicates(self):
+        """Fold solution folders whose paths differ only by letter case into the first one.
+        Returns the number of folders removed."""
+        removed = 0
+        while True:
+            seen, dup = {}, None
+            for parts, g in sorted(self.guid_paths(), key=lambda kv: len(kv[0])):
+                key = tuple(x.lower() for x in parts)
+                if key in seen and seen[key] != g:
+                    dup = (seen[key], g)
+                    break
+                seen.setdefault(key, g)
+            if dup is None:
+                return removed
+            keep, gone = dup
+            block = self.folders()[gone][1]
+            for l in block:
+                if l.startswith("\t\t") and " = " in l:
+                    self.add_entry(keep, l.strip().split(" = ", 1)[0])
+            self.blocks = [b for b in self.blocks if b is not block]
+            for i in range(self.n1 - 1, self.n0, -1):
+                a, b = [x.strip().upper() for x in self.tail[i].split("=", 1)]
+                if a == gone:
+                    del self.tail[i]
+                    self.n1 -= 1
+                elif b == gone:
+                    self.tail[i] = "\t\t{0} = {1}".format(a, keep)
+            removed += 1
 
     def entries(self):
         """[(entry path, folder guid)] for every solution item."""
@@ -107,9 +151,10 @@ class Sln(object):
     # ---- edits ----
     def ensure_folder(self, parts):
         parts = tuple(parts)
-        known = self.paths()
-        if parts in known:
-            return known[parts]
+        known = self.paths_ci()
+        key = tuple(x.lower() for x in parts)
+        if key in known:
+            return known[key]
         if len(parts) <= 1:
             raise SlnError("root solution folder '{0}' not found".format("/".join(parts)))
         parent = self.ensure_folder(parts[:-1])
@@ -158,6 +203,7 @@ def folder_parts(rel):
 def place(text, rel_paths):
     """Return the .sln text with each `Docs\\...` path listed under its mirrored folder."""
     sln = Sln(text)
+    sln.merge_case_duplicates()
     for rel in rel_paths:
         rel = rel.replace("/", "\\")
         parts = folder_parts(rel)
@@ -172,9 +218,16 @@ def place(text, rel_paths):
 def misplaced(text):
     """Docs entries whose solution folder path differs from their physical folder."""
     sln = Sln(text)
-    by_guid = dict((g, p) for p, g in sln.paths().items())
+    by_guid = dict((g, tuple(x.lower() for x in p)) for p, g in sln.paths().items())
     return sorted(rel for rel, g in sln.entries()
-                  if rel.startswith(ROOT + "\\") and by_guid.get(g) != folder_parts(rel))
+                  if rel.startswith(ROOT + "\\")
+                  and by_guid.get(g) != tuple(x.lower() for x in folder_parts(rel)))
+
+
+def case_duplicates(text):
+    """Number of solution folders whose path differs from another only by letter case."""
+    paths = [p for p, _g in Sln(text).guid_paths()]
+    return len(paths) - len(set(tuple(x.lower() for x in p) for p in paths))
 
 
 def docs_entries(text):
@@ -195,12 +248,14 @@ def main(argv):
         raise SlnError("Docs entry set changed: {0} distinct -> {1}".format(len(set(before)), len(after)))
     if dupes:
         print("sln_nest: {0} duplicate listings collapse to one entry each.".format(dupes))
-    if misplaced(new):
+    if misplaced(new) or case_duplicates(new):
         raise SlnError("entries are still misplaced after the move")
     created = len(Sln(new).folders()) - len(Sln(text).folders())
-    repairs = Sln(text).repairs
+    repairs, case_dupes = Sln(text).repairs, case_duplicates(text)
     print("sln_nest: {0} of {1} Docs entries misplaced; {2} solution folders to create; "
-          "{3} malformed EndProject lines to repair.".format(len(todo), len(before), created, repairs))
+          "{3} malformed EndProject lines to repair; {4} case-variant duplicate folders to merge.".format(
+              len(todo), len(before), max(created + case_dupes, 0), repairs, case_dupes))
+    repairs += case_dupes
     if "--dry-run" in argv or not (todo or repairs):
         print("sln_nest: nothing written.")
         return 0

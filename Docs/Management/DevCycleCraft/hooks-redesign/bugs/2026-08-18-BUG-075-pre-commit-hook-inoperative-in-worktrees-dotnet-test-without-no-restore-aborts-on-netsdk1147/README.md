@@ -1,13 +1,14 @@
 ---
 id: BUG-075
 title: "Pre-commit hook inoperative in worktrees: dotnet test without --no-restore aborts on NETSDK1147"
-status: 💡 Pending
+status: 🔵 Superseded
 severity: Major
 target: 2026-08-18
 section: DevCycleCraft
 parent: hooks-redesign
 goal: The pre-commit hook runs dotnet test without --no-restore; in a worktree the restore fails with NETSDK1147, so the hook exits before running a single test.
 gate: Found in UOW Phase 2. The test gate silently does not run in any worktree, and every worktree commit needs --no-verify for an unrelated reason.
+closed: 2026-11
 kind: bug
 ---
 
@@ -89,3 +90,8 @@ In a **freshly created** worktree (not the main tree — the main tree cannot re
 3. The hook must print test counts and pass.
 4. Then stage a deliberately failing test and confirm the hook still **blocks** — the fix must not
    turn the gate off, only make it run.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was still useful and not delivered. Reopen it by registering a new item if the work is wanted again.

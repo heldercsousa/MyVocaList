@@ -33,7 +33,7 @@ Run this checklist during code review for any test file. A test that fails one o
 
 ## Builder Must Not Modify Tests
 
-During the Green phase, the Builder's only permitted action is writing or modifying **production code** in `MyVocaList.Domain`, `MyVocaList.Services`, `MyVocaList.Infra`, or `MyVocaList` (MAUI).
+During the Green phase, the Builder's only permitted action is writing or modifying **production code** in `MyVocaList.Domain`, `MyVocaList.Contracts`, `MyVocaList.Services`, `MyVocaList.Infra`, `MyVocaList.Extensions`, or `MyVocaList` (MAUI).
 
 **The Builder must never:**
 - Edit a test file to make a test pass

@@ -19,5 +19,6 @@ Defined in `CLAUDE.md § Architecture` — they apply equally to code. "Business
 
 ## UI Thread Performance — ObservableRangeCollection
 `library/code-style-reference.md § UI Thread Performance` — one `ReplaceRange` per `RunOnUiThread` block; clear selection after reload; no LINQ/service calls inside the UI-thread block.
+**Loading pattern — mandatory for every list and every screen that loads data:** `library/code-style-reference.md § Loading Pattern — Lists and Data Loads` (lists derive from `CrudListViewModelBase`; never hand-roll loading, threading or the shimmer).
 
 EF Core / SQLite constraints: `constraints-registry.md § EF Core / SQLite`. Design skills: `modern-csharp-coding-standards`, `dependency-injection-patterns`, `efcore-patterns`.

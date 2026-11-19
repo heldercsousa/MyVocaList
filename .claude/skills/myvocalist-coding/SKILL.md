@@ -15,6 +15,7 @@ Project-specific coding rules for the MyVocaList .NET MAUI app. Read the relevan
 | Task | File |
 |------|------|
 | C# style, naming, async, DI lifetimes, service return tuples, exception handling, global usings | `.claude/library/code-style-reference.md` |
+| **Any list, or any screen that loads data before use (form, picker, field search) — mandatory pattern** | `.claude/library/code-style-reference.md § Loading Pattern — Lists and Data Loads` |
 | Any UI work — CRUD laws + index | `.claude/library/crud-pages.md` (index) → `crud-listview.md` · `crud-appbar-list-toolbar.md` · `crud-form-page.md` · `crud-checklists.md` · `crud-migration-specfirst.md` · `crud-supporting.md` |
 | DevExpress components — **FIRST, always** read `dx-audit-namespaces.md`, then the component section | `.claude/library/devexpress-patterns.md` (index) → `dx-buttons.md` · `dx-collectionview.md` · `dx-visual-containers.md` · `dx-editors.md` · `dx-bottomsheet-theme.md` · `dx-form-page.md` · `dx-misc-patterns.md` · `dx-appbars.md` · `dx-styles-gotchas.md` · `dx-subcomponents-styles.md` |
 | EF Core entity config, migrations, repository queries | `.claude/library/database-indexing.md` |

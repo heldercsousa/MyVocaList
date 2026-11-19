@@ -28,7 +28,7 @@ Generic test-project setup (csproj skeleton, xUnit/Moq/coverlet packages, condit
 
 - **TFM is `net10.0` only** (NOT `net10.0-android`) so tests run on the desktop host.
 - Add `Microsoft.EntityFrameworkCore.Sqlite` `10.*` (repository integration tests use real SQLite).
-- Reference the four non-MAUI projects: `MyVocaList.Domain`, `MyVocaList.Contracts`, `MyVocaList.Infra`, `MyVocaList.Services`.
+- Reference the five non-MAUI projects: `MyVocaList.Domain`, `MyVocaList.Contracts`, `MyVocaList.Infra`, `MyVocaList.Services`, `MyVocaList.Extensions` (folder `Extensions/`; folder naming: `code-style-reference.md § C# Style › Projects and folders`).
 - Do NOT reference `MyVocaList.csproj` (MAUI head) unless ViewModel tests are needed; if referenced, apply the skill's conditional `<OutputType>Library</OutputType>` on the `net10.0` TFM.
 
 ### GlobalUsings.cs

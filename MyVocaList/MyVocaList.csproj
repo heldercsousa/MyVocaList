@@ -137,6 +137,7 @@
 
 		<PackageReference Include="Redth.MauiDevFlow.Agent" Condition="'$(TargetFramework)' != 'net10.0'" />
 		<PackageReference Include="MinVer" PrivateAssets="All" />
+		<PackageReference Include="System.Security.Cryptography.Xml" />
 	</ItemGroup>
 
 	<!-- Android transitive-dependency alignment.
@@ -184,16 +185,11 @@
 	     MinVer normally runs late (BeforeCompile), after the Android SDK target _GetAndroidPackageName has already
 	     copied ApplicationDisplayVersion/ApplicationVersion into the manifest inputs. DependsOnTargets="MinVer"
 	     pulls MinVer forward so MinVerVersion exists before either consumer runs. -->
-	<Target Name="SetVersionFromMinVer"
-	        DependsOnTargets="MinVer"
-	        BeforeTargets="_GetAndroidPackageName;GenerateAssemblyInfo"
-	        Condition="'$(DesignTimeBuild)' != 'true'">
-		<Exec Command="git rev-list --count --first-parent HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low"
-		      ContinueOnError="true" IgnoreExitCode="true" StandardErrorImportance="low">
+	<Target Name="SetVersionFromMinVer" DependsOnTargets="MinVer" BeforeTargets="_GetAndroidPackageName;GenerateAssemblyInfo" Condition="'$(DesignTimeBuild)' != 'true'">
+		<Exec Command="git rev-list --count --first-parent HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" ContinueOnError="true" IgnoreExitCode="true" StandardErrorImportance="low">
 			<Output TaskParameter="ConsoleOutput" PropertyName="_BidCount" />
 		</Exec>
-		<Error Condition="'$(_BidCount)' == '' Or !$([System.Text.RegularExpressions.Regex]::IsMatch('$(_BidCount)', '^\d+$'))"
-		       Text="versionCode: git rev-list --count failed - git history is required (REQ-BID-06)." />
+		<Error Condition="'$(_BidCount)' == '' Or !$([System.Text.RegularExpressions.Regex]::IsMatch('$(_BidCount)', '^\d+$'))" Text="versionCode: git rev-list --count failed - git history is required (REQ-BID-06)." />
 		<PropertyGroup>
 			<ApplicationDisplayVersion>$(MinVerVersion)</ApplicationDisplayVersion>
 			<ApplicationVersion>$(_BidCount)</ApplicationVersion>
@@ -202,9 +198,7 @@
 
 	<!-- Git details for the About page. Runs on every build (no Inputs/Outputs) so a new commit with unchanged
 	     sources is never stale. Git output goes through shell redirection so ';' and '%' survive verbatim. -->
-	<Target Name="WriteBuildDetails"
-	        BeforeTargets="PrepareForBuild;AssignTargetPaths"
-	        Condition="'$(ShowBuildDetails)' != 'false' And '$(DesignTimeBuild)' != 'true'">
+	<Target Name="WriteBuildDetails" BeforeTargets="PrepareForBuild;AssignTargetPaths" Condition="'$(ShowBuildDetails)' != 'false' And '$(DesignTimeBuild)' != 'true'">
 		<PropertyGroup>
 			<_BidDetailsFile>$(IntermediateOutputPath)build-details.txt</_BidDetailsFile>
 		</PropertyGroup>

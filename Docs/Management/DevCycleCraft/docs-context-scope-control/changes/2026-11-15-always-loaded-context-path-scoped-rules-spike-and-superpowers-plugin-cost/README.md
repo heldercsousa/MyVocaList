@@ -2,7 +2,7 @@
 id: always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost
 title: "Always-loaded context: path-scoped rules spike and superpowers plugin cost"
 status: 💡 Pending
-target: 2026-11-15
+target: —
 parent: docs-context-scope-control
 goal: Find out whether code-only rules files can load on demand without failing to reach subagents, and measure the fixed cost of the superpowers plugin, before any decision.
 gate: Helder decides on the spike result and the measured plugin cost.

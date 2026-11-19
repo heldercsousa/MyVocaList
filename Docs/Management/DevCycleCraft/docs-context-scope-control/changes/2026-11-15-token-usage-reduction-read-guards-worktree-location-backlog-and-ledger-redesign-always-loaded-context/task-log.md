@@ -133,3 +133,20 @@ So every reminder listed in workstream C was invisible to the model, and so is t
 - `CLAUDE.md`: 7 `[HARD RULE]`/`[Unamendable]` markers before and after; Helder approved the diff before the commit.
 - Clean-up: each of the 37 branches was re-checked for commits outside `develop` and `main` (0) immediately before deletion.
 - Context: `claude -p "/context"` from a fresh process, figures in `README.md`.
+
+## Step 7 — Verifications closed on 2026-11-16
+
+**Status:** Done
+
+### Changed files
+
+- `.claude/scripts/sln_nest.py`, `.claude/scripts/tests/test_sln_nest.py`, `MyVocaList.sln` (`88349be4`)
+- `.claude/scripts/worktree-base-check.py` (`e95a562e`)
+- `.claude/agents/orchestrator.md` (briefing rule for library files, `88349be4`)
+
+### Verification evidence
+
+- "Before" measurement: fresh headless process on the pre-change commit `f8752731` in a temporary worktree (removed afterwards): 31.9k tokens in total, memory files 12k, skills 2.5k. After: 31.6k, 11.7k, 2.5k.
+- Official parser: `dotnet sln migrate` failed on the re-nested file with "Duplicate item '/Docs/Changelog/' of type 'Folder'"; the same command converts the pre-change file. Cause: case-sensitive folder matching in `sln_nest.py`. After the fix it converts; an XML check of the result shows 328 folders, 7 projects, 715 `Docs` files, 0 in a folder that does not match their directory. The generated `.slnx` was deleted. 12 tests in `test_sln_nest.py`.
+- Compaction hook: `claude -p`, then `claude -c -p "/compact"`, then a question in the same session; the model quoted the "AFTER COMPACTION" line.
+- Base check: `test_worktree_base_check` OK; the script prints nothing for the 8 live worktrees.
