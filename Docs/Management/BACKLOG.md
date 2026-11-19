@@ -38,12 +38,9 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 <!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->
 | Target | Activity | Status |
 |--------|----------|--------|
-| 2026-07-12 | **Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception** | 🟡 In Progress |
-| 2026-11-03 | ↳ Post-ship review — did the agent-dispatch recalibration meet its expectations | 💡 Pending |
 | 2026-06-12 | Large-volume data stress test (1–2 year seed) | 💡 Pending |
 | — | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
-| — | ↳ Screen coverage — keyboard, safe area and snackbars hiding inputs and bottom bars | 💡 Pending |
 | 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ Move the Playwright MCP token to .env.local | 💡 Pending |
