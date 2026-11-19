@@ -3,16 +3,35 @@ using Microsoft.Maui.Controls.Shapes;
 namespace MyVocaList.UI.Components.Media;
 
 /// <summary>
-/// The form picture field (REQ-PIC-13..16; design.md § 2.5 of the form-pictures change): a centred column
-/// of the 120 dp picture (rounded square, or circle when <see cref="IsCircle"/>), the actions ("Add picture",
-/// or "Replace picture" + "Remove picture") and the size hint. The picture layers the placeholder icon under
-/// <see cref="ThumbnailSource"/> under <see cref="ImageSource"/>, like <c>ListItemLeadingImage</c>.
+/// The form picture field (REQ-IPF-01..04; supersedes the size and button set of REQ-PIC-13/15 and REQ-VEN-07..09):
+/// a centred square picture (a circle when <see cref="IsCircle"/>) with a round remove icon button over its top-end
+/// corner, and the size hint. The side is computed from the field's own allocated width. The picture layers the
+/// placeholder icon under <see cref="ThumbnailSource"/> under <see cref="ImageSource"/>, like <c>ListItemLeadingImage</c>.
+/// A tap on the picture runs <see cref="PickCommand"/> (add, or replace when there is a picture).
 /// The component decides nothing about pictures: the ViewModel owns <see cref="HasImage"/> and the commands.
 /// </summary>
 public partial class ImagePickerField : ContentView
 {
     /// <summary>Corner radius of the song picture's rounded square (REQ-PIC-13).</summary>
     private const double SquareCornerRadius = 12;
+
+    /// <summary>Horizontal inset from the field's allocated width on each side (REQ-IPF-01).</summary>
+    private const double FormSideInset = 40;
+
+    /// <summary>Largest side of the picture (REQ-IPF-01).</summary>
+    private const double MaximumSide = 360;
+
+    /// <summary>
+    /// Side used before the field has a usable width (first layout, or a width of at most
+    /// <see cref="MinimumLayoutWidth"/>). Also the lower bound of the computed side.
+    /// </summary>
+    private const double MinimumSide = 120;
+
+    /// <summary>Allocated widths at or below this are treated as "not laid out yet".</summary>
+    private const double MinimumLayoutWidth = 80;
+
+    /// <summary>The side currently applied to the picture host, frame and image layers.</summary>
+    private double _side;
 
     // ── ImageSource ────────────────────────────────────────────────────────
 
@@ -77,7 +96,7 @@ public partial class ImagePickerField : ContentView
         nameof(HasImage), typeof(bool), typeof(ImagePickerField), false,
         propertyChanged: (b, _, _) => ((ImagePickerField)b).ApplyState());
 
-    /// <summary>Whether the form has a picture: switches the buttons and the hint (REQ-PIC-15, -16).</summary>
+    /// <summary>Whether the form has a picture: shows the remove button, switches the tap hint and hides the size hint (REQ-IPF-03, REQ-PIC-16).</summary>
     public bool HasImage
     {
         get => (bool)GetValue(HasImageProperty);
@@ -104,7 +123,7 @@ public partial class ImagePickerField : ContentView
     public static readonly BindableProperty PickCommandProperty = BindableProperty.Create(
         nameof(PickCommand), typeof(ICommand), typeof(ImagePickerField), null);
 
-    /// <summary>Runs on "Add picture", "Replace picture" and a tap on the picture (REQ-PIC-15).</summary>
+    /// <summary>Runs on a tap on the picture: adds a picture when there is none, replaces it otherwise (REQ-IPF-02).</summary>
     public ICommand PickCommand
     {
         get => (ICommand)GetValue(PickCommandProperty);
@@ -117,7 +136,7 @@ public partial class ImagePickerField : ContentView
     public static readonly BindableProperty RemoveCommandProperty = BindableProperty.Create(
         nameof(RemoveCommand), typeof(ICommand), typeof(ImagePickerField), null);
 
-    /// <summary>Runs on "Remove picture" (REQ-PIC-15, -20).</summary>
+    /// <summary>Runs on a tap on the corner remove button (REQ-IPF-03, REQ-PIC-20).</summary>
     public ICommand RemoveCommand
     {
         get => (ICommand)GetValue(RemoveCommandProperty);
@@ -131,7 +150,7 @@ public partial class ImagePickerField : ContentView
         nameof(IsBusy), typeof(bool), typeof(ImagePickerField), false,
         propertyChanged: (b, _, _) => ((ImagePickerField)b).ApplyState());
 
-    /// <summary>While <c>true</c> the actions and the picture tap are disabled (a picture is being imported).</summary>
+    /// <summary>While <c>true</c> the picture tap and the remove button are disabled (a picture is being imported; REQ-IPF-04).</summary>
     public bool IsBusy
     {
         get => (bool)GetValue(IsBusyProperty);
@@ -140,12 +159,56 @@ public partial class ImagePickerField : ContentView
 
     // ── Constructor ────────────────────────────────────────────────────────
 
-    /// <summary>Creates the field with no picture: the placeholder, "Add picture" and no hint text.</summary>
+    /// <summary>Creates the field with no picture: the placeholder, no remove button and no hint text.</summary>
     public ImagePickerField()
     {
         InitializeComponent();
         ApplyShape();
+        ApplySide(MinimumSide);
         ApplyState();
+    }
+
+    // ── Layout ─────────────────────────────────────────────────────────────
+
+    /// <summary>Recomputes the picture side when the field's allocated width changes (REQ-IPF-01).</summary>
+    protected override void OnSizeAllocated(double width, double height)
+    {
+        base.OnSizeAllocated(width, height);
+
+        var side = ComputeSide(width);
+        if (side != _side)
+            ApplySide(side);
+    }
+
+    /// <summary>
+    /// The square side for an allocated width: <c>width - 2 * 40</c>, at most 360, and never below
+    /// <see cref="MinimumSide"/>. A width at or below <see cref="MinimumLayoutWidth"/> (not laid out yet) gives the minimum.
+    /// </summary>
+    private static double ComputeSide(double width)
+    {
+        if (width <= MinimumLayoutWidth)
+            return MinimumSide;
+
+        return Math.Max(MinimumSide, Math.Min(width - 2 * FormSideInset, MaximumSide));
+    }
+
+    // Sets the size of the host, the frame and both image layers (width and height together). Child sizes only:
+    // the field's own WidthRequest is never touched, so the layout does not feed back into itself.
+    private void ApplySide(double side)
+    {
+        if (pictureHost is null)
+            return;
+
+        _side = side;
+
+        pictureHost.WidthRequest = side;
+        pictureHost.HeightRequest = side;
+        pictureFrame.WidthRequest = side;
+        pictureFrame.HeightRequest = side;
+        thumbnailImage.WidthRequest = side;
+        thumbnailImage.HeightRequest = side;
+        largeImage.WidthRequest = side;
+        largeImage.HeightRequest = side;
     }
 
     // ── State application ─────────────────────────────────────────────────
@@ -163,24 +226,22 @@ public partial class ImagePickerField : ContentView
     // Called from the HasImage, HintText and IsBusy callbacks, so the result does not depend on binding order.
     private void ApplyState()
     {
-        if (addButton is null)
+        if (removeButton is null)
             return;
 
         var hasImage = HasImage;
-        var isEnabled = !IsBusy;
 
-        addButton.IsVisible = !hasImage;
-        replaceButton.IsVisible = hasImage;
         removeButton.IsVisible = hasImage;
+        removeButton.IsEnabled = !IsBusy;
 
-        addButton.IsEnabled = isEnabled;
-        replaceButton.IsEnabled = isEnabled;
-        removeButton.IsEnabled = isEnabled;
+        SemanticProperties.SetHint(pictureFrame, hasImage
+            ? "Double tap to replace the picture"
+            : "Double tap to choose a picture");
 
         hintLabel.IsVisible = !hasImage && !string.IsNullOrWhiteSpace(HintText);
     }
 
-    // A tap on the picture does what the first button does (REQ-PIC-15), never while busy.
+    // A tap on the picture adds or replaces the picture (REQ-IPF-02), never while busy (REQ-IPF-04).
     private void OnPictureTapped(object? sender, TappedEventArgs e)
     {
         if (IsBusy)

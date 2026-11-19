@@ -3,6 +3,7 @@ id: backup-restore
 title: "**Data Backup & Restore — Tier 2 (WiFi Mirror)**"
 status: "💡 Pending"
 target: "—"
+horizon: post-mvp
 section: BusinessFeatures
 kind: feature
 order: 360

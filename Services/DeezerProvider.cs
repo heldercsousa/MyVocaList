@@ -1,5 +1,7 @@
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Rules;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
@@ -44,7 +46,7 @@ public sealed class DeezerProvider : IMusicMetadataProvider
     public async Task<IEnumerable<MusicSearchResultDto>> SearchSongsAsync(string term, string? artistHint = null, CancellationToken ct = default)
     {
         var response = await GetAsync<DeezerTrack>($"search/track?q={Uri.EscapeDataString(term)}", ct);
-        return response.Data?.Take(MaxResults)
+        return response.Data?.Take(SearchConstants.RemoteSongFetchCount)
             .Select(t => new MusicSearchResultDto(
                 t.Id.ToString(),
                 ProviderName,
@@ -55,7 +57,8 @@ public sealed class DeezerProvider : IMusicMetadataProvider
                 ImageUrlRules.Normalize(t.Album?.CoverMedium),
                 ImageUrlRules.Normalize(t.Artist?.PictureMedium),
                 NormaliseAlbumTitle(t.Album?.Title),
-                NormaliseDuration(t.Duration)))
+                NormaliseDuration(t.Duration),
+                t.Artist?.Id?.ToString(CultureInfo.InvariantCulture)))
             .ToList()
             ?? [];
     }
@@ -134,6 +137,7 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         [property: JsonPropertyName("album")] DeezerTrackAlbum? Album,
         [property: JsonPropertyName("duration")] int? Duration);
     private record DeezerTrackArtist(
+        [property: JsonPropertyName("id")] long? Id,
         [property: JsonPropertyName("name")] string Name,
         [property: JsonPropertyName("picture_medium")] string? PictureMedium);
     private record DeezerTrackAlbum(

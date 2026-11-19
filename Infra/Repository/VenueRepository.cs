@@ -178,16 +178,13 @@ namespace MyVocaList.Infra.Repository
         }
 
         /// <summary>
-        /// Checks whether another venue has all six address fields equal. Plain == on the six columns: EF Core's
-        /// null semantics make a null value match only NULL, and the column collation NOCASE_NOACCENT ignores letter
-        /// case and accents, so no C# normalisation is needed. The caller passes a normalised address; an empty
-        /// address never collides and returns false without a query (REQ-VEN-20, 21).
+        /// Checks whether another venue has an equal name and all six address fields equal. Plain == on the name and
+        /// the six columns, as <see cref="GetByNameAsync"/> compares the name: EF Core's null semantics make a null
+        /// value match only NULL, and the column collation NOCASE_NOACCENT ignores letter case and accents, so no C#
+        /// normalisation is needed. No early return for an empty address: empty equals empty (REQ-VEN-41 to 44).
         /// </summary>
-        public async Task<bool> AddressExistsAsync(VenueAddress address, int? excludeId, CancellationToken ct = default)
+        public async Task<bool> NameAndAddressExistsAsync(string name, VenueAddress address, int? excludeId, CancellationToken ct = default)
         {
-            if (VenueAddressRules.IsEmpty(address))
-                return false;
-
             var line1 = address.Line1;
             var line2 = address.Line2;
             var city = address.City;
@@ -197,6 +194,7 @@ namespace MyVocaList.Infra.Repository
 
             return await _context.Venues.AnyAsync(v =>
                 (excludeId == null || v.Id != excludeId)
+                && v.Name == name
                 && v.AddressLine1 == line1
                 && v.AddressLine2 == line2
                 && v.City == city

@@ -28,10 +28,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		version-manifest.json = version-manifest.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Design\MyVocaList_Iconography_MD3_Guideline.md = Docs\Design\MyVocaList_Iconography_MD3_Guideline.md
@@ -47,7 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 		Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf = Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Tests", "MyVocaList.Tests\MyVocaList.Tests.csproj", "{C3E8D7AF-F4B4-42B9-8355-EACE1EA31762}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\MyVocaList.Tests.csproj", "{C3E8D7AF-F4B4-42B9-8355-EACE1EA31762}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-0001-4000-8000-000000000001}"
 	ProjectSection(SolutionItems) = preProject
@@ -246,8 +242,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versi
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-015-016-fixes", "bug-015-016-fixes", "{FA1234BC-0001-4000-8000-000000000030}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-form-validation-guide", "ui-form-validation-guide", "{FA1234BC-0001-4000-8000-000000000033}"
 	ProjectSection(SolutionItems) = preProject
@@ -309,8 +303,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "a
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompleteedit-replacement", "2026-07-19-dx-autocompleteedit-replacement", "{FA1234BC-0001-4000-8000-000000000053}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-trivial-fix", "inline-trivial-fix", "{FA1234BC-0001-4000-8000-000000000056}"
 	ProjectSection(SolutionItems) = preProject
@@ -458,16 +450,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-appbar-pattern", "se
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-044-duplicate-personformpage-after-save", "2026-07-15-BUG-044-duplicate-personformpage-after-save", "{FA1234BC-0001-4000-8000-0000000000CE}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "{FA1234BC-0001-4000-8000-0000000000CF}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "{FA1234BC-0001-4000-8000-0000000000D0}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
@@ -506,12 +492,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-search-launch", "yo
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "song-import-resolution", "song-import-resolution", "{FA1234BC-0001-4000-8000-000000000023}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-form-ux-redesign", "2026-07-10-form-ux-redesign", "{FA1234BC-0001-4000-8000-000000000045}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-create", "2026-07-21-inline-artist-create", "{FA1234BC-0001-4000-8000-000000000055}"
 	ProjectSection(SolutionItems) = preProject
@@ -911,28 +893,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-out
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-017-artistscrud-emulator-debug-often-stops", "BUG-017-artistscrud-emulator-debug-often-stops", "{B92F4F42-00C3-44C3-BC6E-E340782C7183}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-018-artistformpage-edit-save-crash", "BUG-018-artistformpage-edit-save-crash", "{FA1234BC-0001-4000-8000-000000000031}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-019-artistspage-listitem-button-noop", "BUG-019-artistspage-listitem-button-noop", "{FA1234BC-0001-4000-8000-000000000032}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-021-songspage-fab-crash", "BUG-021-songspage-fab-crash", "{92D65ADE-A1E0-4220-AE25-06691B50D86D}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-024-songform-edit-data-loss", "BUG-024-songform-edit-data-loss", "{FA1234BC-0001-4000-8000-000000000035}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-023-songform-bottomsheet-broken", "BUG-023-songform-bottomsheet-broken", "{FA1234BC-0001-4000-8000-000000000036}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000038}"
 	ProjectSection(SolutionItems) = preProject
@@ -942,12 +912,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000039}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-026-hwui-sigabrt-render-teardown", "BUG-026-hwui-sigabrt-render-teardown", "{FA1234BC-0001-4000-8000-000000000040}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Archive", "Archive", "{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rules-file-refactoring", "rules-file-refactoring", "{FA1234BC-0001-4000-8000-000000000041}"
 	ProjectSection(SolutionItems) = preProject
@@ -1012,10 +976,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bugs", "Bugs", "{1AAD9972-3FB1-449D-B8DD-145C107CBD67}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941D280-F5AE-428A-AC78-42246F3BF3F8}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Extensions", "MyVocaList.Extensions\MyVocaList.Extensions.csproj", "{9380343D-7BB2-4832-A406-ED77FF9AAEB2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions", "Extensions\MyVocaList.Extensions.csproj", "{9380343D-7BB2-4832-A406-ED77FF9AAEB2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}"
 EndProject
@@ -1043,16 +1005,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (autocomplete-component)", "bugs (autocomplete-component)", "{FA1234BC-0001-4000-8000-0000000000BC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{FA1234BC-0001-4000-8000-0000000000BD}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-041-search-view-duplicate-on-back", "2026-07-12-BUG-041-search-view-duplicate-on-back", "{FA1234BC-0001-4000-8000-0000000000BE}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-042-back-tap-repeat-cycle", "2026-07-12-BUG-042-back-tap-repeat-cycle", "{FA1234BC-0001-4000-8000-0000000000BF}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
 	ProjectSection(SolutionItems) = preProject
@@ -1277,14 +1233,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "emulator-testing", "emulato
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\emulator-testing\Chat with Opus about frozen UI in emulator - TO DO.txt = Docs\Management\cross-cutting\emulator-testing\Chat with Opus about frozen UI in emulator - TO DO.txt
 		Docs\Management\cross-cutting\emulator-testing\EMULATOR_TEST_MASTER_LIST.md = Docs\Management\cross-cutting\emulator-testing\EMULATOR_TEST_MASTER_LIST.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Changelog", "Changelog", "{AF868E58-4DB1-5636-8BB6-614964BBA192}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Archive", "Archive", "{B68CA4C6-5A8B-5AAF-A338-ACC3E955699B}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Changelog\Archive\changelog-2025-2026.md = Docs\Changelog\Archive\changelog-2025-2026.md
-		Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md = Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{869E9F71-DCA1-5BA0-8A84-9E9A92158B93}"
@@ -1647,8 +1595,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-10-retire-changelog
 		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-10-retire-changelog-md-and-its-references\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-10-retire-changelog-md-and-its-references\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{CD50E32E-8C1D-5DD8-8497-EBACACC62267}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{915BA353-CE8B-55C2-8D71-30542A0C2075}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md
@@ -2006,6 +1952,64 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-15-always-loaded-co
 		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark", "2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark", "{A7F0B821-1B0C-550F-A72E-0F7502BB6679}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-16-send-corrected-lyrics-back-to-lrclib", "2026-11-16-send-corrected-lyrics-back-to-lrclib", "{E97B9141-1344-5B4D-93A8-0C3823B6E2EB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-send-corrected-lyrics-back-to-lrclib\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-send-corrected-lyrics-back-to-lrclib\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open", "2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open", "{C70D1D55-6B49-5D3A-9151-A2D66D8A5AD4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\spec-changelog.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\spec-changelog.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed", "2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed", "{8DB9392D-441E-53D6-8135-FA909998E452}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\README.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\requirements.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\requirements.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\design.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\design.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\tasks.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\tasks.md
+		Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\task-log.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-17-venue-duplicates-name-and-address-together-same-name-at-another-address-allowed\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics", "2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics", "{D3DA5A0A-B4C6-5F28-8A43-BB329531349C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-lyrics-lookup-falls-back-to-the-lyrics-source-s-search-before-recording-no-lyrics\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-remote-and-local-field-searches-show-a-loading-indicator", "2026-11-17-remote-and-local-field-searches-show-a-loading-indicator", "{4F5023D3-21EE-5EDC-AF2A-EDFE6889C56C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-remote-and-local-field-searches-show-a-loading-indicator\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-17-remote-and-local-field-searches-show-a-loading-indicator\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{0720A89A-CD49-57EF-9597-BE5572A82705}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while", "2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while", "{C994C33D-A7F6-53F0-8D83-39A8E8720626}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\README.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\README.md
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\requirements.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\requirements.md
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\tasks.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\tasks.md
+		Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\task-log.md = Docs\Management\BusinessFeatures\cross-cutting\changes\2026-11-17-debug-builds-hold-the-loading-shimmer-for-a-while\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{E89362B8-1919-5AA6-81D0-47C38A70CC1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button", "2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button", "{601FB201-2EA4-57D6-980E-0E3167C0800A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\task-log.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\task-log.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2107,37 +2111,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FA1234BC-0001-4000-8000-000000000055} = {FA1234BC-0001-4000-8000-00000000007F}
-		{C9CDD2BC-B529-48CA-9EFD-24A2A2D92DE7} = {FA1234BC-0001-4000-8000-000000000029}
-		{FA1234BC-0001-4000-8000-0000000000D4} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000071} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
-		{FA1234BC-0001-4000-8000-000000000072} = {FA1234BC-0001-4000-8000-000000000071}
-		{FA1234BC-0001-4000-8000-000000000067} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000068} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000069} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000006A} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000006B} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000006C} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000006D} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000006E} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000006F} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000057} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
-		{FA1234BC-0001-4000-8000-000000000058} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000005A} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000D5} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-00000000005D} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000005E} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-00000000005F} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000060} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000061} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000062} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000063} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000064} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000065} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000066} = {FA1234BC-0001-4000-8000-000000000057}
-		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{300D3C1B-4E22-4CEE-85FF-453BD80607BD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B1A2C3D4-0001-4000-8000-000000000001} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
@@ -2150,34 +2123,34 @@ Global
 		{A1B2C3D4-0001-4000-8000-000000000002} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000003} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000019} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-0000000000AC} = {FA1234BC-0001-4000-8000-000000000019}
+		{FA1234BC-0001-4000-8000-0000000000AD} = {FA1234BC-0001-4000-8000-0000000000AC}
 		{A1B2C3D4-0001-4000-8000-000000000004} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000005} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000006} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000030} = {FA1234BC-0001-4000-8000-000000000029}
 		{FA1234BC-0001-4000-8000-000000000033} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-0000000000B2} = {FA1234BC-0001-4000-8000-000000000033}
+		{FA1234BC-0001-4000-8000-0000000000B3} = {FA1234BC-0001-4000-8000-0000000000B2}
 		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000054} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000053} = {FA1234BC-0001-4000-8000-000000000046}
-		{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000056} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000052} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000047} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000048} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-0000000000B8} = {FA1234BC-0001-4000-8000-000000000048}
+		{FA1234BC-0001-4000-8000-0000000000B9} = {FA1234BC-0001-4000-8000-0000000000B8}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000034} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
 		{FA1234BC-0001-4000-8000-0000000000B6} = {FA1234BC-0001-4000-8000-000000000034}
 		{FA1234BC-0001-4000-8000-00000000007D} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
 		{FA1234BC-0001-4000-8000-00000000007E} = {FA1234BC-0001-4000-8000-00000000007D}
-		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
-		{FA1234BC-0001-4000-8000-000000000022} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
-		{FA1234BC-0001-4000-8000-000000000023} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{FA1234BC-0001-4000-8000-000000000045} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
-		{FA1234BC-0001-4000-8000-00000000007F} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-0000000000C1} = {FA1234BC-0001-4000-8000-00000000007D}
 		{FA1234BC-0001-4000-8000-0000000000C2} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-0000000000C3} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-0000000000C4} = {FA1234BC-0001-4000-8000-000000000057}
@@ -2193,33 +2166,75 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000CE} = {FA1234BC-0001-4000-8000-0000000000BC}
 		{FA1234BC-0001-4000-8000-0000000000CF} = {FA1234BC-0001-4000-8000-0000000000BC}
 		{FA1234BC-0001-4000-8000-0000000000D0} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-000000000022} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-000000000023} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000045} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-000000000055} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-00000000007F} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000080} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-000000000091} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-000000000093} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{15F1DA03-2180-47BF-BC40-1BB457C97F9E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FA1234BC-0001-4000-8000-000000000011} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-0000000000A0} = {FA1234BC-0001-4000-8000-000000000011}
+		{FA1234BC-0001-4000-8000-0000000000A1} = {FA1234BC-0001-4000-8000-0000000000A0}
 		{FA1234BC-0001-4000-8000-000000000012} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000013} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-00000000009B} = {FA1234BC-0001-4000-8000-000000000013}
+		{FA1234BC-0001-4000-8000-00000000009C} = {FA1234BC-0001-4000-8000-00000000009B}
 		{FA1234BC-0001-4000-8000-000000000014} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000016} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-00000000009D} = {FA1234BC-0001-4000-8000-000000000016}
+		{FA1234BC-0001-4000-8000-00000000009E} = {FA1234BC-0001-4000-8000-00000000009D}
 		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000017} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000018} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000085} = {FA1234BC-0001-4000-8000-000000000018}
+		{FA1234BC-0001-4000-8000-000000000086} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000087} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000088} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000089} = {FA1234BC-0001-4000-8000-000000000085}
 		{4CB09F16-6E81-425E-9080-840BABFB66BF} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000020} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000021} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-0000000000A2} = {FA1234BC-0001-4000-8000-000000000021}
 		{C81D77D9-056E-44D8-A88F-522682CEE603} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000026} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{FA1234BC-0001-4000-8000-000000000027} = {FA1234BC-0001-4000-8000-000000000026}
 		{FA1234BC-0001-4000-8000-000000000081} = {FA1234BC-0001-4000-8000-000000000026}
 		{FA1234BC-0001-4000-8000-000000000082} = {FA1234BC-0001-4000-8000-000000000081}
+		{FA1234BC-0001-4000-8000-000000000027} = {FA1234BC-0001-4000-8000-000000000026}
 		{FA1234BC-0001-4000-8000-000000000037} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{C9CDD2BC-B529-48CA-9EFD-24A2A2D92DE7} = {FA1234BC-0001-4000-8000-000000000029}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-0000000000B5} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000B4} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000AA} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000AB} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008F} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000090} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008A} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008B} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008C} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008D} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000083} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000084} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000073} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000074} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000075} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000007A} = {FA1234BC-0001-4000-8000-000000000024}
+		{FA1234BC-0001-4000-8000-000000000070} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000025} = {FA1234BC-0001-4000-8000-000000000021}
 		{FA1234BC-0001-4000-8000-000000000024} = {9EA47D78-293E-41B7-872D-3B2B85E82710}
 		{FA1234BC-0001-4000-8000-00000000007B} = {9EA47D78-293E-41B7-872D-3B2B85E82710}
 		{FA1234BC-0001-4000-8000-00000000007C} = {FA1234BC-0001-4000-8000-00000000007B}
+		{FA1234BC-0001-4000-8000-0000000000C0} = {FA1234BC-0001-4000-8000-00000000007B}
 		{15BB70C4-1D36-417D-9F28-E5D6978FAF2C} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{DAA6CE0B-7CD5-49ED-8C46-D202070039F3} = {15BB70C4-1D36-417D-9F28-E5D6978FAF2C}
 		{B92F4F42-00C3-44C3-BC6E-E340782C7183} = {7A021F6B-F297-41EA-A028-C4F881146791}
@@ -2229,36 +2244,8 @@ Global
 		{FA1234BC-0001-4000-8000-000000000035} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000036} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000038} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-00000000009B} = {FA1234BC-0001-4000-8000-000000000013}
-		{FA1234BC-0001-4000-8000-00000000009C} = {FA1234BC-0001-4000-8000-00000000009B}
-		{FA1234BC-0001-4000-8000-00000000009D} = {FA1234BC-0001-4000-8000-000000000016}
-		{FA1234BC-0001-4000-8000-00000000009E} = {FA1234BC-0001-4000-8000-00000000009D}
-		{FA1234BC-0001-4000-8000-0000000000A0} = {FA1234BC-0001-4000-8000-000000000011}
-		{FA1234BC-0001-4000-8000-0000000000A1} = {FA1234BC-0001-4000-8000-0000000000A0}
-		{FA1234BC-0001-4000-8000-0000000000A2} = {FA1234BC-0001-4000-8000-000000000021}
-		{FA1234BC-0001-4000-8000-0000000000A4} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000A5} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000A6} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000A7} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000D1} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000D2} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000D3} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000A8} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000A9} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000AA} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-0000000000AB} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-0000000000B4} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-0000000000B5} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-0000000000AC} = {FA1234BC-0001-4000-8000-000000000019}
-		{FA1234BC-0001-4000-8000-0000000000AD} = {FA1234BC-0001-4000-8000-0000000000AC}
-		{FA1234BC-0001-4000-8000-0000000000AE} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000AF} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000B0} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000B2} = {FA1234BC-0001-4000-8000-000000000033}
-		{FA1234BC-0001-4000-8000-0000000000B3} = {FA1234BC-0001-4000-8000-0000000000B2}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
-		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
 		{FA1234BC-0001-4000-8000-000000000041} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000043} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000044} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
@@ -2274,38 +2261,51 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000BD} = {FA1234BC-0001-4000-8000-0000000000BC}
 		{FA1234BC-0001-4000-8000-0000000000BE} = {FA1234BC-0001-4000-8000-0000000000BC}
 		{FA1234BC-0001-4000-8000-0000000000BF} = {FA1234BC-0001-4000-8000-0000000000BC}
-		{FA1234BC-0001-4000-8000-0000000000C0} = {FA1234BC-0001-4000-8000-00000000007B}
-		{FA1234BC-0001-4000-8000-0000000000C1} = {FA1234BC-0001-4000-8000-00000000007D}
+		{FA1234BC-0001-4000-8000-000000000057} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{FA1234BC-0001-4000-8000-0000000000D1} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D2} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D3} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000B7} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000B8} = {FA1234BC-0001-4000-8000-000000000048}
-		{FA1234BC-0001-4000-8000-0000000000B9} = {FA1234BC-0001-4000-8000-0000000000B8}
-		{FA1234BC-0001-4000-8000-000000000070} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-00000000007A} = {FA1234BC-0001-4000-8000-000000000024}
-		{FA1234BC-0001-4000-8000-000000000073} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-000000000074} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-000000000075} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000058} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005A} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D5} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-00000000005D} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005E} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005F} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000060} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A4} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A5} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A6} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A7} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A8} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A9} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000AE} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000AF} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B0} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000061} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000062} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000063} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000064} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000065} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000066} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000067} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000068} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000069} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006A} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006B} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006D} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006E} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006F} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000076} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000077} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000078} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000079} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-000000000083} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-000000000084} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-00000000008A} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-00000000008B} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-00000000008C} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-00000000008D} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-00000000008E} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-00000000008F} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-000000000090} = {7A021F6B-F297-41EA-A028-C4F881146791}
-		{FA1234BC-0001-4000-8000-000000000091} = {FA1234BC-0001-4000-8000-00000000007F}
-		{FA1234BC-0001-4000-8000-000000000093} = {FA1234BC-0001-4000-8000-00000000007F}
-		{FA1234BC-0001-4000-8000-000000000085} = {FA1234BC-0001-4000-8000-000000000018}
-		{FA1234BC-0001-4000-8000-000000000086} = {FA1234BC-0001-4000-8000-000000000085}
-		{FA1234BC-0001-4000-8000-000000000087} = {FA1234BC-0001-4000-8000-000000000085}
-		{FA1234BC-0001-4000-8000-000000000088} = {FA1234BC-0001-4000-8000-000000000085}
-		{FA1234BC-0001-4000-8000-000000000089} = {FA1234BC-0001-4000-8000-000000000085}
-		{AF868E58-4DB1-5636-8BB6-614964BBA192} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{B68CA4C6-5A8B-5AAF-A338-ACC3E955699B} = {AF868E58-4DB1-5636-8BB6-614964BBA192}
+		{FA1234BC-0001-4000-8000-000000000071} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{FA1234BC-0001-4000-8000-000000000072} = {FA1234BC-0001-4000-8000-000000000071}
+		{FA1234BC-0001-4000-8000-0000000000D4} = {FA1234BC-0001-4000-8000-000000000057}
 		{869E9F71-DCA1-5BA0-8A84-9E9A92158B93} = {FA1234BC-0001-4000-8000-000000000017}
 		{E30F7C02-8512-537A-B232-BA014D9F7900} = {869E9F71-DCA1-5BA0-8A84-9E9A92158B93}
 		{3F070FFB-AF89-5A81-8D43-D8DBF1C4C367} = {FA1234BC-0001-4000-8000-000000000017}
@@ -2366,14 +2366,13 @@ Global
 		{3A193A4F-7E10-56DF-93D9-8BE594BE0CBB} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
 		{7E82FD89-9092-5F4C-B3C4-03FA3EBFC70B} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
 		{7E650721-BD81-52BB-83F4-529A02C3D43A} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
-		{CD50E32E-8C1D-5DD8-8497-EBACACC62267} = {FA1234BC-0001-4000-8000-000000000046}
-		{915BA353-CE8B-55C2-8D71-30542A0C2075} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
-		{7CB84C15-3882-5E82-90ED-26B2B28E1EB6} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
-		{E39D8024-BDA5-5EEB-BD8A-ACC41572B8F4} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
-		{60A5A361-441D-5185-A9C7-880AEFFA821B} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
-		{41156B92-7625-5174-B0E8-327AEAD9F0FD} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
-		{20418C78-A7C3-5BB1-BF48-515FB187B3E8} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
-		{CBEDA274-E457-52FA-A946-F00168F4B260} = {CD50E32E-8C1D-5DD8-8497-EBACACC62267}
+		{915BA353-CE8B-55C2-8D71-30542A0C2075} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{7CB84C15-3882-5E82-90ED-26B2B28E1EB6} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{E39D8024-BDA5-5EEB-BD8A-ACC41572B8F4} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{60A5A361-441D-5185-A9C7-880AEFFA821B} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{41156B92-7625-5174-B0E8-327AEAD9F0FD} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{20418C78-A7C3-5BB1-BF48-515FB187B3E8} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{CBEDA274-E457-52FA-A946-F00168F4B260} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
 		{1FE7428A-DDA2-5CD3-8AD8-D4E45F681309} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
 		{C59FB33E-1166-5F02-83DC-A29F40E332DF} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
 		{EA9987BC-8CF3-5D52-AA4B-39EBF55534F4} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
@@ -2436,6 +2435,16 @@ Global
 		{59AC753C-B093-5D60-AB34-05AD3BCD77F6} = {E192492E-8D42-599B-844A-78FA6124DA0E}
 		{3E6041DA-9147-51DE-AEA9-045E2D5E9AB5} = {E192492E-8D42-599B-844A-78FA6124DA0E}
 		{2F0297B6-7811-5F5B-B39C-225AAA695026} = {47E1E835-6E93-5164-9B6F-74B16DBE4FA6}
+		{A7F0B821-1B0C-550F-A72E-0F7502BB6679} = {FA1234BC-0001-4000-8000-00000000007F}
+		{E97B9141-1344-5B4D-93A8-0C3823B6E2EB} = {FA1234BC-0001-4000-8000-00000000007F}
+		{C70D1D55-6B49-5D3A-9151-A2D66D8A5AD4} = {FA1234BC-0001-4000-8000-00000000007F}
+		{8DB9392D-441E-53D6-8135-FA909998E452} = {FA1234BC-0001-4000-8000-00000000007B}
+		{D3DA5A0A-B4C6-5F28-8A43-BB329531349C} = {FA1234BC-0001-4000-8000-00000000007F}
+		{4F5023D3-21EE-5EDC-AF2A-EDFE6889C56C} = {FA1234BC-0001-4000-8000-00000000007F}
+		{0720A89A-CD49-57EF-9597-BE5572A82705} = {FA1234BC-0001-4000-8000-000000000038}
+		{C994C33D-A7F6-53F0-8D83-39A8E8720626} = {0720A89A-CD49-57EF-9597-BE5572A82705}
+		{E89362B8-1919-5AA6-81D0-47C38A70CC1A} = {60384D3A-1291-563A-A6E7-C6E38CFBE1BB}
+		{601FB201-2EA4-57D6-980E-0E3167C0800A} = {E89362B8-1919-5AA6-81D0-47C38A70CC1A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

@@ -3,6 +3,7 @@ id: social-features
 title: "**Social features**"
 status: "💡 Pending"
 target: —
+horizon: post-mvp
 section: BusinessFeatures
 kind: feature
 order: 380

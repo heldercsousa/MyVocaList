@@ -1,12 +1,13 @@
 ---
 id: BUG-078
 title: Service read paths still use the captive AppDbContext; one of them tracks
-status: 💡 Pending
+status: ✅ Fixed
 severity: Major
 target: 2026-08-24
 section: DevCycleCraft
 parent: read-model-notracking-guidelines
 goal: Service read methods call the constructor-injected repository, which holds the app-lifetime AppDbContext that has no scope. ArtistRepository.GetByIdAsync is the only .AsTracking() read in the repository layer, and ArtistService.GetDeleteConfirmationAsync reaches it outside any unit of work.
+closed: 2026-11
 kind: bug
 ---
 

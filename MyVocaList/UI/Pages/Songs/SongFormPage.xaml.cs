@@ -150,5 +150,6 @@ public partial class SongFormPage : ContentPage
     {
         base.OnDisappearing();
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        ViewModel.CancelLyricsLookupOnOpen();
     }
 }

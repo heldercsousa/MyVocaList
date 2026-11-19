@@ -37,6 +37,30 @@ public class SongRepository : ISongRepository
         LIMIT @take
         """;
 
+    // REQ-SLD-01/02/03: Songs list search. Same FTS index and bm25 weights as TitleSearchSql; the id
+    // tie-break keeps pages disjoint; the count joins the same tables so it cannot exceed the rows.
+    private const string ListSearchSql =
+        """
+        SELECT s.Id AS Id, s.Title AS Title, s.ArtistId AS OriginalArtistId, a.Name AS OriginalArtistName,
+               s.FeaturedArtists AS FeaturedArtists, s.ExternalProvider AS ExternalProvider, s.Version AS Version,
+               COALESCE(s.ImageUrl, a.ImageUrl) AS ImageUrl
+        FROM SongSearch
+        JOIN Songs s ON s.Id = SongSearch.rowid
+        JOIN Artists a ON a.Id = s.ArtistId
+        WHERE SongSearch MATCH @m
+        ORDER BY bm25(SongSearch, 10.0, 1.0), length(s.Title), s.Id
+        LIMIT @take OFFSET @skip
+        """;
+
+    private const string ListSearchCountSql =
+        """
+        SELECT count(*) AS Value
+        FROM SongSearch
+        JOIN Songs s ON s.Id = SongSearch.rowid
+        JOIN Artists a ON a.Id = s.ArtistId
+        WHERE SongSearch MATCH @m
+        """;
+
     private readonly AppDbContext _db;
     private readonly ILogger<SongRepository> _logger;
 
@@ -50,20 +74,72 @@ public class SongRepository : ISongRepository
     public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedAsync(
         int pageNumber, int pageSize, string? query, CancellationToken ct)
     {
-        var q = _db.Songs.AsQueryable();
-
-        if (!string.IsNullOrEmpty(query))
+        if (string.IsNullOrEmpty(query))
         {
-            var pattern = query + "%";
-            q = q.Where(s => EF.Functions.Like(
-                EF.Functions.Collate(s.Title, CollationConstants.Default),
-                EF.Functions.Collate(pattern, CollationConstants.Default)));
+            // Blank query: the list of every song, unchanged.
+            var all = _db.Songs.AsQueryable();
+            var allCount = await all.CountAsync(ct);
+            var allItems = await all
+                .OrderBy(s => s.Title)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(s => new SongListItemDto(
+                    s.Id,
+                    s.Title,
+                    s.ArtistId,
+                    s.OriginalArtist.Name,
+                    s.FeaturedArtists,
+                    s.ExternalProvider,
+                    s.Version,
+                    s.ImageUrl ?? s.OriginalArtist.ImageUrl))
+                .ToListAsync(ct);
+            return (allItems, allCount);
         }
+
+        if (FtsQueryBuilder.BuildTrigramMatch(query) is null)
+        {
+            // REQ-SLD-01/02: no word of 3+ chars - title prefix only, ordered by title.
+            return await GetPagedPrefixAsync(pageNumber, pageSize, query, ct);
+        }
+
+        try
+        {
+            return await SearchPagedAsync(pageNumber, pageSize, query, ct);
+        }
+        catch (SqliteException ex) when (ex.Message.Contains("no such table", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogError(ex, "SongSearch FTS index is missing; songs list falls back to the title prefix");
+            return await GetPagedPrefixAsync(pageNumber, pageSize, query, ct);
+        }
+    }
+
+    /// <summary>
+    /// REQ-SLD-35 short text (no word of 3+ characters, or the index missing): the title or the artist name
+    /// contains the text, collated (case and accents ignored, the custom LIKE). Ordered: title starts with the
+    /// text first, then title, then id, so pages are disjoint (REQ-SLD-02/03). Only called with a non-blank query.
+    /// </summary>
+    private async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedPrefixAsync(
+        int pageNumber, int pageSize, string? query, CancellationToken ct)
+    {
+        var containsPattern = "%" + query + "%";
+        var startsPattern = query + "%";
+
+        var q = _db.Songs.Where(s =>
+            EF.Functions.Like(
+                EF.Functions.Collate(s.Title, CollationConstants.Default),
+                EF.Functions.Collate(containsPattern, CollationConstants.Default))
+            || EF.Functions.Like(
+                EF.Functions.Collate(s.OriginalArtist.Name, CollationConstants.Default),
+                EF.Functions.Collate(containsPattern, CollationConstants.Default)));
 
         var totalCount = await q.CountAsync(ct);
 
         var items = await q
-            .OrderBy(s => s.Title)
+            .OrderBy(s => EF.Functions.Like(
+                EF.Functions.Collate(s.Title, CollationConstants.Default),
+                EF.Functions.Collate(startsPattern, CollationConstants.Default)) ? 0 : 1)
+            .ThenBy(s => s.Title)
+            .ThenBy(s => s.Id)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(s => new SongListItemDto(
@@ -75,6 +151,31 @@ public class SongRepository : ISongRepository
                 s.ExternalProvider,
                 s.Version,
                 s.ImageUrl ?? s.OriginalArtist.ImageUrl))
+            .ToListAsync(ct);
+
+        return (items, totalCount);
+    }
+
+    /// <summary>
+    /// REQ-SLD-01/02/03/04: full-text match over title and artist, ranked by bm25 (title 10, artist 1),
+    /// then title length, then id. Matching and ranking stay in the database.
+    /// </summary>
+    private async Task<(IEnumerable<SongListItemDto> items, int totalCount)> SearchPagedAsync(
+        int pageNumber, int pageSize, string query, CancellationToken ct)
+    {
+        var match = FtsQueryBuilder.BuildTrigramMatch(query)!;
+        var skip = (pageNumber - 1) * pageSize;
+
+        var totalCount = await _db.Database
+            .SqlQueryRaw<int>(ListSearchCountSql, new SqliteParameter("@m", match))
+            .SingleAsync(ct);
+
+        var items = await _db.Database
+            .SqlQueryRaw<SongListItemDto>(
+                ListSearchSql,
+                new SqliteParameter("@m", match),
+                new SqliteParameter("@take", pageSize),
+                new SqliteParameter("@skip", skip))
             .ToListAsync(ct);
 
         return (items, totalCount);
