@@ -30,7 +30,7 @@
          extension methods — Infra configures WHERE the trimming rule applies. MyVocaList.Extensions
          is a dependency-free leaf project (Task 6a), so this keeps strict DRY Onion ordering
          (no Infra -> Services edge). -->
-    <ProjectReference Include="..\MyVocaList.Extensions\MyVocaList.Extensions.csproj" />
+    <ProjectReference Include="..\Extensions\MyVocaList.Extensions.csproj" />
   </ItemGroup>
 
 </Project>
