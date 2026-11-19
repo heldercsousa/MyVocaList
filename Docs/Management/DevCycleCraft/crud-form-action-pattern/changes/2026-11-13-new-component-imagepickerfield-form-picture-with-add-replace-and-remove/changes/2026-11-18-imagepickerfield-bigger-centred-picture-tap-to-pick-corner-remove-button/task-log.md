@@ -1,11 +1,11 @@
 # Task log: ImagePickerField — bigger centred picture, tap to pick, corner remove button
 
 ### Checkpoint
-- Done: built, tested and committed by the orchestrator on 2026-11-18. Next: Helder device check.
+- Done: 2026-11-18. Helder passed the device check after device-check fix 1 (trash-can icon, centred). Merged into develop; worktrees and branches removed. Next: none.
 
 ## Task: ImagePickerField — bigger centred picture, tap to pick, corner remove button
 **Plan:** `Docs/Management/DevCycleCraft/crud-form-action-pattern/changes/2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove/changes/2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button/README.md`
-**Status:** To Review (device check pending)
+**Status:** Done (device check passed 2026-11-18)
 **Started:** 2026-11-18
 **Completed:** 2026-11-18
 
@@ -36,7 +36,7 @@ Governed component change (`component-change-governance`): Helder pre-authorised
 ---
 ## Task: Device-check fix 1 — corner remove icon off-centre and read as an X
 **Plan:** `Docs/Management/DevCycleCraft/crud-form-action-pattern/changes/2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove/changes/2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button/README.md`
-**Status:** To Review (device check pending)
+**Status:** Done (device check passed 2026-11-18)
 **Started:** 2026-11-18
 **Completed:** 2026-11-18
 
