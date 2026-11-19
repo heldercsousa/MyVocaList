@@ -19,7 +19,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-12 | ↳ Songs list rows: YouTube action moves into the overflow menu, checkbox moves leading | 💡 Pending |
 | 2026-11-13 | ↳ Backfill Deezer images for songs and artists saved before the artwork item | 💡 Pending |
 | 2026-11-16 | ↳ Songs list searches Deezer: one tap saves a thin song row, lyrics copy with edit mark | 💡 Pending |
-| 2026-11-16 | ↳ Songs list searches title and artist; Deezer versions collapsed; Deezer artist frozen; lyrics on first open | 🟡 In Progress |
 | 2026-11-17 | ↳ Remote and local field searches show a loading indicator | 💡 Pending |
 | 2026-06 | **Queue Entry Point Redesign — QueuePage as CRUD event list** | 💡 Pending |
 | 2026-06 | | 🏁 **MVP release** |

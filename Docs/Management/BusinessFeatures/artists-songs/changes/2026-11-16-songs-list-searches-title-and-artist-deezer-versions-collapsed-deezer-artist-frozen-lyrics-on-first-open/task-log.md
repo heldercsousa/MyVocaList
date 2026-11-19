@@ -5,8 +5,8 @@ Branch `feature/songs-list-deezer`, worktree `.claude/worktrees/songs-list-deeze
 
 ### Checkpoint
 
-- **Updated:** 2026-11-17, after the second device round.
-- **Phase:** T16 to T18 merged (`develop` 78da0df9; full suite 1,855 passed, 0 failed). **Waiting for Helder's second device check (T14)** (round 2 below).
+- **Updated:** 2026-11-19, item closed.
+- **Phase:** Done. T14 device check passed 2026-11-19 (round 2 below, plus the four open round-1 points). Item ✅ Done; worktree `songs-list-deezer` removed.
 - **Load fix merged** (Helder approved the test waits, 2026-11-17): 53678a5f moves the edit-mode load off the UI thread; waits changed in 6 song-form test files, no assertion changed; `SongFormViewModelImageTests.Save_EditModeAfterDeezerPick_SendsNullImages` had no wait at all and so saved during a pending load. Merge ccbaa4af, full suite 1,856 passed.
 - **Context manifest (≤ 8 files):** `tasks.md`, `requirements.md`, `design.md`, `spec-changelog.md`, this file.
 
@@ -17,6 +17,8 @@ Branch `feature/songs-list-deezer`, worktree `.claude/worktrees/songs-list-deeze
 Search by artist, Deezer pick, fixed artist in add mode and the airplane-mode copy: ok. Short search text showed "No results found" (fixed by REQ-SLD-35). A Deezer title could be changed into another song's name (fixed by REQ-SLD-36 to 39). Emptied lyrics stay empty: by design (REQ-SLD-27, origin *user*). No lookup on some songs without lyrics: most likely their stored origin is *none found* or *user* (no code fault found; open below). No shimmer seen: the load runs on the UI thread (parked fix).
 
 ### Round 2 — build from `develop` at or after 78da0df9
+
+**Result (2026-11-19, Helder): "All 1 to 10 are ok! All tested and all worked."** Covers the six points below (Venues was closed with its own item) and the four open round-1 points: look of the fixed artist, typing lyrics while the lookup runs, leaving during the lookup, Save ignored while loading.
 
 - [ ] **Short search.** Type 1 or 2 letters from the middle of a title, or of an artist name ("u2"): matching songs appear; titles that start with the letters come first.
 - [ ] **Deezer title fixed in edit mode.** Open a stored Deezer song: title and artist are plain text, nothing to tap; Save works.
