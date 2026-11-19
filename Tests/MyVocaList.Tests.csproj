@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.Maui.Core" />
     <PackageReference Include="Plugin.LocalNotification" />
+    <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -32,7 +33,7 @@
     <ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
     <!-- MAUI head project: referenced for ViewModel + Component tests -->
     <ProjectReference Include="..\MyVocaList\MyVocaList.csproj" />
-    <ProjectReference Include="..\MyVocaList.Extensions\MyVocaList.Extensions.csproj" />
+    <ProjectReference Include="..\Extensions\MyVocaList.Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- Tests of the frozen AutocompleteField family (D-AC1, 2026-07-19) - excluded with the component. -->
