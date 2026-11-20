@@ -48,3 +48,25 @@ GREEN: 5 passed; full `dotnet test Tests/MyVocaList.Tests.csproj` 1863 passed, 0
 |----|----------------|------|
 | REQ-CATPROP-09 | BackfillDerivedCatalogRows.BackfillSql | CatalogBackfillMigrationTests (4 tests) |
 | REQ-CATPROP-11 | existing PerformersOnly filter | ArtistRepositoryTests.PerformersOnly_AuthorWithOnlyDerivedRows_IsReturned |
+
+---
+## Task: C3a - Test setup: register ICatalogRepository in SongService test scopes (no AC; setup only)
+**Status:** To Review (Standard lane: test setup)
+
+### Changed files:
+- `Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` (1 call; new `_catalogRepo` field)
+- `Tests/Integration/UnitOfWork/SongServiceReadScopeTests.cs` (2 calls; inline `new Mock<ICatalogRepository>().Object`)
+- `Tests/Unit/Services/SongServiceArtistFreezeTests.cs` (1 call; new `_catalogRepoMock` field)
+- `Tests/Unit/Services/SongServiceEnsureLyricsTests.cs` (2 calls; new `_catalogRepoMock` field)
+- `Tests/Unit/Services/SongServiceLyricsOriginTests.cs` (1 call; new `_catalogRepoMock` field)
+- `Tests/Unit/Services/SongServiceSaveFromFormImageTests.cs` (1 call; new `_catalogRepoMock` field)
+- `Tests/Unit/Services/SongServiceSaveFromFormPictureTests.cs` (1 call; new `_catalogRepoMock` field)
+- `Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (1 call; new `_catalogRepoMock` field)
+- `Tests/Unit/Services/SongServiceTests.cs` (2 calls; new `_catalogRepoMock` field)
+- `Tests/Unit/Services/SongServiceTitleFreezeTests.cs` (1 call; new `_catalogRepoMock` field)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/task-log.md`
+
+Not changed (their `Over` does not feed a `SongService`): `SongResolutionServiceTests.cs`, the line-100 `Over` in `SongSaveTrigramDuplicateTests.cs` (feeds `SongResolutionService`), and the `Over(_artistRepoMock, _artistServiceMock)` at `SongServiceSaveFromFormTests.cs` (feeds `ArtistResolutionService`).
+
+### Test evidence
+Full `dotnet test Tests/MyVocaList.Tests.csproj`: 1863 passed, 0 failed (no assertion or other setup changed; `UnitOfWorkMocks.cs` untouched).
