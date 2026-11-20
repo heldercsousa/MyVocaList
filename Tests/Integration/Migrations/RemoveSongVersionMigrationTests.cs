@@ -229,7 +229,8 @@ public class RemoveSongVersionMigrationTests : IAsyncDisposable
         await db.Database.ExecuteSqlAsync($"INSERT INTO Catalog (ArtistId, SongId) VALUES (1, 2)");
         await db.Database.ExecuteSqlAsync($"INSERT INTO SongKaraokeUrls (SongId, VideoId, PlayCount) VALUES (3, 'vid-3', 0)");
 
-        await db.GetService<IMigrator>().MigrateAsync();
+        // Pinned to this migration: later data migrations (BackfillDerivedCatalogRows) legitimately add Catalog rows.
+        await db.GetService<IMigrator>().MigrateAsync(NewMigrationId(db));
 
         Assert.Equal(["1", "2", "3"], await RowsAsync(db, "SELECT Id AS Value FROM Songs ORDER BY Id"));
         Assert.Equal(["1|2"], await RowsAsync(db, "SELECT ArtistId || '|' || SongId AS Value FROM Catalog"));

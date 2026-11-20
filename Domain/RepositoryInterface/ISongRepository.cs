@@ -87,4 +87,7 @@ public interface ISongRepository
     Task AddAsync(Song song, CancellationToken ct);
     Task UpdateAsync(Song song, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
+
+    /// <summary>REQ-CATPROP-10: number of songs the artist authored (catalog covers are not counted).</summary>
+    Task<int> CountByArtistAsync(int artistId, CancellationToken ct);
 }

@@ -33,7 +33,6 @@ public class PagedListConcurrencyTests
 
         var artistRepository = host.Resolve<IArtistRepository>();
         var songRepository = host.Resolve<ISongRepository>();
-        var catalogRepository = host.Resolve<ICatalogRepository>();
         var urlRepository = host.Resolve<ISongKaraokeUrlRepository>();
         var urlService = host.Resolve<ISongKaraokeUrlService>();
         var artistLogger = host.Resolve<ILogger<ArtistService>>();
@@ -68,7 +67,7 @@ public class PagedListConcurrencyTests
             await releaseArtist.Task;
         });
         var artistService = new ArtistService(
-            artistRepository, songRepository, catalogRepository, artistUow, artistLogger);
+            artistRepository, songRepository, artistUow, artistLogger);
 
         var songUow = new ConcurrencyProbeUnitOfWork(realUow, ctx =>
         {
