@@ -235,6 +235,9 @@ task that owns the AC, never by the Builder during Green:
 - `CatalogServiceTests`' "remove always succeeds" test encodes the behaviour REQ-CATPROP-06 replaces.
   It is rewritten.
 - `SongsViewModel` tests that cover `RemoveFromCatalogCommand`, if any, are deleted with the command.
+- `RemoveSongVersionMigrationTests.Up_RowCountAndForeignKeyRowsUnchanged_ForeignKeyCheckEmpty` migrated to
+  latest and asserted the `Catalog` rows unchanged; the backfill (REQ-CATPROP-09) adds rows there. It now
+  migrates to its own migration id only, with every assertion unchanged (added during C2, 2026-11-20).
 
 ## 10. Files touched (for the plan; DRY Onion order)
 

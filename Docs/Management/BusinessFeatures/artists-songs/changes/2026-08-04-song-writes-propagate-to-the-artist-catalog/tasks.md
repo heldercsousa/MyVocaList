@@ -16,7 +16,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] C1 **Repository queries.** Review lane: Standard. Size note: 6 files (interface + implementation pairs). (REQ-CATPROP-05, 06, 07, 10)
   - Files owned: `ICatalogRepository.cs`, `CatalogRepository.cs`, `ISongRepository.cs`, `SongRepository.cs`, `CatalogRepositoryTests.cs`, `SongRepositoryTests.cs`.
   - Demo: `RemoveCoversAsync(A, [own, cover])` returns `(1, 1)` on real SQLite.
-- [ ] C2 **Backfill migration.** After C1. Review lane: Elevated. Sequential-only (`Infra/Migrations/*`). (REQ-CATPROP-09, 11)
+- [x] C2 **Backfill migration.** After C1. Review lane: Elevated. Sequential-only (`Infra/Migrations/*`). (REQ-CATPROP-09, 11)
   - Files owned: new `Infra/Migrations/*_BackfillDerivedCatalogRows.cs` (+ Designer), new `CatalogBackfillMigrationTests.cs`, `ArtistRepositoryTests.cs`.
   - Demo: a song with no catalog row gains its author's row after `MigrateAsync`, and a second apply inserts nothing.
 
