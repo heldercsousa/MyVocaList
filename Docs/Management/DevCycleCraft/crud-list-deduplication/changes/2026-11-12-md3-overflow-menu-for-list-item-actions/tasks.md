@@ -46,8 +46,8 @@
 - [x] **T10 — Plan** (`plan.md § Revision 2026-11-20b`) + plan-reviewer (3 blockers fixed: T11a split, task fields, registry ownership)
 - [x] **T11a1 — `MenuItemModel` + `ItemMenuItems`** (TDD, Level A) · REQ-OVFM-18
 - [x] **T11a2 — menu helpers** (`MenuItemSelection`, `MenuResolution`, `MenuItemShape`; TDD, Level B) · REQ-OVFM-19, 20, 21
-- [~] **T11a3 — `MenuItem` style + `Menu` + `IMenuHost`** · REQ-OVFM-12a, 21, 23, 24, 25
-- [ ] **T11a4 — `OverflowMenuButton`** · REQ-OVFM-20, 22, 25
+- [x] **T11a3 — `MenuItem` style + `Menu` + `IMenuHost`** · REQ-OVFM-12a, 21, 23, 24, 25
+- [~] **T11a4 — `OverflowMenuButton`** · REQ-OVFM-20, 22, 25
 - [ ] **T11c — `ListItemOverflowButton` wraps `OverflowMenuButton`** (governed; own commit and log entry; runs before T11b)
 - [ ] **T11b — `CrudListView` consumes `Menu`** (governed; own commit and log entry)
 - [ ] **T12 — Verify** (verifier, build, tests, emulator walk), merge into `develop`, then Helder on-device pass
