@@ -73,7 +73,7 @@ public class Bug068RegressionTests
         var (createOk, _, person) = await persons.CreatePersonAsync("Tracking Person");
         Assert.True(createOk);
 
-        var (updateOk, message) = await persons.UpdatePersonAsync(person!.Id, "Updated Person Name");
+        var (updateOk, message) = await persons.UpdatePersonAsync(person!.Id, "Updated Person Name", null, null, null);
 
         Assert.True(updateOk, message);
         var reread = await persons.GetPersonByIdAsync(person.Id);

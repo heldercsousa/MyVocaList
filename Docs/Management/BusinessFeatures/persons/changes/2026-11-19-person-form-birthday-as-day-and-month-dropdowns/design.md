@@ -9,6 +9,7 @@ Requirements: `requirements.md` (REQ-BDAY-01..10). Layers follow the DRY Onion: 
 ## Infra: `PersonConfiguration.cs` + migration
 - `BirthDay` and `BirthMonth`: INTEGER, `IsRequired(false)`.
 - `builder.ToTable(t => t.HasCheckConstraint("CK_Persons_Birthday", "(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)"))`. The table is **`People`** (`AppDbContext.People`, `InitialCreate`). REQ-BDAY-07.
+> **Spec updated [2026-11-20]:** the CHECK expression as first written, `(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)`, passes when only one column is NULL. SQLite treats a NULL CHECK result as a pass, so a day without a month was accepted. The expression now adds `BirthDay IS NOT NULL AND BirthMonth IS NOT NULL` to the second branch. REQ-BDAY-07 (both null, or month 1 to 12 and day 1 to 31) is the authority. <!-- impl decision: SQLite NULL-in-CHECK pass; caught by REQ-BDAY-07 repository test -->
 - The old `IX_Persons_Name_Birthday` index (FullName + BirthdayDayMonth) has nothing left to point at, so it is dropped. BUG-088 adds the identity index that replaces it.
 - Migration `PersonBirthDayMonth` (`dotnet ef migrations add PersonBirthDayMonth -p Infra -s Infra`). If EF scaffolds the steps in the wrong order, edit the scaffold so they run in this order:
   1. Add the two INTEGER columns.

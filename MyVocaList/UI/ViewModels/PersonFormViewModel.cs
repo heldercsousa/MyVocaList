@@ -191,10 +191,26 @@ public partial class PersonFormViewModel : ViewModelBase
 
     private void ApplyBirthdayValidation(string value)
     {
-        var birthday = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-        var (isValid, message) = _personService.ValidateBirthday(birthday);
+        // T1 bridge: the VM still holds the birthday as a "DDMM" string until T2 replaces it with the Day/Month dropdowns.
+        var (wellFormed, day, month) = ParseBirthdayBridge(value);
+        var (isValid, message) = wellFormed
+            ? _personService.ValidateBirthday(day, month)
+            : (false, "Use DD/MM format (e.g.: 15/03)");
         BirthdayHasError = !isValid;
         BirthdayErrorText = isValid ? string.Empty : message;
+    }
+
+    // T1 bridge (temporary, removed by T2): parses the 4-digit "DDMM" (or legacy "DD/MM") text into the int pair the service takes.
+    private static (bool wellFormed, int? day, int? month) ParseBirthdayBridge(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return (true, null, null);
+
+        var digits = value.Trim().Replace("/", "");
+        if (digits.Length != 4 || !digits.All(char.IsAsciiDigit))
+            return (false, null, null);
+
+        return (true, int.Parse(digits[..2]), int.Parse(digits[2..]));
     }
 
     private void ApplyEmailValidation(string value)
@@ -220,7 +236,7 @@ public partial class PersonFormViewModel : ViewModelBase
         if (NameHasError || BirthdayHasError || EmailHasError)
             return;
 
-        var birthday = string.IsNullOrWhiteSpace(PersonBirthday) ? null : PersonBirthday.Trim();
+        var (_, birthDay, birthMonth) = ParseBirthdayBridge(PersonBirthday);
         var email = string.IsNullOrWhiteSpace(PersonEmail) ? null : PersonEmail.Trim();
 
         IsBusy = true;
@@ -229,7 +245,7 @@ public partial class PersonFormViewModel : ViewModelBase
             if (IsEditMode)
             {
                 var (success, message) = await _personService.UpdatePersonAsync(
-                    PersonId.Value, name, birthday, email);
+                    PersonId.Value, name, birthDay, birthMonth, email);
                 if (success)
                 {
                     await _snackbarService.ShowSuccessAsync(message);
@@ -242,7 +258,7 @@ public partial class PersonFormViewModel : ViewModelBase
             }
             else
             {
-                var (success, message, _) = await _personService.CreatePersonAsync(name, birthday, email);
+                var (success, message, _) = await _personService.CreatePersonAsync(name, birthDay, birthMonth, email);
                 if (success)
                 {
                     await _snackbarService.ShowSuccessAsync(message);
@@ -310,7 +326,9 @@ public partial class PersonFormViewModel : ViewModelBase
 
         Suggestions = [];
 
-        var birthday = Uri.EscapeDataString(person.BirthdayDayMonth ?? string.Empty);
+        // T1 bridge: the URL still carries the "DDMM" string until T2 switches to personBirthDay/personBirthMonth.
+        var birthday = Uri.EscapeDataString(
+            person.BirthDay.HasValue && person.BirthMonth.HasValue ? $"{person.BirthDay:00}{person.BirthMonth:00}" : string.Empty);
         var email = Uri.EscapeDataString(person.Email ?? string.Empty);
         var name = Uri.EscapeDataString(person.FullName);
 

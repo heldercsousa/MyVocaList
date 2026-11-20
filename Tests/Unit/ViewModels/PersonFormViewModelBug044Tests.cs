@@ -33,7 +33,7 @@ public class PersonFormViewModelBug044Tests
         var sut = CreateSut();
         sut.PersonName = "Helder Sousa"; // raw typed text on the New Singer form
 
-        var person = new Person { Id = 7, FullName = "Helder Sousa", BirthdayDayMonth = "15/03", Email = "h@x.com" };
+        var person = new Person { Id = 7, FullName = "Helder Sousa", BirthDay = 15, BirthMonth = 3, Email = "h@x.com" };
         string navigatedRoute = null;
         _navigationMock.Setup(n => n.GoToAsync(It.IsAny<string>()))
                        .Callback<string>(r => navigatedRoute = r)
