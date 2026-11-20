@@ -196,6 +196,18 @@ public partial class CrudListView : ContentView
     /// </summary>
     private bool _showConfirmWhenActionsHidden;
 
+    /// <summary>
+    /// Set when the confirm sheet must open after the overflow item menu has closed (Delete from the menu).
+    /// </summary>
+    private bool _showConfirmWhenMenuClosed;
+
+#if ANDROID
+    /// <summary>
+    /// Back route on the overflow menu's window. Held only while the menu is open (Android only).
+    /// </summary>
+    private IDisposable _menuBackRoute;
+#endif
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -242,12 +254,18 @@ public partial class CrudListView : ContentView
             if (_viewModel.ConfirmSheetState == BottomSheetState.Hidden)
             {
                 _showConfirmWhenActionsHidden = false;
+                _showConfirmWhenMenuClosed = false;
                 confirmSheet.Close();
             }
             else if (itemActionsSheet.State != BottomSheetState.Hidden)
             {
                 // Only one sheet at a time: the confirm sheet opens once the item actions sheet has hidden.
                 _showConfirmWhenActionsHidden = true;
+            }
+            else if (itemMenu.IsOpen)
+            {
+                // Only one surface at a time: the confirm sheet opens once the overflow menu has closed (REQ-OVFM-17).
+                _showConfirmWhenMenuClosed = true;
             }
             else
             {
@@ -386,5 +404,54 @@ public partial class CrudListView : ContentView
             if (_viewModel != null && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
                 confirmSheet.Show(_viewModel.ConfirmSheetState, null);
         }
+    }
+
+    /// <summary>
+    /// Opens the overflow item menu anchored to <paramref name="anchor"/> (the row's overflow button) for <paramref name="item"/>.
+    /// The ViewModel ignores the call in selection mode.
+    /// </summary>
+    public void ShowItemMenu(View anchor, object item)
+    {
+        itemMenu.PlacementTarget = anchor;
+        _viewModel?.OpenItemMenuCommand.Execute(item);
+    }
+
+    /// <summary>
+    /// Overflow item menu opened. Routes the system back press to the ViewModel while the popup window has focus
+    /// (REQ-OVFM-13b). DXPopup's window has no back handler of its own, so the press would otherwise be swallowed.
+    /// </summary>
+    private void OnItemMenuOpened(object sender, EventArgs e)
+    {
+#if ANDROID
+        _menuBackRoute?.Dispose();
+        var contentView = itemMenu.Content?.Handler?.PlatformView as Android.Views.View;
+        _menuBackRoute = MyVocaList.Platforms.PopupBackHandler.Attach(contentView, OnMenuBackPressed);
+        if (_menuBackRoute is null)
+            Serilog.Log.ForContext("SourceContext", nameof(CrudListView))
+                .Warning("Overflow menu back route not attached: popup content view or back dispatcher unavailable");
+#endif
+    }
+
+#if ANDROID
+    private void OnMenuBackPressed() => _viewModel?.HandleBack();
+#endif
+
+    /// <summary>
+    /// Overflow item menu closed (outside tap, back, Edit, or a page action). Flushes a Delete-deferred confirm sheet.
+    /// Never dispatches DismissItemMenuCommand: the TwoWay IsOpen binding has already written the close back.
+    /// </summary>
+    private void OnItemMenuClosed(object sender, EventArgs e)
+    {
+#if ANDROID
+        _menuBackRoute?.Dispose();
+        _menuBackRoute = null;
+#endif
+
+        if (!_showConfirmWhenMenuClosed)
+            return;
+
+        _showConfirmWhenMenuClosed = false;
+        if (_viewModel != null && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
+            confirmSheet.Show(_viewModel.ConfirmSheetState, null);
     }
 }

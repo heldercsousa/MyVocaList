@@ -24,6 +24,7 @@ Any reusable custom UI component consumed by 2+ pages/views. Current set (non-ex
 | `ListItemCheckbox` | `UI/Components/Lists/` |
 | `ListItemLeadingImage` | `UI/Components/Lists/` |
 | `ListItemLeadingAvatar` | `UI/Components/Lists/` |
+| `ListItemOverflowButton` | `UI/Components/Lists/` |
 | `AutocompleteDXField` | `UI/Components/TextFields/` |
 | `TapToEditField` | `UI/Components/TextFields/` |
 | `ImagePickerField` | `UI/Components/Media/` |
