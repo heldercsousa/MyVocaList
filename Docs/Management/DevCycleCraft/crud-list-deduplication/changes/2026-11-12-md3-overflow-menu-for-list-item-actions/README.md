@@ -1,7 +1,7 @@
 ---
 id: md3-overflow-menu-for-list-item-actions
 title: MD3 overflow menu for list item actions
-status: 🟢 Ready
+status: 🟡 In Progress
 target: 2026-11-12
 section: DevCycleCraft
 parent: crud-list-deduplication

@@ -52,7 +52,7 @@ This settles the two discrepancies left open in the README:
 | Menu item leading / trailing space | 16dp / 16dp | `Padding="16,0"` |
 | Menu item between space | 12dp | DXButton `IconIndent=12` |
 | Menu item leading icon size | 20dp | `IconWidth/IconHeight=20` |
-| Menu item label text | Roboto 14pt / line 20pt / tracking 0.1pt / weight 500 (= Label Large) | `FontSize=14`, `FontAttributes=Bold` → see note |
+| Menu item label text | Roboto 14pt / line 20pt / tracking 0.1pt / weight 500 (= Label Large) | `FontFamily=RobotoMedium`, `FontSize=14` → see note |
 | Menu group padding | 2dp | `Padding="0,2"` on the menu's item stack |
 | Container color (standard) | Surface container low | `{StaticResource SurfaceContainerLow}` |
 | Label / icon color | On surface / On surface variant | `TextColor=OnSurface`, `IconColor=OnSurfaceVariant` |
@@ -119,7 +119,14 @@ public sealed record ItemMenuAction(string Text, string Icon, Func<object, Task>
   - When `ConfirmSheetState` becomes visible, check the popup. If `itemMenu.IsOpen` is still true, the menu is still on screen: set a `_showConfirmWhenMenuClosed` flag and defer the sheet. Otherwise show it at once.
   - `itemMenu.Closed` handler: if the flag is set, clear it and show the confirm sheet. It is the same flush as the existing sheet-hidden path.
   - The handler **never** executes `DismissItemMenuCommand`. The TwoWay `IsOpen` binding already writes false back, and that write-back is idempotent.
-- **Back ownership:** the page's `OnBackButtonPressed` → `ViewModel.HandleBack()` stays the single owner. If on device DXPopup consumes the back press itself (closing through TwoWay), the outcome still satisfies REQ-OVFM-13b, but only if the page does not *also* pop. T6 verifies that a single back press with the menu open leaves the page in place. If the page pops, stop and escalate to Helder.
+- **Back ownership, revised 2026-11-20 after the T6 emulator finding:**
+  - What we found: `DXPopup` shows the menu in its **own focused Android window**. `dumpsys window` lists a separate `ty=APPLICATION` window of 360×305, and that window is the IME input target. Back is delivered to that window, which has no back handler, so the press is swallowed. The page's `OnBackButtonPressed` is never called; a diagnostic log was silent.
+  - DevExpress 25.2.4 has no back-related DXPopupBase member (checked against the XML docs).
+  - Fix: while the menu is open, `CrudListView` registers a back handler **on the popup's window**. `itemMenu.Opened` registers it and `itemMenu.Closed` removes it. The handler routes to `ViewModel.HandleBack()`, so the ViewModel stays the single source of truth.
+    - Android 13+ (API 33): `OnBackInvokedDispatcher` from `FindOnBackInvokedDispatcher()` on the popup content's platform view, registered with `PRIORITY_DEFAULT`.
+    - API 24–32: a `KEYCODE_BACK` key listener on the popup content's root platform view, made focusable and focused.
+  - The code is Android-only, under `#if ANDROID`, in `CrudListView.xaml.cs` or a small `Platforms/Android` helper. It is UI plumbing with no business logic.
+- Original text: the page's `OnBackButtonPressed` → `ViewModel.HandleBack()` stays the single owner. If on device DXPopup consumes the back press itself (closing through TwoWay), the outcome still satisfies REQ-OVFM-13b, but only if the page does not *also* pop. T6 verifies that a single back press with the menu open leaves the page in place. If the page pops, stop and escalate to Helder.
 
 ### `ListItemOverflowButton` (new, `UI/Components/Lists/`)
 
