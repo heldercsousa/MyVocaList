@@ -70,3 +70,25 @@ Not changed (their `Over` does not feed a `SongService`): `SongResolutionService
 
 ### Test evidence
 Full `dotnet test Tests/MyVocaList.Tests.csproj`: 1863 passed, 0 failed (no assertion or other setup changed; `UnitOfWorkMocks.cs` untouched).
+
+---
+## Task: C3b - SongService propagation (REQ-CATPROP-01 to 04)
+**Status:** To Review (Elevated lane: transactional write path)
+
+### Changed files:
+- `Services/SongService.cs` (CreateSongAsync, CreateSongWithUrlsCoreAsync, UpdateSongCoreAsync)
+- `Tests/Integration/Services/SongServiceCatalogPropagationTests.cs` (new, 12 tests, real SQLite + real unit of work)
+- `Tests/Integration/UnitOfWork/VenueCatalogServiceReadScopeTests.cs` (setup only: dropped the now-duplicate AddSongToCatalogAsync; assertions unchanged)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/design.md` (section 9 note for the line above)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/task-log.md`
+
+### Test evidence
+RED: 12 new tests, 8 failed (4 create tests, MovesRow, NewInlineArtist move, OldDerivedRowMissing, SaveThrows). 4 pass by design on the old code (SameAuthor, BAlreadyCovers, ValidationFails, ArtistChoiceNeeded are guards).
+GREEN: 12/12; full `dotnet test Tests/MyVocaList.Tests.csproj` 1875 passed, 0 failed (includes UnitOfWorkReadScopeTests).
+
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-CATPROP-01 | SongService create paths stage `new Catalog { Song = song, ArtistId }` | CreateSongAsync_WritesDerivedRow, SaveFromForm_AddMode_WritesDerivedRow, SaveFromForm_AddMode_NewInlineArtist_WritesDerivedRowWithRealId, CreateSongWithUrls_WritesDerivedRow |
+| REQ-CATPROP-02 | move only when author changed | Update_SameAuthor_CatalogUnchanged |
+| REQ-CATPROP-03 | UpdateSongCoreAsync Remove(old) + Exists/Add(new) | Update_AuthorAtoB_MovesRow, _BAlreadyCovers_NoDuplicate, Update_AuthorToNewInlineArtist_MovesRowWithRealId, Update_AuthorChange_OldDerivedRowMissing_StillWritesNew |
+| REQ-CATPROP-04 | all staged in the UoW transaction | Create_ValidationFails_NoCatalogRow, Update_ArtistChoiceNeeded_CatalogUnchanged, Update_AuthorAtoB_SaveThrows_CatalogUnchanged |
