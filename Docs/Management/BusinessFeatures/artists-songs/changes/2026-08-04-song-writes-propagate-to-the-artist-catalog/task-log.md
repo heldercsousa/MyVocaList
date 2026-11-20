@@ -125,7 +125,7 @@ GREEN: CatalogServiceTests 15/15; full `dotnet test Tests/MyVocaList.Tests.cspro
 ### Test evidence
 RED: 4 failed (Delete_OwnerOfSongs_Refused, Delete_TwoOwners_NamesFirstInSelectionOrder, Delete_ArtistWithOnlyCatalogRows_Succeeds, Delete_CoverOnlyArtist_RowsGoneSongsKept).
 GREEN: full `dotnet test Tests/MyVocaList.Tests.csproj` 1888 passed, 0 failed (one unrelated timing flake, LoadingHoldShimmerTests, passed on rerun). UnitOfWorkReadScopeTests 4/4.
-Governed constructor parameters after removal: 15 by an approximate grep of Services/ repository-typed parameters (the architecture test, floor >= 15, passes 4/4; its own counter is the authority).
+Governed constructor parameters after removal: 22 (23 before), counted by the C5 reviewer with the architecture test's own rule (`^I\w*Repository$` plus the five data services, per file, under `Services/`). The floor is >= 15, and the test passes 4/4.
 
 | AC | Implementation | Test |
 |----|----------------|------|
