@@ -35,6 +35,14 @@
     - scroll with the menu open
   - Plus the Artists/Songs regression rows of `design.md § Governance`.
   - Merge into `develop`.
-- [ ] **T7 — Helder on-device pass**
+- [x] **T7 — Helder on-device pass** (2026-11-20: all points fine; corner 16 accepted)
   - Includes confirming the 16dp container corner (Claude's unverified call).
   - Then status ✅.
+
+## Follow-up round (Helder, 2026-11-20)
+
+- [~] **T8 — Final MD3 revision** (Playwright crawl of menus overview/specs/guidelines/accessibility); deltas go into `design.md § MD3 evidence`
+- [ ] **T9 — Spec: shared menu component** (usable anywhere, not CrudListView-only); spec-reviewer
+- [ ] **T10 — Plan** + plan-reviewer
+- [ ] **T11 — Implement** (governed: CrudListView, ListItemOverflowButton; four gates in `design.md`); guidelines in `component-safety-gate.md`
+- [ ] **T12 — Verify** (verifier, build, tests, emulator walk), merge into `develop`, then Helder on-device pass
