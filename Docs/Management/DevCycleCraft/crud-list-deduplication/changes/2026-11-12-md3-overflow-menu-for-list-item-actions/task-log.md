@@ -145,7 +145,7 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81`, T11a3 `46982a87` committed; T11a4 implementor dispatched.
+- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81`, T11a3 `46982a87`, T11a4 `9d07e9c5` committed; T11c implementor dispatched (branch head after T11c is NOT deployable alone).
 - Next: T11a2 → T11a3 → T11a4 → T11c → T11b (one fresh implementor each, sequential; check `git -C .claude/worktrees/md3-menu-shared log --oneline` to see which committed) → T12 verifier + clean Android build + emulator walk → merge → Helder device pass
 - Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
@@ -214,3 +214,22 @@ Commit `46982a87`.
 ### Decisions (orchestrator, under Helder's autonomy grant)
 - `SemanticExtensions.SetSemanticFocus` is obsolete in MAUI 10 (CS0618). Its suggested replacement, `SemanticScreenReader`, can only announce text and cannot move focus. **Kept**, so REQ-OVFM-23 still works. Follow-up: replace it with the native Android accessibility-focus action when the obsolete API is removed.
 - A `MenuItemModel` with a null `Command` shows enabled, and selecting it only closes the menu. Accepted.
+
+## 2026-11-20 — T11a4 OverflowMenuButton — To Review
+
+Commit `9d07e9c5`.
+
+### Changed files
+- `MyVocaList/UI/Components/Menus/OverflowMenuButton.xaml(.cs)` (new)
+
+### Verification
+- Android build: 0 errors. Full suite: 1882 passed. Not consumed yet, so the emulator check is in T12.
+- Anchor: `PlacementTarget` is the `OverflowMenuButton` itself, whose bounds equal the 48×48 inner DXButton. Pressed layer: `OnSurfaceVariant` from `MaterialColors.xaml`, with `WithAlpha(0.10f)`, applied when the menu is open after the tap and restored on `Closed`.
+- Accepted assumption: the pressed state needs the menu to be open synchronously after the tap. This holds for `OpenItemMenuCommand`, a synchronous RelayCommand with a TwoWay `IsOpen`.
+
+### AC traceability
+| AC | Implementation | Verification |
+|----|----------------|--------------|
+| REQ-OVFM-20 | `OnClicked` → `MenuResolution.Resolve` (explicit, then ancestor `IMenuHost`, else a warning) | Level B tests (T11a2) and reviewer check |
+| REQ-OVFM-22 | `BeginPressedState` / `OnPressedMenuClosed` | emulator (T12) |
+| REQ-OVFM-25 | no host references | grep |
