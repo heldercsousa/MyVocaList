@@ -16,7 +16,7 @@ public class SongServiceSaveFromFormPictureTests
     private const string StoredSongImage = "https://old.example.com/cover.jpg";
     private const string ArtistImage = "https://cdn.example.com/artist.jpg";
     private const string OtherArtistImage = "https://cdn.example.com/other.jpg";
-    private const string ArtistChangeDuplicateMessage = "A song with this title and version already exists for this artist";
+    private const string ArtistChangeDuplicateMessage = "This artist already has a song with this title.";
     private const int EditedSongId = 40;
     private const int StoredArtistId = 5;
     private const int OtherArtistId = 6;
@@ -73,7 +73,7 @@ public class SongServiceSaveFromFormPictureTests
 
         StoredSong = new Song
         {
-            Id = EditedSongId, Title = "Don't Cry", Version = string.Empty,
+            Id = EditedSongId, Title = "Don't Cry",
             ArtistId = StoredArtistId, ImageUrl = StoredSongImage
         };
         _songRepoMock
@@ -107,7 +107,7 @@ public class SongServiceSaveFromFormPictureTests
         string? artistImageUrl = null,
         bool imageChanged = false)
         => new(
-            songId, "Don't Cry", string.Empty, FeaturedArtists: null, Lyrics: null,
+            songId, "Don't Cry", Lyrics: null,
             artistId, artistText, ExternalProvider: null, ExternalId: null,
             PendingUrls: [],
             artistDecision ?? new ArtistDecision.None(),
@@ -132,8 +132,8 @@ public class SongServiceSaveFromFormPictureTests
 
     private void SetupCollisionFor(int artistId)
         => _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(
-                artistId, It.IsAny<string>(), It.IsAny<string>(), EditedSongId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(
+                artistId, It.IsAny<string>(), EditedSongId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)CollidingSongId);
 
     private void VerifySongNeverUpdated()
@@ -221,7 +221,7 @@ public class SongServiceSaveFromFormPictureTests
     public async Task UpdateSongAsync_PublicPath_NeverTouchesTheStoredReference()
     {
         // [AC] REQ-PIC-21: the public update path keeps the stored reference (only a form Save with ImageChanged changes it)
-        var (success, _) = await CreateSut().UpdateSongAsync(EditedSongId, "Don't Cry", null, null);
+        var (success, _) = await CreateSut().UpdateSongAsync(EditedSongId, "Don't Cry", null);
 
         Assert.True(success);
         Assert.Equal(StoredSongImage, StoredSong.ImageUrl);
@@ -247,7 +247,7 @@ public class SongServiceSaveFromFormPictureTests
     [Fact]
     public async Task SaveFromForm_EditArtistChangedByIdIntoDuplicate_FailsOnArtistAndChangesNothing()
     {
-        // [AC] REQ-PIC-32: moving the song by id onto an artist that already has the same title and version is refused
+        // [AC] REQ-PIC-32: moving the song by id onto an artist that already has the same title is refused
         SetupCollisionFor(OtherArtistId);
 
         var outcome = await CreateSut().SaveFromFormAsync(EditRequest(artistId: OtherArtistId));

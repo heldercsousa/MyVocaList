@@ -374,10 +374,6 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
-                    b.Property<string>("FeaturedArtists")
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
-
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT")
@@ -401,20 +397,14 @@ namespace MyVocaList.Infra.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("ArtistId", "Title")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Songs_ArtistId_Title");
 
                     b.HasIndex("ExternalProvider", "ExternalId")
                         .IsUnique();
-
-                    b.HasIndex("ArtistId", "Title", "Version")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
 
                     b.ToTable("Songs", (string)null);
 

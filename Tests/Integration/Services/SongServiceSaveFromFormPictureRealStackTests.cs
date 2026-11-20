@@ -22,7 +22,7 @@ public class SongServiceSaveFromFormPictureRealStackTests
     private static SongFormSaveRequest EditRequest(
         int songId, string title, int? artistId, string? artistText,
         string? imageUrl = null, string? artistImageUrl = null, bool imageChanged = false)
-        => new(songId, title, string.Empty, FeaturedArtists: null, Lyrics: null,
+        => new(songId, title, Lyrics: null,
             artistId, artistText, ExternalProvider: null, ExternalId: null,
             PendingUrls: [], new ArtistDecision.None(), SongDecision.None,
             imageUrl, artistImageUrl, imageChanged);
@@ -48,7 +48,7 @@ public class SongServiceSaveFromFormPictureRealStackTests
         await using var seed = FreshContext(host);
         var song = new Song
         {
-            ArtistId = artistId, Title = title, Version = string.Empty, ImageUrl = imageUrl,
+            ArtistId = artistId, Title = title, ImageUrl = imageUrl,
             CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
         };
         seed.Songs.Add(song);
@@ -122,7 +122,7 @@ public class SongServiceSaveFromFormPictureRealStackTests
     [Fact]
     public async Task SaveFromFormAsync_EditArtistChangedByIdIntoDuplicate_FailsAndChangesNothing()
     {
-        // [AC] REQ-PIC-32: moving a song onto an artist that already has the same title and version is refused
+        // [AC] REQ-PIC-32: moving a song onto an artist that already has the same title is refused
         await using var host = UnitOfWorkTestHost.Create();
         var target = await SeedArtistAsync(host, "Collision Target Artist");
         var source = await SeedArtistAsync(host, "Collision Source Artist");

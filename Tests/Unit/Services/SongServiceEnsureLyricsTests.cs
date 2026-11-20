@@ -47,7 +47,6 @@ public class SongServiceEnsureLyricsTests
             Id = SongId,
             ArtistId = ArtistId,
             Title = StoredTitle,
-            Version = "",
             Lyrics = lyrics,
             LyricsOrigin = origin,
             ExternalProvider = provider,

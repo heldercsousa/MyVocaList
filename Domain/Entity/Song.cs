@@ -7,9 +7,6 @@ public class Song
     public int Id { get; set; }
     public int ArtistId { get; set; }
     public string Title { get; set; }
-    /// <summary>Variant label (Live/Acoustic/Remix); empty string = canonical version.</summary>
-    public string Version { get; set; } = string.Empty;
-    public string? FeaturedArtists { get; set; }
     public string? Lyrics { get; set; }
     /// <summary>Where the stored lyrics came from; null = not recorded (REQ-SLD-26..28).</summary>
     public LyricsOrigin? LyricsOrigin { get; set; }

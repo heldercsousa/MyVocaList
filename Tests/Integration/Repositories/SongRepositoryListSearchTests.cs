@@ -258,7 +258,6 @@ public class SongRepositoryListSearchTests : IAsyncLifetime
         {
             ArtistId = artistId,
             Title = title,
-            Version = string.Empty,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

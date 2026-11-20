@@ -50,7 +50,7 @@ public class SongServiceUpdateIntegrationTests
 
         // Simulate Save — direct call to SongService.UpdateSongAsync (the form's save now goes through SongService.SaveFromFormAsync).
         var (success, message) = await songService.UpdateSongAsync(
-            songId, "Some Title", featuredArtists: null, lyrics: null,
+            songId, "Some Title", lyrics: null,
             artistId: newArtistId, ct: CancellationToken.None);
 
         Assert.True(success, message);
@@ -78,13 +78,56 @@ public class SongServiceUpdateIntegrationTests
         var songId = song!.Id;
 
         var (success, message) = await songService.UpdateSongAsync(
-            songId, "Some Title 2", featuredArtists: null, lyrics: null,
+            songId, "Some Title 2", lyrics: null,
             artistId: newArtistId, ct: CancellationToken.None);
 
         Assert.True(success, message);
 
         var reloaded = await songRepo.GetByIdAsync(songId, CancellationToken.None);
         Assert.Equal(newArtistId, reloaded!.ArtistId);
+    }
+
+    // [AC] REQ-RMV-06: an edit that renames a song into the identity (artist, title) of another song of the same
+    // artist is refused, case- and accent-insensitively (NOCASE_NOACCENT), and the other song is not changed.
+    [Fact]
+    public async Task UpdateSongAsync_RenameIntoCaseAndAccentVariantOfAnotherSong_IsRefusedAndNothingChanges()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var songService = host.Resolve<ISongService>();
+        var songRepo = host.Resolve<ISongRepository>();
+
+        var artistId = await SeedArtistAsync(host, "Identity Artist");
+        var (createdFirst, firstMessage, _) = await songService.CreateSongAsync(artistId, "Canção Nova", ct: CancellationToken.None);
+        Assert.True(createdFirst, firstMessage);
+        var (createdSecond, secondMessage, second) = await songService.CreateSongAsync(artistId, "Other Song", ct: CancellationToken.None);
+        Assert.True(createdSecond, secondMessage);
+
+        var (success, message) = await songService.UpdateSongAsync(
+            second!.Id, "CANCAO NOVA", lyrics: null, ct: CancellationToken.None);
+
+        Assert.False(success);
+        Assert.Equal("This artist already has a song with this title.", message);
+        var reloaded = await songRepo.GetByIdAsync(second.Id, CancellationToken.None);
+        Assert.Equal("Other Song", reloaded!.Title);
+    }
+
+    // [AC] REQ-RMV-06: a new song whose title is a case- and accent-variant of an existing title of the same artist is
+    // refused with the single duplicate message; no second row is written.
+    [Fact]
+    public async Task CreateSongAsync_CaseAndAccentVariantOfExistingTitle_IsRefused()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var songService = host.Resolve<ISongService>();
+
+        var artistId = await SeedArtistAsync(host, "Identity Artist Two");
+        var (created, message, _) = await songService.CreateSongAsync(artistId, "Canção Nova", ct: CancellationToken.None);
+        Assert.True(created, message);
+
+        var (secondCreated, secondMessage, song) = await songService.CreateSongAsync(artistId, "cancao nova", ct: CancellationToken.None);
+
+        Assert.False(secondCreated);
+        Assert.Equal("This artist already has a song with this title.", secondMessage);
+        Assert.Null(song);
     }
 
     private static async Task<int> SeedArtistAsync(UnitOfWorkTestHost host, string name)

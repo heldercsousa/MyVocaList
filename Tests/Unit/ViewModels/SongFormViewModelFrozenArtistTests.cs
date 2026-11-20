@@ -9,8 +9,7 @@ namespace MyVocaList.Tests.Unit.ViewModels;
 
 /// <summary>
 /// The Artist of a Deezer song is plain text and fixed (REQ-SLD-12..14, 17, 30): the frozen state of the form,
-/// its release by Title or X, and what Save sends for the artist and the identity. A pick writes no Version
-/// (REQ-SLD-08). Moq services, <c>TestImageStore.PassThrough</c>; no database, no <c>Shell.Current</c>.
+/// its release by Title or X, and what Save sends for the artist and the identity. Moq services, <c>TestImageStore.PassThrough</c>; no database, no <c>Shell.Current</c>.
 /// </summary>
 public class SongFormViewModelFrozenArtistTests
 {
@@ -84,7 +83,6 @@ public class SongFormViewModelFrozenArtistTests
         ArtistId = artistId,
         OriginalArtist = new Artist { Id = artistId, Name = artistName },
         Title = "Bohemian Rhapsody",
-        Version = string.Empty,
         ExternalProvider = DeezerProvider,
         ExternalId = "3135556"
     };
@@ -95,14 +93,12 @@ public class SongFormViewModelFrozenArtistTests
         ArtistId = 8,
         OriginalArtist = new Artist { Id = 8, Name = "Ramones" },
         Title = "Blitzkrieg Bop",
-        Version = string.Empty
     };
 
     private Mock<ISongService> SaveService()
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
         songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
             .Returns((SongFormSaveRequest r, CancellationToken _) =>
             {
@@ -113,10 +109,10 @@ public class SongFormViewModelFrozenArtistTests
     }
 
     private static SongSuggestionDto RemoteDto(
-        string title = "Creep", string artist = "Radiohead", string version = "",
+        string title = "Creep", string artist = "Radiohead",
         string? externalId = DeezerId, string? provider = DeezerProvider,
         int? localArtistId = null, string? localArtistName = null) =>
-        new(null, title, artist, localArtistId, externalId, provider, true, version, localArtistName, Cover, ArtistPic, null);
+        new(null, title, artist, localArtistId, externalId, provider, true, localArtistName, Cover, ArtistPic, null);
 
     private static AutocompleteSuggestion Pick(SongSuggestionDto dto) => new(dto.Title, string.Empty, dto);
 
@@ -247,20 +243,6 @@ public class SongFormViewModelFrozenArtistTests
 
         var request = Assert.Single(_requests);
         Assert.Equal(sut.IsArtistFrozen, request.ExternalId is not null);
-    }
-
-    // [AC] REQ-SLD-08: a Deezer pick writes no Version; the Version stays as the user left it.
-    [Theory]
-    [InlineData("Demo", "Live", "Demo")]
-    [InlineData("", "Live", "")]
-    public async Task DeezerPick_LeavesTheVersionAsTheUserLeftIt(string typedVersion, string deezerVersion, string expected)
-    {
-        var sut = CreateAddFormSut();
-        sut.SongVersion = typedVersion;
-
-        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto(version: deezerVersion)));
-
-        Assert.Equal(expected, sut.SongVersion);
     }
 
     // [AC] REQ-SLD-14: a pick that holds only one part of the Deezer identity is no identity: the Artist stays

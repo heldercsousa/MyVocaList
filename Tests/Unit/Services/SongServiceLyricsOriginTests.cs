@@ -81,7 +81,7 @@ public class SongServiceLyricsOriginTests
         SongDecision songDecision = SongDecision.None,
         LyricsLookupResult? pickLookup = null)
         => new(
-            songId, "Don't Cry", "", FeaturedArtists: null, Lyrics: lyrics,
+            songId, "Don't Cry", Lyrics: lyrics,
             artistId, "Guns N' Roses", provider, externalId,
             PendingUrls: [],
             new ArtistDecision.None(),
@@ -96,7 +96,6 @@ public class SongServiceLyricsOriginTests
             Id = StoredSongId,
             ArtistId = StoredArtistId,
             Title = "Old title",
-            Version = "",
             Lyrics = lyrics,
             LyricsOrigin = origin,
             ExternalProvider = provider,
@@ -211,7 +210,7 @@ public class SongServiceLyricsOriginTests
         var stored = SetupStoredSong("Old lyrics", LyricsOrigin.LyricsSource);
 
         var (success, _) = await CreateSut().UpdateSongAsync(
-            StoredSongId, "Old title", null, "New lyrics");
+            StoredSongId, "Old title", "New lyrics");
 
         Assert.True(success);
         Assert.Equal(LyricsOrigin.User, stored.LyricsOrigin);

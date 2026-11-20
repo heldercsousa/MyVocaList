@@ -58,7 +58,6 @@ public class SongFormViewModelLoadingTests
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
         songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SongFormSaveOutcome(SongFormSaveKind.Saved, "Song saved", SaveField.None, 5, [], false, []));
         return songService;
@@ -70,7 +69,6 @@ public class SongFormViewModelLoadingTests
         ArtistId = 8,
         OriginalArtist = new Artist { Id = 8, Name = "Ramones" },
         Title = "Blitzkrieg Bop",
-        Version = string.Empty
     };
 
     private static async Task WaitUntilAsync(Func<bool> condition)

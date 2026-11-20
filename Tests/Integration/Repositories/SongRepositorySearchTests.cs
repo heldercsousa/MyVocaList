@@ -29,14 +29,14 @@ public class SongRepositorySearchTests : IAsyncLifetime
         var abba = await SeedArtistAsync("ABBA");
 
         _db.Songs.AddRange(
-            MakeSong(guns.Id, "Don't Cry", "", "Deezer", "3135556"),
-            MakeSong(guns.Id, "Don't Cry", "Live"),
-            MakeSong(guns.Id, "Sweet Child O' Mine", ""),
-            MakeSong(cyndi.Id, "Cry", ""),
-            MakeSong(cure.Id, "Boys Don't Cry", ""),
-            MakeSong(oasis.Id, "Dont Look Back in Anger", ""),
-            MakeSong(ana.Id, "Não Sei", ""),
-            MakeSong(abba.Id, "Abba Song", ""));
+            MakeSong(guns.Id, "Don't Cry", "Deezer", "3135556"),
+            MakeSong(guns.Id, "Don't Cry (Live)"),
+            MakeSong(guns.Id, "Sweet Child O' Mine"),
+            MakeSong(cyndi.Id, "Cry"),
+            MakeSong(cure.Id, "Boys Don't Cry"),
+            MakeSong(oasis.Id, "Dont Look Back in Anger"),
+            MakeSong(ana.Id, "Não Sei"),
+            MakeSong(abba.Id, "Abba Song"));
         await _db.SaveChangesAsync();
     }
 
@@ -144,7 +144,7 @@ public class SongRepositorySearchTests : IAsyncLifetime
             var artist = new Artist { Name = "ABBA", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
             plain.Artists.Add(artist);
             await plain.SaveChangesAsync();
-            plain.Songs.Add(MakeSong(artist.Id, "Abba Song", ""));
+            plain.Songs.Add(MakeSong(artist.Id, "Abba Song"));
             await plain.SaveChangesAsync();
             var repo = new SongRepository(plain);
 
@@ -170,28 +170,27 @@ public class SongRepositorySearchTests : IAsyncLifetime
         Assert.Equal("3135556", hit.ExternalId);
     }
 
-    // [AC] REQ-SFT-05: collated (title, artist, "") triple matches
+    // [AC] REQ-SFT-05: collated (title, artist name) pair matches
     [Fact]
-    public async Task FindByTitleAndArtistNamesAsync_CollatedTripleEmptyVersion_Returns()
+    public async Task FindByTitleAndArtistNamesAsync_CollatedPair_Returns()
     {
         var hits = await _repo.FindByTitleAndArtistNamesAsync(
-            [("DON'T CRY", "guns n' roses", "")], CancellationToken.None);
+            [("DON'T CRY", "guns n' roses")], CancellationToken.None);
         var hit = Assert.Single(hits);
         Assert.Equal("Don't Cry", hit.Title);
-        Assert.Equal("", hit.Version);
     }
 
-    // [AC] REQ-SFT-05: the version is part of the match, per item
+    // [AC] REQ-RMV-06: the pair match is identity-only; a title with extra text is a different identity and matches its own row only
     [Fact]
-    public async Task FindByTitleAndArtistNamesAsync_VersionMustMatch()
+    public async Task FindByTitleAndArtistNamesAsync_TitleWithExtraText_MatchesOnlyItsOwnRow()
     {
-        var empty = await _repo.FindByTitleAndArtistNamesAsync(
-            [("don't cry", "guns n' roses", "")], CancellationToken.None);
-        var live = await _repo.FindByTitleAndArtistNamesAsync(
-            [("don't cry", "guns n' roses", "LIVE")], CancellationToken.None);
+        var plain = await _repo.FindByTitleAndArtistNamesAsync(
+            [("don't cry", "guns n' roses")], CancellationToken.None);
+        var withSuffix = await _repo.FindByTitleAndArtistNamesAsync(
+            [("don't cry (live)", "guns n' roses")], CancellationToken.None);
 
-        Assert.Equal("", Assert.Single(empty).Version);
-        Assert.Equal("Live", Assert.Single(live).Version);
+        Assert.Equal("Don't Cry", Assert.Single(plain).Title);
+        Assert.Equal("Don't Cry (Live)", Assert.Single(withSuffix).Title);
     }
 
     // [AC] AC-STL-04 (REQ-STL-04): a 250-char title is found by exact (collated triple) and trigram search
@@ -203,11 +202,11 @@ public class SongRepositorySearchTests : IAsyncLifetime
         title = title.PadRight(250, 'q');
         Assert.Equal(250, title.Length);
         var artist = await SeedArtistAsync("Long Title Artist");
-        _db.Songs.Add(MakeSong(artist.Id, title, ""));
+        _db.Songs.Add(MakeSong(artist.Id, title));
         await _db.SaveChangesAsync();
 
         var exact = await _repo.FindByTitleAndArtistNamesAsync(
-            [(title.ToUpperInvariant(), "long title artist", "")], CancellationToken.None);
+            [(title.ToUpperInvariant(), "long title artist")], CancellationToken.None);
         var trigram = await _repo.SearchTitleCandidatesAsync("zanzibar quixotic marmalade", 50, CancellationToken.None);
 
         Assert.Equal(title, Assert.Single(exact).Title);
@@ -222,12 +221,11 @@ public class SongRepositorySearchTests : IAsyncLifetime
         return artist;
     }
 
-    private static Song MakeSong(int artistId, string title, string version,
+    private static Song MakeSong(int artistId, string title,
         string? provider = null, string? externalId = null) => new()
     {
         ArtistId = artistId,
         Title = title,
-        Version = version,
         ExternalProvider = provider,
         ExternalId = externalId,
         CreatedAt = DateTime.UtcNow,
