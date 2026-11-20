@@ -27,3 +27,24 @@ GREEN: two classes 43 passed; full `dotnet test Tests/MyVocaList.Tests.csproj` 1
 | REQ-CATPROP-06 | CatalogRepository.IsDerivedAsync | IsDerivedAsync_AuthorRow/CoverRow/MissingRow |
 | REQ-CATPROP-07 | CatalogRepository.RemoveCoversAsync | RemoveCoversAsync_MixedList/UnknownIds/DuplicateIds/OtherArtistsCover |
 | REQ-CATPROP-10 | SongRepository.CountByArtistAsync | CountByArtistAsync_ReturnsOwnedSongsOnly |
+
+---
+## Task: C2 - Backfill migration (REQ-CATPROP-09, 11)
+**Status:** To Review (Elevated lane: migration)
+
+### Changed files:
+- `Infra/Migrations/20261120052950_BackfillDerivedCatalogRows.cs` (+ `.Designer.cs`; snapshot unchanged)
+- `Tests/Integration/Migrations/CatalogBackfillMigrationTests.cs`
+- `Tests/Integration/Repositories/ArtistRepositoryTests.cs`
+- `Tests/Integration/Migrations/RemoveSongVersionMigrationTests.cs` (one test pinned to its own migration)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/task-log.md`
+
+### Test evidence
+RED: `BackfillSql` const added with an empty `Up`; 3 of 5 new tests failed (SongWithoutDerivedRow, CoverRowsUntouched, SecondApply: Actual empty). ManualAuthorRow and PerformersOnly are guards that pass by design (INSERT OR IGNORE; repository unchanged).
+GREEN: 5 passed; full `dotnet test Tests/MyVocaList.Tests.csproj` 1863 passed, 0 failed.
+`RemoveSongVersionMigrationTests.Up_RowCountAndForeignKeyRowsUnchanged_ForeignKeyCheckEmpty` migrated to latest and asserted Catalog unchanged; it now correctly sees backfilled rows, so it is pinned to `NewMigrationId(db)` (intent REQ-RMV-03 unchanged). Not in design.md section 9 list; flagged for review.
+
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-CATPROP-09 | BackfillDerivedCatalogRows.BackfillSql | CatalogBackfillMigrationTests (4 tests) |
+| REQ-CATPROP-11 | existing PerformersOnly filter | ArtistRepositoryTests.PerformersOnly_AuthorWithOnlyDerivedRows_IsReturned |
