@@ -54,6 +54,19 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     protected static ItemMenuAction MenuAction(string text, string icon, Func<TItem, Task> execute) =>
         new(text, icon, item => execute((TItem)item));
 
+    private IReadOnlyList<MenuItemModel> _itemMenuItems;
+
+    /// <summary>The item menu entries in display order: Edit, the page-specific actions, Delete. Built once, on first read.</summary>
+    public IReadOnlyList<MenuItemModel> ItemMenuItems => _itemMenuItems ??= BuildItemMenuItems();
+
+    private IReadOnlyList<MenuItemModel> BuildItemMenuItems()
+    {
+        var items = new List<MenuItemModel> { new("Edit", "edit_outlined", EditItemCommand) };
+        items.AddRange(ItemMenuActions.Select(a => new MenuItemModel(a.Text, a.Icon, ExecuteItemMenuActionCommand, a)));
+        items.Add(new MenuItemModel("Delete", "delete_outlined", DeleteItemCommand));
+        return items;
+    }
+
     protected abstract ObservableRangeCollection<TItem> Items { get; }
     protected abstract ObservableRangeCollection<TItem> SelectedItems { get; }
 
