@@ -25,7 +25,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
   - Size note: about 11 test files, each a one-argument mechanical addition; no assertion changed.
   - Files owned: every `PassthroughUnitOfWork.Over(...)` call that builds a `SongService` (list in `plan.md § Task 3a`, confirm by grep).
   - Demo: the full test run stays green.
-- [ ] C3b **SongService propagation.** After C3a. Review lane: Elevated. (REQ-CATPROP-01, 02, 03, 04)
+- [x] C3b **SongService propagation.** After C3a. Review lane: Elevated. (REQ-CATPROP-01, 02, 03, 04)
   - Files owned: `Services/SongService.cs`, new `SongServiceCatalogPropagationTests.cs`.
   - Demo: create a song → its author's catalog lists it; change the author → the row moves.
 - [ ] C4 **CatalogService guard + bulk remove.** After C1. Review lane: Standard. (REQ-CATPROP-06, 07)
