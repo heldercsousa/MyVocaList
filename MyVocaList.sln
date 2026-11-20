@@ -156,6 +156,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\README.md = Docs\Management\BusinessFeatures\artists-songs\README.md
 		Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md = Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md
+		Docs\Management\BusinessFeatures\artists-songs\spec-changelog.md = Docs\Management\BusinessFeatures\artists-songs\spec-changelog.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
