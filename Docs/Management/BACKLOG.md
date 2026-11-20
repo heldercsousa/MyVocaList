@@ -43,8 +43,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
 | 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
-| — | ↳ Move the Playwright MCP token to .env.local | 💡 Pending |
-| — | ↳ Rotate the DevExpress license key | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
 | — | ↳ Always-loaded context: path-scoped rules spike and superpowers plugin cost | 💡 Pending |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->
