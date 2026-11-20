@@ -145,7 +145,7 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81` committed; T11a3 implementor dispatched.
+- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81`, T11a3 `46982a87` committed; T11a4 implementor dispatched.
 - Next: T11a2 → T11a3 → T11a4 → T11c → T11b (one fresh implementor each, sequential; check `git -C .claude/worktrees/md3-menu-shared log --oneline` to see which committed) → T12 verifier + clean Android build + emulator walk → merge → Helder device pass
 - Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
@@ -188,3 +188,29 @@ Commit `9a26ab81`.
 | REQ-OVFM-19 | `MenuItemSelection.Select` | `Select_RunsCommandBeforeClose`, `Select_DoesNotCloseWhenCommandAlreadyClosed`, `Select_DoesNotCloseWhenCloseOnItemSelectedFalse`, `Select_CommandCannotExecute_DoesNotRun_StillCloses`, `Select_NullCommand_DoesNotThrow` |
 | REQ-OVFM-20 | `MenuResolution.Resolve<TMenu>` | `Resolve_ExplicitWins`, `Resolve_NearestHost`, `Resolve_SkipsHostWithNullMenu`, `Resolve_NoneReturnsNull` |
 | REQ-OVFM-21 | `MenuItemShape.For` | `For_SingleItem_All12`, `For_First_Top12Bottom4`, `For_Last_Top4Bottom12`, `For_Middle_All4` |
+
+## 2026-11-20 — T11a3 MenuItem style + Menu + IMenuHost — To Review
+
+Commit `46982a87`.
+
+### Changed files
+- `MyVocaList/Resources/Styles/MaterialStyles.xaml`: `MenuItem` `Padding` 16,0 → 12,0, plus `CornerRadius` 4
+- `MyVocaList/UI/Components/Menus/Menu.xaml(.cs)` (new): one DXPopup; items built in code-behind; `MenuItemShape` corners; `CanExecute` → `IsEnabled`; tap → `MenuItemSelection.Select`; `PopupBackHandler` attach and detach; initial focus
+- `MyVocaList/UI/Components/Menus/IMenuHost.cs` (new)
+
+### Verification
+- Android build: 0 errors. Full suite: 1882 passed. Not consumed yet, so there is no emulator gate (covered in T11b and T12).
+- Grep of `UI/Components/Menus/` for `CrudListView|ICrudListViewModel|CrudListPageBase`: 0 matches (REQ-OVFM-25).
+
+### AC traceability
+| AC | Implementation | Verification |
+|----|----------------|--------------|
+| REQ-OVFM-12a (amended) | `MenuItem` style | reviewer check |
+| REQ-OVFM-21 | `Menu.RebuildItems` (corners), content `Padding="4,2"` | Level B tests (T11a2), plus reviewer check and visual in T12 |
+| REQ-OVFM-23 | `OnPopupOpened` → `SetSemanticFocus(first item)` | reviewer check; TalkBack on device |
+| REQ-OVFM-24 | `IsEnabled` from `CanExecute`, refreshed on `CanExecuteChanged` | reviewer check |
+| REQ-OVFM-25 | no host references | grep |
+
+### Decisions (orchestrator, under Helder's autonomy grant)
+- `SemanticExtensions.SetSemanticFocus` is obsolete in MAUI 10 (CS0618). Its suggested replacement, `SemanticScreenReader`, can only announce text and cannot move focus. **Kept**, so REQ-OVFM-23 still works. Follow-up: replace it with the native Android accessibility-focus action when the obsolete API is removed.
+- A `MenuItemModel` with a null `Command` shows enabled, and selecting it only closes the menu. Accepted.
