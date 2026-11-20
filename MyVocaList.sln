@@ -1367,6 +1367,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-04-song-writes-prop
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\design.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\plan.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-24-song-form-title-first-one-search-over-local-and-music-apis", "2026-09-24-song-form-title-first-one-search-over-local-and-music-apis", "{DAA25DC3-31F5-5F11-B9D7-183B7E948BFE}"

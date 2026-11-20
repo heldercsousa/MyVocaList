@@ -268,6 +268,49 @@ public class SongRepositoryTests : IAsyncLifetime
         Assert.Equal(0, remaining);
     }
 
+    [Fact]
+    // [AC] REQ-CATPROP-05: deleting a song removes all its catalog rows (existing DB cascade)
+    public async Task DeleteAsync_Song_RemovesDerivedAndCoverCatalogRows()
+    {
+        var author = await SeedArtistAsync("Author");
+        var coverer = await SeedArtistAsync("Coverer");
+        var song = MakeSong(author.Id, "Doomed");
+        var other = MakeSong(author.Id, "Survivor");
+        _db.Set<Song>().AddRange(song, other);
+        await _db.SaveChangesAsync();
+        _db.Set<Catalog>().AddRange(
+            new Catalog { ArtistId = author.Id, SongId = song.Id },
+            new Catalog { ArtistId = coverer.Id, SongId = song.Id },
+            new Catalog { ArtistId = author.Id, SongId = other.Id });
+        await _db.SaveChangesAsync();
+
+        await _repo.DeleteAsync([song.Id], CancellationToken.None);
+        await _db.SaveChangesAsync();
+
+        Assert.Equal(0, await _db.Set<Catalog>().CountAsync(c => c.SongId == song.Id));
+        Assert.True(await _db.Set<Catalog>().AnyAsync(c => c.ArtistId == author.Id && c.SongId == other.Id));
+    }
+
+    // ── CountByArtistAsync ────────────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-CATPROP-10: only owned songs are counted, covers are not
+    public async Task CountByArtistAsync_ReturnsOwnedSongsOnly()
+    {
+        var a = await SeedArtistAsync("A");
+        var b = await SeedArtistAsync("B");
+        var s1 = MakeSong(a.Id, "One");
+        var s2 = MakeSong(a.Id, "Two");
+        var cover = MakeSong(b.Id, "Theirs");
+        _db.Set<Song>().AddRange(s1, s2, cover);
+        await _db.SaveChangesAsync();
+        _db.Set<Catalog>().Add(new Catalog { ArtistId = a.Id, SongId = cover.Id });
+        await _db.SaveChangesAsync();
+
+        Assert.Equal(2, await _repo.CountByArtistAsync(a.Id, CancellationToken.None));
+        Assert.Equal(0, await _repo.CountByArtistAsync(9999, CancellationToken.None));
+    }
+
     // ── Lyrics field ─────────────────────────────────────────────────────
 
     [Fact]
