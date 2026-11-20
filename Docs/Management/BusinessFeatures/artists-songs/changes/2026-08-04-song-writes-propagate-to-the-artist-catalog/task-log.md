@@ -92,3 +92,22 @@ GREEN: 12/12; full `dotnet test Tests/MyVocaList.Tests.csproj` 1875 passed, 0 fa
 | REQ-CATPROP-02 | move only when author changed | Update_SameAuthor_CatalogUnchanged |
 | REQ-CATPROP-03 | UpdateSongCoreAsync Remove(old) + Exists/Add(new) | Update_AuthorAtoB_MovesRow, _BAlreadyCovers_NoDuplicate, Update_AuthorToNewInlineArtist_MovesRowWithRealId, Update_AuthorChange_OldDerivedRowMissing_StillWritesNew |
 | REQ-CATPROP-04 | all staged in the UoW transaction | Create_ValidationFails_NoCatalogRow, Update_ArtistChoiceNeeded_CatalogUnchanged, Update_AuthorAtoB_SaveThrows_CatalogUnchanged |
+
+---
+## Task: C4 - CatalogService guard and bulk remove (REQ-CATPROP-06, 07)
+**Status:** To Review
+
+### Changed files:
+- `Domain/ServicesInterfaces/ICatalogService.cs` (new `RemoveSongsFromCatalogAsync`)
+- `Services/CatalogService.cs` (single remove: exists, derived, remove; bulk remove with message table)
+- `Tests/Unit/Services/CatalogServiceTests.cs` (replaced "AlwaysReturnsSuccess"; 3 single + 2 + 7-case theory bulk tests)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/task-log.md`
+
+### Test evidence
+RED: with the interface member added and no implementation, the test project did not compile (CS0535 on CatalogService); the old always-success body also could not satisfy the new single-remove tests.
+GREEN: CatalogServiceTests 15/15; full `dotnet test Tests/MyVocaList.Tests.csproj` 1886 passed, 0 failed.
+
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-CATPROP-06 | CatalogService.RemoveSongFromCatalogAsync | RemoveSongFromCatalogAsync_DerivedRow_RefusesAndKeepsRow, _CoverRow_RemovesAndSucceeds, _MissingRow_ReturnsNotInCatalog |
+| REQ-CATPROP-07 | CatalogService.RemoveSongsFromCatalogAsync + BuildBulkRemoveMessage | RemoveSongsFromCatalogAsync_EmptyList_..., _UnknownArtist_..., _Counts_ProduceExactMessage (7 cases) |
