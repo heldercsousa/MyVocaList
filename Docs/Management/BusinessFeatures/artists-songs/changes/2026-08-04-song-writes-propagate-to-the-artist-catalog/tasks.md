@@ -41,5 +41,5 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
   - Demo: catalog-mode Delete never calls `DeleteSongsAsync`.
 
 ## Close-out
-- [ ] C7 Merge to `develop`, full test run, Android build, traceability matrix, status.
-- [ ] C8 **Device check (Helder)**, checklist in `plan.md § Task 7`.
+- [x] C7 Merge to `develop`, full test run, Android build, traceability matrix, status.
+- [x] C8 **Device check (Helder)**, checklist in `plan.md § Task 7`.
