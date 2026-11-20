@@ -525,6 +525,51 @@ public class CrudListViewModelBaseTests
     }
 
     [Fact]
+    // [AC] REQ-OVFM-18: ItemMenuItems of a plain ViewModel is Edit, then Delete, with their icons and commands.
+    public void ItemMenuItems_Default_IsEditThenDelete()
+    {
+        var sut = new TestCrudListViewModel();
+
+        Assert.Equal(["Edit", "Delete"], sut.ItemMenuItems.Select(m => m.Text));
+        Assert.Equal(["edit_outlined", "delete_outlined"], sut.ItemMenuItems.Select(m => m.Icon));
+        Assert.Same(sut.EditItemCommand, sut.ItemMenuItems[0].Command);
+        Assert.Same(sut.DeleteItemCommand, sut.ItemMenuItems[1].Command);
+    }
+
+    [Fact]
+    // [AC] REQ-OVFM-18: ItemMenuItems puts the page-specific actions between Edit and Delete, in their given order.
+    public void ItemMenuItems_WithPageActions_EditActionsDelete()
+    {
+        var sut = new ActionsTestCrudListViewModel();
+
+        Assert.Equal(["Edit", "First", "Second", "Delete"], sut.ItemMenuItems.Select(m => m.Text));
+    }
+
+    [Fact]
+    // [AC] REQ-OVFM-18: A page-specific ItemMenuItems entry runs ExecuteItemMenuActionCommand with its ItemMenuAction as the parameter.
+    public void ItemMenuItems_PageAction_CommandIsExecuteWithActionParameter()
+    {
+        var sut = new ActionsTestCrudListViewModel();
+
+        var pageItem = sut.ItemMenuItems[1];
+
+        Assert.Same(sut.ExecuteItemMenuActionCommand, pageItem.Command);
+        Assert.Same(sut.ItemMenuActions[0], pageItem.CommandParameter);
+    }
+
+    [Fact]
+    // [AC] REQ-OVFM-18: ItemMenuItems is built once, so two reads return the same list instance.
+    public void ItemMenuItems_IsBuiltOnce()
+    {
+        var sut = new ActionsTestCrudListViewModel();
+
+        var first = sut.ItemMenuItems;
+        var second = sut.ItemMenuItems;
+
+        Assert.Same(first, second);
+    }
+
+    [Fact]
     // [AC] REQ-OVFM-08: With the menu open, ExecuteItemMenuActionCommand with a page-specific menu item closes the menu, then runs that item's action once, passing the target item.
     public void ExecuteItemMenuAction_ClosesMenuThenRunsActionOnceWithTarget()
     {
