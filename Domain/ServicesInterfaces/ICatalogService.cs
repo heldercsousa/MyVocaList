@@ -12,4 +12,8 @@ public interface ICatalogService
 
     Task<(bool success, string message)> RemoveSongFromCatalogAsync(
         int artistId, int songId, CancellationToken ct = default);
+
+    /// <summary>Removes the artist's cover rows for the listed songs; the artist's own songs are kept.</summary>
+    Task<(bool success, string message, int removed, int kept)> RemoveSongsFromCatalogAsync(
+        int artistId, IReadOnlyCollection<int> songIds, CancellationToken ct = default);
 }

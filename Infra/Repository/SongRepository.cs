@@ -377,4 +377,8 @@ public class SongRepository : ISongRepository
             .Where(s => idList.Contains(s.Id))
             .ExecuteDeleteAsync(ct);
     }
+
+    /// <inheritdoc />
+    public async Task<int> CountByArtistAsync(int artistId, CancellationToken ct)
+        => await _db.Songs.CountAsync(s => s.ArtistId == artistId, ct);
 }

@@ -150,6 +150,106 @@ public class CatalogRepositoryTests : IAsyncLifetime
         Assert.Equal("Enter Sandman", items.Single().Title);
     }
 
+    // ── IsDerivedAsync / RemoveCoversAsync (CATALOG-PROP) ─────────────────
+
+    private async Task AddCatalogAsync(int artistId, int songId)
+    {
+        await _repo.AddAsync(new Catalog { ArtistId = artistId, SongId = songId }, CancellationToken.None);
+        await _db.SaveChangesAsync();
+    }
+
+    [Fact]
+    // [AC] REQ-CATPROP-06: a catalog row for a song the artist authored is derived
+    public async Task IsDerivedAsync_AuthorRow_ReturnsTrue()
+    {
+        var a = await SeedArtistAsync("A");
+        var s = await SeedSongAsync(a.Id, "Own");
+        await AddCatalogAsync(a.Id, s.Id);
+
+        Assert.True(await _repo.IsDerivedAsync(a.Id, s.Id, CancellationToken.None));
+    }
+
+    [Fact]
+    // [AC] REQ-CATPROP-06: a catalog row for another artist's song is a cover, not derived
+    public async Task IsDerivedAsync_CoverRow_ReturnsFalse()
+    {
+        var a = await SeedArtistAsync("A");
+        var b = await SeedArtistAsync("B");
+        var s = await SeedSongAsync(b.Id, "Cover");
+        await AddCatalogAsync(a.Id, s.Id);
+
+        Assert.False(await _repo.IsDerivedAsync(a.Id, s.Id, CancellationToken.None));
+    }
+
+    [Fact]
+    // [AC] REQ-CATPROP-06: no row means not derived
+    public async Task IsDerivedAsync_MissingRow_ReturnsFalse()
+    {
+        var a = await SeedArtistAsync("A");
+        var s = await SeedSongAsync(a.Id, "Own");
+
+        Assert.False(await _repo.IsDerivedAsync(a.Id, s.Id, CancellationToken.None));
+    }
+
+    [Fact]
+    // [AC] REQ-CATPROP-07: bulk remove removes covers and keeps derived rows
+    public async Task RemoveCoversAsync_MixedList_RemovesCoversKeepsDerived()
+    {
+        var a = await SeedArtistAsync("A");
+        var b = await SeedArtistAsync("B");
+        var s1 = await SeedSongAsync(a.Id, "Own");
+        var s2 = await SeedSongAsync(b.Id, "Cover");
+        await AddCatalogAsync(a.Id, s1.Id);
+        await AddCatalogAsync(a.Id, s2.Id);
+
+        var result = await _repo.RemoveCoversAsync(a.Id, [s1.Id, s2.Id], CancellationToken.None);
+
+        Assert.Equal((1, 1), result);
+        Assert.True(await _repo.ExistsAsync(a.Id, s1.Id, CancellationToken.None));
+        Assert.False(await _repo.ExistsAsync(a.Id, s2.Id, CancellationToken.None));
+    }
+
+    [Fact]
+    // [AC] REQ-CATPROP-07: ids with no catalog row are counted in neither total
+    public async Task RemoveCoversAsync_UnknownIds_CountsNeither()
+    {
+        var a = await SeedArtistAsync("A");
+
+        var result = await _repo.RemoveCoversAsync(a.Id, [999], CancellationToken.None);
+
+        Assert.Equal((0, 0), result);
+    }
+
+    [Fact]
+    // [AC] REQ-CATPROP-07: a duplicated id is counted once and never throws
+    public async Task RemoveCoversAsync_DuplicateIds_CountedOnce()
+    {
+        var a = await SeedArtistAsync("A");
+        var b = await SeedArtistAsync("B");
+        var s2 = await SeedSongAsync(b.Id, "Cover");
+        await AddCatalogAsync(a.Id, s2.Id);
+
+        var result = await _repo.RemoveCoversAsync(a.Id, [s2.Id, s2.Id], CancellationToken.None);
+
+        Assert.Equal((1, 0), result);
+    }
+
+    [Fact]
+    // [AC] REQ-CATPROP-07: another artist's cover of the same song survives
+    public async Task RemoveCoversAsync_OtherArtistsCoverOfSameSong_Untouched()
+    {
+        var a = await SeedArtistAsync("A");
+        var b = await SeedArtistAsync("B");
+        var c = await SeedArtistAsync("C");
+        var s2 = await SeedSongAsync(b.Id, "Cover");
+        await AddCatalogAsync(a.Id, s2.Id);
+        await AddCatalogAsync(c.Id, s2.Id);
+
+        await _repo.RemoveCoversAsync(a.Id, [s2.Id], CancellationToken.None);
+
+        Assert.True(await _repo.ExistsAsync(c.Id, s2.Id, CancellationToken.None));
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private async Task<Artist> SeedArtistAsync(string name)

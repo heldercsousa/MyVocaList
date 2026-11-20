@@ -184,6 +184,11 @@ public class SongService : ISongService
             };
 
             await songRepository.AddAsync(song, ct);
+
+            // REQ-CATPROP-01: the author performs their own song. Staged through the Song navigation so EF
+            // fixes up SongId on the single save; resolved from sp (REQ-UOW-28), committed with the song.
+            await sp.GetRequiredService<ICatalogRepository>()
+                .AddAsync(new Catalog { Song = song, ArtistId = artistId }, ct);
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
             return (true, $"Song '{title.Trim()}' created successfully", song);
         }, ct);
@@ -323,6 +328,7 @@ public class SongService : ISongService
             // as the only source of truth, which is exactly what the pre-UOW stopgap's
             // CurrentValues.SetValues achieved ("scalar/FK properties only, no navigation graph").
             song.OriginalArtist = null;
+            var oldArtistId = song.ArtistId;
             song.ArtistId = effectiveArtistId;
             song.Title = title;
             song.LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnUpdate(song.Lyrics, song.LyricsOrigin, lyrics);
@@ -340,6 +346,18 @@ public class SongService : ISongService
                 song.ImageUrl = songImageReference;
 
             await songRepository.UpdateAsync(song, ct);
+
+            // REQ-CATPROP-03: an author change moves the derived row, after every refusal above. A row the
+            // new author already holds as a cover becomes the derived row (no duplicate). Both calls run on
+            // the unit of work's connection, so a failed save rolls them back (REQ-CATPROP-04).
+            if (effectiveArtistId != oldArtistId)
+            {
+                var catalogRepository = sp.GetRequiredService<ICatalogRepository>();
+                await catalogRepository.RemoveAsync(oldArtistId, song.Id, ct);
+                if (!await catalogRepository.ExistsAsync(effectiveArtistId, song.Id, ct))
+                    await catalogRepository.AddAsync(new Catalog { ArtistId = effectiveArtistId, SongId = song.Id }, ct);
+            }
+
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
             return (true, $"Song updated to '{title}'", SaveField.None);
         }, ct);
@@ -464,6 +482,11 @@ public class SongService : ISongService
 
             // Stage the song entity (no SaveChangesAsync yet)
             await songRepository.AddAsync(song, ct);
+
+            // REQ-CATPROP-01: the derived catalog row, staged with the song (the artist id is real here,
+            // even for an artist created in this save: it was flushed above).
+            await sp.GetRequiredService<ICatalogRepository>()
+                .AddAsync(new Catalog { Song = song, ArtistId = effectiveArtistId }, ct);
 
             // Stage URL entities on the SAME context — N3: one SaveChangesAsync commits both atomically
             var urlList = urls?.ToList() ?? [];

@@ -14,6 +14,7 @@ namespace MyVocaList.Tests.Unit.Services;
 public class SongServiceLyricsOriginTests
 {
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepoMock = new();
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
@@ -68,7 +69,7 @@ public class SongServiceLyricsOriginTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _artistServiceMock,
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, _artistServiceMock,
             _artistResolutionMock.Object, _songResolutionMock),
         _loggerMock.Object);
 
