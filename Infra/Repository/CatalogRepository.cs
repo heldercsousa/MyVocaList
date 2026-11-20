@@ -72,4 +72,25 @@ public class CatalogRepository : ICatalogRepository
             .Where(c => c.ArtistId == artistId && c.SongId == songId)
             .ExecuteDeleteAsync(ct);
     }
+
+    /// <inheritdoc />
+    public async Task<bool> IsDerivedAsync(int artistId, int songId, CancellationToken ct)
+        => await _db.Catalog.AnyAsync(
+            c => c.ArtistId == artistId && c.SongId == songId && c.Song.ArtistId == artistId, ct);
+
+    /// <inheritdoc />
+    public async Task<(int removed, int kept)> RemoveCoversAsync(
+        int artistId, IReadOnlyCollection<int> songIds, CancellationToken ct)
+    {
+        var ids = songIds.Distinct().ToList();
+
+        var kept = await _db.Catalog.CountAsync(
+            c => c.ArtistId == artistId && ids.Contains(c.SongId) && c.Song.ArtistId == artistId, ct);
+
+        var removed = await _db.Catalog
+            .Where(c => c.ArtistId == artistId && ids.Contains(c.SongId) && c.Song.ArtistId != artistId)
+            .ExecuteDeleteAsync(ct);
+
+        return (removed, kept);
+    }
 }

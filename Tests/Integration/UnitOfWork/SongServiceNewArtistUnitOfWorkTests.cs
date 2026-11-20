@@ -207,5 +207,8 @@ public class SongServiceNewArtistUnitOfWorkTests
 
         public Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct)
             => _inner.DeleteAsync(ids, ct);
+
+        public Task<int> CountByArtistAsync(int artistId, CancellationToken ct)
+            => _inner.CountByArtistAsync(artistId, ct);
     }
 }
