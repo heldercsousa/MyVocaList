@@ -44,5 +44,4 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
-| — | ↳ Always-loaded context: path-scoped rules spike and superpowers plugin cost | 💡 Pending |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->
