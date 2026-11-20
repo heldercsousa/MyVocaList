@@ -10,8 +10,6 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| ITF | Inline Trivial Fix lane — bounded orchestrator inline-edit exception | merged; 38/38 green; one gate left | develop | — | merged | a4c198a | Helder observes the FIRST live ITF fix end-to-end; decide on 4 misbased `agent-*` worktrees. Detail: `DevCycleCraft/inline-trivial-fix/handoff.md` + task-log § Ledger detail |
-| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete, verifier PASS | develop (tooling + docs) | — | to review | 68e1852 | Helder runs the two-terminal live demo; optionally directs the 4 leftover agent worktrees. Detail: `DevCycleCraft/session-continuity-leasing/task-log.md` § Ledger detail |
 
 ## Completed (recent)
 

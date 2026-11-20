@@ -98,3 +98,5 @@
 | SFT | Song form title-first (5.5, 5.6, 5.8, title 250; 6.3 moved out) | task/sft-5.5…5.8, task/title-limit-250 | 2026-11-11 | 686d5aa3 |
 | AC-FIELD | Shared autocomplete field: pick-lock via X, centralised behaviour | develop (T2–T12 merged; T3-C cancelled) | 2026-11-11 closed; T7 run 6 PASS, Rebuild Test 0-1; develop 953/953. Detail: item `task-log.md` § Close-out bookkeeping | 77b408f6 |
 | BID | Build identity — MinVer version + About build details (app-versioning) | develop | 2026-11-10 closed; G3 PASS on S23 (`v0.2.0-alpha.0.4`); follow-ups: release-tag discipline, changelog retirement | 4a839cbe |
+| ITF | Inline Trivial Fix lane | develop | 2026-07-21 merged (a4c198a); closed 2026-11-19, live-fix gate met. Detail: `DevCycleCraft/inline-trivial-fix/handoff.md` | a4c198a |
+| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | develop | 2026-07-14 merged (68e1852); closed 2026-11-20 by Helder, item 🔵 Superseded, live demo dropped. Detail: `DevCycleCraft/session-continuity-leasing/task-log.md` | 68e1852 |
