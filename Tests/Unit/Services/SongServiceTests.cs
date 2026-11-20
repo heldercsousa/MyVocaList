@@ -5,6 +5,7 @@ namespace MyVocaList.Tests.Unit.Services;
 public class SongServiceTests
 {
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepoMock = new();
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
@@ -19,7 +20,7 @@ public class SongServiceTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock),
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object),
         _loggerMock.Object);
 
     // ── ValidateTitleInput ────────────────────────────────────────────────
@@ -334,7 +335,7 @@ public class SongServiceTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, artistServiceMock),
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, artistServiceMock),
         _loggerMock.Object);
 
     [Fact]
