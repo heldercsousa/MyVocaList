@@ -15,6 +15,7 @@ namespace MyVocaList.Tests.Integration.Migrations;
 public class CatalogBackfillMigrationTests : IAsyncDisposable
 {
     private const string PreviousMigration = "20261120031836_RemoveSongVersionAndFeaturedArtists";
+    private const string BackfillMigration = "20261120052950_BackfillDerivedCatalogRows";
     private const string Stamp = "'2026-01-01 00:00:00'";
 
     private readonly List<AppDbContext> _contexts = [];
@@ -38,7 +39,7 @@ public class CatalogBackfillMigrationTests : IAsyncDisposable
     private static async Task<List<string>> CatalogRowsAsync(AppDbContext db)
         => await db.Database.SqlQueryRaw<string>("SELECT ArtistId || '|' || SongId AS Value FROM Catalog ORDER BY ArtistId, SongId").ToListAsync();
 
-    private static Task MigrateToLatestAsync(AppDbContext db) => db.GetService<IMigrator>().MigrateAsync();
+    private static Task MigrateToBackfillAsync(AppDbContext db) => db.GetService<IMigrator>().MigrateAsync(BackfillMigration);
 
     [Fact]
     public async Task Backfill_SongWithoutDerivedRow_GetsOne()
@@ -50,7 +51,7 @@ public class CatalogBackfillMigrationTests : IAsyncDisposable
         await SeedSongAsync(db, 1, 1, "One");
         await SeedSongAsync(db, 2, 2, "Two");
 
-        await MigrateToLatestAsync(db);
+        await MigrateToBackfillAsync(db);
 
         Assert.Equal(["1|1", "2|2"], await CatalogRowsAsync(db));
     }
@@ -64,7 +65,7 @@ public class CatalogBackfillMigrationTests : IAsyncDisposable
         await SeedSongAsync(db, 1, 1, "One");
         await ExecAsync(db, "INSERT INTO Catalog (ArtistId, SongId) VALUES (1, 1)");
 
-        await MigrateToLatestAsync(db);
+        await MigrateToBackfillAsync(db);
 
         var count = await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM Catalog WHERE ArtistId = 1 AND SongId = 1").SingleAsync();
         Assert.Equal(1, count);
@@ -80,7 +81,7 @@ public class CatalogBackfillMigrationTests : IAsyncDisposable
         await SeedSongAsync(db, 1, 1, "One");
         await ExecAsync(db, "INSERT INTO Catalog (ArtistId, SongId) VALUES (2, 1)");
 
-        await MigrateToLatestAsync(db);
+        await MigrateToBackfillAsync(db);
 
         Assert.Equal(["1|1", "2|1"], await CatalogRowsAsync(db));
     }
@@ -93,7 +94,7 @@ public class CatalogBackfillMigrationTests : IAsyncDisposable
         await SeedArtistAsync(db, 1, "Queen");
         await SeedSongAsync(db, 1, 1, "One");
         await SeedSongAsync(db, 2, 1, "Two");
-        await MigrateToLatestAsync(db);
+        await MigrateToBackfillAsync(db);
         var before = await CatalogRowsAsync(db);
         Assert.Equal(["1|1", "1|2"], before); // guards against a vacuous pass
 
