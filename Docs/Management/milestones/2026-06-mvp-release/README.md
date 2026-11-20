@@ -1,7 +1,7 @@
 ---
 id: 2026-06-mvp-release
 title: "🏁 **MVP release**"
-target: 2026-06
+target: —
 section: BusinessFeatures
 kind: milestone
 order: 350

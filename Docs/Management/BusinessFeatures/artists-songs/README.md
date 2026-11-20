@@ -2,7 +2,7 @@
 id: artists-songs
 title: "**Artists & Songs Catalog**"
 status: "🔴 Blocked"
-target: 2026-05
+target: —
 section: BusinessFeatures
 kind: feature
 order: 20

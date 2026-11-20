@@ -2,7 +2,7 @@
 id: large-volume-data-stress-test
 title: "Large-volume data stress test (1–2 year seed)"
 status: "💡 Pending"
-target: 2026-06-12
+target: —
 section: DevCycleCraft
 kind: feature
 order: 300
