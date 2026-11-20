@@ -77,7 +77,9 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
     protected override async Task NavigateToEditAsync(PersonListItemDto item)
     {
         var name = Uri.EscapeDataString(item.FullName);
-        var birthday = Uri.EscapeDataString(item.BirthdayDayMonth ?? string.Empty);
+        // T1 bridge: the URL still carries the "DDMM" string until T2 switches to personBirthDay/personBirthMonth.
+        var birthday = Uri.EscapeDataString(
+            item.BirthDay.HasValue && item.BirthMonth.HasValue ? $"{item.BirthDay:00}{item.BirthMonth:00}" : string.Empty);
         var email = Uri.EscapeDataString(item.Email ?? string.Empty);
         await (Shell.Current?.GoToAsync(
             $"{Routes.PersonForm}?personId={item.Id}&personName={name}&personBirthday={birthday}&personEmail={email}") ?? Task.CompletedTask);

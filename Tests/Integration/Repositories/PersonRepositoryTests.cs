@@ -118,7 +118,7 @@ public class PersonRepositoryTests : IAsyncLifetime
     [Fact]
     public async Task AddAsync_SameNameNullBirthday_AllowsDuplicate()
     {
-        // Same name + null birthday = allowed (filtered unique index only applies when birthday IS NOT NULL)
+        // Same name + null birthday = allowed (no uniqueness on name alone; BUG-088 identity index is separate)
         var p1 = Create("John Doe");
         var p2 = Create("John Doe");   // no birthday — should be allowed
 
@@ -130,17 +130,47 @@ public class PersonRepositoryTests : IAsyncLifetime
         Assert.Equal(2, await _db.Set<Person>().CountAsync());
     }
 
+    // [AC] REQ-BDAY-07: a day without a month violates the CHECK constraint
     [Fact]
-    public async Task AddAsync_SameNameSameBirthday_ThrowsDbUpdateException()
+    public async Task SaveChanges_DayWithoutMonth_ThrowsDbUpdateException()
     {
-        var p1 = Create("John Doe");
-        p1.BirthdayDayMonth = "15/03";
-        var p2 = Create("John Doe");
-        p2.BirthdayDayMonth = "15/03";
+        var person = Create("John Doe");
+        person.BirthDay = 15;
+        person.BirthMonth = null;
 
-        _db.Set<Person>().AddRange(p1, p2);
+        _db.Set<Person>().Add(person);
 
         await Assert.ThrowsAsync<DbUpdateException>(() => _db.SaveChangesAsync());
+    }
+
+    // [AC] REQ-BDAY-07: a month without a day violates the CHECK constraint
+    [Fact]
+    public async Task SaveChanges_MonthWithoutDay_ThrowsDbUpdateException()
+    {
+        var person = Create("John Doe");
+        person.BirthDay = null;
+        person.BirthMonth = 3;
+
+        _db.Set<Person>().Add(person);
+
+        await Assert.ThrowsAsync<DbUpdateException>(() => _db.SaveChangesAsync());
+    }
+
+    // [AC] REQ-BDAY-07: day 1-31 and month 1-12 are stored and read back as integers
+    [Fact]
+    public async Task SaveChanges_ValidBirthday_RoundTripsDayAndMonth()
+    {
+        var person = Create("John Doe");
+        person.BirthDay = 15;
+        person.BirthMonth = 3;
+        _db.Set<Person>().Add(person);
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.GetByIdAsync(person.Id);
+
+        Assert.NotNull(found);
+        Assert.Equal(15, found.BirthDay);
+        Assert.Equal(3, found.BirthMonth);
     }
 
     [Fact]

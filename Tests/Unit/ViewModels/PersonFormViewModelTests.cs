@@ -73,7 +73,7 @@ public class PersonFormViewModelTests
         sut.PersonBirthday = "99/99";
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
+        _serviceMock.Setup(s => s.ValidateBirthday(99, 99)).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
 
         await sut.SaveCommand.ExecuteAsync(null);
 
@@ -90,7 +90,7 @@ public class PersonFormViewModelTests
         sut.PersonEmail = "notanemail";
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail("notanemail")).Returns((false, "Invalid email"));
 
         await sut.SaveCommand.ExecuteAsync(null);
@@ -109,15 +109,15 @@ public class PersonFormViewModelTests
         sut.PersonEmail = "";
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
-        _serviceMock.Setup(s => s.CreatePersonAsync("John Doe", null, null, default))
+        _serviceMock.Setup(s => s.CreatePersonAsync("John Doe", null, null, null, default))
                     .ReturnsAsync((true, "John Doe registered successfully!", new Person("John Doe")));
         _snackMock.Setup(s => s.ShowSuccessAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        _serviceMock.Verify(s => s.CreatePersonAsync("John Doe", null, null, default), Times.Once);
+        _serviceMock.Verify(s => s.CreatePersonAsync("John Doe", null, null, null, default), Times.Once);
     }
 
     [Fact]
@@ -130,15 +130,15 @@ public class PersonFormViewModelTests
         sut.PersonEmail = "";
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
-        _serviceMock.Setup(s => s.UpdatePersonAsync(5, "John Doe", null, null, default))
+        _serviceMock.Setup(s => s.UpdatePersonAsync(5, "John Doe", null, null, null, default))
                     .ReturnsAsync((true, "John Doe updated successfully!"));
         _snackMock.Setup(s => s.ShowSuccessAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        _serviceMock.Verify(s => s.UpdatePersonAsync(5, "John Doe", null, null, default), Times.Once);
+        _serviceMock.Verify(s => s.UpdatePersonAsync(5, "John Doe", null, null, null, default), Times.Once);
     }
 
     // ── SearchPersonsCommand ──────────────────────────────────────────────
@@ -317,7 +317,7 @@ public class PersonFormViewModelTests
 
         Assert.False(sut.BirthdayHasError);
         Assert.Empty(sut.BirthdayErrorText);
-        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<string>()), Times.Never);
+        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
     }
 
     [Fact]
@@ -327,7 +327,7 @@ public class PersonFormViewModelTests
         var sut = CreateSut();
         sut.CompleteHydration();
         sut.PersonBirthday = "99/99";
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
+        _serviceMock.Setup(s => s.ValidateBirthday(99, 99)).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
 
         sut.ValidateBirthdayCommand.Execute(null);
 
@@ -345,7 +345,7 @@ public class PersonFormViewModelTests
         sut.PersonBirthday = "99/99";
 
         Assert.False(sut.BirthdayHasError);
-        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<string>()), Times.Never);
+        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
     }
 
     [Fact]
@@ -355,11 +355,11 @@ public class PersonFormViewModelTests
         var sut = CreateSut();
         sut.CompleteHydration();
         sut.PersonBirthday = "99/99";
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
+        _serviceMock.Setup(s => s.ValidateBirthday(99, 99)).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
         sut.ValidateBirthdayCommand.Execute(null);
         Assert.True(sut.BirthdayHasError);
 
-        _serviceMock.Setup(s => s.ValidateBirthday("15/03")).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(15, 3)).Returns((true, ""));
         sut.PersonBirthday = "15/03";
 
         Assert.False(sut.BirthdayHasError);
@@ -377,7 +377,7 @@ public class PersonFormViewModelTests
 
         Assert.False(sut.BirthdayHasError);
         Assert.Empty(sut.BirthdayErrorText);
-        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<string>()), Times.Never);
+        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
     }
 
     // ── Email field: blur-first validation ─────────────────────────────────
@@ -469,7 +469,7 @@ public class PersonFormViewModelTests
         sut.PersonEmail = "notanemail";
 
         _serviceMock.Setup(s => s.ValidateNameInput("A")).Returns((false, "Name too short. Minimum 2 characters."));
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
+        _serviceMock.Setup(s => s.ValidateBirthday(99, 99)).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
         _serviceMock.Setup(s => s.ValidateEmail("notanemail")).Returns((false, "Invalid email"));
 
         await sut.SaveCommand.ExecuteAsync(null);
@@ -477,7 +477,7 @@ public class PersonFormViewModelTests
         Assert.True(sut.NameHasError);
         Assert.True(sut.BirthdayHasError);
         Assert.True(sut.EmailHasError);
-        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default), Times.Never);
+        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), default), Times.Never);
     }
 
     // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────
@@ -492,11 +492,11 @@ public class PersonFormViewModelTests
         sut.CompleteHydration();
         sut.PersonName = "Jane Doe";
         _serviceMock.Setup(s => s.ValidateNameInput("Jane Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
 
         var gate = new TaskCompletionSource<(bool success, string message, Person? person)>();
-        _serviceMock.Setup(s => s.CreatePersonAsync("Jane Doe", null, null, default)).Returns(gate.Task);
+        _serviceMock.Setup(s => s.CreatePersonAsync("Jane Doe", null, null, null, default)).Returns(gate.Task);
 
         var firstCall = sut.SaveCommand.ExecuteAsync(null);
         var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
@@ -504,7 +504,7 @@ public class PersonFormViewModelTests
         gate.SetResult((true, "Singer created", new Person { FullName = "Jane Doe" }));
         await Task.WhenAll(firstCall, secondCall);
 
-        _serviceMock.Verify(s => s.CreatePersonAsync("Jane Doe", null, null, default), Times.Once);
+        _serviceMock.Verify(s => s.CreatePersonAsync("Jane Doe", null, null, null, default), Times.Once);
     }
 
     // ── NameOptionSource ──────────────────────────────────────────────────

@@ -70,36 +70,21 @@ public class PersonService : IPersonService
     }
 
     /// <inheritdoc />
-    public (bool isValid, string message) ValidateBirthday(string birthday)
+    public (bool isValid, string message) ValidateBirthday(int? birthDay, int? birthMonth)
     {
-        // Birthday is optional — empty/null is valid
-        if (string.IsNullOrWhiteSpace(birthday))
+        // Birthday is optional: both null is valid (REQ-BDAY-04, REQ-BDAY-05)
+        if (!birthDay.HasValue && !birthMonth.HasValue)
             return (true, "");
 
-        // The birthday TextEdit uses Mask="00/00": the '/' is a display-only mask literal, so the
-        // delivered value is 4 digits ("DDMM"), not "DD/MM" (BUG-036). Legacy records persisted
-        // before BUG-022 may still contain the literal separator ("15/03"); strip it so both the
-        // masked value and legacy records validate identically.
-        var digits = birthday.Trim().Replace("/", "");
+        // Exactly one of day or month is an incomplete birthday
+        if (!birthDay.HasValue || !birthMonth.HasValue)
+            return (false, "Select both day and month");
 
-        var regex = new Regex(@"^(\d{2})(\d{2})$");
-        var match = regex.Match(digits);
-
-        if (!match.Success)
-            return (false, "Use DD/MM format (e.g.: 15/03)");
-
-        if (!int.TryParse(match.Groups[1].Value, out int day) ||
-            !int.TryParse(match.Groups[2].Value, out int month))
-            return (false, "Invalid date");
-
-        if (day < 1 || day > 31)
-            return (false, "Day must be between 1 and 31");
-
-        if (month < 1 || month > 12)
+        if (birthMonth.Value < 1 || birthMonth.Value > 12)
             return (false, "Month must be between 1 and 12");
 
-        if ((month == 2 && day > 29) ||
-            ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30))
+        // February allows 29 (no year is stored); DaysInMonth is the Domain source of truth
+        if (birthDay.Value < 1 || birthDay.Value > BirthdayRules.DaysInMonth(birthMonth.Value))
             return (false, "Invalid date for this month");
 
         return (true, "");
@@ -129,14 +114,14 @@ public class PersonService : IPersonService
 
     /// <inheritdoc />
     public async Task<(bool success, string message, Person? person)> CreatePersonAsync(
-        string fullName, string birthday = null, string email = null,
+        string fullName, int? birthDay = null, int? birthMonth = null, string email = null,
         CancellationToken cancellationToken = default)
     {
         var nameValidation = ValidateNameInput(fullName);
         if (!nameValidation.isValid)
             return (false, nameValidation.message, null);
 
-        var birthdayValidation = ValidateBirthday(birthday);
+        var birthdayValidation = ValidateBirthday(birthDay, birthMonth);
         if (!birthdayValidation.isValid)
             return (false, birthdayValidation.message, null);
 
@@ -159,10 +144,11 @@ public class PersonService : IPersonService
             }
 
             // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
-            // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
+            // PersonConfiguration (design.md § D3) — not here. The birthday is validated above (REQ-BDAY-05).
             var person = new Person(fullName)
             {
-                BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim(),
+                BirthDay = birthDay,
+                BirthMonth = birthMonth,
                 Email = string.IsNullOrWhiteSpace(email) ? null : email
             };
             // DB collation (NOCASE_NOACCENT) handles case/accent normalization at query time.
@@ -248,7 +234,8 @@ public class PersonService : IPersonService
             {
                 Id = p.Id,
                 FullName = p.FullName,
-                BirthdayDayMonth = p.BirthdayDayMonth,
+                BirthDay = p.BirthDay,
+                BirthMonth = p.BirthMonth,
                 Email = p.Email,
                 Participations = p.Participations,
                 Absences = p.Absences
@@ -260,14 +247,14 @@ public class PersonService : IPersonService
 
     /// <inheritdoc />
     public async Task<(bool success, string message)> UpdatePersonAsync(
-        int id, string fullName, string birthday = null, string email = null,
+        int id, string fullName, int? birthDay, int? birthMonth, string email,
         CancellationToken cancellationToken = default)
     {
         var nameValidation = ValidateNameInput(fullName);
         if (!nameValidation.isValid)
             return (false, nameValidation.message);
 
-        var birthdayValidation = ValidateBirthday(birthday);
+        var birthdayValidation = ValidateBirthday(birthDay, birthMonth);
         if (!birthdayValidation.isValid)
             return (false, birthdayValidation.message);
 
@@ -294,9 +281,10 @@ public class PersonService : IPersonService
             }
 
             // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
-            // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
+            // PersonConfiguration (design.md § D3) — not here. The birthday is validated above (REQ-BDAY-05).
             person.FullName = fullName;
-            person.BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim();
+            person.BirthDay = birthDay;
+            person.BirthMonth = birthMonth;
             person.Email = string.IsNullOrWhiteSpace(email) ? null : email;
             // Explicit UpdateAsync: GetByIdAsync's FindAsync only returns an already-tracked
             // instance when one exists in THIS unit of work's local cache. Since each unit of work
