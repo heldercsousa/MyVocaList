@@ -1,3 +1,4 @@
+using MyVocaList.Domain.Exceptions;
 using MyVocaList.Extensions.Strings;
 using MyVocaList.Tests.Infrastructure;
 
@@ -365,7 +366,7 @@ public class PersonServiceTests
         _repoMock.Setup(r => r.IsEmailTakenAsync(It.IsAny<string>(), It.IsAny<int?>(), default))
                  .ReturnsAsync(false);
 
-        var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe", null, null, null);
+        var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe", null, null, "john@example.com");
 
         Assert.True(success);
         Assert.Contains("updated", message, StringComparison.OrdinalIgnoreCase);
@@ -418,6 +419,130 @@ public class PersonServiceTests
         Assert.Equal("Select both day and month", message);
         Assert.Null(person);
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Person>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-01: an identity that already exists is rejected on create, the tuple carries the duplicate message, nothing is saved
+    [Fact]
+    public async Task CreatePersonAsync_IdentityExists_ReturnsDuplicateMessage()
+    {
+        _repoMock.Setup(r => r.IdentityExistsAsync(
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(),
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var (success, message, person) = await CreateSut().CreatePersonAsync("John Doe", 15, 3, "john@example.com");
+
+        Assert.False(success);
+        Assert.Equal("This singer is already registered.", message);
+        Assert.Null(person);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Person>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-03: neither email nor birthday on create is rejected before any save
+    [Fact]
+    public async Task CreatePersonAsync_NoEmailNoBirthday_ReturnsEitherOrMessageAndDoesNotSave()
+    {
+        var (success, message, person) = await CreateSut().CreatePersonAsync("John Doe", null, null, null);
+
+        Assert.False(success);
+        Assert.Equal("Enter an email or a birthday.", message);
+        Assert.Null(person);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Person>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-03: neither email nor birthday on update is rejected before any save
+    [Fact]
+    public async Task UpdatePersonAsync_NoEmailNoBirthday_ReturnsEitherOrMessageAndDoesNotSave()
+    {
+        var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe", null, null, null);
+
+        Assert.False(success);
+        Assert.Equal("Enter an email or a birthday.", message);
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Person>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-03: ValidateContact accepts an email alone or a birthday alone, and rejects neither
+    [Fact]
+    public void ValidateContact_EmailOnly_ReturnsValid()
+    {
+        var (isValid, _) = CreateSut().ValidateContact("john@example.com", null, null);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void ValidateContact_BirthdayOnly_ReturnsValid()
+    {
+        var (isValid, _) = CreateSut().ValidateContact(null, 15, 3);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void ValidateContact_NeitherEmailNorBirthday_ReturnsEitherOrMessage()
+    {
+        var (isValid, message) = CreateSut().ValidateContact("  ", null, null);
+        Assert.False(isValid);
+        Assert.Equal("Enter an email or a birthday.", message);
+    }
+
+    // [AC] REQ-DUP-02: another person (not the one being edited) already has the resulting identity; nothing is saved
+    [Fact]
+    public async Task UpdatePersonAsync_OtherPersonHasIdentity_ReturnsDuplicateMessage()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Person("Old Name"));
+        _repoMock.Setup(r => r.IdentityExistsAsync(
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(),
+                1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe", 15, 3, "john@example.com");
+
+        Assert.False(success);
+        Assert.Equal("This singer is already registered.", message);
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Person>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-02: the person's own identity is not a duplicate, because the check excludes the person being edited
+    [Fact]
+    public async Task UpdatePersonAsync_OwnIdentity_Passes()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Person("Old Name"));
+        _repoMock.Setup(r => r.IdentityExistsAsync(
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(),
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Returns((string n, string? e, int? d, int? m, int? excludeId, CancellationToken ct)
+                => Task.FromResult(excludeId is null));
+
+        var (success, _) = await CreateSut().UpdatePersonAsync(1, "John Doe", 15, 3, "john@example.com");
+
+        Assert.True(success);
+    }
+
+    // [AC] REQ-DUP-06: a constraint violation at save time maps to the duplicate tuple instead of throwing
+    [Fact]
+    public async Task CreatePersonAsync_ConstraintViolationOnSave_ReturnsDuplicateMessage()
+    {
+        _repoMock.Setup(r => r.AddAsync(It.IsAny<Person>()))
+            .ThrowsAsync(new ConstraintViolationException("constraint", new Exception("UNIQUE")));
+
+        var (success, message, person) = await CreateSut().CreatePersonAsync("John Doe", 15, 3, "john@example.com");
+
+        Assert.False(success);
+        Assert.Equal("This singer is already registered.", message);
+        Assert.Null(person);
+    }
+
+    // [AC] REQ-DUP-06: the same mapping on update
+    [Fact]
+    public async Task UpdatePersonAsync_ConstraintViolationOnSave_ReturnsDuplicateMessage()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Person("Old Name"));
+        _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Person>()))
+            .ThrowsAsync(new ConstraintViolationException("constraint", new Exception("UNIQUE")));
+
+        var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe", 15, 3, "john@example.com");
+
+        Assert.False(success);
+        Assert.Equal("This singer is already registered.", message);
     }
 
     // ── DeletePersonsAsync ────────────────────────────────────────────────────

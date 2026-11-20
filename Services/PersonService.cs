@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Exceptions;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Domain.UnitOfWork;
@@ -20,6 +21,12 @@ public class PersonService : IPersonService
     public int MaxInputLength => 200;
     public int MaxDatabaseLength => 250;
     public int ShowCounterAt => 180;
+
+    /// <summary>BUG-088 REQ-DUP-01/02/06: shown when the identity (name, email, birthday) is already registered.</summary>
+    public const string DuplicateIdentityMessage = "This singer is already registered.";
+
+    /// <summary>BUG-088 REQ-DUP-03: shown when neither an email nor a birthday is given.</summary>
+    public const string EmailOrBirthdayRequiredMessage = "Enter an email or a birthday.";
 
     public PersonService(IPersonRepository personRepository, IUnitOfWork uow, ILogger<PersonService> logger)
     {
@@ -129,35 +136,55 @@ public class PersonService : IPersonService
         if (!emailValidation.isValid)
             return (false, emailValidation.message, null);
 
-        return await _uow.ExecuteAsync<(bool success, string message, Person? person)>(async sp =>
+        // BUG-088 REQ-DUP-03: email or birthday required (checked before any save).
+        var contactValidation = ValidateContact(email, birthDay, birthMonth);
+        if (!contactValidation.isValid)
+            return (false, contactValidation.message, null);
+
+        try
         {
-            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
-            var personRepository = sp.GetRequiredService<IPersonRepository>();
-
-            if (!string.IsNullOrWhiteSpace(email))
+            return await _uow.ExecuteAsync<(bool success, string message, Person? person)>(async sp =>
             {
-                // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
-                // too, so an untrimmed check value still matches trimmed stored rows.
-                var emailTaken = await personRepository.IsEmailTakenAsync(email, cancellationToken: cancellationToken);
-                if (emailTaken)
-                    return (false, "Email already registered to another singer.", null);
-            }
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var personRepository = sp.GetRequiredService<IPersonRepository>();
 
-            // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
-            // PersonConfiguration (design.md § D3) — not here. The birthday is validated above (REQ-BDAY-05).
-            var person = new Person(fullName)
-            {
-                BirthDay = birthDay,
-                BirthMonth = birthMonth,
-                Email = string.IsNullOrWhiteSpace(email) ? null : email
-            };
-            // DB collation (NOCASE_NOACCENT) handles case/accent normalization at query time.
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
+                    // too, so an untrimmed check value still matches trimmed stored rows.
+                    var emailTaken = await personRepository.IsEmailTakenAsync(email, cancellationToken: cancellationToken);
+                    if (emailTaken)
+                        return (false, "Email already registered to another singer.", null);
+                }
 
-            await personRepository.AddAsync(person);
-            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+                // BUG-088 REQ-DUP-01: the identity (name + email + birthday day/month) must be new.
+                var identityTaken = await personRepository.IdentityExistsAsync(
+                    fullName, email, birthDay, birthMonth, null, cancellationToken);
+                if (identityTaken)
+                    return (false, DuplicateIdentityMessage, null);
 
-            return (true, $"{fullName.Trim()} registered successfully!", person);
-        }, cancellationToken);
+                // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
+                // PersonConfiguration (design.md § D3) — not here. The birthday is validated above (REQ-BDAY-05).
+                var person = new Person(fullName)
+                {
+                    BirthDay = birthDay,
+                    BirthMonth = birthMonth,
+                    Email = string.IsNullOrWhiteSpace(email) ? null : email
+                };
+                // DB collation (NOCASE_NOACCENT) handles case/accent normalization at query time.
+
+                await personRepository.AddAsync(person);
+                // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+                return (true, $"{fullName.Trim()} registered successfully!", person);
+            }, cancellationToken);
+        }
+        catch (ConstraintViolationException ex)
+        {
+            // BUG-088 REQ-DUP-06: a race or a constraint the pre-checks missed. Expected business failure → tuple.
+            _logger.LogWarning(ex, "Create singer rejected by a database constraint");
+            return (false, DuplicateIdentityMessage, null);
+        }
     }
 
     /// <inheritdoc />
@@ -262,40 +289,85 @@ public class PersonService : IPersonService
         if (!emailValidation.isValid)
             return (false, emailValidation.message);
 
-        return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+        // BUG-088 REQ-DUP-03: email or birthday required (checked before any save).
+        var contactValidation = ValidateContact(email, birthDay, birthMonth);
+        if (!contactValidation.isValid)
+            return (false, contactValidation.message);
+
+        try
         {
-            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
-            var personRepository = sp.GetRequiredService<IPersonRepository>();
-
-            var person = await personRepository.GetByIdAsync(id);
-            if (person == null)
-                return (false, "Singer not found.");
-
-            if (!string.IsNullOrWhiteSpace(email))
+            return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
             {
-                // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
-                // too, so an untrimmed check value still matches trimmed stored rows.
-                var emailTaken = await personRepository.IsEmailTakenAsync(email, id, cancellationToken);
-                if (emailTaken)
-                    return (false, "Email already registered to another singer.");
-            }
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var personRepository = sp.GetRequiredService<IPersonRepository>();
 
-            // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
-            // PersonConfiguration (design.md § D3) — not here. The birthday is validated above (REQ-BDAY-05).
-            person.FullName = fullName;
-            person.BirthDay = birthDay;
-            person.BirthMonth = birthMonth;
-            person.Email = string.IsNullOrWhiteSpace(email) ? null : email;
-            // Explicit UpdateAsync: GetByIdAsync's FindAsync only returns an already-tracked
-            // instance when one exists in THIS unit of work's local cache. Since each unit of work
-            // gets its own freshly-scoped AppDbContext (REQ-UOW-28), a person fetched here was never
-            // previously tracked, and the DbContext-wide QueryTrackingBehavior.NoTracking default
-            // means FindAsync returns it detached — mutating a detached instance is a silent no-op
-            // at SaveChangesAsync time without this call (mirrors ArtistService.UpdateArtistAsync).
-            await personRepository.UpdateAsync(person);
-            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+                var person = await personRepository.GetByIdAsync(id);
+                if (person == null)
+                    return (false, "Singer not found.");
 
-            return (true, $"{fullName.Trim()} updated successfully!");
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
+                    // too, so an untrimmed check value still matches trimmed stored rows.
+                    var emailTaken = await personRepository.IsEmailTakenAsync(email, id, cancellationToken);
+                    if (emailTaken)
+                        return (false, "Email already registered to another singer.");
+                }
+
+                // BUG-088 REQ-DUP-02: another person (not this one) must not already have the resulting identity.
+                var identityTaken = await personRepository.IdentityExistsAsync(
+                    fullName, email, birthDay, birthMonth, id, cancellationToken);
+                if (identityTaken)
+                    return (false, DuplicateIdentityMessage);
+
+                // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
+                // PersonConfiguration (design.md § D3) — not here. The birthday is validated above (REQ-BDAY-05).
+                person.FullName = fullName;
+                person.BirthDay = birthDay;
+                person.BirthMonth = birthMonth;
+                person.Email = string.IsNullOrWhiteSpace(email) ? null : email;
+                // Explicit UpdateAsync: GetByIdAsync's FindAsync only returns an already-tracked
+                // instance when one exists in THIS unit of work's local cache. Since each unit of work
+                // gets its own freshly-scoped AppDbContext (REQ-UOW-28), a person fetched here was never
+                // previously tracked, and the DbContext-wide QueryTrackingBehavior.NoTracking default
+                // means FindAsync returns it detached — mutating a detached instance is a silent no-op
+                // at SaveChangesAsync time without this call (mirrors ArtistService.UpdateArtistAsync).
+                await personRepository.UpdateAsync(person);
+                // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+                return (true, $"{fullName.Trim()} updated successfully!");
+            }, cancellationToken);
+        }
+        catch (ConstraintViolationException ex)
+        {
+            // BUG-088 REQ-DUP-06: a race or a constraint the pre-checks missed. Expected business failure → tuple.
+            _logger.LogWarning(ex, "Update singer {PersonId} rejected by a database constraint", id);
+            return (false, DuplicateIdentityMessage);
+        }
+    }
+
+    /// <inheritdoc />
+    public (bool isValid, string message) ValidateContact(string? email, int? birthDay, int? birthMonth)
+    {
+        // BUG-088 REQ-DUP-03: identity needs an email or a birthday (day and month both set).
+        if (string.IsNullOrWhiteSpace(email) && !birthDay.HasValue && !birthMonth.HasValue)
+            return (false, EmailOrBirthdayRequiredMessage);
+
+        return (true, "");
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Person>> GetSameNamePersonsAsync(
+        string fullName, string? email, int? birthDay, int? birthMonth, int? excludeId,
+        CancellationToken cancellationToken = default)
+    {
+        // REQ-DUP-09 soft warning: read only, never blocks a save.
+        return await _uow.ExecuteReadAsync<IReadOnlyList<Person>>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
+            return await personRepository.GetSameNameDifferentIdentityAsync(
+                fullName, email, birthDay, birthMonth, excludeId, cancellationToken);
         }, cancellationToken);
     }
 

@@ -37,4 +37,17 @@ public interface IPersonService
 
     Task<(bool success, string message)> DeletePersonsAsync(
         IEnumerable<int> ids, CancellationToken cancellationToken = default);
+
+    // --- BUG-088 identity (REQ-DUP-03, REQ-DUP-09) ---
+
+    /// <summary>REQ-DUP-03: at least one of email or birthday is required. Returns (false, "Enter an email or a birthday.") when both are empty.</summary>
+    (bool isValid, string message) ValidateContact(string? email, int? birthDay, int? birthMonth);
+
+    /// <summary>
+    /// REQ-DUP-09 soft warning: persons with the same FullName (default collation) whose identity differs
+    /// (email or birthday). Excludes excludeId and any exact identity match. Never blocks a save.
+    /// </summary>
+    Task<IReadOnlyList<Person>> GetSameNamePersonsAsync(
+        string fullName, string? email, int? birthDay, int? birthMonth, int? excludeId,
+        CancellationToken cancellationToken = default);
 }

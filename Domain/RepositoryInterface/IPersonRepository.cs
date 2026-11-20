@@ -22,4 +22,16 @@ public interface IPersonRepository : IBaseRepository<Person>
 
     /// <summary>Returns true if any person (other than excludeId) has this email.</summary>
     Task<bool> IsEmailTakenAsync(string email, int? excludePersonId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// BUG-088 identity: true if another person (not excludeId) has the same FullName, Email and
+    /// birthday day/month. Default collation, no C# normalization; null email and null day/month count as empty.
+    /// </summary>
+    Task<bool> IdentityExistsAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// BUG-088 soft warning: persons with the same FullName (default collation) whose identity differs
+    /// (Email or birthday). Excludes excludeId and any exact identity match.
+    /// </summary>
+    Task<IReadOnlyList<Person>> GetSameNameDifferentIdentityAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default);
 }
