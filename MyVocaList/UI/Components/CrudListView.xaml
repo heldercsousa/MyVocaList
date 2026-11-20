@@ -165,7 +165,7 @@
                     AllowShadow="True"
                     CornerRadius="16"
                     BackgroundColor="{StaticResource SurfaceContainerLow}"
-                    HorizontalAlignment="End"
+                    HorizontalAlignment="Right"
                     Closed="OnItemMenuClosed">
             <VerticalStackLayout Padding="0,2"
                                  MinimumWidthRequest="112"
