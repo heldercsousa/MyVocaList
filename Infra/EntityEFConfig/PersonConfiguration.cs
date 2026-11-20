@@ -28,9 +28,17 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
         builder.Property(p => p.BirthMonth)
                .HasColumnType("INTEGER").IsRequired(false);
 
-        builder.ToTable(t => t.HasCheckConstraint(
-            "CK_Persons_Birthday",
-            "(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay IS NOT NULL AND BirthMonth IS NOT NULL AND BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)"));
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint(
+                "CK_Persons_Birthday",
+                "(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay IS NOT NULL AND BirthMonth IS NOT NULL AND BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)");
+
+            // BUG-088 REQ-DUP-05: a singer needs an email or a birthday (identity rule, see the bug's design.md).
+            t.HasCheckConstraint(
+                "CK_Persons_EmailOrBirthday",
+                "Email IS NOT NULL OR BirthDay IS NOT NULL");
+        });
 
         // D3 (design.md § D3): trim-on-save enforced here, not in PersonService Create/Update.
         builder.Property(p => p.Email)
@@ -53,5 +61,10 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
         builder.HasIndex(p => p.ExternalId)
                .IsUnique()
                .HasDatabaseName("IX_Persons_ExternalId");
+
+        // BUG-088 identity: unique index IX_Persons_Identity (FullName, COALESCE(Email), COALESCE(BirthDay/BirthMonth)).
+        // It is an expression index that EF HasIndex cannot express, so it is created ONLY in migration
+        // PersonIdentityUniqueIndex (raw SQL). Do not re-add an equivalent model index here. Any later migration
+        // that rebuilds the People table drops it and must re-create it (the PersonIdentityIndexTests guard checks).
     }
 }

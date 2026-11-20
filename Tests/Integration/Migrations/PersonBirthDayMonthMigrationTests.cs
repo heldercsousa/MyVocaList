@@ -29,8 +29,10 @@ public class PersonBirthDayMonthMigrationTests : IAsyncDisposable
     private static Task SeedPersonAsync(AppDbContext db, int id, string? birthdayDayMonth)
     {
         var value = birthdayDayMonth is null ? "NULL" : $"'{birthdayDayMonth}'";
+        // Email is set so every seeded row satisfies CK_Persons_EmailOrBirthday (BUG-088) once the migrations run to latest,
+        // including rows whose malformed birthday converts to NULL.
         return db.Database.ExecuteSqlRawAsync(
-            $"INSERT INTO People (Id, FullName, BirthdayDayMonth, Participations, Absences) VALUES ({id}, 'Singer {id}', {value}, 0, 0)");
+            $"INSERT INTO People (Id, FullName, Email, BirthdayDayMonth, Participations, Absences) VALUES ({id}, 'Singer {id}', 'singer{id}@example.com', {value}, 0, 0)");
     }
 
     private static async Task<List<string>> ConvertedRowsAsync(AppDbContext db)

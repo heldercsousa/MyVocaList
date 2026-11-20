@@ -44,7 +44,7 @@ public class PersonRepositoryTests : IAsyncLifetime
     [Fact]
     public async Task SearchByNameStartsWithAsync_CaseInsensitive_FindsMatch()
     {
-        var person = new Person("João Silva");
+        var person = new Person("João Silva") { Email = "joao.silva@example.com" };
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
 
@@ -116,11 +116,12 @@ public class PersonRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddAsync_SameNameNullBirthday_AllowsDuplicate()
+    public async Task AddAsync_SameNameDifferentEmail_AllowsDuplicate()
     {
-        // Same name + null birthday = allowed (no uniqueness on name alone; BUG-088 identity index is separate)
+        // BUG-088 (superseded AddAsync_SameNameNullBirthday_AllowsDuplicate): same name is allowed when the
+        // identity differs. Name alone is not unique; the identity index covers name + email + birthday.
         var p1 = Create("John Doe");
-        var p2 = Create("John Doe");   // no birthday — should be allowed
+        var p2 = Create("John Doe");   // different generated email, so a different identity
 
         _db.Set<Person>().AddRange(p1, p2);
 
@@ -176,10 +177,17 @@ public class PersonRepositoryTests : IAsyncLifetime
     [Fact]
     public async Task AddAsync_NullEmailMultipleTimes_AllowsMultipleNulls()
     {
-        // Nullable unique index: NULL != NULL in SQLite — multiple NULL emails are allowed
-        _db.Set<Person>().AddRange(
-            Create("Alice Brown"),
-            Create("Bob Smith"));  // both have null email
+        // Nullable unique index: NULL != NULL in SQLite — multiple NULL emails are allowed.
+        // Both have null email, so each carries a birthday (BUG-088 CHECK); the birthdays differ.
+        var alice = Create("Alice Brown");
+        alice.Email = null;
+        alice.BirthDay = 1;
+        alice.BirthMonth = 1;
+        var bob = Create("Bob Smith");
+        bob.Email = null;
+        bob.BirthDay = 2;
+        bob.BirthMonth = 2;
+        _db.Set<Person>().AddRange(alice, bob);
 
         // Should not throw
         await _db.SaveChangesAsync();
@@ -223,20 +231,56 @@ public class PersonRepositoryTests : IAsyncLifetime
 
     // ── Helper ────────────────────────────────────────────────────────────
 
-    private static Person Create(string name) => new(name);
+    // BUG-088 CHECK: every singer needs an email or a birthday. A unique generated email keeps the default valid.
+    private static Person Create(string name) => new(name) { Email = $"{Guid.NewGuid():N}@example.com" };
 
     // ── Accent-insensitive search ─────────────────────────────────────────
 
     [Fact]
     public async Task SearchByNameStartsWithAsync_QueryWithoutAccents_FindsAccentedPerson()
     {
-        _db.Set<Person>().Add(new Person("João Silva"));
-        _db.Set<Person>().Add(new Person("Anna Smith")); // should not match "joao"
+        _db.Set<Person>().Add(new Person("João Silva") { Email = "joao.silva@example.com" });
+        _db.Set<Person>().Add(new Person("Anna Smith") { Email = "anna.smith@example.com" }); // should not match "joao"
         await _db.SaveChangesAsync();
 
         var results = await _repo.SearchByNameStartsWithAsync("joao", 10, CancellationToken.None);
 
         Assert.Single(results);
         Assert.Equal("João Silva", results.First().FullName);
+    }
+
+    // ── BUG-088 identity queries (default collation, no C# normalization) ──
+
+    [Fact]
+    public async Task IdentityExistsAsync_SameIdentityDifferentCase_ReturnsTrue()
+    {
+        _db.Set<Person>().Add(new Person("João Silva") { BirthDay = 15, BirthMonth = 3 });
+        await _db.SaveChangesAsync();
+
+        Assert.True(await _repo.IdentityExistsAsync("JOAO SILVA", null, 15, 3));
+    }
+
+    [Fact]
+    public async Task IdentityExistsAsync_ExcludeSelf_ReturnsFalse()
+    {
+        var person = new Person("Ana Lima") { Email = "ana@example.com" };
+        _db.Set<Person>().Add(person);
+        await _db.SaveChangesAsync();
+
+        Assert.False(await _repo.IdentityExistsAsync("Ana Lima", "ana@example.com", null, null, person.Id));
+    }
+
+    [Fact]
+    public async Task GetSameNameDifferentIdentityAsync_ReturnsNamesakeButNotExactMatch()
+    {
+        var exact = new Person("Lia Costa") { Email = "lia@example.com", BirthDay = 1, BirthMonth = 2 };
+        var namesake = new Person("Lia Costa") { Email = "other@example.com" };
+        _db.Set<Person>().AddRange(exact, namesake);
+        await _db.SaveChangesAsync();
+
+        var results = await _repo.GetSameNameDifferentIdentityAsync("lia costa", "LIA@example.com", 1, 2);
+
+        var only = Assert.Single(results);
+        Assert.Equal(namesake.Id, only.Id);
     }
 }
