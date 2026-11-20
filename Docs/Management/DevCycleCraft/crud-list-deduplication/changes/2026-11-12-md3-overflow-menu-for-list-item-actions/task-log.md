@@ -145,8 +145,8 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81`, T11a3 `46982a87`, T11a4 `9d07e9c5`, T11c `5c53b3c2` committed; T11b implementor dispatched (incl. clean build + emulator gate).
-- Next: T11a2 → T11a3 → T11a4 → T11c → T11b (one fresh implementor each, sequential; check `git -C .claude/worktrees/md3-menu-shared log --oneline` to see which committed) → T12 verifier + clean Android build + emulator walk → merge → Helder device pass
+- Step: T11a1–T11b done, T12 verified, merged `9fd344ba` and pushed.
+- Next: Helder's on-device pass for revision 2026-11-20b (optional TalkBack, REQ-OVFM-23), then status ✅.
 - Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
 
@@ -250,3 +250,46 @@ Commit `5c53b3c2`. Gates: `design.md § Governance (revision 2026-11-20b)`.
 
 ### Verification
 - Android build: 0 errors. Full suite: 1882 passed. `ShowItemMenu` now has no caller (removed in T11b). This commit is not deployable alone, so there was no emulator check.
+
+## 2026-11-20 — T11b CrudListView hosts the shared Menu (governed) — To Review
+
+Commit `16122733`. Gates: `design.md § Governance (revision 2026-11-20b)`.
+
+### Changed files
+- `MyVocaList/UI/Components/CrudListView.xaml`: the inline DXPopup is replaced by `menus:Menu` (`IsOpen` TwoWay, `ItemsSource=ItemMenuItems`, `Closed=OnItemMenuClosed`).
+- `CrudListView.xaml.cs`: implements `IMenuHost`. Removed `_menuBackRoute`, `ShowItemMenu`, `OnItemMenuOpened` and `OnMenuBackPressed`. The Delete → confirm hand-off is kept.
+
+### Consumer map (grep `<views:CrudListView`)
+| Consumer | What could break | Result |
+|----------|------------------|--------|
+| `Pages/Venues/VenuesPage.xaml:26` | the back route, the confirm hand-off, the target cleared too early, anchoring | PASS (emulator) |
+| `Pages/People/PeoplePage.xaml:25` | same | PASS (emulator) |
+| `Pages/Artists/ArtistsPage.xaml:27` | XAML regression | PASS (orchestrator, T12) |
+| `Pages/Songs/SongsPage.xaml:26` | XAML regression | PASS (orchestrator, T12) |
+
+### Verification
+- Android build: 0 errors. Full suite: 1882 passed. One run had a flaky failure in `SongRepositoryListSearchTests` (an SQLite handle disposed during parallel runs, unrelated to this change); the rerun was green.
+
+## 2026-11-20 — T12 Verification (revision 2026-11-20b)
+
+- **`verifier`: CONDITIONAL PASS, no blockers.**
+  - Signatures and reviewer-check ACs (12a, 12b, 21, 23, 24, 25) pass. Every test carries one `[AC]`. Governance commits are separate. No leaks: every subscription is detached.
+  - Warnings, not fixed:
+    - the `[AC]` comment sits below `[Fact]` in the VM tests;
+    - the doc-comment typo in `ListItemOverflowButton.xaml.cs` ("`ListItemOverflowButton` rows" should read "`ListItem` rows");
+    - the pressed state relies on a synchronous open.
+- **Emulator** (Pixel 5, API 36; clean `obj/` and `bin/`; branch head `16122733`):
+
+| AC | Result | Evidence |
+|----|--------|----------|
+| REQ-OVFM-09/11 | PASS | The overflow opens an anchored menu with Edit and Delete (Venues, People). |
+| REQ-OVFM-21 | PASS | Holding Edit shows the pressed item inset inside the container, with 12dp top corners and 4dp bottom corners. The container corner is 16. |
+| REQ-OVFM-22 | PASS | A tint circle shows on the overflow button while the menu is open and clears on close. |
+| REQ-OVFM-13a / 13b | PASS | An outside tap closes the menu only. Back closes the menu only, and the page stays. |
+| REQ-OVFM-03 / 17 | PASS | Edit opens the tapped row. Delete shows the confirm sheet once (cancelled; no data deleted). |
+| REQ-OVFM-14 | PASS | The last row's menu flips above the button. |
+| Regression: Artists, Songs | PASS | The lists render, the trailing buttons are unchanged, and logcat shows no crash. |
+| REQ-OVFM-23 | open | Code verified (`SetSemanticFocus`). TalkBack check left to Helder's device. |
+
+- Observation for Helder: the pressed colour of a menu item comes from the existing `MenuItem` style (a strong tonal fill). The MD3 pressed state layer is On surface at about 10%, so that is a possible refinement.
+- Merged into `develop` as `9fd344ba`.

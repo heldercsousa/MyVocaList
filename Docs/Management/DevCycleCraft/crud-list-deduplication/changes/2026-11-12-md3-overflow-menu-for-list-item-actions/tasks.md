@@ -49,5 +49,6 @@
 - [x] **T11a3 — `MenuItem` style + `Menu` + `IMenuHost`** · REQ-OVFM-12a, 21, 23, 24, 25
 - [x] **T11a4 — `OverflowMenuButton`** · REQ-OVFM-20, 22, 25
 - [x] **T11c — `ListItemOverflowButton` wraps `OverflowMenuButton`** (governed; own commit and log entry; runs before T11b)
-- [~] **T11b — `CrudListView` consumes `Menu`** (governed; own commit and log entry)
-- [ ] **T12 — Verify** (verifier, build, tests, emulator walk), merge into `develop`, then Helder on-device pass
+- [x] **T11b — `CrudListView` consumes `Menu`** (governed; own commit and log entry)
+- [x] **T12 — Verify** (verifier CONDITIONAL PASS; emulator PASS; merged `9fd344ba`)
+- [ ] **T13 — Helder on-device pass** (revision 2026-11-20b; optional TalkBack for REQ-OVFM-23), then status ✅
