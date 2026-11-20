@@ -21,7 +21,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
   - Demo: a song with no catalog row gains its author's row after `MigrateAsync`, and a second apply inserts nothing.
 
 ## Phase 2 — Services
-- [ ] C3a **Test setup: `ICatalogRepository` in SongService test scopes** (Tester role, no AC). After C1. Review lane: Standard.
+- [x] C3a **Test setup: `ICatalogRepository` in SongService test scopes** (Tester role, no AC). After C1. Review lane: Standard.
   - Size note: about 11 test files, each a one-argument mechanical addition; no assertion changed.
   - Files owned: every `PassthroughUnitOfWork.Over(...)` call that builds a `SongService` (list in `plan.md § Task 3a`, confirm by grep).
   - Demo: the full test run stays green.
