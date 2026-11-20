@@ -145,7 +145,28 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 implementor dispatched.
+- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 committed `0935dee3`; T11a2 implementor dispatched.
 - Next: T11a2 → T11a3 → T11a4 → T11c → T11b (one fresh implementor each, sequential; check `git -C .claude/worktrees/md3-menu-shared log --oneline` to see which committed) → T12 verifier + clean Android build + emulator walk → merge → Helder device pass
 - Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
+
+## 2026-11-20 — T11a1 MenuItemModel + ItemMenuItems — To Review
+
+Commit `0935dee3` on `task/md3-menu-shared-component`.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/MenuItemModel.cs` (new)
+- `MyVocaList/UI/ViewModels/ICrudListViewModel.cs` (+`ItemMenuItems`)
+- `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs` (`ItemMenuItems` built once: Edit → page actions → Delete)
+- `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` (+4 tests)
+
+### Verification
+- Red: the 4 tests did not compile (CS1061, no `ItemMenuItems`). Green: 41/41 in `CrudListViewModelBaseTests`; full suite 1869 passed, 0 failed. Android build: 0 errors.
+
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-OVFM-18 | Edit, then Delete (no page actions) | `CrudListViewModelBase.BuildItemMenuItems` | `ItemMenuItems_Default_IsEditThenDelete` |
+| REQ-OVFM-18 | Page actions between Edit and Delete, in order | same | `ItemMenuItems_WithPageActions_EditActionsDelete` |
+| REQ-OVFM-18 | A page item runs `ExecuteItemMenuActionCommand` with the action as its parameter | same | `ItemMenuItems_PageAction_CommandIsExecuteWithActionParameter` |
+| REQ-OVFM-18 | Built once | `ItemMenuItems` (`??=`) | `ItemMenuItems_IsBuiltOnce` |
