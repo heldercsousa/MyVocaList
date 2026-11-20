@@ -135,3 +135,17 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
 | Regression: Venues (post-merge) | PASS | The overflow button shows on every row of the `develop` build. |
 
 - Note: the first `-t:Run` launch after the merge crashed in `ShellFlyoutTemplatedContentRenderer.LoadView` (an NRE). It reproduced on every relaunch. The cause was a stale incremental Android build: after deleting `obj/` and `bin/` for `net10.0-android` and redeploying the same commit, the app launches cleanly. No code change. If the crash reappears, clean the Android `obj/` and `bin/` before suspecting code.
+
+## 2026-11-20 — T7 Helder on-device pass + follow-up round (T8–T12)
+
+- T7 (Helder, device): every T7 point is fine. The 16dp corner is accepted. Back and tap outside close the menu only, as REQ-OVFM-13a/13b specify.
+- Follow-up requested by Helder (autonomous; ask only on crucial points):
+  1. Final MD3 revision of the menu against menus overview, specs, guidelines and accessibility. Read through Playwright with the Chrome extension; the token was rotated in `.env.local` and the User env, never committed.
+  2. The menu must be a shared component usable anywhere in the UI, not hard-coded in `CrudListView`. Adjust the spec, then code.
+  3. Update the internal guidelines for governed components.
+
+### Checkpoint
+- Step: T8 MD3 re-crawl + T9 design exploration (in progress)
+- Next: T9 spec update → spec-reviewer → T10 plan → plan-reviewer → T11 implementor (worktree `task/md3-menu-shared-component`) → T12 verify + emulator → Helder device pass
+- Context manifest: this `task-log.md`, `tasks.md`, `design.md`, `requirements.md`, `.claude/library/component-safety-gate.md`
+- Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
