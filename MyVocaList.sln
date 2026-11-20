@@ -1745,6 +1745,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-md3-overflow-menu-for-list-item-actions", "2026-11-12-md3-overflow-menu-for-list-item-actions", "{E7175041-820E-54A2-AAA7-84C86EFD6F67}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\requirements.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\requirements.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\design.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\tasks.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\tasks.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset", "2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset", "{3F256686-ADBB-5258-8AEF-536101DAA8C6}"
