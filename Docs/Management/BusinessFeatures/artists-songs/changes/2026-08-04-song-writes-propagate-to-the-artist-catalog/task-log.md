@@ -2,7 +2,7 @@
 
 ---
 ## Task: C1 - Repository queries
-**Status:** To Review
+**Status:** Done, task review clean (2026-11-20)
 **Completed:** 2026-11-20
 
 ### Changed files:
@@ -30,7 +30,7 @@ GREEN: two classes 43 passed; full `dotnet test Tests/MyVocaList.Tests.csproj` 1
 
 ---
 ## Task: C2 - Backfill migration (REQ-CATPROP-09, 11)
-**Status:** To Review (Elevated lane: migration)
+**Status:** Done, task review clean (2026-11-20)
 
 ### Changed files:
 - `Infra/Migrations/20261120052950_BackfillDerivedCatalogRows.cs` (+ `.Designer.cs`; snapshot unchanged)
@@ -42,7 +42,7 @@ GREEN: two classes 43 passed; full `dotnet test Tests/MyVocaList.Tests.csproj` 1
 ### Test evidence
 RED: `BackfillSql` const added with an empty `Up`; 3 of 5 new tests failed (SongWithoutDerivedRow, CoverRowsUntouched, SecondApply: Actual empty). ManualAuthorRow and PerformersOnly are guards that pass by design (INSERT OR IGNORE; repository unchanged).
 GREEN: 5 passed; full `dotnet test Tests/MyVocaList.Tests.csproj` 1863 passed, 0 failed.
-`RemoveSongVersionMigrationTests.Up_RowCountAndForeignKeyRowsUnchanged_ForeignKeyCheckEmpty` migrated to latest and asserted Catalog unchanged; it now correctly sees backfilled rows, so it is pinned to `NewMigrationId(db)` (intent REQ-RMV-03 unchanged). Not in design.md section 9 list; flagged for review.
+`RemoveSongVersionMigrationTests.Up_RowCountAndForeignKeyRowsUnchanged_ForeignKeyCheckEmpty` migrated to latest and asserted Catalog unchanged; it now correctly sees backfilled rows, so it is pinned to `NewMigrationId(db)` (intent REQ-RMV-03 unchanged). Recorded in design.md section 9 (commit 90aed3be).
 
 | AC | Implementation | Test |
 |----|----------------|------|
@@ -51,7 +51,7 @@ GREEN: 5 passed; full `dotnet test Tests/MyVocaList.Tests.csproj` 1863 passed, 0
 
 ---
 ## Task: C3a - Test setup: register ICatalogRepository in SongService test scopes (no AC; setup only)
-**Status:** To Review (Standard lane: test setup)
+**Status:** Done, task review clean (2026-11-20)
 
 ### Changed files:
 - `Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` (1 call; new `_catalogRepo` field)
@@ -73,7 +73,7 @@ Full `dotnet test Tests/MyVocaList.Tests.csproj`: 1863 passed, 0 failed (no asse
 
 ---
 ## Task: C3b - SongService propagation (REQ-CATPROP-01 to 04)
-**Status:** To Review (Elevated lane: transactional write path)
+**Status:** Done, task review clean (2026-11-20)
 
 ### Changed files:
 - `Services/SongService.cs` (CreateSongAsync, CreateSongWithUrlsCoreAsync, UpdateSongCoreAsync)
@@ -95,7 +95,7 @@ GREEN: 12/12; full `dotnet test Tests/MyVocaList.Tests.csproj` 1875 passed, 0 fa
 
 ---
 ## Task: C4 - CatalogService guard and bulk remove (REQ-CATPROP-06, 07)
-**Status:** To Review
+**Status:** Done, task review clean (2026-11-20)
 
 ### Changed files:
 - `Domain/ServicesInterfaces/ICatalogService.cs` (new `RemoveSongsFromCatalogAsync`)
@@ -114,7 +114,7 @@ GREEN: CatalogServiceTests 15/15; full `dotnet test Tests/MyVocaList.Tests.cspro
 
 ---
 ## Task: C5 - ArtistService delete check (REQ-CATPROP-10, service part)
-**Status:** To Review
+**Status:** Done, task review clean (2026-11-20)
 
 ### Changed files:
 - `Services/ArtistService.cs` (delete check via `ISongRepository.CountByArtistAsync`, AC-6.2 text; `ICatalogRepository` field/parameter removed)
@@ -133,7 +133,7 @@ Governed constructor parameters after removal: 22 (23 before), counted by the C5
 
 ---
 ## Task C6: ViewModels (REQ-CATPROP-08, REQ-CATPROP-10 text)
-**Status:** To Review
+**Status:** Done, task review clean (2026-11-20)
 **Completed:** 2026-11-20
 
 ### Changed files:
@@ -144,7 +144,7 @@ Governed constructor parameters after removal: 22 (23 before), counted by the C5
 
 ### Test evidence
 RED: 6 of 7 new tests failed (texts unchanged, bulk remove never called); the songs-mode regression test passed as expected.
-GREEN: new classes 7/7; full `dotnet test Tests/MyVocaList.Tests.csproj` 1895 passed, 0 failed. Android build left to the controller.
+GREEN: new classes 7/7; full `dotnet test Tests/MyVocaList.Tests.csproj` 1895 passed, 0 failed. Android build (controller, net10.0-android Debug): 0 errors.
 
 | AC | Implementation | Test |
 |----|----------------|------|
