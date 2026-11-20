@@ -2010,6 +2010,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-catalog-as-an-au
 		Docs\Management\BusinessFeatures\queue-management\changes\2026-11-19-catalog-as-an-auto-filled-grouped-grid-filled-from-karaoke-participations\README.md = Docs\Management\BusinessFeatures\queue-management\changes\2026-11-19-catalog-as-an-auto-filled-grouped-grid-filled-from-karaoke-participations\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one", "2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one", "{7BC7AB1C-906A-5C00-A0DC-8BE8270E54B7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-person-form-birthday-as-day-and-month-dropdowns", "2026-11-19-person-form-birthday-as-day-and-month-dropdowns", "{16D8834F-FC60-53F4-B331-03B67666D303}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2445,6 +2455,8 @@ Global
 		{E89362B8-1919-5AA6-81D0-47C38A70CC1A} = {60384D3A-1291-563A-A6E7-C6E38CFBE1BB}
 		{601FB201-2EA4-57D6-980E-0E3167C0800A} = {E89362B8-1919-5AA6-81D0-47C38A70CC1A}
 		{7ECDBA7C-214A-5E27-B4DB-6D142281902F} = {FA1234BC-0001-4000-8000-0000000000A2}
+		{7BC7AB1C-906A-5C00-A0DC-8BE8270E54B7} = {FA1234BC-0001-4000-8000-000000000034}
+		{16D8834F-FC60-53F4-B331-03B67666D303} = {FA1234BC-0001-4000-8000-00000000007D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
