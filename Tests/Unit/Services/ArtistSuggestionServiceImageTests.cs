@@ -55,7 +55,7 @@ public class ArtistSuggestionServiceImageTests
     public async Task SearchNameRemoteAsync_RemoteArtistSuggestion_CarriesArtistImage()
     {
         // [AC] REQ-ART-24: a remote artist suggestion carries the Deezer artist picture as ImageUrl
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Metallica", null, null, null, "https://dz/picture.jpg"));
+        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Metallica", null, "https://dz/picture.jpg"));
         var sut = CreateSut();
 
         var result = await sut.SearchNameRemoteAsync("metallica");
@@ -69,7 +69,7 @@ public class ArtistSuggestionServiceImageTests
     public async Task SearchNameRemoteAsync_RemoteArtistWithoutPicture_ImageUrlIsNull()
     {
         // [AC] REQ-ART-24: a remote artist without a picture carries a null ImageUrl
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Metallica", null, null));
+        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Metallica", null));
         var sut = CreateSut();
 
         var result = await sut.SearchNameRemoteAsync("metallica");

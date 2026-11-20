@@ -15,6 +15,8 @@ namespace MyVocaList.Tests.Integration.Migrations;
 public class SongMigrationTests : IAsyncDisposable
 {
     private const string DropHasManualEditsName = "DropHasManualEdits";
+    // Last migration before RemoveSongVersionAndFeaturedArtists: tests that seed or assert the Version column pin here.
+    private const string LastBeforeRemoveVersion = "20261116152258_AddSongLyricsOrigin";
 
     private readonly List<AppDbContext> _contexts = [];
 
@@ -67,7 +69,7 @@ public class SongMigrationTests : IAsyncDisposable
         await db.Database.ExecuteSqlRawAsync(
             "INSERT INTO Songs (Id, ArtistId, Title, Version, HasManualEdits, CreatedAt, UpdatedAt) VALUES (2, 1, 'One', 'Live', 0, '2026-01-01 00:00:00', '2026-01-01 00:00:00')");
 
-        await migrator.MigrateAsync();
+        await migrator.MigrateAsync(migrations[index]);
 
         var artists = await db.Database.SqlQueryRaw<string>("SELECT Id || '|' || Name AS Value FROM Artists").ToListAsync();
         var songs = await db.Database.SqlQueryRaw<string>(
@@ -80,7 +82,7 @@ public class SongMigrationTests : IAsyncDisposable
     public async Task M1_TableRebuild_KeepsUniqueCollatedIndexes()
     {
         // [AC] REQ-SFT-52: after the M1 table rebuild, Artists.Name stays unique under NOCASE_NOACCENT and the song identity index stays unique
-        var db = await MigratedToAsync();
+        var db = await MigratedToAsync(LastBeforeRemoveVersion);
 
         Assert.True(await IsUniqueIndexAsync(db, "Artists", "IX_Artists_Name"));
         Assert.True(await IsUniqueIndexAsync(db, "Songs", "IX_Songs_ArtistId_Title_Version"));
@@ -132,7 +134,7 @@ public class SongMigrationTests : IAsyncDisposable
         await InsertSongAsync(db, 3, "Three", "Deezer", "3135556");
         await InsertSongAsync(db, 4, "Four", "Deezer", "999");
 
-        await db.GetService<IMigrator>().MigrateAsync();
+        await db.GetService<IMigrator>().MigrateAsync(MigrationId(db, SongExternalIdentityUniqueName));
 
         var rows = await db.Database.SqlQueryRaw<string>(
             "SELECT Id || '|' || ArtistId || '|' || Title || '|' || Version || '|' || IFNULL(ExternalProvider, 'null') || '|' || IFNULL(ExternalId, 'null') AS Value FROM Songs ORDER BY Id").ToListAsync();
@@ -145,7 +147,7 @@ public class SongMigrationTests : IAsyncDisposable
     public async Task M2_UniqueIndex_RejectsSecondSongWithSameIdentity()
     {
         // [AC] REQ-SFT-39: after migration a second song with the same (ExternalProvider, ExternalId) is rejected by a UNIQUE constraint
-        var db = await MigratedToAsync();
+        var db = await MigratedToAsync(LastBeforeRemoveVersion);
         await InsertArtistAsync(db, 1, "Metallica");
         await InsertSongAsync(db, 1, "One", "Deezer", "3135556");
 
@@ -157,7 +159,7 @@ public class SongMigrationTests : IAsyncDisposable
     public async Task M2_NullIdentities_AllowMany()
     {
         // [AC] REQ-SFT-39: songs without an external identity (NULL, NULL) remain unrestricted by the unique index
-        var db = await MigratedToAsync();
+        var db = await MigratedToAsync(LastBeforeRemoveVersion);
         await InsertArtistAsync(db, 1, "Metallica");
 
         await InsertSongAsync(db, 1, "One", null, null);
@@ -283,7 +285,7 @@ public class SongMigrationTests : IAsyncDisposable
     public async Task SongExecuteDelete_RemovesSongSearchRow()
     {
         // [AC] REQ-SFT-34: ExecuteDeleteAsync on Songs (bypasses change tracking) still removes the SongSearch row
-        var db = await MigratedToAsync();
+        var db = await MigratedToAsync(LastBeforeRemoveVersion);
         await InsertArtistAsync(db, 1, "Metallica");
         await InsertSongAsync(db, 1, "One", null, null);
         Assert.Equal(1, await CountAsync(db, "SELECT rowid FROM SongSearch WHERE rowid = 1"));

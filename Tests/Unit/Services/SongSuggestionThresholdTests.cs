@@ -134,7 +134,7 @@ public class SongSuggestionThresholdTests
             .Setup(r => r.FindByExternalIdsAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((IReadOnlyList<SongSearchHit>)new List<SongSearchHit>());
         _songRepoMock
-            .Setup(r => r.FindByTitleAndArtistNamesAsync(It.IsAny<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindByTitleAndArtistNamesAsync(It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((IReadOnlyList<SongSearchHit>)new List<SongSearchHit>());
         _artistRepoMock
             .Setup(r => r.GetByNamesCollatedAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -155,7 +155,7 @@ public class SongSuggestionThresholdTests
 
         fetchTcs.SetResult(new List<MusicSearchResultDto>
         {
-            new("dz-1", "Deezer", "Beatles", "Yesterday", null)
+            new("dz-1", "Deezer", "Beatles", "Yesterday")
         });
         var result = await task;
 
