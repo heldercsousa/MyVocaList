@@ -28,7 +28,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] C3b **SongService propagation.** After C3a. Review lane: Elevated. (REQ-CATPROP-01, 02, 03, 04)
   - Files owned: `Services/SongService.cs`, new `SongServiceCatalogPropagationTests.cs`.
   - Demo: create a song → its author's catalog lists it; change the author → the row moves.
-- [ ] C4 **CatalogService guard + bulk remove.** After C1. Review lane: Standard. (REQ-CATPROP-06, 07)
+- [x] C4 **CatalogService guard + bulk remove.** After C1. Review lane: Standard. (REQ-CATPROP-06, 07)
   - Files owned: `ICatalogService.cs`, `Services/CatalogService.cs`, `CatalogServiceTests.cs`.
   - Demo: the bulk remove of an own song + a cover returns `Removed 1 song from the catalog. 1 kept: <A> wrote it.`
 - [ ] C5 **ArtistService delete check.** After C1. Review lane: Standard. (REQ-CATPROP-10)
