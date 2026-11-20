@@ -145,7 +145,7 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81`, T11a3 `46982a87`, T11a4 `9d07e9c5` committed; T11c implementor dispatched (branch head after T11c is NOT deployable alone).
+- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81`, T11a3 `46982a87`, T11a4 `9d07e9c5`, T11c `5c53b3c2` committed; T11b implementor dispatched (incl. clean build + emulator gate).
 - Next: T11a2 → T11a3 → T11a4 → T11c → T11b (one fresh implementor each, sequential; check `git -C .claude/worktrees/md3-menu-shared log --oneline` to see which committed) → T12 verifier + clean Android build + emulator walk → merge → Helder device pass
 - Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
@@ -233,3 +233,20 @@ Commit `9d07e9c5`.
 | REQ-OVFM-20 | `OnClicked` → `MenuResolution.Resolve` (explicit, then ancestor `IMenuHost`, else a warning) | Level B tests (T11a2) and reviewer check |
 | REQ-OVFM-22 | `BeginPressedState` / `OnPressedMenuClosed` | emulator (T12) |
 | REQ-OVFM-25 | no host references | grep |
+
+## 2026-11-20 — T11c ListItemOverflowButton wraps OverflowMenuButton (governed) — To Review
+
+Commit `5c53b3c2`. Gates: `design.md § Governance (revision 2026-11-20b)`.
+
+### Changed files
+- `MyVocaList/UI/Components/Lists/ListItemOverflowButton.xaml`: the content is now `menus:OverflowMenuButton`. The selection-mode `IsVisible` binding is unchanged; `Command` is bound to `CrudListPageBase.BindingContext.OpenItemMenuCommand`, with `CommandParameter={Binding .}`.
+- `ListItemOverflowButton.xaml.cs`: the constructor only. The `CrudListView` parent walk and the Clicked handler are removed.
+
+### Consumer map (grep `ListItemOverflowButton`)
+| Consumer | What could break | Verification |
+|----------|------------------|--------------|
+| `UI/Pages/Venues/VenuesPage.xaml:48` | the ancestor `IMenuHost` lookup, the anchor, the pressed state | emulator on the final head (T11b/T12) |
+| `UI/Pages/People/PeoplePage.xaml:47` | same | same |
+
+### Verification
+- Android build: 0 errors. Full suite: 1882 passed. `ShowItemMenu` now has no caller (removed in T11b). This commit is not deployable alone, so there was no emulator check.
