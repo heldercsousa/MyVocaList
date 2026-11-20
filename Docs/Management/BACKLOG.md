@@ -15,12 +15,12 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-11 | ↳ Discuss: song identity by lyric, version de-duplication and richer Deezer data in the song UX | 💡 Pending |
 | 2026-11-11 | ↳ Evaluate removing the Song form Version and Featured artists fields | 💡 Pending |
 | 2026-11-12 | ↳ Artists list rows: catalog action moves into the overflow menu | 💡 Pending |
-| 2026-11-12 | ↳ Data model simplification — merge Artist into Person, catalog as an auto-filled grid (discussion) | 💡 Pending |
 | 2026-11-12 | ↳ Songs list rows: YouTube action moves into the overflow menu, checkbox moves leading | 💡 Pending |
 | 2026-11-13 | ↳ Backfill Deezer images for songs and artists saved before the artwork item | 💡 Pending |
 | 2026-11-16 | ↳ Songs list searches Deezer: one tap saves a thin song row, lyrics copy with edit mark | 💡 Pending |
 | 2026-11-17 | ↳ Remote and local field searches show a loading indicator | 💡 Pending |
 | — | **Queue Entry Point Redesign — QueuePage as CRUD event list** | 💡 Pending |
+| 2026-11-19 | ↳ Catalog as an auto-filled grouped grid, filled from karaoke participations | 💡 Pending |
 | — | | 🏁 **MVP release** |
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | — | **Cross-cutting** | — |
