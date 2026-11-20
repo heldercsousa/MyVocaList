@@ -33,7 +33,7 @@ public class PersistedStringTrimmingTests : IAsyncLifetime
     [Fact]
     public async Task PersonFullName_LeadingTrailingAndInternalWhitespace_PersistedTrimmedAndCollapsed()
     {
-        var person = new Person(" John  Doe ");
+        var person = new Person(" John  Doe ") { Email = "john.doe@example.com" };
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
 
@@ -46,7 +46,8 @@ public class PersistedStringTrimmingTests : IAsyncLifetime
     [Fact]
     public async Task PersonEmail_WhitespaceOnly_PersistedAsNull()
     {
-        var person = new Person("Jane Doe") { Email = "   " };
+        // BUG-088 CHECK: a singer needs an email or a birthday; the whitespace email still persists as null.
+        var person = new Person("Jane Doe") { Email = "   ", BirthDay = 1, BirthMonth = 1 };
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
 
