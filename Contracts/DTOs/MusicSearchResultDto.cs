@@ -5,8 +5,6 @@ public record MusicSearchResultDto(
     string Provider,
     string ArtistName,
     string? SongTitle,
-    string? FeaturedArtists,
-    string? Version = null,
     string? ImageUrl = null,
     string? ArtistImageUrl = null,
     string? AlbumTitle = null,

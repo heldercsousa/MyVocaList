@@ -8,8 +8,6 @@ namespace MyVocaList.Domain.Resolution;
 /// </summary>
 /// <param name="SongId">Id of the song being edited; <c>null</c> = add mode.</param>
 /// <param name="Title">Song title as typed or filled by a pick.</param>
-/// <param name="Version">Variant label; empty string = canonical version.</param>
-/// <param name="FeaturedArtists">Optional featured-artist names.</param>
 /// <param name="Lyrics">Optional lyrics text.</param>
 /// <param name="ArtistId">Picked or stored local artist; <c>null</c> when only text is known.</param>
 /// <param name="ArtistText">Typed or Deezer-filled artist name, used when <paramref name="ArtistId"/> is <c>null</c>.</param>
@@ -35,7 +33,7 @@ namespace MyVocaList.Domain.Resolution;
 /// </param>
 public sealed record SongFormSaveRequest(
     int? SongId,
-    string Title, string Version, string? FeaturedArtists, string? Lyrics,
+    string Title, string? Lyrics,
     int? ArtistId,
     string? ArtistText,
     string? ExternalProvider, string? ExternalId,
@@ -66,9 +64,6 @@ public enum SongDecision
     /// <summary>No choice made yet: the song guard runs in add mode.</summary>
     None,
 
-    /// <summary>Save as a new version of an existing song; a non-empty Version is required.</summary>
-    SaveAsNewVersion,
-
-    /// <summary>Save as a different song; no Version required.</summary>
+    /// <summary>Save as a different song (near-duplicates only).</summary>
     SaveAsNewSong
 }

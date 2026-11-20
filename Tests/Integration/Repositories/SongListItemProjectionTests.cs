@@ -8,7 +8,7 @@ namespace MyVocaList.Tests.Integration.Repositories;
 
 /// <summary>
 /// T2: list projections of SongRepository.GetPagedAsync and CatalogRepository.GetPagedByArtistAsync
-/// carry the row image (song image, else artist image) and the version. Real SQLite, MigrateAsync.
+/// carry the row image (song image, else artist image). Real SQLite, MigrateAsync.
 /// </summary>
 public class SongListItemProjectionTests : IAsyncLifetime
 {
@@ -38,7 +38,7 @@ public class SongListItemProjectionTests : IAsyncLifetime
     public async Task GetPagedAsync_SongWithImage_RowImageIsSongImage()
     {
         var artist = await SeedArtistAsync("Artist With Picture", ArtistPictureUrl);
-        await SeedSongAsync(artist.Id, "Song With Cover", "", CoverUrl);
+        await SeedSongAsync(artist.Id, "Song With Cover", CoverUrl);
 
         var (items, _) = await _songs.GetPagedAsync(1, 20, null, CancellationToken.None);
 
@@ -50,7 +50,7 @@ public class SongListItemProjectionTests : IAsyncLifetime
     public async Task GetPagedAsync_SongWithoutImageArtistWithImage_RowImageIsArtistImage()
     {
         var artist = await SeedArtistAsync("Artist With Picture", ArtistPictureUrl);
-        await SeedSongAsync(artist.Id, "Song Without Cover", "", null);
+        await SeedSongAsync(artist.Id, "Song Without Cover", null);
 
         var (items, _) = await _songs.GetPagedAsync(1, 20, null, CancellationToken.None);
 
@@ -62,41 +62,27 @@ public class SongListItemProjectionTests : IAsyncLifetime
     public async Task GetPagedAsync_NeitherHasImage_RowImageIsNull()
     {
         var artist = await SeedArtistAsync("Artist Without Picture", null);
-        await SeedSongAsync(artist.Id, "Song Without Cover", "", null);
+        await SeedSongAsync(artist.Id, "Song Without Cover", null);
 
         var (items, _) = await _songs.GetPagedAsync(1, 20, null, CancellationToken.None);
 
         Assert.Null(items.Single().ImageUrl);
     }
 
-    // [AC] REQ-ART-19: the version is carried into the list item
+    // [AC] REQ-ART-19: catalog query, song with its own image shows that image
     [Fact]
-    public async Task GetPagedAsync_SongWithVersion_CarriesVersion()
-    {
-        var artist = await SeedArtistAsync("Radiohead", null);
-        await SeedSongAsync(artist.Id, "Creep", "Live", null);
-
-        var (items, _) = await _songs.GetPagedAsync(1, 20, null, CancellationToken.None);
-
-        Assert.Equal("Live", items.Single().Version);
-    }
-
-    // [AC] REQ-ART-19: catalog query, song with its own image shows that image and carries the version
-    [Fact]
-    public async Task GetPagedByArtistAsync_SongWithImageAndVersion_CarriesImageAndVersion()
+    public async Task GetPagedByArtistAsync_SongWithImage_CarriesImage()
     {
         var original = await SeedArtistAsync("Original Artist", null);
         var performer = await SeedArtistAsync("Performer", ArtistPictureUrl);
-        var song = await SeedSongAsync(original.Id, "Catalog Song", "Live", CoverUrl);
+        var song = await SeedSongAsync(original.Id, "Catalog Song", CoverUrl);
         _db.Catalog.Add(new Catalog { ArtistId = performer.Id, SongId = song.Id });
         await _db.SaveChangesAsync();
 
         var (items, _) = await _catalog.GetPagedByArtistAsync(
             performer.Id, 1, 20, null, CancellationToken.None);
 
-        var item = items.Single();
-        Assert.Equal(CoverUrl, item.ImageUrl);
-        Assert.Equal("Live", item.Version);
+        Assert.Equal(CoverUrl, items.Single().ImageUrl);
     }
 
     // [AC] REQ-ART-19: catalog query, song without image falls back to the artist image of the song's original artist
@@ -105,7 +91,7 @@ public class SongListItemProjectionTests : IAsyncLifetime
     {
         var original = await SeedArtistAsync("Original Artist", ArtistPictureUrl);
         var performer = await SeedArtistAsync("Performer", null);
-        var song = await SeedSongAsync(original.Id, "Catalog Song", "", null);
+        var song = await SeedSongAsync(original.Id, "Catalog Song", null);
         _db.Catalog.Add(new Catalog { ArtistId = performer.Id, SongId = song.Id });
         await _db.SaveChangesAsync();
 
@@ -129,13 +115,12 @@ public class SongListItemProjectionTests : IAsyncLifetime
         return artist;
     }
 
-    private async Task<Song> SeedSongAsync(int artistId, string title, string version, string? imageUrl)
+    private async Task<Song> SeedSongAsync(int artistId, string title, string? imageUrl)
     {
         var song = new Song
         {
             ArtistId = artistId,
             Title = title,
-            Version = version,
             ImageUrl = imageUrl,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

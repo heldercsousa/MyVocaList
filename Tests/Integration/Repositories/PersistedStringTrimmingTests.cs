@@ -105,28 +105,4 @@ public class PersistedStringTrimmingTests : IAsyncLifetime
 
         Assert.Equal("Bohemian Rhapsody", reloaded.Title);
     }
-
-    // [AC] REQ-TRIM-07: Song.FeaturedArtists — whitespace-only optional field persists as null.
-    [Fact]
-    public async Task SongFeaturedArtists_WhitespaceOnly_PersistedAsNull()
-    {
-        var artist = new Artist { Name = "Queen", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
-        _db.Set<Artist>().Add(artist);
-        await _db.SaveChangesAsync();
-
-        var song = new Song
-        {
-            ArtistId = artist.Id,
-            Title = "Under Pressure",
-            FeaturedArtists = "   ",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-        _db.Set<Song>().Add(song);
-        await _db.SaveChangesAsync();
-
-        var reloaded = await _db.Set<Song>().AsNoTracking().FirstAsync(s => s.Id == song.Id);
-
-        Assert.Null(reloaded.FeaturedArtists);
-    }
 }

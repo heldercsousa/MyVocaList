@@ -25,9 +25,6 @@ public enum SaveField
     /// <summary>The Title field.</summary>
     Title,
 
-    /// <summary>The Version field.</summary>
-    Version,
-
     /// <summary>The Artist field.</summary>
     Artist
 }

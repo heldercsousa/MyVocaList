@@ -43,9 +43,7 @@ public class CatalogRepository : ICatalogRepository
                 s.Title,
                 s.ArtistId,
                 s.OriginalArtist.Name,
-                s.FeaturedArtists,
                 s.ExternalProvider,
-                s.Version,
                 s.ImageUrl ?? s.OriginalArtist.ImageUrl))
             .ToListAsync(ct);
 

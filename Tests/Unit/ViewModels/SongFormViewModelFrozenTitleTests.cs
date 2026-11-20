@@ -88,7 +88,6 @@ public class SongFormViewModelFrozenTitleTests
         ArtistId = artistId,
         OriginalArtist = new Artist { Id = artistId, Name = artistName },
         Title = "Bohemian Rhapsody",
-        Version = string.Empty,
         ExternalProvider = DeezerProvider,
         ExternalId = "3135556"
     };
@@ -99,14 +98,12 @@ public class SongFormViewModelFrozenTitleTests
         ArtistId = 8,
         OriginalArtist = new Artist { Id = 8, Name = "Ramones" },
         Title = "Blitzkrieg Bop",
-        Version = string.Empty
     };
 
     private Mock<ISongService> SaveService()
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
         songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
             .Returns((SongFormSaveRequest r, CancellationToken _) =>
             {
@@ -117,10 +114,10 @@ public class SongFormViewModelFrozenTitleTests
     }
 
     private static SongSuggestionDto RemoteDto(
-        string title = "Creep", string artist = "Radiohead", string version = "",
+        string title = "Creep", string artist = "Radiohead",
         string? externalId = DeezerId, string? provider = DeezerProvider,
         int? localArtistId = null, string? localArtistName = null) =>
-        new(null, title, artist, localArtistId, externalId, provider, true, version, localArtistName, Cover, ArtistPic, null);
+        new(null, title, artist, localArtistId, externalId, provider, true, localArtistName, Cover, ArtistPic, null);
 
     private static AutocompleteSuggestion Pick(SongSuggestionDto dto) => new(dto.Title, string.Empty, dto);
 

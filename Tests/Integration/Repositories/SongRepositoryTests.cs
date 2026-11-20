@@ -373,47 +373,46 @@ public class SongRepositoryTests : IAsyncLifetime
     // ── Lookups (SFT) ──────────────────────────────────────────────────────
 
     [Fact]
-    // [AC] REQ-SFT-42: collated (artist, title, version) match ignores accent difference
-    public async Task FindIdByTitleVersionForArtistAsync_AccentOnlyDifference_ReturnsStoredId()
+    // [AC] REQ-SFT-42: collated (artist, title) match ignores accent difference
+    public async Task FindIdByTitleForArtistAsync_AccentOnlyDifference_ReturnsStoredId()
     {
         var artist = await SeedArtistAsync("Ana Carolina");
         var song = MakeSong(artist.Id, "Não Sei");
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
-        var found = await _repo.FindIdByTitleVersionForArtistAsync(
-            artist.Id, "Nao Sei", "", null, CancellationToken.None);
+        var found = await _repo.FindIdByTitleForArtistAsync(
+            artist.Id, "Nao Sei", null, CancellationToken.None);
 
         Assert.Equal(song.Id, found);
     }
 
     [Fact]
-    // [AC] REQ-SFT-29: a different version label is not a match
-    public async Task FindIdByTitleVersionForArtistAsync_DifferentVersion_ReturnsNull()
+    // [AC] REQ-RMV-06: case-only difference is an identity match (collation, not Version)
+    public async Task FindIdByTitleForArtistAsync_CaseOnlyDifference_ReturnsStoredId()
     {
         var artist = await SeedArtistAsync("Radiohead");
         var song = MakeSong(artist.Id, "Creep");
-        song.Version = "Live";
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
-        var found = await _repo.FindIdByTitleVersionForArtistAsync(
-            artist.Id, "Creep", "Acoustic", null, CancellationToken.None);
+        var found = await _repo.FindIdByTitleForArtistAsync(
+            artist.Id, "creep", null, CancellationToken.None);
 
-        Assert.Null(found);
+        Assert.Equal(song.Id, found);
     }
 
     [Fact]
-    // [AC] REQ-SFT-29: excluding the only matching row (the song being edited) yields no match
-    public async Task FindIdByTitleVersionForArtistAsync_ExcludeSelf_ReturnsNull()
+    // [AC] REQ-RMV-06: excluding the only matching row (the song being edited) yields no match
+    public async Task FindIdByTitleForArtistAsync_ExcludeSelf_ReturnsNull()
     {
         var artist = await SeedArtistAsync("The Who");
         var song = MakeSong(artist.Id, "My Generation");
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
-        var found = await _repo.FindIdByTitleVersionForArtistAsync(
-            artist.Id, "My Generation", "", song.Id, CancellationToken.None);
+        var found = await _repo.FindIdByTitleForArtistAsync(
+            artist.Id, "My Generation", song.Id, CancellationToken.None);
 
         Assert.Null(found);
     }

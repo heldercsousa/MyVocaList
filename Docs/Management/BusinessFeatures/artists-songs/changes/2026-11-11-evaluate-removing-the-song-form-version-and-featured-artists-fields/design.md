@@ -54,6 +54,8 @@ If a code flow does not fit this table, the implementor stops and logs `blocked:
 3. Drop index `IX_Songs_ArtistId_Title_Version`; drop columns `Version`, `FeaturedArtists` (EF performs the SQLite table rebuild); create unique index `IX_Songs_ArtistId_Title` on `(ArtistId, Title)` with the existing collation.
 4. `Down`: per REQ-RMV-05 (lossy, does not undo the renames).
 
+> **Spec updated [2026-11-20]:** impl decision — EF `DropColumn` rebuilds the SQLite table and breaks the FTS triggers ("no such table: main.Songs"), so both drops are native `ALTER TABLE ... DROP COLUMN` (same approach as `AddSongLyricsOrigin` Down); the 3-column index is dropped before the renames (a rename can collide under it, REQ-RMV-04 e); pass B runs three times (chains beyond that fail the unique index); "empty" whitespace is `char(32, 9, 10, 13)`. Details: task-log T2.
+
 Sequential-only files: `Migrations/*`, `AppDbContext.cs`, `MauiProgram.cs`, spec `tasks.md`.
 
 ## Waves (DRY Onion; tests move with their wave)

@@ -105,7 +105,7 @@ public class ImageUrlMigrationTests : IAsyncDisposable
 
         const string ts = "'2026-01-01 00:00:00'";
         await db.Database.ExecuteSqlRawAsync($"INSERT INTO Artists (Id, Name, CreatedAt, UpdatedAt) VALUES (1, 'Metallica', {ts}, {ts})");
-        await db.Database.ExecuteSqlRawAsync($"INSERT INTO Songs (Id, ArtistId, Title, Version, CreatedAt, UpdatedAt) VALUES (1, 1, 'One', '', {ts}, {ts})");
+        await db.Database.ExecuteSqlRawAsync($"INSERT INTO Songs (Id, ArtistId, Title, CreatedAt, UpdatedAt) VALUES (1, 1, 'One', {ts}, {ts})");
 
         await db.GetService<IMigrator>().MigrateAsync(migrations[index - 1]);
 
