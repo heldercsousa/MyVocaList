@@ -39,7 +39,6 @@ public class LocalImageReferencesRepositoryTests : IAsyncLifetime
     {
         ArtistId = artistId,
         Title = title,
-        Version = "",
         ImageUrl = imageUrl,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow

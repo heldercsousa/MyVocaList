@@ -41,7 +41,7 @@ public class SongSuggestionServiceTests
             .ReturnsAsync(new List<SongSearchHit>());
         _songRepoMock
             .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(), It.IsAny<CancellationToken>()))
+                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit>());
         _artistRepoMock
             .Setup(r => r.GetByNamesCollatedAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -58,13 +58,13 @@ public class SongSuggestionServiceTests
         _networkMock.Object,
         _loggerMock.Object);
 
-    private static SongSearchHit Hit(int id, string title, string artist, int artistId = 1, string version = "",
+    private static SongSearchHit Hit(int id, string title, string artist, int artistId = 1,
         string? provider = null, string? externalId = null)
-        => new(id, title, version, artistId, artist, provider, externalId);
+        => new(id, title, artistId, artist, provider, externalId);
 
-    // Expression trees cannot contain tuple literals, so Moq predicates build the triple through a method.
-    private static (string Title, string ArtistName, string Version) Triple(string title, string artist, string version)
-        => (title, artist, version);
+    // Expression trees cannot contain tuple literals, so Moq predicates build the pair through a method.
+    private static (string Title, string ArtistName) Pair(string title, string artist)
+        => (title, artist);
 
     private void SetupCandidates(string query, params SongSearchHit[] hits)
         => _songRepoMock
@@ -190,10 +190,10 @@ public class SongSuggestionServiceTests
     }
 
     [Fact]
-    public async Task SearchTitleLocalAsync_MapsVersionAndArtist()
+    public async Task SearchTitleLocalAsync_MapsArtistAndIds()
     {
-        // [AC] REQ-SFT-04: a local option carries the stored version, artist name and ids
-        SetupCandidates("creep", Hit(5, "Creep", "Radiohead", 3, "Live"));
+        // [AC] REQ-SFT-04: a local option carries the artist name and ids (REQ-RMV-08: no version part)
+        SetupCandidates("creep", Hit(5, "Creep", "Radiohead", 3));
         var sut = CreateSut();
 
         var result = await sut.SearchTitleLocalAsync("creep");
@@ -201,7 +201,6 @@ public class SongSuggestionServiceTests
         var option = Assert.Single(result);
         Assert.Equal(5, option.LocalId);
         Assert.Equal("Creep", option.Title);
-        Assert.Equal("Live", option.Version);
         Assert.Equal("Radiohead", option.ArtistName);
         Assert.Equal("Radiohead", option.LocalArtistName);
         Assert.Equal(3, option.LocalArtistId);
@@ -230,11 +229,11 @@ public class SongSuggestionServiceTests
     public async Task SearchTitleRemoteAsync_ExternalIdentityMatchNotShown_Promoted()
     {
         // [AC] REQ-SFT-05: a Deezer hit already in the library by external id is promoted as the local row
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep", null));
+        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep"));
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(
                 "Deezer", It.Is<IReadOnlyCollection<string>>(ids => ids.Contains("dz-1")), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "", "Deezer", "dz-1") });
+            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "Deezer", "dz-1") });
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
@@ -246,15 +245,14 @@ public class SongSuggestionServiceTests
     }
 
     [Fact]
-    public async Task SearchTitleRemoteAsync_CollatedTitleArtistEmptyVersionMatch_Promoted()
+    public async Task SearchTitleRemoteAsync_CollatedTitleArtistMatch_Promoted()
     {
-        // [AC] REQ-SFT-05: with no external id match, a collated (title, artist, "") match is promoted
-        // (a null provider Version is coalesced to "" before the triple is built)
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep", null, null));
+        // [AC] REQ-SFT-05: with no external id match, a collated (title, artist) match is promoted (REQ-RMV-08)
+        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep"));
         _songRepoMock
             .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.Is<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(
-                    items => items.Contains(Triple("Creep", "Radiohead", ""))),
+                It.Is<IReadOnlyCollection<(string Title, string ArtistName)>>(
+                    items => items.Contains(Pair("Creep", "Radiohead"))),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit> { Hit(8, "creep", "RADIOHEAD", 3) });
         var sut = CreateSut();
@@ -270,11 +268,11 @@ public class SongSuggestionServiceTests
     public async Task SearchTitleRemoteAsync_MatchAlreadyShownLocally_DroppedNotPromoted()
     {
         // [AC] REQ-SFT-05: a match already listed among the local options is dropped, not promoted twice
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep", null));
+        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep"));
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(
                 It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "", "Deezer", "dz-1") });
+            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "Deezer", "dz-1") });
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", [7]);
@@ -287,8 +285,8 @@ public class SongSuggestionServiceTests
     public async Task SearchTitleRemoteAsync_OtherArtistSameTitle_StaysRemote()
     {
         // [AC] REQ-SFT-05: dedup is artist-scoped; the same title by another artist stays a remote option
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep", null));
-        // The library holds "Creep" by Stone Temple Pilots only: the (Creep, Radiohead, "") lookup finds nothing.
+        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep"));
+        // The library holds "Creep" by Stone Temple Pilots only: the (Creep, Radiohead) lookup finds nothing.
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
@@ -298,8 +296,8 @@ public class SongSuggestionServiceTests
         Assert.Empty(result.Promoted);
         _songRepoMock.Verify(
             r => r.FindByTitleAndArtistNamesAsync(
-                It.Is<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(
-                    items => items.Contains(Triple("Creep", "Radiohead", ""))),
+                It.Is<IReadOnlyCollection<(string Title, string ArtistName)>>(
+                    items => items.Contains(Pair("Creep", "Radiohead"))),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -325,7 +323,7 @@ public class SongSuggestionServiceTests
     public async Task SearchTitleRemoteAsync_DedupeLookupThrows_StatusUnavailable_LogsWarning_DoesNotThrow()
     {
         // [AC] REQ-SFT-06: any failure after the Deezer fetch (library dedupe) degrades to Unavailable + Warning, never an exception
-        SetupDeezer(new MusicSearchResultDto("1", "Deezer", "Niska", "Commando", null, ""));
+        SetupDeezer(new MusicSearchResultDto("1", "Deezer", "Niska", "Commando"));
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("collation failure"));
@@ -444,7 +442,7 @@ public class SongSuggestionServiceTests
     public async Task SearchTitleRemoteAsync_RemoteRowArtistIsLocal_CarriesLocalArtistIdAndName()
     {
         // [AC] REQ-SFT-13: a Deezer artist that collates equal to a local artist carries its id and stored spelling
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "radiohead", "Creep", null));
+        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "radiohead", "Creep"));
         _artistRepoMock
             .Setup(r => r.GetByNamesCollatedAsync(
                 It.Is<IEnumerable<string>>(n => n.Contains("radiohead")), It.IsAny<CancellationToken>()))
@@ -478,7 +476,7 @@ public class SongSuggestionServiceTests
     {
         // [AC] REQ-SFT-04: at most MaxSearchResults remote options
         SetupDeezer(Enumerable.Range(1, 8)
-            .Select(i => new MusicSearchResultDto($"dz-{i}", "Deezer", "Queen", $"Song {i}", null))
+            .Select(i => new MusicSearchResultDto($"dz-{i}", "Deezer", "Queen", $"Song {i}"))
             .ToArray());
         var sut = CreateSut();
 

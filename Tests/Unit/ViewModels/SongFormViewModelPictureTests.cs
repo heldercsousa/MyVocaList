@@ -72,7 +72,6 @@ public class SongFormViewModelPictureTests
             ArtistId = 1,
             OriginalArtist = new Artist { Id = 1, Name = "Radiohead" },
             Title = "Creep",
-            Version = string.Empty,
             ImageUrl = storedImage
         };
         var songService = SaveService(decide);
@@ -94,7 +93,6 @@ public class SongFormViewModelPictureTests
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
         songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
             .Returns((SongFormSaveRequest r, CancellationToken _) =>
             {
@@ -113,7 +111,7 @@ public class SongFormViewModelPictureTests
     private static SongSuggestionDto RemoteDto(
         string title = "Creep", string artist = "Radiohead", string? image = Cover, string? artistImage = ArtistPic,
         int? localArtistId = null, string? localArtistName = null) =>
-        new(null, title, artist, localArtistId, "dz-1", "Deezer", true, string.Empty, localArtistName, image, artistImage, null);
+        new(null, title, artist, localArtistId, "dz-1", "Deezer", true, localArtistName, image, artistImage, null);
 
     private static AutocompleteSuggestion Pick(SongSuggestionDto dto) => new(dto.Title, string.Empty, dto);
 
@@ -604,7 +602,7 @@ public class SongFormViewModelPictureTests
     {
         // [AC] REQ-PIC-39: Title options show an uploaded picture through its thumbnail file.
         _imageStoreMock.Setup(s => s.ResolveDisplaySource(Uploaded, ImageSize.Thumbnail)).Returns("/images/songs/x_t.jpg");
-        var local = new SongSuggestionDto(3, "Creep", "Radiohead", 1, null, null, false, string.Empty, "Radiohead", Uploaded, null, null);
+        var local = new SongSuggestionDto(3, "Creep", "Radiohead", 1, null, null, false, "Radiohead", Uploaded, null, null);
         _suggestionsMock.Setup(s => s.SearchTitleLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync([local]);
         _suggestionsMock
             .Setup(s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()))

@@ -1424,6 +1424,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-evaluate-removin
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\design.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\supersession.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\supersession.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "{E260291E-7885-5298-8FF1-F7F717ABA8E3}"

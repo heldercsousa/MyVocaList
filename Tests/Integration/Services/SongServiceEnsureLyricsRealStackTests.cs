@@ -57,7 +57,6 @@ public class SongServiceEnsureLyricsRealStackTests
         {
             ArtistId = artist.Id,
             Title = StoredTitle,
-            Version = string.Empty,
             ExternalProvider = DeezerProvider,
             ExternalId = DeezerTrackId,
             Lyrics = null,

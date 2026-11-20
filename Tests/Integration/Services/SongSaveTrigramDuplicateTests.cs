@@ -43,7 +43,6 @@ public class SongSaveTrigramDuplicateTests : IAsyncLifetime
         {
             ArtistId = _queen.Id,
             Title = "Patience",
-            Version = "",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -76,7 +75,7 @@ public class SongSaveTrigramDuplicateTests : IAsyncLifetime
     public async Task SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate()
     {
         var outcome = await CreateSut().SaveFromFormAsync(new SongFormSaveRequest(
-            null, "Patiencee", "", FeaturedArtists: null, Lyrics: null,
+            null, "Patiencee", Lyrics: null,
             _queen.Id, "Queen", null, null,
             PendingUrls: [],
             new ArtistDecision.None(),

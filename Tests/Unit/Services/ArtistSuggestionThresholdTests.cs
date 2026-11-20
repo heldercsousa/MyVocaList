@@ -113,7 +113,7 @@ public class ArtistSuggestionThresholdTests
         var query = new string('a', SearchConstants.MinimumRemoteQueryLength);
         _deezerMock
             .Setup(p => p.SearchArtistsAsync(query, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new[] { new MusicSearchResultDto("dz-1", "Deezer", query, null, null) });
+            .ReturnsAsync(new[] { new MusicSearchResultDto("dz-1", "Deezer", query, null) });
 
         var sut = CreateSut(PassthroughUnitOfWork.Over(_repoMock));
 
@@ -141,7 +141,7 @@ public class ArtistSuggestionThresholdTests
             {
                 providerEntered.SetResult();
                 await releaseProvider.Task;
-                return new[] { new MusicSearchResultDto("dz-1", "Deezer", "Anitta", null, null) };
+                return new[] { new MusicSearchResultDto("dz-1", "Deezer", "Anitta", null) };
             });
 
         var sut = CreateSut(counting);
