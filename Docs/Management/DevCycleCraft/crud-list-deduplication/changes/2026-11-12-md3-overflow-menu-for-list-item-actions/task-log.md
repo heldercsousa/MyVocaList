@@ -125,4 +125,13 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
 ### Notes for Helder (T7)
 - The 16dp container corner is Claude's unverified call (the MD3 token value is not exposed).
 - `AndroidManifest.xml` has no `android:enableOnBackInvokedCallback` opt-in. Back works on API 36 regardless; flagged only.
-- Songs regression was not walked on the emulator (same shared code path as Artists).
+- Songs regression: walked 2026-11-20 on `develop` @ `19555574` (see below).
+
+## 2026-11-20 — T6 addendum: Songs regression on `develop`
+
+| AC | Result | Evidence |
+|----|--------|----------|
+| Regression: Songs | PASS | The list renders, the catalog button is unchanged, no overflow button (as designed). Tapping a row opens Edit Song; back returns to Songs. No crash in logcat. |
+| Regression: Venues (post-merge) | PASS | The overflow button shows on every row of the `develop` build. |
+
+- Note: the first `-t:Run` launch after the merge crashed in `ShellFlyoutTemplatedContentRenderer.LoadView` (an NRE). It reproduced on every relaunch. The cause was a stale incremental Android build: after deleting `obj/` and `bin/` for `net10.0-android` and redeploying the same commit, the app launches cleanly. No code change. If the crash reappears, clean the Android `obj/` and `bin/` before suspecting code.
