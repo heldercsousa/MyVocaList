@@ -145,7 +145,7 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 committed `0935dee3`; T11a2 implementor dispatched.
+- Step: T10 done (plan committed 78869742). Worktree `.claude/worktrees/md3-menu-shared` on branch `task/md3-menu-shared-component` (from develop 78869742). T11a1 `0935dee3`, T11a2 `9a26ab81` committed; T11a3 implementor dispatched.
 - Next: T11a2 → T11a3 → T11a4 → T11c → T11b (one fresh implementor each, sequential; check `git -C .claude/worktrees/md3-menu-shared log --oneline` to see which committed) → T12 verifier + clean Android build + emulator walk → merge → Helder device pass
 - Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
@@ -170,3 +170,21 @@ Commit `0935dee3` on `task/md3-menu-shared-component`.
 | REQ-OVFM-18 | Page actions between Edit and Delete, in order | same | `ItemMenuItems_WithPageActions_EditActionsDelete` |
 | REQ-OVFM-18 | A page item runs `ExecuteItemMenuActionCommand` with the action as its parameter | same | `ItemMenuItems_PageAction_CommandIsExecuteWithActionParameter` |
 | REQ-OVFM-18 | Built once | `ItemMenuItems` (`??=`) | `ItemMenuItems_IsBuiltOnce` |
+
+## 2026-11-20 — T11a2 menu helpers — To Review
+
+Commit `9a26ab81`.
+
+### Changed files
+- `MyVocaList/UI/Components/Menus/MenuItemSelection.cs`, `MenuResolution.cs`, `MenuItemShape.cs` (new)
+- `Tests/Unit/Components/MenuItemSelectionTests.cs`, `MenuResolutionTests.cs`, `MenuItemShapeTests.cs` (new)
+
+### Verification
+- Red: each helper's tests failed to compile first (CS0234/CS0103). Green: full suite 1882 passed, 0 failed. Android build: 0 errors.
+
+### AC traceability
+| AC | Implementation | Tests |
+|----|----------------|-------|
+| REQ-OVFM-19 | `MenuItemSelection.Select` | `Select_RunsCommandBeforeClose`, `Select_DoesNotCloseWhenCommandAlreadyClosed`, `Select_DoesNotCloseWhenCloseOnItemSelectedFalse`, `Select_CommandCannotExecute_DoesNotRun_StillCloses`, `Select_NullCommand_DoesNotThrow` |
+| REQ-OVFM-20 | `MenuResolution.Resolve<TMenu>` | `Resolve_ExplicitWins`, `Resolve_NearestHost`, `Resolve_SkipsHostWithNullMenu`, `Resolve_NoneReturnsNull` |
+| REQ-OVFM-21 | `MenuItemShape.For` | `For_SingleItem_All12`, `For_First_Top12Bottom4`, `For_Last_Top4Bottom12`, `For_Middle_All4` |
