@@ -201,6 +201,13 @@ public partial class CrudListView : ContentView
     /// </summary>
     private bool _showConfirmWhenMenuClosed;
 
+#if ANDROID
+    /// <summary>
+    /// Back route on the overflow menu's window. Held only while the menu is open (Android only).
+    /// </summary>
+    private IDisposable _menuBackRoute;
+#endif
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -410,11 +417,36 @@ public partial class CrudListView : ContentView
     }
 
     /// <summary>
+    /// Overflow item menu opened. Routes the system back press to the ViewModel while the popup window has focus
+    /// (REQ-OVFM-13b). DXPopup's window has no back handler of its own, so the press would otherwise be swallowed.
+    /// </summary>
+    private void OnItemMenuOpened(object sender, EventArgs e)
+    {
+#if ANDROID
+        _menuBackRoute?.Dispose();
+        var contentView = itemMenu.Content?.Handler?.PlatformView as Android.Views.View;
+        _menuBackRoute = MyVocaList.Platforms.PopupBackHandler.Attach(contentView, OnMenuBackPressed);
+        if (_menuBackRoute is null)
+            Serilog.Log.ForContext("SourceContext", nameof(CrudListView))
+                .Warning("Overflow menu back route not attached: popup content view or back dispatcher unavailable");
+#endif
+    }
+
+#if ANDROID
+    private void OnMenuBackPressed() => _viewModel?.HandleBack();
+#endif
+
+    /// <summary>
     /// Overflow item menu closed (outside tap, back, Edit, or a page action). Flushes a Delete-deferred confirm sheet.
     /// Never dispatches DismissItemMenuCommand: the TwoWay IsOpen binding has already written the close back.
     /// </summary>
     private void OnItemMenuClosed(object sender, EventArgs e)
     {
+#if ANDROID
+        _menuBackRoute?.Dispose();
+        _menuBackRoute = null;
+#endif
+
         if (!_showConfirmWhenMenuClosed)
             return;
 

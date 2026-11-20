@@ -166,6 +166,7 @@
                     CornerRadius="16"
                     BackgroundColor="{StaticResource SurfaceContainerLow}"
                     HorizontalAlignment="Right"
+                    Opened="OnItemMenuOpened"
                     Closed="OnItemMenuClosed">
             <VerticalStackLayout Padding="0,2"
                                  MinimumWidthRequest="112"
