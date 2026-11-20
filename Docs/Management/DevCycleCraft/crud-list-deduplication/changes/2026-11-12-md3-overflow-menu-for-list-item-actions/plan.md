@@ -163,3 +163,93 @@ Consumes: `ListItemOverflowButton` (T3). Review lane: Standard · Demo: an overf
 ### Task 7: Helder on-device pass (gate)
 
 - [ ] Helder passes REQ-OVFM-09…17 on device and confirms the 16dp corner. Then status ✅.
+
+---
+
+# Revision 2026-11-20b — shared Menu component (T11a → T11c → T11b → T12)
+
+**Goal:** turn the menu into reusable `Menu` + `OverflowMenuButton` components (usable on any page), make `CrudListView` a consumer of them, and apply the final MD3 deltas. **Spec:** `design.md § Revision 2026-11-20b` (signatures and mechanisms are binding), `requirements.md § Revision 2026-11-20b` (REQ-OVFM-12a/12b amended, 18–25).
+
+**Order rationale:** T11c runs before T11b. It removes the only caller of `CrudListView.ShowItemMenu`, so T11b can delete it without touching `ListItemOverflowButton`, and each governed component is changed only in its own task. Between the T11c and T11b commits the row button builds but finds no `IMenuHost` (warning only). That intermediate state exists only on the branch and is never merged on its own.
+
+**Branch:** `task/md3-menu-shared-component`, in a worktree cut from `develop` (after the docs commit for this revision). One implementor runs the tasks sequentially. **Each task gets its own commit**, with an `Item: md3-overflow-menu-for-list-item-actions` trailer, and its own hand-back section (no bundling across the governed components). **Global Constraints above still apply.**
+
+## T11a — VM descriptor, pure helpers, components, style (new code; not a governed-component change)
+
+Files owned:
+- `MyVocaList/UI/ViewModels/MenuItemModel.cs` (new)
+- `MyVocaList/UI/ViewModels/ICrudListViewModel.cs`
+- `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs`
+- `MyVocaList/UI/Components/Menus/IMenuHost.cs` (new)
+- `MyVocaList/UI/Components/Menus/MenuItemSelection.cs` (new)
+- `MyVocaList/UI/Components/Menus/MenuResolution.cs` (new)
+- `MyVocaList/UI/Components/Menus/MenuItemShape.cs` (new)
+- `MyVocaList/UI/Components/Menus/Menu.xaml(.cs)` (new)
+- `MyVocaList/UI/Components/Menus/OverflowMenuButton.xaml(.cs)` (new)
+- `MyVocaList/Resources/Styles/MaterialStyles.xaml` (`MenuItem` style only)
+- `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs`
+- `Tests/Unit/Components/MenuItemSelectionTests.cs`, `MenuResolutionTests.cs`, `MenuItemShapeTests.cs` (new; follow the existing `Tests/Unit/Components/` pattern, for example the `TapToEditFieldLogic` tests)
+
+Steps:
+- [ ] 1. **TDD, VM (Level A), REQ-OVFM-18.** Write the failing tests first, then implement:
+  - `ItemMenuItems_Default_IsEditThenDelete`
+  - `ItemMenuItems_WithPageActions_EditActionsDelete` (existing `ActionsTestCrudListViewModel`)
+  - `ItemMenuItems_PageAction_CommandIsExecuteWithActionParameter`
+  - `ItemMenuItems_IsBuiltOnce` (same instance on two reads)
+  - Then add `MenuItemModel`, `ICrudListViewModel.ItemMenuItems`, and the base-class build: Edit (`edit_outlined`) → actions → Delete (`delete_outlined`). Run the tests: Red, then Green.
+- [ ] 2. **TDD, helpers (Level B), REQ-OVFM-19/20/21.**
+  - `MenuItemSelection`:
+    - `Select_RunsCommandBeforeClose`
+    - `Select_DoesNotCloseWhenCommandAlreadyClosed`
+    - `Select_DoesNotCloseWhenCloseOnItemSelectedFalse`
+    - `Select_CommandCannotExecute_DoesNotRun_StillCloses`
+    - `Select_NullCommand_DoesNotThrow` (the record's `Command` is non-nullable; test with a `null!` guard)
+  - `MenuResolution`, with `TMenu = string` in the tests:
+    - `Resolve_ExplicitWins`
+    - `Resolve_NearestHost`
+    - `Resolve_SkipsHostWithNullMenu`
+    - `Resolve_NoneReturnsNull`
+  - `MenuItemShape`: `For_SingleItem_All12`, `For_First_Top12Bottom4`, `For_Last_Top4Bottom12`, `For_Middle_All4`.
+- [ ] 3. **Style.** In `MenuItem`, `Padding` becomes `12,0` and `CornerRadius="4"` is added. Build.
+- [ ] 4. **`Menu`.** Build it per `design.md § Signatures / § Mechanisms`:
+  - the DXPopup chrome copied from `CrudListView.xaml` (`itemMenu`), with content `Padding="4,2"`;
+  - item buttons built in code-behind with `MenuItemShape` and the `CanExecute` → `IsEnabled` sync;
+  - a tap calls `MenuItemSelection.Select`;
+  - `PopupBackHandler` attached on Opened (move the logic from `CrudListView.xaml.cs`; `PopupBackHandler.cs` itself is unchanged);
+  - `SetSemanticFocus` on the first item;
+  - `IsOpen` kept in sync with the popup both ways; `Closed` raised for every close path.
+  - Confirm `Menu` does not collide with a global-usings type (W9). Build with 0 errors.
+- [ ] 5. **`OverflowMenuButton`.** Build it per spec: resolution through `MenuResolution` over the `Parent` chain; set `PlacementTarget`; `Command` vs `Show`; the pressed state layer until `Closed`; no reference to `CrudListView`, `ICrudListViewModel` or `CrudListPageBase` (REQ-OVFM-25). Build.
+- [ ] 6. Full build and full test run. Commit `feat: shared MD3 Menu and OverflowMenuButton components`.
+- Hand-back: Changed files; AC traceability (REQ-OVFM-18–21, 24, 25); the test counts.
+
+## T11b — `CrudListView` consumes `Menu` (governed; gates in `design.md § Governance (revision 2026-11-20b)`)
+
+Files owned: `MyVocaList/UI/Components/CrudListView.xaml`, `CrudListView.xaml.cs`.
+
+- [ ] 1. **XAML.** Replace the inline `dx:DXPopup x:Name="itemMenu"` with `<menus:Menu x:Name="itemMenu" IsOpen="{Binding IsItemMenuOpen, Mode=TwoWay}" ItemsSource="{Binding ItemMenuItems}" Closed="OnItemMenuClosed"/>` and add the `menus` xmlns. Build.
+- [ ] 2. **Code-behind.**
+  - Implement `IMenuHost` (`HostedMenu => itemMenu`).
+  - Delete `OnItemMenuOpened`, `_menuBackRoute`, the back callback, and `ShowItemMenu` (no caller remains after T11c; grep to confirm).
+  - **Keep** the `_showConfirmWhenMenuClosed` hand-off, reading `itemMenu.IsOpen`.
+  - Build, then run the full tests.
+- [ ] 3. Commit `refactor: CrudListView hosts the shared Menu`.
+- Hand-back: Changed files, the consumer map, and the risk table copied from the spec.
+
+## T11c — `ListItemOverflowButton` wraps `OverflowMenuButton` (governed)
+
+Files owned: `MyVocaList/UI/Components/Lists/ListItemOverflowButton.xaml(.cs)` only. Runs **before** T11b.
+
+- [ ] 1. **XAML.** The content becomes `menus:OverflowMenuButton` with the selection-mode `IsVisible` binding (unchanged), `Command="{Binding BindingContext.OpenItemMenuCommand, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"` and `CommandParameter="{Binding .}"`. Build.
+- [ ] 2. **Code-behind:** the constructor only. Build, then run the full tests.
+- [ ] 3. Commit `refactor: ListItemOverflowButton wraps OverflowMenuButton`.
+- Hand-back: Changed files, the consumer map (Venues, People), and the risk rows.
+
+## T12 — Verification (orchestrator)
+
+- [ ] `verifier` subagent on the branch diff against the 2026-11-20b ACs.
+- [ ] Clean Android build (delete `obj/` and `bin/` for `net10.0-android`), deploy to the emulator, then walk through:
+  - Venues and People: menu open, anchor, Edit, Delete → confirm once, back closes the menu only, outside tap closes only, last-row reposition;
+  - the item shapes (rounded first and last item, inset 4) and the pressed state on the overflow button while open (REQ-OVFM-21, 22);
+  - the Artists and Songs regression.
+- [ ] Task-log entries per task, on `develop`. Merge into `develop`, push. Then Helder's on-device pass (including TalkBack for REQ-OVFM-23, optional).

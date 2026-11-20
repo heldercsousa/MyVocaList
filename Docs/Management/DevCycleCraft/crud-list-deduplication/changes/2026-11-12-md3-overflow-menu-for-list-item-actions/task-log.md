@@ -145,7 +145,7 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T8 MD3 re-crawl + T9 design exploration (in progress)
-- Next: T9 spec update → spec-reviewer → T10 plan → plan-reviewer → T11 implementor (worktree `task/md3-menu-shared-component`) → T12 verify + emulator → Helder device pass
-- Context manifest: this `task-log.md`, `tasks.md`, `design.md`, `requirements.md`, `.claude/library/component-safety-gate.md`
+- Step: T8 done; T9 spec done (spec-reviewer findings addressed); T10 plan written, plan-reviewer running
+- Next: commit docs → worktree `task/md3-menu-shared-component` from develop → implementor T11a → T11c → T11b (sequential, own commits) → T12 verifier + clean Android build + emulator walk → merge → Helder device pass
+- Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.

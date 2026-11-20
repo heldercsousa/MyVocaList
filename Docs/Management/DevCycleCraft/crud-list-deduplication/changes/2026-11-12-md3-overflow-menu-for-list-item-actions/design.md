@@ -179,3 +179,147 @@ The T4 task-log entry repeats this map and the risk table.
 - **DXPopup anchored inside a virtualized DXCollectionView cell.** This covers position, recycling while scrolling, and repositioning near the bottom (REQ-OVFM-14). If DX properties can't fix a problem, stop and escalate to Helder. Do not switch to the bottom sheet alone.
 - **No scrim with `PlacementTarget`: an outside tap may reach the row beneath.** Mitigation is the VM guard (REQ-OVFM-15/16). T6 verifies REQ-OVFM-13a by tapping another row with the menu open.
 - **Back press consumed by both the popup and the page.** Ownership is under § CrudListView. T6 verifies REQ-OVFM-13b, and an extra page pop is escalated.
+
+---
+
+## Revision 2026-11-20b — shared Menu component + final MD3 revision (unshipped; in-place)
+
+Trigger: Helder's T7 feedback. "It's a button that will certainly be used in other places, so must not be hard-coded inside the crudlistview. It must be a shared component ready to usage anywhere in the UI." This section **supersedes** § Component decision "Chosen: no menu component", and the parts of § CrudListView and § ListItemOverflowButton named below. Everything else above still holds.
+
+### Final MD3 revision (Playwright + Chrome extension crawl, 2026-11-20; token table read with "Expand all" + "Hide previews")
+
+| Claim | Verbatim | URL | Impact |
+|-------|----------|-----|--------|
+| Container shape | "Menu container shape … Rounded corners … 16dp" | …/menus/specs (Menus - Common › Shape / Default) | Confirms Helder's T7 acceptance. `CornerRadius=16` is now verified. |
+| Item shapes | "Menu item shape … 4dp" · "Menu item first child shape … 12dp" · "Menu item first child inner corner corner size … 4dp" · "Menu item last child shape … 12dp" · "Menu item last child inner corner corner size … 4dp" | …/menus/specs | **Delta.** Items get 4dp corners. The first item's top corners and the last item's bottom corners are 12dp (REQ-OVFM-21). |
+| Group / inset | "Menu group padding 2dp" · measurements diagram (alt "Vertical menu marked with spacing and padding measurements."): items inset **4** from the container sides and **2** top/bottom, with **12** from the item edge to the icon | …/menus/specs | **Delta.** Container content `Padding="4,2"`, item `Padding="12,0"`. The icon still sits 16dp from the container edge, which matches "Menu item leading space 16dp". |
+| Elevation | "Menu container elevation … 3dp" | …/menus/specs | `AllowShadow=True` (DX default shadow; no numeric elevation API). |
+| Layout / type (re-confirmed) | "Menu item height 44dp" · "Menu item between space 12dp" · "Menu item leading icon size 20dp" · label "Roboto · 20pt · 14pt · 0.1pt · 500" | …/menus/specs | Unchanged. |
+| Trigger pressed while open | "When a menu is opened, the corresponding button or icon button should remain the same visually, with the addition of a pressed state." · alt "The overflow icon remains the same, even after the menu is opened." | …/menus/guidelines | **Delta** (REQ-OVFM-22). |
+| Disabled, not removed | "When a menu item can only be used under specific conditions, it should appear disabled rather than be removed." | …/menus/guidelines | **Delta** (REQ-OVFM-24). |
+| Initial focus | "When a menu opens, focus should be placed on the first menu item." | …/menus/accessibility | **Delta** (REQ-OVFM-23). |
+| Exit | "Selecting an option · Tapping Escape or outside of the menu · Using the system back button" | …/menus/accessibility | Already met (REQ-OVFM-13a/13b; Helder T7). |
+| Labels | "The accessibility label should be the same as the menu item text." · "the icon's accessibility label should be marked as decorative" | …/menus/accessibility | The DXButton's content is its label, and the icon is not separately focusable. No change. |
+| Targets | "Targets should be 48x48dp or larger" (under *slot* accessibility) | …/menus/guidelines + accessibility | Applies to slot elements. The menu item keeps the 44dp height token; the full-width row exceeds 48dp wide. Noted, no change. |
+| Toolbar vs menu | "Use a menu to show a temporary set of actions. To show actions on screen at all times, use a toolbar instead" | …/menus/overview | Fits the overflow use. |
+| Bottom sheet on compact | "Consider adapting menus into bottom sheets on small screens." | …/menus/guidelines | Unchanged decision (advice, not rule; see § MD3 evidence). |
+| Motion | "Menus use an enter and exit transition." | …/menus/guidelines | DXPopup's built-in open/close animation. Expressive motion stays out of scope. |
+
+### Component decision (revised)
+
+- **Names (W9).** The `MenuItem` style key and `MenuItemModel` do not clash with `Microsoft.Maui.Controls.MenuItem`: a style key is a string, and the record has a different name. The implementor confirms at build time that `Menu` does not collide with a type in the global usings. On a collision, qualify the name; do not rename it.
+- **`Menu`** — `UI/Components/Menus/Menu.xaml(.cs)`, namespace `MyVocaList.UI.Components.Menus`, XAML prefix `menus`. The MD3 vertical menu, standard colours. A ContentView that wraps **one** `DXPopup`. It owns:
+  - the chrome: 16dp corners, shadow, Surface container low, 112–280 width, `Padding="4,2"`;
+  - the item template: a `MenuItem`-style DXButton per `MenuItemModel`, with the first/last child corners (REQ-OVFM-21);
+  - the Android back route: `PopupBackHandler` attached on Opened and detached on Closed, **moved out of `CrudListView`**. The default action closes the menu (`IsOpen=false`). For a TwoWay-bound host, the ViewModel's `OnIsItemMenuOpenChanged(false)` then clears its state, so REQ-OVFM-13b's outcome is unchanged;
+  - initial accessibility focus on the first item when the menu opens (REQ-OVFM-23).
+  - Bindable: `ItemsSource` (`IEnumerable<MenuItemModel>`), `IsOpen` (TwoWay default, mirrors the popup's live `IsOpen`), `PlacementTarget` (View), `CloseOnItemSelected` (default true).
+  - API: `Show(View anchor)`, `Close()`, events `Opened` and `Closed`.
+  - Item selection rule (REQ-OVFM-19): **run the item's command first, then close only if still open.** Closing first would clear `ItemActionsTarget` through the TwoWay write-back before Edit, Delete or a page action reads it. The rule is a pure helper, `MenuItemSelection.Select(...)` (Level B tests).
+  - If the class name `Menu` collides with a framework type in this project's global usings, keep the MD3 name and qualify it. Do not rename it.
+- **`OverflowMenuButton`** — `UI/Components/Menus/OverflowMenuButton.xaml(.cs)`. The MD3 icon button with `more_vert_outlined`: `StandardIconButton`, 48×48, `SemanticProperties.Description` default "More options".
+  - Bindable: `Menu` (explicit; `x:Reference` from anywhere on a page), `Command` / `CommandParameter`, `Description`.
+  - On tap it resolves the menu: (1) the explicit `Menu`, else (2) the nearest ancestor `IMenuHost.HostedMenu`. This replaces the hard-coded `CrudListView` parent walk. If neither is found, it logs a warning and does nothing.
+  - It then sets `menu.PlacementTarget = this`. If `Command` is set, it runs `Command.Execute(CommandParameter ?? BindingContext)`; the ViewModel opens the menu through the `IsOpen` binding. Otherwise it calls `menu.Show(this)`.
+  - The resolution order is a pure helper, `MenuResolution.Resolve(explicitMenu, parentChain)` (Level B tests, REQ-OVFM-20).
+  - Pressed while open (REQ-OVFM-22): while the resolved menu is open **and** this button is its `PlacementTarget`, the button shows the pressed state layer (On surface variant at 10% opacity, the MD3 pressed-state opacity). It clears on `Closed`.
+- **`IMenuHost`** — `UI/Components/Menus/IMenuHost.cs`, with `Menu? HostedMenu { get; }`. `CrudListView` implements it.
+- **`MenuItemModel`** — `UI/ViewModels/MenuItemModel.cs`, `public sealed record MenuItemModel(string Text, string Icon, ICommand Command, object? CommandParameter = null);`. It is a UI-agnostic descriptor (only `System.Windows.Input`). `ItemMenuAction` stays as the authoring type for derived ViewModels; it cannot be bound to a button.
+- **`ListItemOverflowButton`** (governed) stays as a **thin wrapper** around `OverflowMenuButton`, so Venues and People need no edits. It keeps the selection-mode `IsVisible` binding and binds `Command` to `CrudListPageBase.BindingContext.OpenItemMenuCommand`, with `CommandParameter={Binding .}`. Its code-behind keeps only the constructor.
+- **`CrudListView`** (governed) becomes a consumer.
+  - It replaces the inline `DXPopup` with `<menus:Menu x:Name="itemMenu" IsOpen="{Binding IsItemMenuOpen, Mode=TwoWay}" ItemsSource="{Binding ItemMenuItems}" Closed="OnItemMenuClosed"/>` and implements `IMenuHost`.
+  - It deletes `OnItemMenuOpened`, `_menuBackRoute`, its back callback and `ShowItemMenu`.
+  - It **keeps** the Delete → confirm hand-off (`_showConfirmWhenMenuClosed`), which reads `itemMenu.IsOpen`.
+- **Deferred (YAGNI): a button-owned menu** (`Items` on `OverflowMenuButton`, a code-created DXPopup). The DevExpress docs do not confirm that a DXPopup outside the visual tree renders on Android or inherits BindingContext. That needs a device spike, and there is no consumer yet. Any page can already use the menu by placing a `Menu` and referencing it.
+- Rejected again: a per-row DXPopup in each template (§ Component decision).
+
+### Signatures (binding; spec-review B1)
+
+```csharp
+namespace MyVocaList.UI.Components.Menus;
+
+public interface IMenuHost { Menu? HostedMenu { get; } }
+
+public partial class Menu : ContentView            // wraps one dx:DXPopup
+{
+    // Bindable properties (name / type / default)
+    public IEnumerable<MenuItemModel>? ItemsSource { get; set; }   // null
+    public bool IsOpen { get; set; }                               // false, BindingMode.TwoWay default
+    public View? PlacementTarget { get; set; }                     // null
+    public bool CloseOnItemSelected { get; set; }                  // true
+    public void Show(View anchor);   // PlacementTarget = anchor; IsOpen = true
+    public void Close();             // IsOpen = false
+    public event EventHandler? Opened;
+    public event EventHandler? Closed;   // raised for every close path (outside tap, back, item, IsOpen=false)
+}
+
+public partial class OverflowMenuButton : ContentView
+{
+    public Menu? Menu { get; set; }                  // null
+    public ICommand? Command { get; set; }           // null
+    public object? CommandParameter { get; set; }    // null
+    public string Description { get; set; }          // "More options"
+}
+
+// Pure helpers (no MAUI handlers; unit-testable in Tests/Unit/Components/)
+public static class MenuItemSelection
+{
+    // Runs item.Command (when CanExecute(item.CommandParameter)), THEN closes if closeOnItemSelected && isOpen().
+    public static void Select(MenuItemModel item, Func<bool> isOpen, Action close, bool closeOnItemSelected);
+}
+public static class MenuResolution
+{
+    // explicitMenu ?? first non-null hostMenu(a) over ancestors (nearest first); null when none.
+    public static TMenu? Resolve<TMenu>(TMenu? explicitMenu, IEnumerable<object> ancestors, Func<object, TMenu?> hostMenu)
+        where TMenu : class;
+}
+public static class MenuItemShape
+{
+    // count == 1 → 12 all; index 0 → (12,12,4,4); index count-1 → (4,4,12,12); otherwise 4.
+    // Microsoft.Maui.CornerRadius order: TopLeft, TopRight, BottomLeft, BottomRight.
+    public static CornerRadius For(int index, int count);
+}
+```
+
+`namespace MyVocaList.UI.ViewModels; public sealed record MenuItemModel(string Text, string Icon, ICommand Command, object? CommandParameter = null);`
+
+### Mechanisms (spec-review B2, W2–W6)
+
+- **Per-corner shape (REQ-OVFM-21).** `DXButton` inherits `DXViewBase.CornerRadius`, whose type is `Microsoft.Maui.CornerRadius` (Context7 `/websites/devexpress_maui`: "public CornerRadius CornerRadius { get; set; }"; the DX docs also show per-corner XAML `CornerRadius="20,0,0,0"`). `Menu` builds its item buttons in code-behind whenever `ItemsSource` changes. This is view plumbing, not a `BindableLayout`, because each button needs its index. Each item is a `DXButton` with `Style=MenuItem`, `Text`, `Icon`, `Command`, `CommandParameter` and `CornerRadius = MenuItemShape.For(i, n)`. A tap calls `MenuItemSelection.Select`, so the button's own `Command` is not set; this keeps the selection order in a single place.
+- **Disabled, not removed (REQ-OVFM-24).** `Menu` sets `button.IsEnabled = Command.CanExecute(CommandParameter)` and refreshes it on `CanExecuteChanged`, which does not depend on DXButton command semantics. It unsubscribes when the items are rebuilt. No current item can be disabled (Edit and Delete always execute), so verification is a reviewer check of this code.
+- **Pressed while open (REQ-OVFM-22).** `OverflowMenuButton` sets its DXButton `BackgroundColor` to the pressed state layer, On surface variant at 10% opacity (the MD3 pressed state-layer opacity), when it opens a menu, and subscribes once to that menu's `Closed` event. The `Closed` handler restores `Transparent` and unsubscribes. `Closed` fires for every close path, including the TwoWay write-back, because `Menu` raises it from the popup's own `Closed` event.
+- **Initial focus (REQ-OVFM-23).** On `Opened`, `Menu` calls `SemanticExtensions.SetSemanticFocus(firstButton)` (Microsoft.Maui). Manual step: with TalkBack on, open the menu, and the first item is announced.
+- **Back ownership (W5).** `Menu` owns back while it is open: `PopupBackHandler` → `Close()`. When a ViewModel binds `IsOpen` TwoWay, as CrudListView does, the write-back runs `OnIsItemMenuOpenChanged(false)` and clears `ItemActionsTarget`; REQ-OVFM-06 and 13b still hold. `ICrudListViewModel.HandleBack()`'s menu branch now serves only a page-level back (for example a page that receives back first). It stays as defence in depth. For hosts that bind no ViewModel, `Menu` is the only owner of back.
+- **Selection timing (W6).** `MenuItemSelection.Select` runs the command first. `EditItemCommand`, `DeleteItemCommand` and `ExecuteItemMenuActionCommand` capture `ItemActionsTarget` and call `CloseItemActions()` synchronously, before their first `await`. Once the command returns, `isOpen()` is false and `Select` does not close again. The existing REQ-OVFM-03, 04 and 08 tests cover target capture. The new test `Select_RunsCommandBeforeClose` fails if close is called first.
+
+### Contract additions
+
+- `ICrudListViewModel.ItemMenuItems { get; }`: `IReadOnlyList<MenuItemModel>`, built once in `CrudListViewModelBase`:
+  - `Edit → EditItemCommand`;
+  - then each `ItemMenuActions` entry → `(ExecuteItemMenuActionCommand, action)`;
+  - then `Delete → DeleteItemCommand`.
+  - The order moves from XAML into the ViewModel, where it is tested (REQ-OVFM-18; REQ-OVFM-11 now verified there).
+  - Text "Edit"/"Delete", icons `edit_outlined`/`delete_outlined`.
+- Every other menu member and its behaviour is unchanged. All existing REQ-OVFM tests stay valid.
+
+### Styles
+
+- `MenuItem` (DXButton): `Padding` changes from `16,0` to `12,0` and gains `CornerRadius=4`. Everything else is unchanged.
+- Optional `MenuSurface` values are allowed if the chrome would otherwise be hard-coded twice. Only `Menu` uses them today.
+
+### Governance (revision 2026-11-20b)
+
+Gates for the governed components touched (`CrudListView`, `ListItemOverflowButton`):
+1. Dedicated tasks, one per governed component, as no-bundling requires: **T11b** `CrudListView` and **T11c** `ListItemOverflowButton`. Each has its own task-log entry with the map and the risk rows. The new components and the VM addition (**T11a**) are not governed-component changes. The MD3 review is above.
+2. Consumer map: the table below, from a grep on 2026-11-20.
+3. Per-consumer risk: the same table.
+4. **Helder approval:** recorded 2026-11-20, from his T7 follow-up message in session: "It must be a shared component ready to usage anywhere in the UI … proceed with coding accordingly … Do all autonomously … you're authorized to decide anything".
+
+| Consumer | Component | What could break | Verification |
+|----------|-----------|------------------|--------------|
+| `CrudListView` (owner) | `Menu` | The back route is lost. The confirm hand-off breaks if `Menu.IsOpen` is stale. The target is cleared if the menu closes before the command runs. | Emulator: with the menu open, back closes it and the page stays. Delete shows the confirm sheet once, after the menu closes. Edit opens the tapped row. |
+| `VenuesPage.xaml` | `ListItemOverflowButton` → `OverflowMenuButton` | The ancestor `IMenuHost` lookup through DX cells; anchoring; the pressed state is not cleared | Emulator: first, middle and last row; the menu is anchored; the pressed state shows while open and clears on close |
+| `PeoplePage.xaml` | same | same | same |
+| `ArtistsPage.xaml`, `SongsPage.xaml` | `CrudListView` without the button | XAML regression only | Emulator: the list renders, the trailing buttons work, back is unchanged |
+
+**Classification (spec-review W1).** `Menu` is consumed by `CrudListView`, which 4 pages use. `OverflowMenuButton` is consumed by `ListItemOverflowButton`, which 2 pages use. Counted transitively, both already have 2+ pages, so they are **governed from creation**. They are registered in the governed table of `component-safety-gate.md`, with their usage contract, in the T11a commit. Creating them needs no four gates, because they have no prior version. Every later change does.
