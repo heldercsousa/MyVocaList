@@ -36,7 +36,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
   - Demo: deleting an artist who owns songs is refused with the AC-6.2 text; a cover-only artist is deleted.
 
 ## Phase 3 — UI
-- [ ] C6 **ViewModels.** After C4, C5. Review lane: Standard. (REQ-CATPROP-08, 10)
+- [x] C6 **ViewModels.** After C4, C5. Review lane: Standard. (REQ-CATPROP-08, 10)
   - Files owned: `SongsViewModel.cs`, `ArtistsViewModel.cs`, new `SongsViewModelCatalogDeleteTests.cs`, new `ArtistsViewModelDeleteConfirmTests.cs`.
   - Demo: catalog-mode Delete never calls `DeleteSongsAsync`.
 
