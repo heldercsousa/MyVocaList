@@ -1,6 +1,6 @@
 # Requirements: song writes propagate to the artist catalog (CATALOG-PROP)
 
-> **Status: DRAFT 2026-11-19, awaiting spec-reviewer and Helder's approval.** Written from Helder's
+> **Status: APPROVED by Helder 2026-11-20** (after spec-reviewer, PASS WITH FIXES, fixes applied). Written from Helder's
 > decisions D1–D4 (2026-08-24) and D5–D6 (2026-11-19), all recorded in this folder's `README.md`.
 
 Parent (shipped, not edited): Artists & Songs Catalog `../../` (`requirements.md`, `design.md`).
@@ -56,8 +56,7 @@ before this change get the record once, through a migration.
   a rolled-back transaction), THEN the catalog SHALL hold exactly the rows it held before the call.
 - **REQ-CATPROP-05: Deleting a song removes all its catalog rows.**
   WHEN songs are deleted (`DeleteSongsAsync`), every catalog row of those songs, derived and cover,
-  SHALL be gone. (Existing cascade, already asserted in `SongRepositoryTests`; the AC is traced to that
-  test, and a derived-row case is added only if it is missing.)
+  SHALL be gone. (Existing DB cascade; no test covered it, so a new one pins it.)
 
 ### Manual catalog removal
 

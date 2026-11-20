@@ -1,12 +1,12 @@
 ---
 id: song-writes-propagate-to-the-artist-catalog
 title: Song writes propagate to the artist catalog
-status: 📋 Spec
+status: 🗺️ Plan
 target: 2026-08-04
 section: BusinessFeatures
 parent: artists-songs
 goal: Creating a song must also create the matching record in that artist's catalog, and editing a song must be reflected there. Today the two can drift apart.
-gate: "Deferred by Helder 2026-11-04 — spec waits until the song-form title-first item is done, so catalog decisions are not built on song entities still changing."
+gate: Deferred by Helder 2026-11-04 — spec waits until the song-form title-first item is done, so catalog decisions are not built on song entities still changing.
 kind: change
 ---
 
