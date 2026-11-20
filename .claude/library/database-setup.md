@@ -5,7 +5,7 @@
 ## Current Database Solution
 
 - **Provider:** SQLite via EF Core 10
-- **Schema Management:** EF Core migrations (`.cs` files in `MyVocaList.Infra/Migrations/`)
+- **Schema Management:** EF Core migrations (`.cs` files in `Infra/Migrations/`)
 - **Test Database:** Real SQLite temp files (one per test run) via `TestDbContextFactory`
 - **MCP Query Database:** `.claude/MyVocaList.db` (synced automatically after migrations)
 
@@ -17,14 +17,12 @@
 # 1. Restore dependencies
 dotnet restore
 
-# 2. Apply migrations to all configured databases
-dotnet ef database update -p MyVocaList.Infra -s MyVocaList
+# 2. Sync schema to the MCP query database (the app's own DB lives on the device
+#    and is migrated by the app at startup — there is no desktop app DB to update)
+dotnet ef database update -p Infra -s Infra --connection "Data Source=<absolute repo path>/.claude/MyVocaList.db"
 
-# 3. Sync schema to the MCP query database
-dotnet ef database update --connection "Data Source=.claude/MyVocaList.db"
-
-# 4. Verify tests run with current schema
-dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
+# 3. Verify tests run with current schema
+dotnet test Tests/MyVocaList.Tests.csproj
 ```
 
 ---
@@ -34,25 +32,21 @@ dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
 When adding new tables, columns, or constraints:
 
 ```bash
-# 1. Create the migration (applies changes to your local schema)
-dotnet ef migrations add MigrationDescription -p MyVocaList.Infra
+# 1. Create the migration
+dotnet ef migrations add MigrationDescription -p Infra -s Infra
 
-# 2. Apply migrations to the main database
-dotnet ef database update -p MyVocaList.Infra -s MyVocaList
+# 2. Sync the MCP query database (the app migrates the device DB at startup)
+dotnet ef database update -p Infra -s Infra --connection "Data Source=<absolute repo path>/.claude/MyVocaList.db"
 
-# 3. (Automated) The hook in .claude/settings.json automatically syncs to .claude/MyVocaList.db
-#    If the hook doesn't run, manually sync:
-dotnet ef database update --connection "Data Source=.claude/MyVocaList.db"
-
-# 4. Verify tests still pass
-dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
+# 3. Verify tests still pass
+dotnet test Tests/MyVocaList.Tests.csproj
 ```
 
 ---
 
 ## How Tests Guarantee Current Schema
 
-**Location:** `MyVocaList.Tests/Infrastructure/TestDbContextFactory.cs`
+**Location:** `Tests/Infrastructure/TestDbContextFactory.cs`
 
 ```csharp
 public static AppDbContext Create()
@@ -85,13 +79,19 @@ public static AppDbContext Create()
 
 **Auto-sync Mechanism:**
 - Configured in `.claude/settings.json` → `PostToolUse` hook
-- Triggers after any `dotnet ef database update` command
-- Automatically applies the same migrations to `.claude/MyVocaList.db`
+- Triggers after any `dotnet ef database update` command and runs `.claude/scripts/sync-mcp-db.ps1`
+- The script applies the migrations to `.claude/MyVocaList.db` and prints `SQLite MCP DB synced…` or `SQLite MCP DB sync FAILED…` (it never blocks)
+- Running the manual command below also fires the hook; the second run is a no-op
 
-**Manual Sync (if hook doesn't run):**
+**Manual Sync (if the hook doesn't run):**
 ```bash
-dotnet ef database update --connection "Data Source=.claude/MyVocaList.db"
+dotnet ef database update -p Infra -s Infra --connection "Data Source=<absolute repo path>/.claude/MyVocaList.db"
 ```
+
+**Why `-p Infra -s Infra` and an absolute path:**
+- The app project (`MyVocaList`) cannot be the EF startup project: it targets `net10.0-android` and has no desktop `deps.json`. `Infra` has a design-time factory (`Infra/AppDbContextFactory.cs`).
+- EF resolves a relative `Data Source` against the startup project folder (`Infra/`), so `.claude/MyVocaList.db` fails with `SQLite Error 14: unable to open database file`.
+- The database uses the `NOCASE_NOACCENT` collation, which the SQLite MCP server does not register: queries touching collated columns fail there with `no such collation sequence`. For such queries use Python `sqlite3` with `create_collation('NOCASE_NOACCENT', …)`.
 
 **Why MCP needs sync:**
 - Claude Code's SQLite MCP queries `.claude/MyVocaList.db` for schema inspection
@@ -109,13 +109,13 @@ Run this after any migration changes:
 dotnet build
 
 # Tests pass (uses current schema via TestDbContextFactory)
-dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
+dotnet test Tests/MyVocaList.Tests.csproj
 
-# Migrations are in sync (no pending migrations)
-dotnet ef migrations has-pending-changes -p MyVocaList.Infra --exit-code
+# The model has no changes missing a migration
+dotnet ef migrations has-pending-model-changes -p Infra -s Infra
 
-# MCP database has current schema (can query it without errors)
-dotnet ef database update --connection "Data Source=.claude/MyVocaList.db" --dry-run
+# MCP database has every migration applied (pending ones are marked "(Pending)")
+dotnet ef migrations list -p Infra -s Infra --connection "Data Source=<absolute repo path>/.claude/MyVocaList.db"
 ```
 
 ---
@@ -136,12 +136,13 @@ This file **must** be updated to reflect:
 - `.claude/library/database-setup.md` (this file) — PRIMARY AUTHORITY
 - `README.md` → keep link but no DB-specific details
 - `.claude/settings.json` → update PostToolUse hook if needed
+- `.claude/scripts/sync-mcp-db.ps1` → the command the hook runs
 - `TestDbContextFactory.cs` → update provider and temp DB path
 - `.claude/.mcp.json` → update SQLite MCP reference if migrating away from SQLite
 
 **Process:**
 1. Update spec in `Docs/Management/` documenting the new database solution
-2. Update migration code and config in `MyVocaList.Infra/`
+2. Update migration code and config in `Infra/`
 3. Update `TestDbContextFactory.cs` to use the new provider
 4. Update `.claude/.mcp.json` if needed (or remove if no longer applicable)
 5. Update this file with the new procedures
