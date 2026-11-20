@@ -1,7 +1,7 @@
 ---
 id: person-form-birthday-as-day-and-month-dropdowns
 title: Person form birthday as day and month dropdowns
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-19
 section: BusinessFeatures
 parent: persons
