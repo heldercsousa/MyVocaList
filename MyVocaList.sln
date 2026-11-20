@@ -1420,6 +1420,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields", "2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields", "{B9BFB19E-ED0B-51CD-8BE7-5C8572E8922A}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\supersession.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\supersession.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "{E260291E-7885-5298-8FF1-F7F717ABA8E3}"
