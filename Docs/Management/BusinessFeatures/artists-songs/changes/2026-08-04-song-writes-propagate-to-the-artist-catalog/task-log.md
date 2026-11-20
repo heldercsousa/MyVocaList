@@ -150,3 +150,43 @@ GREEN: new classes 7/7; full `dotnet test Tests/MyVocaList.Tests.csproj` 1895 pa
 |----|----------------|------|
 | REQ-CATPROP-08 | SongsViewModel.BuildDeleteConfirmMessage / ExecuteDeleteAsync | CatalogMode_OneSong_ConfirmTextNamesSongAndCatalog, CatalogMode_ThreeSongs_ConfirmTextCountsAll, CatalogMode_Confirm_CallsBulkRemoveNeverDeleteSongs_AndShowsSuccess, CatalogMode_RemoveFails_ShowsErrorStillReloads_NeverDeletesSongs, SongsMode_Confirm_StillDeletesSongs |
 | REQ-CATPROP-10 (text) | ArtistsViewModel.BuildDeleteConfirmMessage | OneArtist_ConfirmTextMentionsCatalogEntries, TwoArtists_ConfirmTextMentionsCatalogEntries |
+
+---
+## Task C7: Merge, verification, traceability
+**Status:** Done (2026-11-20)
+**Completed:** 2026-11-20
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/task-log.md`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/tasks.md`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/README.md` (status, via backlog_gen)
+
+### Test evidence
+- `feature/catalog-prop` merged into `develop` (--no-ff).
+- On `develop`: `dotnet test Tests` 1911 passed, 0 failed. Android build (net10.0-android Debug): 0 errors.
+- Developer query database: `dotnet ef database update -p Infra -s Infra --connection "Data Source=<absolute path>/.claude/MyVocaList.db"` applied `RemoveSongVersionAndFeaturedArtists` and `BackfillDerivedCatalogRows`. The app project cannot be the EF startup project (no Android deps.json), and a relative path resolves against `Infra/`.
+
+### Traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|-------------------------|-------------|
+| REQ-CATPROP-01 | Creating a song stores its derived catalog row | SongService create paths (CreateSongAsync, SaveFromFormAsync add mode, CreateSongWithUrlsAsync) | CreateSongAsync_WritesDerivedRow, SaveFromForm_AddMode_WritesDerivedRow, SaveFromForm_AddMode_NewInlineArtist_WritesDerivedRowWithRealId, CreateSongWithUrls_WritesDerivedRow |
+| REQ-CATPROP-02 | An update that keeps the author leaves the catalog unchanged | SongService.UpdateSongCoreAsync | Update_SameAuthor_CatalogUnchanged |
+| REQ-CATPROP-03 | An author change moves the derived row, without duplicates | SongService.UpdateSongCoreAsync | Update_AuthorAtoB_MovesRow, Update_AuthorAtoB_BAlreadyCovers_NoDuplicate, Update_AuthorToNewInlineArtist_MovesRowWithRealId, Update_AuthorChange_OldDerivedRowMissing_StillWritesNew |
+| REQ-CATPROP-04 | A refused or failed save leaves the catalog unchanged | SongService (single unit of work) | Create_ValidationFails_NoCatalogRow, Update_ArtistChoiceNeeded_CatalogUnchanged, Update_AuthorAtoB_SaveThrows_CatalogUnchanged |
+| REQ-CATPROP-05 | Deleting a song removes all its catalog rows | Existing FK cascade (Catalog → Songs) | DeleteAsync_Song_RemovesDerivedAndCoverCatalogRows |
+| REQ-CATPROP-06 | A derived row cannot be removed from the catalog | CatalogRepository.IsDerivedAsync, CatalogService.RemoveSongFromCatalogAsync | IsDerivedAsync_AuthorRow_ReturnsTrue, IsDerivedAsync_CoverRow_ReturnsFalse, IsDerivedAsync_MissingRow_ReturnsFalse, CatalogServiceTests (derived refused / cover removed / missing row) |
+| REQ-CATPROP-07 | Bulk remove removes covers, keeps derived rows, reports counts | CatalogRepository.RemoveCoversAsync, CatalogService.RemoveSongsFromCatalogAsync | RemoveCoversAsync_MixedList_RemovesCoversKeepsDerived, RemoveCoversAsync_UnknownIds_CountsNeither, RemoveCoversAsync_DuplicateIds_CountedOnce, RemoveCoversAsync_OtherArtistsCoverOfSameSong_Untouched, CatalogServiceTests (empty list, unknown artist, message theory) |
+| REQ-CATPROP-08 | Catalog-mode Delete removes from the catalog, never deletes songs | SongsViewModel.BuildDeleteConfirmMessage / ExecuteDeleteAsync | CatalogMode_OneSong_ConfirmTextNamesSongAndCatalog, CatalogMode_ThreeSongs_ConfirmTextCountsAll, CatalogMode_Confirm_CallsBulkRemoveNeverDeleteSongs_AndShowsSuccess, CatalogMode_RemoveFails_ShowsErrorStillReloads_NeverDeletesSongs, SongsMode_Confirm_StillDeletesSongs |
+| REQ-CATPROP-09 | Backfill adds every missing derived row, touches nothing else, is idempotent | Migration 20261120052950_BackfillDerivedCatalogRows | CatalogBackfillMigrationTests (4 tests) |
+| REQ-CATPROP-10 | Artist delete blocked only by owned songs; catalog rows go with the artist | SongRepository.CountByArtistAsync, ArtistService.DeleteArtistsAsync, ArtistsViewModel.BuildDeleteConfirmMessage | CountByArtistAsync_ReturnsOwnedSongsOnly, Delete_OwnerOfSongs_Refused, Delete_TwoOwners_NamesFirstInSelectionOrder, Delete_ArtistWithOnlyCatalogRows_Succeeds, Delete_CoverOnlyArtist_RowsGoneSongsKept, OneArtist_ConfirmTextMentionsCatalogEntries, TwoArtists_ConfirmTextMentionsCatalogEntries |
+| REQ-CATPROP-11 | An author with only derived rows is listed under Performers | ArtistRepository (Performers filter, unchanged) | PerformersOnly_AuthorWithOnlyDerivedRows_IsReturned |
+
+---
+## Task C8: Device check (Helder)
+**Status:** Done (2026-11-20)
+
+### Evidence (reported by Helder)
+- Tests all good on device; nothing pending.
+- A song picked from Deezer and saved locally appears in its author's catalog.
+- That song cannot be removed from the author's catalog (ownership refusal).
+- The backfill migration ran fine at app startup.
