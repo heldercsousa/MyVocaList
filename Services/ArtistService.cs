@@ -14,7 +14,6 @@ public class ArtistService : IArtistService
 {
     private readonly IArtistRepository _artistRepository;
     private readonly ISongRepository _songRepository;
-    private readonly ICatalogRepository _catalogRepository;
     private readonly IUnitOfWork _uow;
     private readonly ILogger<ArtistService> _logger;
 
@@ -24,13 +23,11 @@ public class ArtistService : IArtistService
     public ArtistService(
         IArtistRepository artistRepository,
         ISongRepository songRepository,
-        ICatalogRepository catalogRepository,
         IUnitOfWork uow,
         ILogger<ArtistService> logger)
     {
         _artistRepository = artistRepository;
         _songRepository = songRepository;
-        _catalogRepository = catalogRepository;
         _uow = uow;
         _logger = logger;
     }
@@ -156,12 +153,12 @@ public class ArtistService : IArtistService
 
         return _uow.ExecuteAsync<(bool success, string message)>(async sp =>
         {
-            // REQ-UOW-28: both repositories resolved from the lambda's own scope — never the
+            // REQ-UOW-28: the repositories are resolved from the lambda's own scope — never the
             // constructor fields. IArtistRepository.DeleteAsync is ExecuteDeleteAsync-based
             // (REQ-UOW-33), so the explicit transaction opened by IUnitOfWork is what makes the
             // bulk delete atomic with the per-id validation above it.
             var artistRepository = sp.GetRequiredService<IArtistRepository>();
-            var catalogRepository = sp.GetRequiredService<ICatalogRepository>();
+            var songRepository = sp.GetRequiredService<ISongRepository>();
 
             var idList = ids.ToList();
             if (idList.Count == 0)
@@ -173,9 +170,11 @@ public class ArtistService : IArtistService
                 if (artist == null)
                     continue;
 
-                var songCount = await catalogRepository.CountByArtistAsync(id, ct);
+                // REQ-CATPROP-10: only owned songs (Song.ArtistId) block the delete; catalog rows never do —
+                // they go with the artist through the Artist -> Catalog cascade.
+                var songCount = await songRepository.CountByArtistAsync(id, ct);
                 if (songCount > 0)
-                    return (false, $"'{artist.Name}' has {songCount} song(s) and cannot be deleted");
+                    return (false, $"Cannot delete — {artist.Name} owns {songCount} song(s). Delete their songs first.");
             }
 
             await artistRepository.DeleteAsync(idList, ct);

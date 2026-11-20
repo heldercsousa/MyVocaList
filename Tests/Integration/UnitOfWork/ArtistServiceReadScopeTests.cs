@@ -61,10 +61,9 @@ public class ArtistServiceReadScopeTests
         var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
         var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
         var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
-        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
         var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
         var service = new MyVocaList.Services.ArtistService(
-            artistRepository, songRepository, catalogRepository, counting, logger);
+            artistRepository, songRepository, counting, logger);
 
         Assert.True("a".Length < SearchConstants.MinimumLocalQueryLength);
         var results = await service.SearchArtistsByNameAsync("a");
@@ -82,10 +81,9 @@ public class ArtistServiceReadScopeTests
         var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
         var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
         var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
-        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
         var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
         var service = new MyVocaList.Services.ArtistService(
-            artistRepository, songRepository, catalogRepository, counting, logger);
+            artistRepository, songRepository, counting, logger);
 
         var query = new string('a', SearchConstants.MinimumLocalQueryLength);
         Assert.Equal(SearchConstants.MinimumLocalQueryLength, query.Length);
@@ -120,10 +118,9 @@ public class ArtistServiceReadScopeTests
         var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
         var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
         var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
-        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
         var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
         var service = new MyVocaList.Services.ArtistService(
-            artistRepository, songRepository, catalogRepository, counting, logger);
+            artistRepository, songRepository, counting, logger);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
             () => service.GetPagedArtistsForListAsync(0, 10));
@@ -140,10 +137,9 @@ public class ArtistServiceReadScopeTests
         var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
         var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
         var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
-        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
         var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
         var service = new MyVocaList.Services.ArtistService(
-            artistRepository, songRepository, catalogRepository, counting, logger);
+            artistRepository, songRepository, counting, logger);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
             () => service.GetPagedArtistsForListAsync(1, 0));
@@ -161,10 +157,9 @@ public class ArtistServiceReadScopeTests
         var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
         var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
         var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
-        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
         var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
         var service = new MyVocaList.Services.ArtistService(
-            artistRepository, songRepository, catalogRepository, counting, logger);
+            artistRepository, songRepository, counting, logger);
 
         var message = await service.GetDeleteConfirmationAsync([1, 2]);
 

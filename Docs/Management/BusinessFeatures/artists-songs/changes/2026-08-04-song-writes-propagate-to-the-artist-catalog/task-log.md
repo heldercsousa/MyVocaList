@@ -111,3 +111,22 @@ GREEN: CatalogServiceTests 15/15; full `dotnet test Tests/MyVocaList.Tests.cspro
 |----|----------------|------|
 | REQ-CATPROP-06 | CatalogService.RemoveSongFromCatalogAsync | RemoveSongFromCatalogAsync_DerivedRow_RefusesAndKeepsRow, _CoverRow_RemovesAndSucceeds, _MissingRow_ReturnsNotInCatalog |
 | REQ-CATPROP-07 | CatalogService.RemoveSongsFromCatalogAsync + BuildBulkRemoveMessage | RemoveSongsFromCatalogAsync_EmptyList_..., _UnknownArtist_..., _Counts_ProduceExactMessage (7 cases) |
+
+---
+## Task: C5 - ArtistService delete check (REQ-CATPROP-10, service part)
+**Status:** To Review
+
+### Changed files:
+- `Services/ArtistService.cs` (delete check via `ISongRepository.CountByArtistAsync`, AC-6.2 text; `ICatalogRepository` field/parameter removed)
+- `Tests/Unit/Services/ArtistServiceTests.cs` (two refusal tests rewritten, catalog-only test added)
+- `Tests/Unit/Services/ArtistServicePictureTests.cs`, `Tests/Integration/UnitOfWork/PagedListConcurrencyTests.cs`, `Tests/Integration/UnitOfWork/ArtistServiceReadScopeTests.cs` (constructor calls only)
+- `Tests/Integration/Services/ArtistServiceDeleteIntegrationTests.cs` (new)
+
+### Test evidence
+RED: 4 failed (Delete_OwnerOfSongs_Refused, Delete_TwoOwners_NamesFirstInSelectionOrder, Delete_ArtistWithOnlyCatalogRows_Succeeds, Delete_CoverOnlyArtist_RowsGoneSongsKept).
+GREEN: full `dotnet test Tests/MyVocaList.Tests.csproj` 1888 passed, 0 failed (one unrelated timing flake, LoadingHoldShimmerTests, passed on rerun). UnitOfWorkReadScopeTests 4/4.
+Governed constructor parameters after removal: 15 by an approximate grep of Services/ repository-typed parameters (the architecture test, floor >= 15, passes 4/4; its own counter is the authority).
+
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-CATPROP-10 | ArtistService.DeleteArtistsAsync | Delete_OwnerOfSongs_Refused, Delete_TwoOwners_NamesFirstInSelectionOrder, Delete_ArtistWithOnlyCatalogRows_Succeeds, Delete_CoverOnlyArtist_RowsGoneSongsKept |
