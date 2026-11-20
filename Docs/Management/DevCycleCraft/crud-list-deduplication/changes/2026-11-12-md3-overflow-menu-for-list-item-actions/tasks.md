@@ -44,8 +44,8 @@
 - [x] **T8 — Final MD3 revision** (Playwright crawl of menus overview/specs/guidelines/accessibility); deltas go into `design.md § MD3 evidence`
 - [x] **T9 — Spec: shared menu component** (usable anywhere, not CrudListView-only); spec-reviewer PASS WITH MINOR ISSUES; blockers B1/B2 and warnings W1–W9 addressed
 - [x] **T10 — Plan** (`plan.md § Revision 2026-11-20b`) + plan-reviewer (3 blockers fixed: T11a split, task fields, registry ownership)
-- [~] **T11a1 — `MenuItemModel` + `ItemMenuItems`** (TDD, Level A) · REQ-OVFM-18
-- [ ] **T11a2 — menu helpers** (`MenuItemSelection`, `MenuResolution`, `MenuItemShape`; TDD, Level B) · REQ-OVFM-19, 20, 21
+- [x] **T11a1 — `MenuItemModel` + `ItemMenuItems`** (TDD, Level A) · REQ-OVFM-18
+- [~] **T11a2 — menu helpers** (`MenuItemSelection`, `MenuResolution`, `MenuItemShape`; TDD, Level B) · REQ-OVFM-19, 20, 21
 - [ ] **T11a3 — `MenuItem` style + `Menu` + `IMenuHost`** · REQ-OVFM-12a, 21, 23, 24, 25
 - [ ] **T11a4 — `OverflowMenuButton`** · REQ-OVFM-20, 22, 25
 - [ ] **T11c — `ListItemOverflowButton` wraps `OverflowMenuButton`** (governed; own commit and log entry; runs before T11b)
