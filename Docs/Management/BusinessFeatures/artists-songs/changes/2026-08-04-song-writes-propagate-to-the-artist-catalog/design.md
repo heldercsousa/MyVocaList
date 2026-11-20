@@ -1,6 +1,6 @@
 # Design: song writes propagate to the artist catalog (CATALOG-PROP)
 
-> **Status: DRAFT 2026-11-19**, written with `requirements.md` (REQ-CATPROP-01…11). Decisions: `README.md`
+> **Status: APPROVED by Helder 2026-11-20**, written with `requirements.md` (REQ-CATPROP-01…11). Decisions: `README.md`
 > D1–D4 (2026-08-24) and § Decisions — Helder, 2026-11-19.
 
 ## 1. Decisions this design rests on
@@ -78,7 +78,8 @@ after it can fail except the final save, which rolls back with it.
 ### 3.3 Delete — REQ-CATPROP-05
 
 No code change. `DeleteSongsAsync` → `ExecuteDeleteAsync` → the DB-level cascade removes the rows.
-`SongRepositoryTests` already asserts the catalog cascade on song delete. The AC traces to it.
+No test covers the catalog cascade on song delete today. A new `SongRepositoryTests` case pins it, for
+both a derived row and a cover row.
 
 ## 4. CatalogService and ICatalogRepository
 
@@ -87,11 +88,12 @@ No code change. `DeleteSongsAsync` → `ExecuteDeleteAsync` → the DB-level cas
 ```csharp
 // ICatalogRepository — additions
 /// <summary>True when Catalog(artistId, songId) exists and the song's author is artistId.</summary>
-Task<bool> IsDerivedAsync(int artistId, int songId, CancellationToken ct = default);
+Task<bool> IsDerivedAsync(int artistId, int songId, CancellationToken ct);
 
 /// <summary>Removes the artist's cover rows for the listed songs; derived rows are left and counted.</summary>
 Task<(int removed, int kept)> RemoveCoversAsync(
-    int artistId, IReadOnlyCollection<int> songIds, CancellationToken ct = default);
+    int artistId, IReadOnlyCollection<int> songIds, CancellationToken ct);
+// Required ct, matching the existing ICatalogRepository methods.
 ```
 
 - `IsDerivedAsync`: `Catalog` filtered on the pair, with `Song.ArtistId == artistId` (navigation join).
@@ -106,7 +108,7 @@ The existing `RemoveAsync`, `ExistsAsync`, `AddAsync`, `CountByArtistAsync` and 
 ```csharp
 // ISongRepository — addition (no owned-song count exists today)
 /// <summary>Number of songs whose author (Song.ArtistId) is artistId.</summary>
-Task<int> CountByArtistAsync(int artistId, CancellationToken ct = default);
+Task<int> CountByArtistAsync(int artistId, CancellationToken ct);   // ct style as ISongRepository's existing methods
 ```
 
 ### 4.2 Service changes (`Domain/ServicesInterfaces/ICatalogService.cs`, `Services/CatalogService.cs`)
@@ -137,9 +139,9 @@ Task<int> CountByArtistAsync(int artistId, CancellationToken ct = default);
   catalog mode it returns `Remove '<title>' from <ArtistName>'s catalog?` or
   `Remove <n> songs from <ArtistName>'s catalog?`. Otherwise it is unchanged.
 - **`ExecuteDeleteAsync`**: `if (IsCatalogMode)` → `_catalogService.RemoveSongsFromCatalogAsync(ArtistId, ids)`.
-  - Show the message with `ShowSuccessAsync` when `success`, else with the error snackbar, following the
-    song path's existing pattern.
-  - Then call `RefreshAsync()` on both paths, so a partial outcome is reflected.
+  - Call `RefreshAsync()` on both outcomes, then show the message: `ShowSuccessAsync` when `success`,
+    else the error snackbar. This diverges on purpose from the song path, which refreshes only on
+    success.
   - The selection is cleared by `CrudListViewModelBase.RequestDelete` after `ExecuteDeleteAsync`
     returns, on both paths. That is the guarantee; `RefreshAsync` also clears it after a completed load.
 
@@ -161,9 +163,9 @@ Task<int> CountByArtistAsync(int artistId, CancellationToken ct = default);
     shape: the first owner in selection order is refused.
   - The refusal text becomes AC-6.2's: `Cannot delete — {Name} owns N song(s). Delete their songs first.`
   - `ICatalogRepository` is no longer used by `ArtistService`. Remove the `_catalogRepository`
-    constructor parameter if `UnitOfWorkReadScopeTests`' floor of ≥ 15 governed parameters still
-    holds. The plan counts them; if the floor would break, keep the parameter and log the reason in
-    the task-log.
+    constructor parameter. `UnitOfWorkReadScopeTests`' floor of ≥ 15 governed parameters still holds
+    with a wide margin; the count is recorded in the task-log. Test call sites of `new ArtistService(`
+    change with it.
   - The catalog rows of a deletable (song-less) artist go through the existing Artist → Catalog
     cascade.
 - **`ArtistsViewModel.BuildDeleteConfirmMessage`** (the VM override behind AC-6.3): returns
@@ -209,12 +211,12 @@ protected override void Down(MigrationBuilder migrationBuilder) { }
 | REQ-CATPROP-02 | A | same class: title/lyrics update keeps the rows |
 | REQ-CATPROP-03 | A | same class: A→B existing; A→new inline artist; B already has a cover row → one row; other rows untouched |
 | REQ-CATPROP-04 | A | same class: forced failure (validation, `ArtistChoiceNeeded`, exception) leaves the catalog unchanged |
-| REQ-CATPROP-05 | B | existing `SongRepositoryTests` catalog-cascade test (trace comment added); a derived-row case only if missing |
+| REQ-CATPROP-05 | B | new `SongRepositoryTests.DeleteAsync_Song_RemovesDerivedAndCoverCatalogRows` |
 | REQ-CATPROP-06 | A | `CatalogServiceTests` (Moq) for the three outcomes, plus `CatalogRepositoryTests.IsDerivedAsync` |
 | REQ-CATPROP-07 | A | `CatalogRepositoryTests.RemoveCoversAsync` (mixed list, unknown ids, real SQLite proves the join-filtered `ExecuteDeleteAsync`) + `CatalogServiceTests`: one test per row of the outcome table |
-| REQ-CATPROP-08 | A | `SongsViewModelTests` (Moq services): catalog mode calls bulk remove and never `DeleteSongsAsync`; confirmation text (1 / n); success vs error snackbar by `success`; refresh on both paths. Songs mode unchanged |
+| REQ-CATPROP-08 | A | new `SongsViewModelCatalogDeleteTests` (Moq services): catalog mode calls bulk remove and never `DeleteSongsAsync`; confirmation text (1 / n); success vs error snackbar by `success`; refresh on both paths. Songs mode unchanged |
 | REQ-CATPROP-09 | B | new `Tests/Integration/Migrations/CatalogBackfillMigrationTests.cs`, following `SongMigrationTests` (`MigratedToLatestMinusAsync`, raw-SQL seed, migrate, `SqlQueryRaw`): missing row added, manual row not duplicated, re-run inserts nothing |
-| REQ-CATPROP-10 | A | `ArtistServiceTests` (Moq): owner refused with AC-6.2 text, first owner named; artist with only catalog rows deleted. Integration: cover-only artist deleted with its rows, songs untouched. `ArtistsViewModelTests`: AC-6.3 confirmation texts. `SongRepositoryTests.CountByArtistAsync` |
+| REQ-CATPROP-10 | A | `ArtistServiceTests` (Moq): owner refused with AC-6.2 text, first owner named; artist with only catalog rows deleted. New `ArtistServiceDeleteIntegrationTests`: cover-only artist deleted with its rows, songs untouched. `ArtistsViewModelTests`: AC-6.3 confirmation texts. `SongRepositoryTests.CountByArtistAsync` |
 | REQ-CATPROP-11 | B | `ArtistRepository` paged read with `PerformersOnly`: an author with no cover rows is returned |
 
 The architecture test `UnitOfWorkReadScopeTests` must stay green. It guards the `sp` resolution of
@@ -226,9 +228,10 @@ task that owns the AC, never by the Builder during Green:
   refusal) encode the behaviour REQ-CATPROP-10 replaces. They are rewritten against
   `ISongRepository.CountByArtistAsync` and the AC-6.2 text.
 - SongService unit tests with a fake `sp` (`SongServiceTests`, `SongServiceSaveFromForm*Tests`,
-  `SongServiceArtistFreezeTests`, …) need an `ICatalogRepository` mock registered in that `sp`, via the
-  shared helper in `Tests/Infrastructure/UnitOfWorkMocks.cs` where possible. This is test-setup only;
-  no assertion is changed.
+  `SongServiceArtistFreezeTests`, …) each build their own `PassthroughUnitOfWork.Over(...)`, whose
+  provider throws for an unregistered type. Each such call gets an `ICatalogRepository` mock added
+  (plan Task 3a). This is test setup only; no assertion is changed and `UnitOfWorkMocks.cs` is not
+  edited.
 - `CatalogServiceTests`' "remove always succeeds" test encodes the behaviour REQ-CATPROP-06 replaces.
   It is rewritten.
 - `SongsViewModel` tests that cover `RemoveFromCatalogCommand`, if any, are deleted with the command.
