@@ -4,31 +4,31 @@
 > Task-logs are written by the orchestrator on `develop` from the implementor's hand-back.
 > Waves: sequential (T1 → T2 → T4 → T3 → T5; T3 consumes T4's `ShowItemMenu`), one implementor. Then T6 (verification, develop) and T7 (Helder on device).
 
-- [ ] **T1 — VM contract + behaviour (TDD, Level A)**
+- [x] **T1 — VM contract + behaviour (TDD, Level A)**
   - Scope: `design.md § Contracts`. Covers `ItemMenuAction`, the `ICrudListViewModel` additions and the `CrudListViewModelBase` logic.
   - Tests first, in `CrudListViewModelBaseTests`, one per AC. A second nested fake, `ActionsTestCrudListViewModel`, carries 2 page-specific actions for 07/08; the existing fake is unchanged.
   - Files owned: `UI/ViewModels/ItemMenuAction.cs` (new), `ICrudListViewModel.cs`, `CrudListViewModelBase.cs`, `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs`
   - ACs: REQ-OVFM-01, 02a, 02b, 03, 04, 05a, 05b, 06, 07, 08, 15, 16 · Level A · Review lane: Elevated · Demo: `dotnet test` green
-- [ ] **T2 — Icon asset + `MenuItem` style (Level C)**
+- [x] **T2 — Icon asset + `MenuItem` style (Level C)**
   - Scope: `more_vert_outlined.svg`, plus the `MenuItem` DXButton style in `MaterialStyles.xaml` per `design.md § Tokens`.
   - Files owned: `Resources/Images/more_vert_outlined.svg`, `Resources/Styles/MaterialStyles.xaml`
   - The style is additive: no existing style changes, so there is no consumer risk.
   - ACs: REQ-OVFM-12a (XAML property check, then visual in T6) · Demo: build green
-- [ ] **T3 — `ListItemOverflowButton` component (Level C, UI)**
+- [x] **T3 — `ListItemOverflowButton` component (Level C, UI)**
   - Scope: `design.md § ListItemOverflowButton`. Not governed yet (0 consumers).
   - Files owned: `UI/Components/Lists/ListItemOverflowButton.xaml(.cs)`
   - ACs: REQ-OVFM-09, 10, delivered through T5 · Review lane: Standard · Demo: build green
-- [ ] **T4 — `CrudListView` hosts the menu (governed, Level C UI)**
+- [x] **T4 — `CrudListView` hosts the menu (governed, Level C UI)**
   - Scope: `design.md § CrudListView`, including the Delete → confirm hand-off and back ownership.
   - The four gates are recorded in `design.md § Governance`. The task-log entry repeats the consumer map and risk table.
   - Files owned: `UI/Components/CrudListView.xaml(.cs)`
   - ACs: REQ-OVFM-11, 12b, 17 · Review lane: Elevated · Demo: build and tests green
-- [ ] **T5 — Venues then People rows + governed registration**
+- [x] **T5 — Venues then People rows + governed registration**
   - Scope: `design.md § Pages`. Venues first, then build, then People.
   - Add `ListItemOverflowButton` to the governed list in `.claude/library/component-safety-gate.md`.
   - Files owned: `UI/Pages/Venues/VenuesPage.xaml`, `UI/Pages/People/PeoplePage.xaml`, `.claude/library/component-safety-gate.md`
   - ACs: REQ-OVFM-09, 10 · Review lane: Standard · Demo: an overflow button on the rows on the emulator
-- [ ] **T6 — Verification**
+- [x] **T6 — Verification**
   - `verifier` subagent, then full build and test run.
   - Android emulator walk-through on Venues and People:
     - REQ-OVFM-09, 10, 11, 12a/b, 13a (tap another row with the menu open), 13b (one back press, page stays), 14 (last visible row), 17
