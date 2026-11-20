@@ -7,6 +7,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
     xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    xmlns:menus="clr-namespace:MyVocaList.UI.Components.Menus"
     x:Class="MyVocaList.UI.Components.CrudListView"
     x:Name="self">
 
@@ -158,41 +159,12 @@
             </VerticalStackLayout>
         </dx:BottomSheet>
 
-        <!-- Overflow item menu (browse mode, MD3 vertical menu) — anchored to the row's overflow button via ShowItemMenu.
-             State driven by ICrudListViewModel.IsItemMenuOpen (TwoWay). Items: Edit, page-specific actions, Delete. -->
-        <dx:DXPopup x:Name="itemMenu"
+        <!-- Overflow item menu (browse mode, shared MD3 Menu) — anchored per row by OverflowMenuButton via IMenuHost.HostedMenu.
+             State driven by ICrudListViewModel.IsItemMenuOpen (TwoWay). Items: ItemMenuItems (Edit, page actions, Delete). -->
+        <menus:Menu x:Name="itemMenu"
                     IsOpen="{Binding IsItemMenuOpen, Mode=TwoWay}"
-                    AllowShadow="True"
-                    CornerRadius="16"
-                    BackgroundColor="{StaticResource SurfaceContainerLow}"
-                    HorizontalAlignment="Right"
-                    Opened="OnItemMenuOpened"
-                    Closed="OnItemMenuClosed">
-            <VerticalStackLayout Padding="0,2"
-                                 MinimumWidthRequest="112"
-                                 MaximumWidthRequest="280">
-                <dx:DXButton Style="{StaticResource MenuItem}"
-                             Icon="edit_outlined"
-                             Content="Edit"
-                             Command="{Binding EditItemCommand}" />
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ItemMenuActions}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate>
-                            <dx:DXButton Style="{StaticResource MenuItem}"
-                                         x:DataType="{x:Null}"
-                                         Content="{Binding Text}"
-                                         Icon="{Binding Icon}"
-                                         Command="{Binding Source={x:Reference self}, Path=BindingContext.ExecuteItemMenuActionCommand}"
-                                         CommandParameter="{Binding .}" />
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
-                <dx:DXButton Style="{StaticResource MenuItem}"
-                             Icon="delete_outlined"
-                             Content="Delete"
-                             Command="{Binding DeleteItemCommand}" />
-            </VerticalStackLayout>
-        </dx:DXPopup>
+                    ItemsSource="{Binding ItemMenuItems}"
+                    Closed="OnItemMenuClosed" />
 
     </Grid>
 
