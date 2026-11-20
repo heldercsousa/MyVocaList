@@ -2,7 +2,7 @@
 id: queue-management
 title: "**Queue Entry Point Redesign — QueuePage as CRUD event list**"
 status: "💡 Pending"
-target: 2026-06
+target: —
 section: BusinessFeatures
 kind: feature
 order: 300
