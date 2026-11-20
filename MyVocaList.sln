@@ -2029,11 +2029,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one", "2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one", "{7BC7AB1C-906A-5C00-A0DC-8BE8270E54B7}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\README.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\requirements.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\requirements.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\design.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\design.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\tasks.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\tasks.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\task-log.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-person-form-birthday-as-day-and-month-dropdowns", "2026-11-19-person-form-birthday-as-day-and-month-dropdowns", "{16D8834F-FC60-53F4-B331-03B67666D303}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\README.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\requirements.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\requirements.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\design.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\design.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\tasks.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\tasks.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\task-log.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\task-log.md
 	EndProjectSection
 EndProject
 Global

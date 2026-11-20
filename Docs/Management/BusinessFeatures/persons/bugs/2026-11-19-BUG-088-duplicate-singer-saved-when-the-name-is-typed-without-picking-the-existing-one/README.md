@@ -1,7 +1,7 @@
 ---
 id: BUG-088
 title: Duplicate singer saved when the name is typed without picking the existing one
-status: 💡 Pending
+status: 🟡 In Progress
 severity: Major
 target: 2026-11-19
 section: BusinessFeatures
