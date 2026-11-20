@@ -43,7 +43,10 @@
                         <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <lists:ListItemCheckbox VerticalOptions="Center" />
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <lists:ListItemOverflowButton />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
