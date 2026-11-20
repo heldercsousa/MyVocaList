@@ -32,7 +32,7 @@ if ! printf '%s\n' "$STAGED" | grep -Eq '\.(cs|xaml)$'; then
   echo "pre-commit: no .cs/.xaml changes staged — skipping build+test gate."
 else
   echo "pre-commit: code changes staged — running dotnet test (bypass with --no-verify)..."
-  if ! dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -v q --nologo; then
+  if ! dotnet test Tests/MyVocaList.Tests.csproj -v q --nologo; then
     echo ""
     echo "pre-commit: BLOCKED — build or tests failed. Fix before committing."
     echo "            To commit anyway (e.g. an intentional WIP checkpoint):"
