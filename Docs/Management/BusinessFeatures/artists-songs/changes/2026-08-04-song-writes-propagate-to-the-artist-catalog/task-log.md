@@ -130,3 +130,23 @@ Governed constructor parameters after removal: 22 (23 before), counted by the C5
 | AC | Implementation | Test |
 |----|----------------|------|
 | REQ-CATPROP-10 | ArtistService.DeleteArtistsAsync | Delete_OwnerOfSongs_Refused, Delete_TwoOwners_NamesFirstInSelectionOrder, Delete_ArtistWithOnlyCatalogRows_Succeeds, Delete_CoverOnlyArtist_RowsGoneSongsKept |
+
+---
+## Task C6: ViewModels (REQ-CATPROP-08, REQ-CATPROP-10 text)
+**Status:** To Review
+**Completed:** 2026-11-20
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/SongsViewModel.cs` (catalog-mode `BuildDeleteConfirmMessage` and `ExecuteDeleteAsync` via `RemoveSongsFromCatalogAsync`; dead `RemoveFromCatalogCommand` / `RemoveFromCatalogAsync` removed, no XAML or test referenced them)
+- `MyVocaList/UI/ViewModels/ArtistsViewModel.cs` (`BuildDeleteConfirmMessage` text only)
+- `Tests/Unit/ViewModels/SongsViewModelCatalogDeleteTests.cs` (new)
+- `Tests/Unit/ViewModels/ArtistsViewModelDeleteConfirmTests.cs` (new)
+
+### Test evidence
+RED: 6 of 7 new tests failed (texts unchanged, bulk remove never called); the songs-mode regression test passed as expected.
+GREEN: new classes 7/7; full `dotnet test Tests/MyVocaList.Tests.csproj` 1895 passed, 0 failed. Android build left to the controller.
+
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-CATPROP-08 | SongsViewModel.BuildDeleteConfirmMessage / ExecuteDeleteAsync | CatalogMode_OneSong_ConfirmTextNamesSongAndCatalog, CatalogMode_ThreeSongs_ConfirmTextCountsAll, CatalogMode_Confirm_CallsBulkRemoveNeverDeleteSongs_AndShowsSuccess, CatalogMode_RemoveFails_ShowsErrorStillReloads_NeverDeletesSongs, SongsMode_Confirm_StillDeletesSongs |
+| REQ-CATPROP-10 (text) | ArtistsViewModel.BuildDeleteConfirmMessage | OneArtist_ConfirmTextMentionsCatalogEntries, TwoArtists_ConfirmTextMentionsCatalogEntries |

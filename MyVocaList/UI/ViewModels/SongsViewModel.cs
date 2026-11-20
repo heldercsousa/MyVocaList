@@ -34,7 +34,6 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>, IQ
 
         AddSongCommand = new AsyncRelayCommand(NavigateToAddAsync);
         AddToCatalogCommand = new AsyncRelayCommand(AddToCatalogAsync, () => IsCatalogMode);
-        RemoveFromCatalogCommand = new AsyncRelayCommand<SongListItemDto>(RemoveFromCatalogAsync, _ => IsCatalogMode);
         LaunchYouTubeSearchCommand = new AsyncRelayCommand<SongListItemDto>(LaunchYouTubeSearchAsync);
         GoBackCommand = new AsyncRelayCommand(() => _navigationService.PopAsync());
     }
@@ -70,7 +69,6 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>, IQ
 
     public IAsyncRelayCommand AddSongCommand { get; }
     public IAsyncRelayCommand AddToCatalogCommand { get; }
-    public IAsyncRelayCommand<SongListItemDto> RemoveFromCatalogCommand { get; }
     public IAsyncRelayCommand<SongListItemDto> LaunchYouTubeSearchCommand { get; }
     public IAsyncRelayCommand GoBackCommand { get; }
 
@@ -123,11 +121,27 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>, IQ
             : _songService.GetPagedSongsForListAsync(page, pageSize, query, ct);
 
     protected override string BuildDeleteConfirmMessage(IList<SongListItemDto> items)
-        => items.Count == 1 ? $"Delete '{items[0].Title}'?" : $"Delete {items.Count} songs?";
+        => IsCatalogMode
+            ? (items.Count == 1
+                ? $"Remove '{items[0].Title}' from {ArtistName}'s catalog?"
+                : $"Remove {items.Count} songs from {ArtistName}'s catalog?")
+            : (items.Count == 1 ? $"Delete '{items[0].Title}'?" : $"Delete {items.Count} songs?");
 
     protected override async Task ExecuteDeleteAsync(IEnumerable<SongListItemDto> items)
     {
         var ids = items.Select(s => s.Id);
+        if (IsCatalogMode)
+        {
+            // REQ-CATPROP-08: catalog rows go, songs never do. Reload on both outcomes, then show the service message.
+            var (removed, removeMessage, _, _) = await _catalogService.RemoveSongsFromCatalogAsync(ArtistId, ids.ToList());
+            await RefreshAsync();
+            if (removed)
+                await _snackbarService.ShowSuccessAsync(removeMessage);
+            else
+                await _snackbarService.ShowErrorAsync(removeMessage);
+            return;
+        }
+
         var (success, message) = await _songService.DeleteSongsAsync(ids);
         if (success)
         {
@@ -157,21 +171,6 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>, IQ
     {
         // TODO Phase 15: open song picker to add to catalog
         return Task.CompletedTask;
-    }
-
-    private async Task RemoveFromCatalogAsync(SongListItemDto song)
-    {
-        if (song == null) return;
-        var (success, message) = await _catalogService.RemoveSongFromCatalogAsync(ArtistId, song.Id);
-        if (success)
-        {
-            await RefreshAsync();
-            await _snackbarService.ShowSuccessAsync(message);
-        }
-        else
-        {
-            await _snackbarService.ShowErrorAsync(message);
-        }
     }
 
     private async Task LaunchYouTubeSearchAsync(SongListItemDto song)
