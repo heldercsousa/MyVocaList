@@ -31,9 +31,6 @@ public partial class PersonFormPage : ContentPage
     }
 
     // Bridges the MAUI Unfocused (blur) events to the ViewModel's validation commands.
-    private void OnBirthdayUnfocused(object sender, FocusEventArgs e) =>
-        _viewModel.ValidateBirthdayCommand.Execute(null);
-
     private void OnEmailUnfocused(object sender, FocusEventArgs e) =>
         _viewModel.ValidateEmailCommand.Execute(null);
 }

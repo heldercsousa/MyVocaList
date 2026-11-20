@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Globalization;
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 using MyVocaList.UI.Models;
@@ -10,7 +12,8 @@ namespace MyVocaList.UI.ViewModels;
 /// </summary>
 [QueryProperty(nameof(PersonIdRaw), "personId")]
 [QueryProperty(nameof(PersonName), "personName")]
-[QueryProperty(nameof(PersonBirthday), "personBirthday")]
+[QueryProperty(nameof(PersonBirthDayRaw), "personBirthDay")]
+[QueryProperty(nameof(PersonBirthMonthRaw), "personBirthMonth")]
 [QueryProperty(nameof(PersonEmail), "personEmail")]
 public partial class PersonFormViewModel : ViewModelBase
 {
@@ -22,15 +25,34 @@ public partial class PersonFormViewModel : ViewModelBase
     // Shell passes all query parameters as strings; parse manually.
     public string PersonIdRaw { set => PersonId = int.TryParse(value, out var id) ? id : null; }
 
+    // Birthday day and month arrive as query strings and are parsed into the dropdown selections (REQ-BDAY-09).
+    public string PersonBirthDayRaw
+    {
+        set => SelectedBirthDay = int.TryParse(value, out var day) ? (int?)day : null;
+    }
+
+    public string PersonBirthMonthRaw
+    {
+        set => SelectedBirthMonth = int.TryParse(value, out var month)
+            ? Months.FirstOrDefault(m => m.Number == month)
+            : null;
+    }
+
     [ObservableProperty] private int? _personId;
     [ObservableProperty] private string _personName = string.Empty;
-    [ObservableProperty] private string _personBirthday = string.Empty;
     [ObservableProperty] private string _personEmail = string.Empty;
+
+    // Birthday dropdowns (REQ-BDAY-01..04). Both optional; the service decides whether the pair is valid.
+    [ObservableProperty] private int? _selectedBirthDay;
+    [ObservableProperty] private MonthOption? _selectedBirthMonth;
 
     [ObservableProperty] private bool _nameHasError;
     [ObservableProperty] private string _nameErrorText = string.Empty;
     [ObservableProperty] private bool _birthdayHasError;
     [ObservableProperty] private string _birthdayErrorText = string.Empty;
+    // The birthday error sits on the empty dropdown; when both are set it sits on Birth day.
+    [ObservableProperty] private bool _birthdayErrorOnDay;
+    [ObservableProperty] private bool _birthdayErrorOnMonth;
     [ObservableProperty] private bool _emailHasError;
     [ObservableProperty] private string _emailErrorText = string.Empty;
 
@@ -46,8 +68,11 @@ public partial class PersonFormViewModel : ViewModelBase
     // Becomes true once the user edits each field. Guards blur validation so a pristine field the
     // user only tabbed through is not flagged prematurely (Form Validation Standard).
     private bool _nameDirty;
-    private bool _birthdayDirty;
     private bool _emailDirty;
+
+    // True while OnSelectedBirthMonthChanged rebuilds Days, so the clear that the ComboBox performs
+    // on an ItemsSource change is not read as a user selection.
+    private bool _isRebuildingDays;
 
     // True until the page's OnAppearing calls CompleteHydration(). While true, Shell QueryProperty
     // pre-population (edit mode) must NOT mark any field dirty — otherwise a pre-filled invalid
@@ -57,6 +82,14 @@ public partial class PersonFormViewModel : ViewModelBase
 
     public bool IsEditMode => PersonId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Singer" : "New Singer";
+
+    /// <summary>The twelve months in English, January first (REQ-BDAY-01).</summary>
+    public IReadOnlyList<MonthOption> Months { get; } = Enumerable.Range(1, 12)
+        .Select(m => new MonthOption(m, CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(m)))
+        .ToList();
+
+    /// <summary>Days offered by the Birth day dropdown; rebuilt when the month changes (REQ-BDAY-02).</summary>
+    public ObservableCollection<int> Days { get; } = [];
 
     public PersonFormViewModel(
         IPersonService personService,
@@ -77,6 +110,8 @@ public partial class PersonFormViewModel : ViewModelBase
         SearchPersonsCommand = new AsyncRelayCommand<string>(SearchPersonsAsync);
         SuggestionSelectedCommand = new AsyncRelayCommand<AutocompleteSuggestion>(SuggestionSelectedAsync);
         NameOptionSource = new MenuOptionSource((query, ct) => SearchPersonsCoreAsync(query, ct));
+
+        RebuildDays(null);
     }
 
     public IAsyncRelayCommand SaveCommand { get; }
@@ -116,16 +151,6 @@ public partial class PersonFormViewModel : ViewModelBase
         ApplyNameValidation(PersonName);
     }
 
-    /// <summary>Blur handler for the birthday field — see <see cref="ValidateName"/>.</summary>
-    [RelayCommand]
-    private void ValidateBirthday()
-    {
-        if (!_birthdayDirty)
-            return;
-
-        ApplyBirthdayValidation(PersonBirthday);
-    }
-
     /// <summary>Blur handler for the email field — see <see cref="ValidateName"/>.</summary>
     [RelayCommand]
     private void ValidateEmail()
@@ -156,17 +181,48 @@ public partial class PersonFormViewModel : ViewModelBase
         ApplyNameValidation(value);
     }
 
-    partial void OnPersonBirthdayChanged(string value)
+    // Dropdowns have no blur, so the birthday is validated on Save and on each selection while it is in error
+    // (the same "reward early" rule as the text fields). Hydration sets these through the query setters, which
+    // never validate, so a stored value cannot show an error before the user acts.
+    partial void OnSelectedBirthMonthChanged(MonthOption? value)
     {
-        if (_isHydrating)
+        RebuildDays(value?.Number);
+
+        if (BirthdayHasError)
+            ApplyBirthdayValidation();
+    }
+
+    partial void OnSelectedBirthDayChanged(int? value)
+    {
+        if (_isRebuildingDays)
             return;
 
-        _birthdayDirty = true;
+        if (BirthdayHasError)
+            ApplyBirthdayValidation();
+    }
 
-        if (!BirthdayHasError)
-            return;
+    /// <summary>
+    /// Rebuilds <see cref="Days"/> for <paramref name="month"/> (1 to 31 when null). A selected day that no longer
+    /// fits the month is cleared (REQ-BDAY-03); a day that still fits is kept.
+    /// </summary>
+    private void RebuildDays(int? month)
+    {
+        var keep = SelectedBirthDay;
+        var maxDay = month is int m ? BirthdayRules.DaysInMonth(m) : 31;
 
-        ApplyBirthdayValidation(value);
+        _isRebuildingDays = true;
+        try
+        {
+            Days.Clear();
+            for (var day = 1; day <= maxDay; day++)
+                Days.Add(day);
+
+            SelectedBirthDay = keep is int kept && kept <= maxDay ? kept : (int?)null;
+        }
+        finally
+        {
+            _isRebuildingDays = false;
+        }
     }
 
     partial void OnPersonEmailChanged(string value)
@@ -189,28 +245,16 @@ public partial class PersonFormViewModel : ViewModelBase
         NameErrorText = isValid ? string.Empty : message;
     }
 
-    private void ApplyBirthdayValidation(string value)
+    private void ApplyBirthdayValidation()
     {
-        // T1 bridge: the VM still holds the birthday as a "DDMM" string until T2 replaces it with the Day/Month dropdowns.
-        var (wellFormed, day, month) = ParseBirthdayBridge(value);
-        var (isValid, message) = wellFormed
-            ? _personService.ValidateBirthday(day, month)
-            : (false, "Use DD/MM format (e.g.: 15/03)");
+        var (isValid, message) = _personService.ValidateBirthday(SelectedBirthDay, SelectedBirthMonth?.Number);
         BirthdayHasError = !isValid;
         BirthdayErrorText = isValid ? string.Empty : message;
-    }
 
-    // T1 bridge (temporary, removed by T2): parses the 4-digit "DDMM" (or legacy "DD/MM") text into the int pair the service takes.
-    private static (bool wellFormed, int? day, int? month) ParseBirthdayBridge(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return (true, null, null);
-
-        var digits = value.Trim().Replace("/", "");
-        if (digits.Length != 4 || !digits.All(char.IsAsciiDigit))
-            return (false, null, null);
-
-        return (true, int.Parse(digits[..2]), int.Parse(digits[2..]));
+        // The error marks the empty dropdown: Birth month when only the day is set, otherwise Birth day.
+        var monthIsTheEmptyOne = SelectedBirthDay is not null && SelectedBirthMonth is null;
+        BirthdayErrorOnMonth = !isValid && monthIsTheEmptyOne;
+        BirthdayErrorOnDay = !isValid && !monthIsTheEmptyOne;
     }
 
     private void ApplyEmailValidation(string value)
@@ -230,13 +274,14 @@ public partial class PersonFormViewModel : ViewModelBase
         // Safety net: re-run ALL field validators on Save, regardless of dirty state — an
         // untouched required field (or one whose error was never surfaced) must still be caught.
         ApplyNameValidation(name);
-        ApplyBirthdayValidation(PersonBirthday);
+        ApplyBirthdayValidation();
         ApplyEmailValidation(PersonEmail);
 
         if (NameHasError || BirthdayHasError || EmailHasError)
             return;
 
-        var (_, birthDay, birthMonth) = ParseBirthdayBridge(PersonBirthday);
+        var birthDay = SelectedBirthDay;
+        var birthMonth = SelectedBirthMonth?.Number;
         var email = string.IsNullOrWhiteSpace(PersonEmail) ? null : PersonEmail.Trim();
 
         IsBusy = true;
@@ -326,9 +371,9 @@ public partial class PersonFormViewModel : ViewModelBase
 
         Suggestions = [];
 
-        // T1 bridge: the URL still carries the "DDMM" string until T2 switches to personBirthDay/personBirthMonth.
-        var birthday = Uri.EscapeDataString(
-            person.BirthDay.HasValue && person.BirthMonth.HasValue ? $"{person.BirthDay:00}{person.BirthMonth:00}" : string.Empty);
+        // Day and month travel as two integer query parameters; both empty when the singer has no birthday.
+        var birthDay = person.BirthDay?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        var birthMonth = person.BirthMonth?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
         var email = Uri.EscapeDataString(person.Email ?? string.Empty);
         var name = Uri.EscapeDataString(person.FullName);
 
@@ -339,7 +384,7 @@ public partial class PersonFormViewModel : ViewModelBase
         // Routed through INavigationService so the behavior is unit-testable (Shell.Current is
         // null in tests — testing.md anti-pattern).
         await _navigation.GoToAsync(
-            $"../{Routes.PersonForm}?personId={person.Id}&personName={name}&personBirthday={birthday}&personEmail={email}");
+            $"../{Routes.PersonForm}?personId={person.Id}&personName={name}&personBirthDay={birthDay}&personBirthMonth={birthMonth}&personEmail={email}");
     }
 
     private void UpdateCharacterCounter(int length)

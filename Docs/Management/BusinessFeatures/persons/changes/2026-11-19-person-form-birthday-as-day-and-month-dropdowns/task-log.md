@@ -71,3 +71,61 @@ REQ-BDAY-01/02/03/04/06/09 are UI and belong to T2/T3. Not covered in T1.
 
 ### Design concern
 - The design's Create signature puts `email` after two optional ints. Positional calls that passed email as the third argument now fail to compile, so every call site was checked. No concern beyond that.
+
+---
+## Task: T2 — UI (person-form-birthday-as-day-and-month-dropdowns)
+**Plan:** Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/tasks.md
+**Status:** Check build
+**Started:** 2026-11-20
+**Completed:** 2026-11-20
+
+### Changed files:
+- `MyVocaList/UI/Models/MonthOption.cs` (new)
+- `MyVocaList/UI/ViewModels/PersonFormViewModel.cs`
+- `MyVocaList/UI/ViewModels/PersonsViewModel.cs`
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml`
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml.cs`
+- `Tests/Unit/ViewModels/PersonFormViewModelTests.cs`
+- `Tests/Unit/ViewModels/PersonFormViewModelBug044Tests.cs`
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/design.md` (spec update note)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/tasks.md` (T2 ticked)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/task-log.md`
+
+### Build notes
+Build: `dotnet build Tests/MyVocaList.Tests.csproj` 0 errors (146 warnings); `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` 0 errors (3 warnings) | Tests: 1971 passed, 0 failed, 0 skipped (`dotnet test Tests/MyVocaList.Tests.csproj`; focused PersonForm/PersonsViewModel filter 59 passed) | Commit SHA: see git log (commit follows this entry)
+Files written and re-read: PersonFormViewModel.cs (birthday section, query setters, Save, suggestion URL), PersonsViewModel.cs (NavigateToEditAsync, using), PersonFormPage.xaml (Grid of two ComboBoxEdit), PersonFormPage.xaml.cs (OnBirthdayUnfocused removed), MonthOption.cs, design.md (spec note), tasks.md (T2 ticked).
+
+### E2E
+E2E: emulator not available — requires manual verification. `adb devices` lists no device and no AVD is installed (`/c/Android` holds platform-tools only). No clean Android build or deploy was run, and no screenshot was taken. Manual checks for the on-device gate (T3): New Singer shows two dropdowns; February offers 29 days; choosing April after 31 clears the day; each clear icon empties its dropdown; Save with one side only shows the inline error on the empty dropdown; edit form pre-selects the stored day and month.
+
+### Verification evidence
+- Full suite green: 1971 passed, 0 failed.
+- Focused run (PersonForm and PersonsViewModel filter): 59 passed.
+- The XAML compiles at DevExpress.Maui.Editors 25.2.4, so `ClearIconVisibility`, `DisplayMember`, `SelectedItem` and `HasError`/`ErrorText` on `dxe:ComboBoxEdit` resolved at build time. Context7 (current docs) confirms `ClearIconVisibility` is an `IconVisibility` on `EditBase` (Never/Always/Auto).
+- TDD order: the new tests were written in one pass with the ViewModel change, not run against the old ViewModel first, so a separate red run was not captured. Flagged below.
+
+### AC traceability
+| AC | Criterion | Implementation location | Test method |
+|----|-----------|-------------------------|-------------|
+| REQ-BDAY-01 | Two dropdowns, Birth day then Birth month, English names, no free-text field | PersonFormPage.xaml (Grid, two ComboBoxEdit); PersonFormViewModel.Months | Months_HoldsEnglishNamesJanuaryToDecember (list half); on-device gate T3 (render) |
+| REQ-BDAY-02 | Day list per month, 1..31 when no month, Feb 29 | PersonFormViewModel.RebuildDays; BirthdayRules.DaysInMonth | SelectedBirthMonth_Change_RebuildsDaysForThatMonth (Theory 1/2/4/9/12), Days_NoMonthSelected_Holds1To31 |
+| REQ-BDAY-03 | Day cleared when invalid for new month, kept when valid | PersonFormViewModel.RebuildDays (clamp), OnSelectedBirthMonthChanged | SelectedBirthMonth_DayInvalidForNewMonth_ClearsDay (31 then April), SelectedBirthMonth_DayValidForNewMonth_KeepsDay |
+| REQ-BDAY-04 | Each dropdown clearable | PersonFormPage.xaml ClearIconVisibility="Auto" | UI-only: on-device gate T3 |
+| REQ-BDAY-06 | Save with one side only: inline error on empty dropdown, no save | PersonFormViewModel.ApplyBirthdayValidation (ErrorOnDay/ErrorOnMonth), SaveAsync | SaveCommand_DayWithoutMonth_ShowsErrorOnMonthAndDoesNotSave, SaveCommand_MonthWithoutDay_ShowsErrorOnDayAndDoesNotSave |
+| REQ-BDAY-06 | Error re-validates on selection while in error; not otherwise | OnSelectedBirthDayChanged / OnSelectedBirthMonthChanged | BirthdayDropdown_WhileInError_ClearsErrorWhenValid, BirthdayDropdown_NotInError_DoesNotValidate |
+| REQ-BDAY-09 | Edit pre-selects stored day and month (query params) | PersonFormViewModel.PersonBirthDayRaw / PersonBirthMonthRaw | QueryParams_Hydration_PreSelectsDayAndMonth, QueryParams_EmptyValues_LeaveDropdownsEmpty, QueryParams_Hydration_DoesNotValidate |
+| REQ-BDAY-09 | Save passes day and month as ints to the service | PersonFormViewModel.SaveAsync | SaveCommand_CreateMode_PassesDayAndMonthToService |
+| REQ-BDAY-09 | Suggestion pick and list edit navigate with personBirthDay / personBirthMonth | PersonFormViewModel.SuggestionSelectedAsync; PersonsViewModel.NavigateToEditAsync | SuggestionSelected_CarriesBirthDayAndMonthAsQueryParams (suggestion path). NavigateToEditAsync: no test, see gaps |
+
+### Deviations and spec gaps
+- **Spec updated (design.md, UI):** the birthday field has no blur step, so `ValidateBirthdayCommand`, the birthday dirty flag and their blur-first tests were removed. Validation runs on Save and on selection while in error. The error placement rule is recorded there. Blocking: No.
+- **Removed tests (superseded):** the birthday blur tests `ValidateBirthdayCommand_PristineField_DoesNotSetError`, `ValidateBirthdayCommand_DirtyInvalidField_SetsError`, `OnPersonBirthdayChanged_DuringHydration_DoesNotDirtyOrValidateOnBlur`, `OnPersonBirthdayChanged_NotInError_DoesNotValidate` and `OnPersonBirthdayChanged_WhileInError_ClearsErrorWhenValid` encoded the text-field blur behaviour. They were replaced by the dropdown tests above. The email blur tests are unchanged.
+- **Hydration guard for birthday:** the `_isHydrating` check is not used for the birthday. Query setters never validate, so there is no dirty state to guard. Name and email keep the pattern.
+- **`_isRebuildingDays` guard (implementation decision):** the Birth day ComboBoxEdit can clear its selection when `ItemsSource` is cleared. The guard keeps that clear from being read as a user selection, and the kept day is restored afterwards.
+- **TDD red not captured:** tests were written and the ViewModel changed before the first test run. The first run was green. No separate red run exists for these tests. Flagged for Helder.
+- **Gap, untested:** `PersonsViewModel.NavigateToEditAsync` uses `Shell.Current` directly, which is null in tests (testing.md anti-pattern), so its URL is not unit tested. It was reviewed by reading. The edit path is covered on device in T3.
+- **E2E:** emulator not available. Status is Check build (see E2E above).
+- **Bridge removed:** the T1 DDMM bridge (`ParseBirthdayBridge`, `personBirthday`, the "Use DD/MM format" message) is gone from the ViewModels and the page.
+
+### Design concern
+- None.

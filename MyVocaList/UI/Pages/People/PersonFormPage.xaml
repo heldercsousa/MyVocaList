@@ -47,16 +47,27 @@
                 </Label.Triggers>
             </Label>
 
-            <!-- Birthday (optional) -->
-            <dxe:TextEdit x:Name="birthdayEdit"
-                          Text="{Binding PersonBirthday, Mode=TwoWay}"
-                          LabelText="Birthday (optional)"
-                          PlaceholderText="DD/MM"
-                          Mask="00/00"
-                          MaskPlaceholderChar="_"
-                          HasError="{Binding BirthdayHasError}"
-                          ErrorText="{Binding BirthdayErrorText}"
-                          Unfocused="OnBirthdayUnfocused" />
+            <!-- Birthday (optional): day and month dropdowns, no year -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                <dxe:ComboBoxEdit Grid.Column="0"
+                                  LabelText="Birth day"
+                                  ItemsSource="{Binding Days}"
+                                  SelectedItem="{Binding SelectedBirthDay, Mode=TwoWay}"
+                                  IsReadOnly="True"
+                                  ClearIconVisibility="Auto"
+                                  HasError="{Binding BirthdayErrorOnDay}"
+                                  ErrorText="{Binding BirthdayErrorText}" />
+
+                <dxe:ComboBoxEdit Grid.Column="1"
+                                  LabelText="Birth month"
+                                  ItemsSource="{Binding Months}"
+                                  DisplayMember="Name"
+                                  SelectedItem="{Binding SelectedBirthMonth, Mode=TwoWay}"
+                                  IsReadOnly="True"
+                                  ClearIconVisibility="Auto"
+                                  HasError="{Binding BirthdayErrorOnMonth}"
+                                  ErrorText="{Binding BirthdayErrorText}" />
+            </Grid>
 
             <!-- Email (optional) -->
             <dxe:TextEdit x:Name="emailEdit"
