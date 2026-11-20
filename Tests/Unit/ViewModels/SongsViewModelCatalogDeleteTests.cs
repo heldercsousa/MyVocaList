@@ -83,6 +83,8 @@ public class SongsViewModelCatalogDeleteTests
         _songMock.Verify(s => s.DeleteSongsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()), Times.Never);
         _snackMock.Verify(s => s.ShowSuccessAsync("Removed 2."), Times.Once);
         _snackMock.Verify(s => s.ShowErrorAsync(It.IsAny<string>()), Times.Never);
+        _catalogMock.Verify(c => c.GetPagedCatalogForArtistAsync(7, It.IsAny<int>(), It.IsAny<int>(),
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
 
     [Fact]
