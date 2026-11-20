@@ -139,6 +139,21 @@ Consequences the spec must state as expected, not as defects:
 
 None outstanding. D1–D4 close every question the "Before any code" section raised.
 
+## Decisions — Helder, 2026-11-19
+
+Taken while the spec (`requirements.md`, `design.md`) was written:
+
+- **D5 — Catalog-mode Delete removes catalog rows, never songs.** Today it calls `DeleteSongsAsync`.
+  It is rewired to remove cover rows. Derived rows are kept, with a message (D2). Songs are deleted only
+  from the main Songs list. → REQ-CATPROP-08.
+- **D6 — Catalog rows never block an artist delete; owned songs still do.** Parent AC-6.2 is kept. The
+  code's check moves from catalog rows to owned songs, because after the backfill a catalog-row check
+  would block every author. Recorded for later: once the queue exists, an artist referenced by queue
+  events can never be deleted, so history is not lost (queue work, not this item). → REQ-CATPROP-10.
+
+Gates cleared: the song-form title-first item is implemented and no longer open (its 2026-11-04 deferral
+is met). The Artist→Person merge idea was dropped on 2026-11-19, so D1–D4 stand as written.
+
 ---
 
 ## Status check — 2026-08-25 (audit)
