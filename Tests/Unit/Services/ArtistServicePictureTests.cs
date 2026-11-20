@@ -32,7 +32,7 @@ public class ArtistServicePictureTests
     }
 
     private ArtistService CreateSut() => new(
-        _artistRepoMock.Object, _songRepoMock.Object, _catalogRepoMock.Object,
+        _artistRepoMock.Object, _songRepoMock.Object,
         PassthroughUnitOfWork.Over(_artistRepoMock, _songRepoMock, _catalogRepoMock),
         _loggerMock.Object);
 
