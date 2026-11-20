@@ -24,9 +24,10 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | | 🏁 **MVP release** |
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | — | **Cross-cutting** | — |
-| 2026-11-06 | ↳ Person form follow-ups from ACF T7 run 2 | 💡 Pending |
 | 2026-11-12 | ↳ People list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
 | 2026-11-12 | ↳ Venues list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
+| 2026-11-19 | ↳ Duplicate singer saved when the name is typed without picking the existing one | 💡 Pending |
+| 2026-11-19 | ↳ Person form birthday as day and month dropdowns | 💡 Pending |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
