@@ -51,14 +51,6 @@
 
                 <!-- Birthday (optional): day and month dropdowns, no year -->
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                    <dxe:ComboBoxEdit Grid.Column="1"
-                                      LabelText="Birth day"
-                                      ItemsSource="{Binding Days}"
-                                      SelectedItem="{Binding SelectedBirthDay, Mode=TwoWay}"
-                                      ClearIconVisibility="Auto"
-                                      HasError="{Binding BirthdayErrorOnDay}"
-                                      ErrorText="{Binding BirthdayErrorText}" />
-
                     <dxe:ComboBoxEdit Grid.Column="0"
                                       LabelText="Birth month"
                                       ItemsSource="{Binding Months}"
@@ -66,6 +58,14 @@
                                       SelectedItem="{Binding SelectedBirthMonth, Mode=TwoWay}"
                                       ClearIconVisibility="Auto"
                                       HasError="{Binding BirthdayErrorOnMonth}"
+                                      ErrorText="{Binding BirthdayErrorText}" />
+
+                    <dxe:ComboBoxEdit Grid.Column="1"
+                                      LabelText="Birth day"
+                                      ItemsSource="{Binding Days}"
+                                      SelectedItem="{Binding SelectedBirthDay, Mode=TwoWay}"
+                                      ClearIconVisibility="Auto"
+                                      HasError="{Binding BirthdayErrorOnDay}"
                                       ErrorText="{Binding BirthdayErrorText}" />
                 </Grid>
 
