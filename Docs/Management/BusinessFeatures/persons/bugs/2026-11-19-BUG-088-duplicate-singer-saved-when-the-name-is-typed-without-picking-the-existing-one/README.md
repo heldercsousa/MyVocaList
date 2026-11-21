@@ -6,7 +6,7 @@ severity: Major
 target: 2026-11-19
 section: BusinessFeatures
 parent: persons
-goal: "A singer with the same name, email and birthday must never be saved twice: enforced in the Person service and by a database unique index. Identity is name + email + birthday day/month, and at least one of email or birthday is required."
+goal: "A singer with the same name, email and birthday must never be saved twice: enforced in the Person service and by a database unique index. Identity is name + email + birthday day/month; email and birthday are optional unless another singer has the same name."
 gate: Helder passes the fix on device.
 kind: bug
 ---
@@ -30,3 +30,9 @@ F2 of `changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/`. In insert 
 - **Dependency:** the index uses the day and month columns from `changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/`. Do that item first, or in the same migration.
 - **Not a key:** birthday is not the link to social accounts. A future `PersonLink` table (platform, handle) would carry that.
 - **Regression test:** Major, so a failing test first (Service with Moq; index test on a real SQLite file).
+
+## Decisions (Helder, 2026-11-21, after the on-device test)
+
+- Email and birthday are **optional**, so a host in a hurry can register a singer by name only.
+- When another singer already has that name, the new entry needs an email, a birthday or both before it can be saved.
+- The same-name sheet shows a singular or plural title, lists at most 3 matches, and counts the rest.
