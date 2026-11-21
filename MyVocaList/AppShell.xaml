@@ -67,6 +67,11 @@
         <ShellContent ContentTemplate="{DataTemplate venues:VenuesPage}" />
     </FlyoutItem>
 
+    <!-- SPIKE (task/spike-syncfusion): Syncfusion POC copy of Venues, hidden like the other routes -->
+    <FlyoutItem Route="venues-sf" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate venues:VenuesSfPage}" />
+    </FlyoutItem>
+
     <FlyoutItem Route="people" FlyoutItemIsVisible="False">
         <ShellContent ContentTemplate="{DataTemplate people:PeoplePage}" />
     </FlyoutItem>

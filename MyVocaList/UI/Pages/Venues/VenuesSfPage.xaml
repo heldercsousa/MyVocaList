@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:CrudListPageBase
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:toolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:views="clr-namespace:MyVocaList.UI.Components"
+    x:Class="MyVocaList.UI.Pages.Venues.VenuesSfPage"
+    x:Name="page"
+    x:DataType="vm:VenuesViewModel"
+    Title="Venues (Syncfusion POC)"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
+
+    <!-- SPIKE (task/spike-syncfusion): Syncfusion copy of VenuesPage. The original is untouched.
+         Uses CrudListViewSf. Item tap / long-press are wired here (SfEffectsView + TapGestureRecognizer),
+         because the stock CollectionView has no tap or long-press events. -->
+
+    <Shell.TitleView>
+        <appbars:SmallAppBar
+            Title="{Binding AppBarTitle}"
+            IsElevated="{Binding IsScrolled}" />
+    </Shell.TitleView>
+
+    <Grid>
+    <views:CrudListViewSf
+        ItemsSource="{Binding Venues}"
+        SelectedItemsSource="{Binding SelectedVenuesRaw}"
+        IsEmptyNoItems="{Binding IsEmptyNoVenues}"
+        SearchText="{Binding SearchText, Mode=TwoWay}"
+        IsSearchBarElevated="{Binding IsScrolled}"
+        SearchPlaceholder="Search venues..."
+        EmptyNoItemsIllustration="nightlife_outlined"
+        EmptyNoItemsHeadline="No venue registered"
+        FabCommand="{Binding AddVenueCommand}"
+        FabDescription="Add venue">
+
+        <views:CrudListViewSf.ItemTemplate>
+            <DataTemplate x:DataType="dto:VenueListItemDto">
+                <toolkit:SfEffectsView LongPressedCommand="{Binding ViewModel.ItemLongPressCommand, Source={x:Reference page}}"
+                                       LongPressedCommandParameter="{Binding .}"
+                                       TouchDownEffects="Highlight">
+                    <toolkit:SfEffectsView.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ViewModel.ItemTapCommand, Source={x:Reference page}}"
+                                              CommandParameter="{Binding .}" />
+                    </toolkit:SfEffectsView.GestureRecognizers>
+                    <lists:ListItem Headline="{Binding Name}"
+                                    SupportingText="{Binding AddressSummary}"
+                                    IsSelected="False">
+                        <lists:ListItem.LeadingContent>
+                            <lists:ListItemLeadingImage ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" PlaceholderIcon="nightlife_outlined" Margin="0,8" />
+                        </lists:ListItem.LeadingContent>
+                        <lists:ListItem.TrailingContent>
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <lists:ListItemOverflowButton />
+                                <lists:ListItemCheckbox VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </lists:ListItem.TrailingContent>
+                    </lists:ListItem>
+                </toolkit:SfEffectsView>
+            </DataTemplate>
+        </views:CrudListViewSf.ItemTemplate>
+
+        <views:CrudListViewSf.SelectedItemTemplate>
+            <DataTemplate x:DataType="dto:VenueListItemDto">
+                <lists:ListItem Headline="{Binding Name}"
+                                SupportingText="{Binding AddressSummary}"
+                                IsSelected="True">
+                    <lists:ListItem.LeadingContent>
+                        <lists:ListItemLeadingImage ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" PlaceholderIcon="nightlife_outlined" Margin="0,8" />
+                    </lists:ListItem.LeadingContent>
+                    <lists:ListItem.TrailingContent>
+                        <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
+                    </lists:ListItem.TrailingContent>
+                </lists:ListItem>
+            </DataTemplate>
+        </views:CrudListViewSf.SelectedItemTemplate>
+
+    </views:CrudListViewSf>
+
+        <!-- Exit confirmation: SfBottomSheet (was dx:BottomSheet) -->
+        <toolkit:SfBottomSheet x:Name="exitConfirmSheet"
+                               HalfExpandedRatio="0.28"
+                               IsModal="True"
+                               ShowGrabber="True"
+                               Background="{StaticResource Surface}"
+                               CornerRadius="28">
+            <toolkit:SfBottomSheet.BottomSheetContent>
+                <VerticalStackLayout>
+                    <Label Text="Exit MyVocaList?"
+                           FontFamily="RobotoMedium" FontSize="16"
+                           TextColor="{StaticResource OnSurface}"
+                           HorizontalTextAlignment="Center"
+                           Margin="24,20" />
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
+                    <Button Text="Exit"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Error}"
+                            HorizontalOptions="Fill"
+                            HeightRequest="56"
+                            Clicked="OnConfirmExit" />
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
+                    <Button Text="Cancel"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Primary}"
+                            HorizontalOptions="Fill"
+                            HeightRequest="56"
+                            Clicked="OnCancelExit" />
+                </VerticalStackLayout>
+            </toolkit:SfBottomSheet.BottomSheetContent>
+        </toolkit:SfBottomSheet>
+    </Grid>
+
+</pages:CrudListPageBase>

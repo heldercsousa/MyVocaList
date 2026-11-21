@@ -32,6 +32,12 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.YouTubeSearch, typeof(YouTubeSearchPage));
 
         _ = viewModel.InitializeAsync();
+
+#if DEBUG
+        // SPIKE (task/spike-syncfusion): open the Syncfusion Venues copy on launch for the DX-vs-Sf emulator comparison.
+        // Debug builds only. Remove with the spike branch.
+        Dispatcher.Dispatch(async () => await GoToAsync("//venues-sf"));
+#endif
     }
 
     // Fallback: catches back press when Shell is at root and VenuesPage.OnBackButtonPressed

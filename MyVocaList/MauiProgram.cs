@@ -11,6 +11,7 @@ using MyVocaList.Infra.Repository;
 using CommunityToolkit.Mvvm.Messaging;
 #if DEBUG
 using MauiDevFlow.Agent;
+using Syncfusion.Maui.Toolkit.Hosting; // SPIKE (task/spike-syncfusion)
 #endif
 
 namespace MyVocaList;
@@ -39,6 +40,7 @@ public static class MauiProgram
             .UseDevExpressCollectionView()
             .UseDevExpressControls()
             .UseDevExpressEditors()
+            .ConfigureSyncfusionToolkit() // SPIKE (task/spike-syncfusion)
             .ConfigureFonts(fonts =>
             {
                 // Roboto for Material Design 3
@@ -149,6 +151,7 @@ public static class MauiProgram
         builder.Services.AddTransient<VenueMapPickerPage>();
         builder.Services.AddTransient<PersonFormPage>();
         builder.Services.AddTransient<VenuesPage>();
+        builder.Services.AddTransient<VenuesSfPage>(); // SPIKE (task/spike-syncfusion)
         builder.Services.AddTransient<PeoplePage>();
         builder.Services.AddTransient<ArtistsPage>();
         builder.Services.AddTransient<ArtistFormPage>();
