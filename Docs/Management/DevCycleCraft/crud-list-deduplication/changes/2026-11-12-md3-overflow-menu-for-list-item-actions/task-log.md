@@ -145,8 +145,8 @@ Commits `b4de1cdb` (T3) and `d4e88ca1` (T5).
   3. Update the internal guidelines for governed components.
 
 ### Checkpoint
-- Step: T11a1–T11b done, T12 verified, merged `9fd344ba` and pushed.
-- Next: Helder's on-device pass for revision 2026-11-20b (optional TalkBack, REQ-OVFM-23), then status ✅.
+- Step: T13 done 2026-11-21 (Helder device pass: all 15 steps OK). Status ✅. Item closed.
+- Next: none. Follow-ups in the T13 entry.
 - Context manifest: this `task-log.md`, `tasks.md`, `design.md` (§ Revision 2026-11-20b), `requirements.md` (§ Revision 2026-11-20b), `plan.md` (§ Revision 2026-11-20b), `.claude/library/component-safety-gate.md`
 - Playwright note: the session's MCP had the old token, so the crawl drives `@playwright/mcp@0.0.78 --extension` from a script (scratchpad), with the token read from `.env.local`.
 
@@ -293,3 +293,8 @@ Commit `16122733`. Gates: `design.md § Governance (revision 2026-11-20b)`.
 
 - Observation for Helder: the pressed colour of a menu item comes from the existing `MenuItem` style (a strong tonal fill). The MD3 pressed state layer is On surface at about 10%, so that is a possible refinement.
 - Merged into `develop` as `9fd344ba`.
+
+## 2026-11-21 — T13 Helder on-device pass — Done
+- Every step of the 15-step checklist passed, including TalkBack (REQ-OVFM-23).
+- Open question: a tap on the ⋮ of an open menu leaves it open. The spec says nothing explicit; REQ-OVFM-13a (outside tap closes) implies it should close. Likely a close-then-reopen. Not ordered; follow-up only.
+- Follow-ups: trigger re-tap toggle · softer item pressed fill · native accessibility focus instead of `SetSemanticFocus` · doc-comment typo.
