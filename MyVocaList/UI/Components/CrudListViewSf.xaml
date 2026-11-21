@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:toolkit="http://schemas.syncfusion.com/maui/toolkit"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
+    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    xmlns:menus="clr-namespace:MyVocaList.UI.Components.Menus"
+    x:Class="MyVocaList.UI.Components.CrudListViewSf"
+    x:Name="self">
+
+    <!-- SPIKE (task/spike-syncfusion): Syncfusion copy of CrudListView. The original is untouched.
+         Ported to Syncfusion / stock MAUI: SfShimmer (was dx:ShimmerView), RefreshView + CollectionView
+         (was DXCollectionView), SfBottomSheet x2 (was dx:BottomSheet), SearchBarSf (was appbars:SearchBar),
+         stock Buttons inside the sheets (was dx:DXButton).
+         NOT ported (still DevExpress, kept as originals): states:EmptyState, toolbars:FloatingToolbar,
+         FAB dx:DXButton, menus:Menu (shared overflow host, IMenuHost). -->
+
+    <Grid x:Name="rootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition x:Name="filterRow" Height="0" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: SearchBarSf (Syncfusion SfTextInputLayout + Entry) -->
+        <appbars:SearchBarSf x:Name="searchBar"
+                             Grid.Row="0"
+                             SearchText="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                             Placeholder="{Binding SearchPlaceholder, Source={x:Reference self}}"
+                             IsElevated="{Binding IsSearchBarElevated, Source={x:Reference self}}" />
+
+        <!-- Row 1: FilterContent slot (same as original) -->
+        <ContentView x:Name="filterContentHost"
+                     Grid.Row="1"
+                     IsVisible="False" />
+
+        <!-- Row 2: SfShimmer wrapping RefreshView > CollectionView -->
+        <toolkit:SfShimmer Grid.Row="2"
+                           IsActive="{Binding IsInitialLoading}"
+                           WaveWidth="200"
+                           WaveColor="#FFFFFF">
+            <toolkit:SfShimmer.CustomView>
+                <VerticalStackLayout Spacing="0">
+                    <BoxView HeightRequest="72" Color="{StaticResource SurfaceContainerHigh}" Margin="16,8" />
+                    <BoxView HeightRequest="72" Color="{StaticResource SurfaceContainerHigh}" Margin="16,8" />
+                    <BoxView HeightRequest="72" Color="{StaticResource SurfaceContainerHigh}" Margin="16,8" />
+                    <BoxView HeightRequest="72" Color="{StaticResource SurfaceContainerHigh}" Margin="16,8" />
+                    <BoxView HeightRequest="72" Color="{StaticResource SurfaceContainerHigh}" Margin="16,8" />
+                    <BoxView HeightRequest="72" Color="{StaticResource SurfaceContainerHigh}" Margin="16,8" />
+                </VerticalStackLayout>
+            </toolkit:SfShimmer.CustomView>
+
+            <RefreshView IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                         Command="{Binding RefreshCommand}"
+                         Margin="0,0,0,88">
+                <CollectionView x:Name="collectionView"
+                                ItemsSource="{Binding ItemsSource, Source={x:Reference self}}"
+                                ItemTemplate="{Binding ItemTemplate, Source={x:Reference self}}"
+                                SelectionMode="None"
+                                RemainingItemsThreshold="3"
+                                RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
+                                Scrolled="OnCollectionViewScrolled"
+                                SelectionChanged="OnSelectionChanged" />
+            </RefreshView>
+        </toolkit:SfShimmer>
+
+        <!-- Empty state: DX original (not ported) -->
+        <states:EmptyState Grid.Row="2"
+            Illustration="{Binding EmptyNoItemsIllustration, Source={x:Reference self}}"
+            Headline="{Binding EmptyNoItemsHeadline, Source={x:Reference self}}"
+            IsVisible="{Binding IsEmptyNoItems, Source={x:Reference self}}"
+            Margin="32,32,32,88" />
+
+        <!-- Empty state: search returned no results (DX original, not ported) -->
+        <states:EmptyState Grid.Row="2"
+            Illustration="search_outlined"
+            Headline="No results found"
+            IsVisible="{Binding IsEmptyNoResults}"
+            Margin="32,32,32,88" />
+
+        <!-- Toolbar + FAB: DX originals (not ported) -->
+        <HorizontalStackLayout Grid.Row="2"
+                               HorizontalOptions="Center"
+                               VerticalOptions="End"
+                               Margin="0,0,0,16"
+                               Spacing="8">
+            <toolbars:FloatingToolbar
+                VerticalOptions="Center"
+                IsVisible="{Binding IsSelectionMode}"
+                Action1Icon="done_all_outlined"
+                Action1Command="{Binding SelectAllCommand}"
+                Action1Description="Select all"
+                Action1IsSelected="{Binding IsAllSelected}"
+                Action2Icon="delete_outlined"
+                Action2Command="{Binding DeleteSelectedCommand}"
+                Action2Description="Delete selected" />
+            <dx:DXButton Style="{StaticResource Fab}"
+                         Icon="{Binding FabIcon, Source={x:Reference self}}"
+                         VerticalOptions="Center"
+                         SemanticProperties.Description="{Binding FabDescription, Source={x:Reference self}}"
+                         Command="{Binding FabCommand, Source={x:Reference self}}" />
+        </HorizontalStackLayout>
+
+        <!-- Confirm action sheet: SfBottomSheet (was dx:BottomSheet) -->
+        <toolkit:SfBottomSheet x:Name="confirmSheet"
+                               Grid.RowSpan="3"
+                               HalfExpandedRatio="0.28"
+                               IsModal="True"
+                               ShowGrabber="True"
+                               Background="{StaticResource Surface}"
+                               CornerRadius="28"
+                               StateChanged="OnConfirmSheetStateChanged">
+            <toolkit:SfBottomSheet.BottomSheetContent>
+                <VerticalStackLayout>
+                    <Label Text="{Binding ConfirmMessage}"
+                           StyleClass="Title.Medium"
+                           TextColor="{StaticResource OnSurface}"
+                           HorizontalTextAlignment="Center"
+                           Margin="24,20" />
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
+                    <Button Text="{Binding ConfirmActionText}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Error}"
+                            HeightRequest="56"
+                            Command="{Binding ConfirmActionCommand}" />
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
+                    <Button Text="Cancel"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Primary}"
+                            HeightRequest="56"
+                            Command="{Binding DismissConfirmCommand}" />
+                </VerticalStackLayout>
+            </toolkit:SfBottomSheet.BottomSheetContent>
+        </toolkit:SfBottomSheet>
+
+        <!-- Item actions sheet (press-and-hold in selection mode): SfBottomSheet -->
+        <toolkit:SfBottomSheet x:Name="itemActionsSheet"
+                               Grid.RowSpan="3"
+                               HalfExpandedRatio="0.22"
+                               IsModal="True"
+                               ShowGrabber="True"
+                               Background="{StaticResource Surface}"
+                               CornerRadius="28"
+                               StateChanged="OnItemActionsSheetStateChanged">
+            <toolkit:SfBottomSheet.BottomSheetContent>
+                <VerticalStackLayout Padding="0,8">
+                    <Button Text="Edit"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource OnSurface}"
+                            HeightRequest="56"
+                            Command="{Binding EditItemCommand}" />
+                    <Button Text="Delete"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Error}"
+                            HeightRequest="56"
+                            Command="{Binding DeleteItemCommand}" />
+                </VerticalStackLayout>
+            </toolkit:SfBottomSheet.BottomSheetContent>
+        </toolkit:SfBottomSheet>
+
+        <!-- Overflow item menu: DX Menu (not ported), shared IMenuHost used by ListItemOverflowButton -->
+        <menus:Menu x:Name="itemMenu"
+                    IsOpen="{Binding IsItemMenuOpen, Mode=TwoWay}"
+                    ItemsSource="{Binding ItemMenuItems}"
+                    Closed="OnItemMenuClosed" />
+
+    </Grid>
+
+</ContentView>

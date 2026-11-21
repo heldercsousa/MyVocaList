@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.syncfusion.com/maui/toolkit"
+    x:Class="MyVocaList.UI.Components.AppBars.SearchBarSf"
+    x:Name="self">
+
+    <!-- SPIKE (task/spike-syncfusion): Syncfusion copy of appbars:SearchBar.
+         Same BindableProperties (SearchText TwoWay, Placeholder). Elevation (IsElevated) is not ported:
+         the copy keeps SurfaceContainerLow. Input is SfTextInputLayout + Entry. -->
+    <Border x:Name="container"
+            StrokeShape="RoundRectangle 28"
+            HeightRequest="56"
+            Margin="16,8"
+            Stroke="Transparent"
+            BackgroundColor="{StaticResource SurfaceContainerLow}">
+
+        <toolkit:SfTextInputLayout ContainerType="Outlined"
+                                   Hint="{Binding Placeholder, Source={x:Reference self}}"
+                                   HasError="False"
+                                   Margin="8,0"
+                                   VerticalOptions="Center">
+            <Entry x:Name="searchEntry"
+                   Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                   TextColor="{StaticResource OnSurface}"
+                   FontSize="16"
+                   Keyboard="Text"
+                   ReturnType="Search"
+                   ClearButtonVisibility="WhileEditing"
+                   SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
+        </toolkit:SfTextInputLayout>
+    </Border>
+</ContentView>

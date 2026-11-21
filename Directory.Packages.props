@@ -73,6 +73,7 @@
     <PackageVersion Include="DevExpress.Maui.Controls" Version="25.2.4" />
     <PackageVersion Include="DevExpress.Maui.Core" Version="25.2.4" />
     <PackageVersion Include="DevExpress.Maui.Editors" Version="25.2.4" />
+    <PackageVersion Include="Syncfusion.Maui.Toolkit" Version="1.0.12" />
   </ItemGroup>
   <!-- ================================================================ -->
   <!-- Dev Tools                                                        -->

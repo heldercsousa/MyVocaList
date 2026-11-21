@@ -123,6 +123,8 @@
 		<PackageReference Include="DevExpress.Maui.CollectionView" />
 		<PackageReference Include="DevExpress.Maui.Controls" />
 		<PackageReference Include="DevExpress.Maui.Editors" />
+		<!-- Spike (task/spike-syncfusion): Syncfusion Toolkit POC -->
+		<PackageReference Include="Syncfusion.Maui.Toolkit" />
 
 		<!-- Serilog Packages -->
 		<PackageReference Include="Serilog" />
