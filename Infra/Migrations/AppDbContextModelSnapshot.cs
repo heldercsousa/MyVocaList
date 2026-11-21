@@ -307,10 +307,11 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0);
 
-                    b.Property<string>("BirthdayDayMonth")
-                        .HasMaxLength(5)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
+                    b.Property<int?>("BirthDay")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("BirthMonth")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -344,12 +345,12 @@ namespace MyVocaList.Infra.Migrations
                     b.HasIndex("FullName")
                         .HasDatabaseName("IX_Persons_FullName");
 
-                    b.HasIndex("FullName", "BirthdayDayMonth")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Persons_Name_Birthday")
-                        .HasFilter("[BirthdayDayMonth] IS NOT NULL");
+                    b.ToTable("People", t =>
+                        {
+                            t.HasCheckConstraint("CK_Persons_Birthday", "(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay IS NOT NULL AND BirthMonth IS NOT NULL AND BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)");
 
-                    b.ToTable("People");
+                            t.HasCheckConstraint("CK_Persons_EmailOrBirthday", "Email IS NOT NULL OR BirthDay IS NOT NULL");
+                        });
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Song", b =>

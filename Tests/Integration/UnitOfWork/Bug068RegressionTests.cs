@@ -70,10 +70,10 @@ public class Bug068RegressionTests
         await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
-        var (createOk, _, person) = await persons.CreatePersonAsync("Tracking Person");
+        var (createOk, _, person) = await persons.CreatePersonAsync("Tracking Person", email: "tracking.person@example.com");
         Assert.True(createOk);
 
-        var (updateOk, message) = await persons.UpdatePersonAsync(person!.Id, "Updated Person Name");
+        var (updateOk, message) = await persons.UpdatePersonAsync(person!.Id, "Updated Person Name", null, null, "tracking.person@example.com");
 
         Assert.True(updateOk, message);
         var reread = await persons.GetPersonByIdAsync(person.Id);

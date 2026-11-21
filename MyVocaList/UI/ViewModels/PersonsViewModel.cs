@@ -1,3 +1,4 @@
+using System.Globalization;
 using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
@@ -77,10 +78,12 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
     protected override async Task NavigateToEditAsync(PersonListItemDto item)
     {
         var name = Uri.EscapeDataString(item.FullName);
-        var birthday = Uri.EscapeDataString(item.BirthdayDayMonth ?? string.Empty);
+        // Day and month travel as two integer query parameters; both empty when the singer has no birthday.
+        var birthDay = item.BirthDay?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        var birthMonth = item.BirthMonth?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
         var email = Uri.EscapeDataString(item.Email ?? string.Empty);
         await (Shell.Current?.GoToAsync(
-            $"{Routes.PersonForm}?personId={item.Id}&personName={name}&personBirthday={birthday}&personEmail={email}") ?? Task.CompletedTask);
+            $"{Routes.PersonForm}?personId={item.Id}&personName={name}&personBirthDay={birthDay}&personBirthMonth={birthMonth}&personEmail={email}") ?? Task.CompletedTask);
     }
 
     protected override void RaiseEntityEmptyStateProperties()

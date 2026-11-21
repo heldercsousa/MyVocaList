@@ -33,7 +33,7 @@ public class PersonFormViewModelBug044Tests
         var sut = CreateSut();
         sut.PersonName = "Helder Sousa"; // raw typed text on the New Singer form
 
-        var person = new Person { Id = 7, FullName = "Helder Sousa", BirthdayDayMonth = "15/03", Email = "h@x.com" };
+        var person = new Person { Id = 7, FullName = "Helder Sousa", BirthDay = 15, BirthMonth = 3, Email = "h@x.com" };
         string navigatedRoute = null;
         _navigationMock.Setup(n => n.GoToAsync(It.IsAny<string>()))
                        .Callback<string>(r => navigatedRoute = r)
@@ -45,6 +45,24 @@ public class PersonFormViewModelBug044Tests
         Assert.StartsWith($"../{Routes.PersonForm}?", navigatedRoute); // "../" pops the current form first
         Assert.Contains("personId=7", navigatedRoute);
         Assert.Contains($"personName={Uri.EscapeDataString(person.FullName)}", navigatedRoute);
+    }
+
+    // [AC] REQ-BDAY-09: The suggestion pick carries the stored day and month as two query parameters.
+    [Fact]
+    public async Task SuggestionSelected_CarriesBirthDayAndMonthAsQueryParams()
+    {
+        var sut = CreateSut();
+        var person = new Person { Id = 7, FullName = "Helder Sousa", BirthDay = 15, BirthMonth = 3, Email = "h@x.com" };
+        string navigatedRoute = null;
+        _navigationMock.Setup(n => n.GoToAsync(It.IsAny<string>()))
+                       .Callback<string>(r => navigatedRoute = r)
+                       .Returns(Task.CompletedTask);
+
+        await sut.SuggestionSelectedCommand.ExecuteAsync(SuggestionFor(person));
+
+        Assert.Contains("personBirthDay=15", navigatedRoute);
+        Assert.Contains("personBirthMonth=3", navigatedRoute);
+        Assert.DoesNotContain("personBirthday=", navigatedRoute);
     }
 
     // [AC] persons AC-2.3 (edge): a suggestion whose Data is not a Person must not navigate at all.
