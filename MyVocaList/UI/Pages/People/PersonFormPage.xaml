@@ -120,23 +120,27 @@
 
                         <BoxView Style="{StaticResource Divider}" />
 
-                        <!-- Same-name singers: name and display identifier; tap to open in edit mode -->
+                        <!-- Same-name singers: name and display identifier; Open button opens the singer in edit mode -->
                         <VerticalStackLayout Spacing="0"
                                              BindableLayout.ItemsSource="{Binding SameNameMatches}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="models:AutocompleteSuggestion">
-                                    <VerticalStackLayout Padding="24,12" Spacing="2">
-                                        <VerticalStackLayout.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PersonFormViewModel}}, Path=OpenSameNameCommand}"
-                                                                  CommandParameter="{Binding .}" />
-                                        </VerticalStackLayout.GestureRecognizers>
-                                        <Label Text="{Binding Headline}"
-                                               StyleClass="Body.Large"
-                                               TextColor="{StaticResource OnSurface}" />
-                                        <Label Text="{Binding SupportingText}"
-                                               StyleClass="Body.Small"
-                                               TextColor="{StaticResource OnSurfaceVariant}" />
-                                    </VerticalStackLayout>
+                                    <Grid ColumnDefinitions="*,Auto" Padding="24,12">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Headline}"
+                                                   StyleClass="Body.Large"
+                                                   TextColor="{StaticResource OnSurface}" />
+                                            <Label Text="{Binding SupportingText}"
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                                        </VerticalStackLayout>
+                                        <dx:DXButton Grid.Column="1"
+                                                     Content="Open"
+                                                     Style="{StaticResource OutlinedButton}"
+                                                     Padding="16,0"
+                                                     VerticalOptions="Center"
+                                                     Clicked="OnSameNameOpenClicked" />
+                                    </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>

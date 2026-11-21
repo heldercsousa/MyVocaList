@@ -142,3 +142,44 @@ Full-suite RED before the fixture adaptation: 5 existing PersonFormViewModelTest
 ### Design concern
 - None beyond the REQ-DUP-07a co-occurrence gap above.
 
+---
+## Task: Fix B - same-name sheet Open button does nothing (E2E finding, 2026-11-21)
+**Plan:** orchestrator emulator E2E finding (no plan file)
+**Status:** To Review
+**Started:** 2026-11-21
+**Completed:** 2026-11-21
+
+### Outcome
+- Option A (`x:Name="page"` on the ContentPage, `Command` bound with `Source={x:Reference page}, Path=ViewModel.OpenSameNameCommand`) was applied and deployed. Tapping Open did nothing: the sheet stayed open, logcat showed no binding exception, and the command did not run (`OpenSameNameAsync` closes the sheet first, so a run would have closed it).
+- Option B worked: the Open button uses `Clicked="OnSameNameOpenClicked"`; the handler in `PersonFormPage.xaml.cs` forwards the row `BindingContext` (`AutocompleteSuggestion`) to `_viewModel.OpenSameNameCommand.Execute(match)`. The option A x:Name and xmlns were removed. Logic stays in the ViewModel.
+- design.md 2026-11-21 note updated to option B and the reason (option A also failed inside the sheet).
+
+### Changed files:
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml` (Open button: `Clicked` handler, column 1 of the row Grid)
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml.cs` (`OnSameNameOpenClicked` forwarder)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/design.md` (2026-11-21 note: option B, reason, SongFormPage follow-up)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/requirements.md` (REQ-DUP-09 Open-button bullet, carried from the previous uncommitted state)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/task-log.md` (this entry)
+
+### Build notes
+Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` after a clean net10.0-android (obj and bin deleted) - 0 errors, 10 warnings (pre-existing, none in the edited files) | Tests: `dotnet test Tests/MyVocaList.Tests.csproj` 2007 passed, 0 failed, 0 skipped | Commit SHA: see git log (commit carries `Item: BUG-088`)
+Files written and re-read: PersonFormPage.xaml (grep: Clicked line present, no x:Name page, no xmlns:pages), PersonFormPage.xaml.cs (handler lines 43-50 re-read), design.md (2026-11-21 note re-read).
+
+### Emulator verification (emulator-5554, app not uninstalled)
+- Clean Android build, deployed with `dotnet build -t:Run -f net10.0-android`. The install step completed (`dumpsys` lastUpdateTime matched the deploy), but the dotnet process hung after install on two runs; the second run was stopped and the app was not reinstalled. The relaunch after the final run was taken as the launch step.
+- Scenario 1: New Singer, "Helder Sousa", Jan/1, Save -> sheet with "Helder Sousa (14 Mar)" and Open -> Open lands on "Edit Singer", Birth day 14, Birth month March. Screenshots: `e2e-fixB2-01-sheet.png`, `e2e-fixB2-03-after-open.png` (scratchpad). Cancel back to the list.
+- Scenario 2: New Singer, "Helder Sousa", Jan/1, Save -> sheet -> Save as new -> Singers list shows two "Helder Sousa" rows. Screenshot `e2e-fixB2-04-after-saveasnew.png`. Row 2 was opened via Edit to confirm 1 January, then deleted through More options -> Delete (snackbar "1 singer(s) successfully removed!"). Final list: one "Helder Sousa"; Edit shows 14 March. Screenshots `e2e-fixB2-05-overflow.png`, `e2e-fixB2-06-delete-confirm.png`, `e2e-fixB2-07-final-list.png`.
+- Scratchpad path for all screenshots: `C:\Users\helde\AppData\Local\Temp\claude\78c429b059350e8f\15c50708-c550-4362-8273-50a7a757e7cf\scratchpad\`
+
+### Test results
+- Full suite (`Tests/MyVocaList.Tests.csproj`): 2007 passed, 0 failed, 0 skipped.
+- Flaky-test check: `SongFormViewModelFrozenArtistTests.EditMode_LocalOnlySongAfterLoad_ArtistBecomesEditableAndNotifies` passed in the full run (run 1 of the check) and in three isolated runs of its class (18 of 18 each time). The earlier single failure did not reproduce, so no flakiness is established. No `.cs` change touched this test on the branch.
+
+### Follow-up for Helder (not changed)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` resolution-sheet and artist-match buttons still use `RelativeSource AncestorType={x:Type vm:SongFormViewModel}` (lines ~180 RemoveUrlCommand, ~302 OpenExistingSongCommand, ~377 UseExistingArtistCommand). They are likely affected by the same failure: option A did not fire inside the BottomSheet. Not verified on device; not changed here.
+
+### Design concern
+- The cause of the non-firing command binding inside `dx:BottomSheet` is not traced (no binding trace taken). The Clicked route works, so the touch reaches the button.
+
+### Spec gap: none open for Fix B
+Helder's option A/B choice was applied per the orchestrator fallback rule. Nothing blocking.

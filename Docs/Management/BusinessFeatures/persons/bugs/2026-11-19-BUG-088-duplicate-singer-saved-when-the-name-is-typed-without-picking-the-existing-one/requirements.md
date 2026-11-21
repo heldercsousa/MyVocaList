@@ -18,7 +18,7 @@ A singer's identity is **FullName + Email + (BirthDay, BirthMonth)**. FullName a
 - **REQ-DUP-07a (precedence):** The either/or error and the birthday one-of-two error (REQ-BDAY-06) are independent, so both can show at the same time.
 - **REQ-DUP-08 (form, duplicate):** When the service returns the REQ-DUP-01/02 message, the form shall show it as an error snackbar and stay on the page.
 - **REQ-DUP-09 (soft warning):** When Save is pressed with all fields valid and one or more *other* persons share the same FullName (default collation) but not the same identity, the form shall open a bottom sheet titled "A singer with this name already exists". It lists each same-name singer (name and `GetDisplayIdentifier()`) and offers:
-  - Tapping a listed singer opens that singer in edit mode, the same as a name-suggestion pick (AC-2.3).
+  - Each listed singer has an **Open** button that opens that singer in edit mode, the same as a name-suggestion pick (AC-2.3).
   - **Save as new** (insert mode), labelled **Save anyway** in edit mode, saves the form as a new singer or as the edit.
   - **Cancel**, or dismissing the sheet, closes it and stays on the form without saving.
 - **REQ-DUP-10:** The soft warning shall never block. In edit mode, it shall appear only when the FullName was changed from the loaded value.
