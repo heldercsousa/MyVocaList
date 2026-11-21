@@ -1,12 +1,13 @@
 ---
 id: singers-list-shows-birthday-and-email-instead-of-participations
 title: Singers list shows birthday and email instead of participations
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-21
 section: BusinessFeatures
 parent: persons
 goal: Each row in the Singers list shows the singer's birthday and email under the name, so namesakes can be told apart; participation and absence counts leave the list.
 gate: Helder passes the list on device.
+closed: 2026-11
 kind: change
 ---
 
