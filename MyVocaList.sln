@@ -2053,6 +2053,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-singers-list-sho
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\README.md
 		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\tasks.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\tasks.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\task-log.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\task-log.md
 	EndProjectSection
 EndProject
 Global
