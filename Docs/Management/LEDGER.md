@@ -10,7 +10,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| BUG-088+PLIST | Duplicate-singer identity (T5, T7) + Singers list identity line | merged, 2035 tests, emulator E2E passed; on-device gates open | develop | — | to review | 847641b7 | Helder: install; check name-only row (no ID) + Singers list 2nd line; see persons/bugs/2026-11-19-BUG-088-* and changes/2026-11-21-singers-list-* |
+| BUG-088 | Duplicate-singer identity (T5, T7, T8 form-flow fixes) | merged, 2037 tests, emulator E2E passed; on-device gate open | develop | — | to review | 8d43d71d | Helder: install; re-run pick-then-Save and sheet Open; see persons/bugs/2026-11-19-BUG-088-* |
 
 ## Completed (recent)
 
