@@ -21,10 +21,11 @@ Helder's directive (2026-11-21): do the POC. Write new code only; existing code 
 |---|------|--------|------------------|
 | S0 | Checkpoint log on develop + worktree created | done | worktree at `efd4cdf3` (develop tip 2026-11-21) |
 | S1 | Context7: Syncfusion MAUI packages (Toolkit vs commercial suite), net10 versions, license-key behaviour | done | Context7 `/syncfusion/maui-toolkit`. **Syncfusion Toolkit for .NET MAUI** (`Syncfusion.Maui.Toolkit`, latest 1.0.12 on nuget.org, LICENSE.txt in package — MIT per GitHub repo) has BottomSheet, Buttons, Chips, Shimmer, TextInputLayout, Popup, Expander, NavigationDrawer, TabView, PullToRefresh, SegmentedControl, Picker, Cards. Registered with `.ConfigureSyncfusionToolkit()`; **no license key**. It has **no ListView** → the POC uses stock MAUI `CollectionView` for the list. Commercial `SfListView` (needs a key) is not used. Context7 has no entry for the commercial suite. |
-| S2 | Duplicate `CrudListView` → `CrudListViewSf` (Syncfusion controls) | in progress | implementor dispatched; commits on the spike branch are prefixed `chore(spike-sf): S<n>` |
-| S3 | Duplicate Venues page → `VenuesSfPage` using `CrudListViewSf`; route + DI | pending | — |
-| S4 | Build net10.0-android, 0 errors | pending | — |
-| S5 | Emulator run: screenshots of the DX vs Sf Venues pages (list, shimmer, selection, search, empty state, sheets) | pending | screenshots go to `<worktree>/spike-screenshots/` (not under `Docs/`, not committed to develop) |
+| S2 | Duplicate `CrudListView` → `CrudListViewSf` (Syncfusion controls) | done | `cb570587`. New `CrudListViewSf` + `SearchBarSf` copies. Verified 2026-11-21: `git diff --numstat` shows 0 deleted lines; originals untouched |
+| S3 | Duplicate Venues page → `VenuesSfPage` using `CrudListViewSf`; route + DI | done | `1f696102`. `VenuesViewModel` reused unchanged. Hidden route `venues-sf`; DEBUG-only launch hook in `AppShell.xaml.cs` opens it first |
+| S4 | Build net10.0-android, 0 errors | done | 0 errors, 10 warnings, none from Syncfusion. Tests pass (1 flaky repository test passed on retry) |
+| S5 | Emulator run: screenshots of the DX vs Sf Venues pages (list, shimmer, selection, search, empty state, sheets) | done (partial) | `1a9e9974`, `spike-screenshots/`. List + delete sheet OK. **Failed on Sf:** (a) `SfTextInputLayout`+`Entry` search — no EditText in the native tree, no keyboard; (b) row tap / long-press never reach the VM (cause unconfirmed). Shimmer not captured; back-closes-sheet not checked |
+| S5b | Diagnose + fix (a) and (b) in the Sf copies only (≤3 attempts each); re-capture search / empty / selection; check back button closing the sheet | in progress | fresh implementor dispatched |
 | S6 | Spike results written into `findings.md` § Spike results | pending | — |
 | S7 | Commit spike branch + push; docs commit on develop | pending | — |
 
