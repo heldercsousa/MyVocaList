@@ -49,3 +49,7 @@ New and changed criteria:
   - The sheet lists at most **3** same-name singers, oldest first (lowest Id), each with its Open button.
   - When N > 3, a line under the list reads "…and M more. Find them in the Singers list.", where M = N − 3.
   - Buttons are unchanged.
+
+## Spec updated 2026-11-21 (Helder, T6 device check)
+
+- **REQ-DUP-15 (no internal ID shown):** A singer with no email and no birthday shall show **no identifier**. `Person.GetDisplayIdentifier()` returns an empty string instead of `"(ID: n)"`, so the same-name sheet rows and the name suggestions show only the name. The database Id is for developers only, not for the user. This supersedes the "falls back to the ID" case of REQ-BDAY-10 (`changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/`, now shipped). By REQ-DUP-13, at most one singer per name can be name-only, so that row stays distinguishable.
