@@ -31,13 +31,22 @@ public class PersonBirthdayTests
         Assert.Equal("john@example.com", person.GetDisplayIdentifier());
     }
 
-    // [AC] REQ-BDAY-10: no email and no birthday falls back to the ID
+    // [AC] REQ-DUP-15: no email and no birthday shows no identifier
     [Fact]
-    public void GetDisplayIdentifier_NoEmailNoBirthday_FallsBackToId()
+    public void GetDisplayIdentifier_NoEmailNoBirthday_ReturnsEmpty()
     {
         var person = new Person("John Doe") { Id = 7 };
 
-        Assert.Equal("(ID: 7)", person.GetDisplayIdentifier());
+        Assert.Equal(string.Empty, person.GetDisplayIdentifier());
+    }
+
+    // [AC] REQ-DUP-15: no email and no birthday shows no identifier
+    [Fact]
+    public void GetDisplayName_NoEmailNoBirthday_ReturnsFullNameOnly()
+    {
+        var person = new Person("John Doe") { Id = 7 };
+
+        Assert.Equal("John Doe", person.GetDisplayName());
     }
 
     // [AC] REQ-BDAY-02: day counts per month — February allows 29, 30-day months stop at 30

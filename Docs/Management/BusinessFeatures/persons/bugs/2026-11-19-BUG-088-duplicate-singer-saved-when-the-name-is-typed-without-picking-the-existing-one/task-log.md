@@ -267,3 +267,40 @@ The Infra and Services production changes were written before their replacement 
 ### Evidence summary
 - Build: 0 errors. Full test suite: 2026 passed, 0 failed.
 - Emulator E2E: all four scenario groups observed; screenshots in the scratchpad (`t5-05`, `t5-06`, `t5-12` to `t5-17`).
+
+---
+## Task: BUG-088 T7 — No internal ID in display (REQ-DUP-15)
+**Plan:** `tasks.md` T7 (this folder)
+**Status:** To Review
+**Started:** 2026-11-21
+**Completed:** 2026-11-21
+
+### Changed files:
+- `Domain/Entity/Person.cs`
+- `Tests/Unit/Domain/PersonBirthdayTests.cs`
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/task-log.md`
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/tasks.md`
+
+### Verification evidence
+- RED: `GetDisplayIdentifier_NoEmailNoBirthday_ReturnsEmpty` failed (`"(ID: 7)"` vs `""`); `GetDisplayName_NoEmailNoBirthday_ReturnsFullNameOnly` failed (`"John Doe (ID: 7)"` vs `"John Doe"`).
+- GREEN: `PersonBirthdayTests` 17 passed, 0 failed.
+- Full suite: `dotnet test Tests/MyVocaList.Tests.csproj` — 2027 passed, 0 failed.
+- Grep for `(ID:` in all C# sources (excluding obj/bin): no remaining matches. No other test encoded the fallback; `PersonFormViewModelBug044Tests` has no ID assertions.
+- Emulator (clean `obj/bin net10.0-android`, pixel_5 API 36, `com.myvocalist`): deployed and launched.
+  - Created name-only singer "T7 NameOnly" (no email, no birthday). Saved.
+  - Created a second "T7 NameOnly", Save → same-name sheet shows the row as "T7 NameOnly" only, no ID, no visible broken gap (`t7-05-samename.png`).
+  - Full Name typed "T7" → suggestion row shows "T7 NameOnly" with no ID, but a blank band below the headline where the supporting line would be (`t7-06-suggest.png`). See Design concern.
+  - Screenshots: `C:\Users\helde\AppData\Local\Temp\claude\78c429b059350e8f\15c50708-c550-4362-8273-50a7a757e7cf\scratchpad\t7-00-start.png` … `t7-06-suggest.png`.
+  - Emulator stopped after the check. Test singer "T7 NameOnly" remains in the emulator DB (test data only).
+
+### Design concern (report, not edited)
+- Empty `SupportingText` in the suggestion popup (`AutocompleteField`, governed component) leaves an empty band under the headline. The sheet row (`ListItem`-style) renders cleanly. Not edited: governed component, per `component-change-governance.md`. Helder to decide whether a governed-component task is needed (e.g., collapse the supporting line when empty).
+
+### Traceability
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-DUP-15 | No email and no birthday shows no identifier | `Domain/Entity/Person.cs` `GetDisplayIdentifier` (returns `string.Empty`) | `PersonBirthdayTests.GetDisplayIdentifier_NoEmailNoBirthday_ReturnsEmpty` |
+| REQ-DUP-15 | Name shown alone, no trailing space | `Domain/Entity/Person.cs` `GetDisplayName` | `PersonBirthdayTests.GetDisplayName_NoEmailNoBirthday_ReturnsFullNameOnly` |
+
+Build notes: Build passed (0 errors; pre-existing EF1002 warning in `PersonIdentityIndexTests.cs`) | Tests: 2027 passed, 0 failed | Android deploy: passed.
+Files written and re-read: `Domain/Entity/Person.cs`, `Tests/Unit/Domain/PersonBirthdayTests.cs`, `task-log.md`, `tasks.md`.
