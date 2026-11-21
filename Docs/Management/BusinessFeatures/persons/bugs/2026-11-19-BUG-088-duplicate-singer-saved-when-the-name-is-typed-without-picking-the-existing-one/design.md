@@ -82,7 +82,7 @@ Root cause: in insert mode, `PersonService.CreatePersonAsync` checks only that t
 Existing tests whose AC is superseded must be updated as part of this spec change:
 - `PersonRepositoryTests.AddAsync_SameNameNullBirthday_AllowsDuplicate`: now this test needs an email difference.
 - `AddAsync_SameNameSameBirthday_ThrowsDbUpdateException`: now this case is covered by the identity index.
-- Any service or VM test that creates a person with neither email nor birthday: add an email.
+- ~~Any service or VM test that creates a person with neither email nor birthday: add an email.~~ Superseded 2026-11-21 by REQ-DUP-12.
 
 ## Spec updated 2026-11-21 (Helder, after the on-device test): name-only singers + sheet cap
 
@@ -96,24 +96,33 @@ REQ-DUP-03/05/07/07a are withdrawn; REQ-DUP-12/13/14 are new; REQ-DUP-09 is chan
      - `Up`: `DROP INDEX IF EXISTS IX_Persons_Identity;` then the same `CREATE UNIQUE INDEX` SQL as `PersonIdentityUniqueIndex`, with the literal `NOCASE_NOACCENT`.
      - `Down`: `DROP INDEX IF EXISTS IX_Persons_Identity;`.
   - Update the `PersonConfiguration` comment so it names the newest migration that creates the index.
-- Repository:
-  - `GetSameNameDifferentIdentityAsync` gains a `take` parameter. It orders by `Id` and returns at most `take` rows.
-  - Add `CountSameNameDifferentIdentityAsync(fullName, email, day, month, excludeId, ct)`, which reuses the same predicate.
-  - Add `FindIdentityMatchAsync(...)` → `Person?` (NoTracking), using the identity predicate. It may replace `IdentityExistsAsync` if that is simpler; update callers and tests.
+- Repository: this is the contract, and there are no alternatives.
+  - Keep `IdentityExistsAsync` as it is.
+  - Add `Task<bool> SameNameExistsAsync(string fullName, int? excludeId, CancellationToken ct)`. It matches any other person with the same FullName (Collate default), whatever the identity.
+  - Add `Task<int> CountSameNameAsync(string fullName, string? email, int? day, int? month, int? excludeId, bool includeIdentityMatch, CancellationToken ct)`.
+  - Replace `GetSameNameDifferentIdentityAsync` with `Task<IReadOnlyList<Person>> GetSameNameAsync(string fullName, string? email, int? day, int? month, int? excludeId, bool includeIdentityMatch, int take, CancellationToken ct)`. It is NoTracking, ordered by `Id`, and returns at most `take` rows. With `includeIdentityMatch == false`, it excludes the exact identity match using the shared predicate, as today.
+  - Update the callers and tests of the old name.
 
 ### Services
 - Remove the either/or step from Create and Update, and remove `ValidateContact` from `IPersonService` and `PersonService`. Delete the `EitherOrMessage` constant if nothing else uses it.
-- New step before the identity check (REQ-DUP-13): if email is empty and day and month are both null, call `CountSameNameDifferentIdentityAsync`, or a simpler `SameNameExistsAsync(fullName, excludeId)` (any other person with the same name, any identity). If one exists, return `NamesakeNeedsContactMessage` = "Another singer has this name. Enter an email or a birthday to save a new one." This also covers the exact name-only duplicate. The identity check (step 3) and `DuplicateMessage` are unchanged for the other cases.
+- `IsNameOnly(email, day, month)` is a private `PersonService` helper. It is true when the email is null or whitespace and day and month are both null.
+- **Create**, new step before the identity check: if `IsNameOnly` and `SameNameExistsAsync(name, null)`, return `NamesakeNeedsContactMessage` = "Another singer has this name. Enter an email or a birthday to save a new one." and do not save.
+- **Update**, same step: it applies only when all three hold:
+  - `IsNameOnly`;
+  - the trimmed name differs (ordinal) from the stored `FullName`, or the stored person had an email or birthday;
+  - `SameNameExistsAsync(name, id)`.
+- In every other case, the identity check (step 3) and `DuplicateMessage` are unchanged.
 - The `ConstraintViolationException` catch keeps returning `DuplicateMessage`. That race is unreachable, and the generic message is accepted.
-- `GetSameNamePersonsAsync` returns `SameNameResult(IReadOnlyList<Person> Matches, int TotalCount)`, a record in `Contracts/Models` (or wherever the service DTOs live). `Matches` is capped by `PersonService.SameNameListLimit = 3`.
-  - Two queries: a count, then `take: 3`. With `TotalCount == 0`, skip the second query.
+- `Task<SameNameResult> GetSameNamePersonsAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludeId, CancellationToken ct)` returns `SameNameResult(IReadOnlyList<Person> Matches, int TotalCount)`, a record in `Contracts/Models`.
+  - It sets `includeIdentityMatch = IsNameOnly(email, birthDay, birthMonth)`.
+  - It calls `CountSameNameAsync`. With a count of 0, it returns an empty result.
+  - Otherwise it calls `GetSameNameAsync` with `take: SameNameListLimit` (`public const int SameNameListLimit = 3` on `PersonService`).
 
 ### UI
 - VM: remove the either/or inline error and its `ValidateContact` call.
 - `SameNameSheetTitle`, a string property set when the sheet opens: "A singer with this name already exists" when TotalCount is 1, otherwise $"{n} singers with this name already exist".
-- `SameNameMoreText`: $"…and {n - 3} more. Find them in the Singers list." It is empty when TotalCount ≤ 3.
+- `SameNameMoreText`: $"…and {n - PersonService.SameNameListLimit} more. Find them in the Singers list." It is empty when TotalCount ≤ SameNameListLimit.
 - `HasMoreSameName` (bool) drives the label's `IsVisible`.
-- When the form is name-only, the sheet query lists **all** same-name persons, including an exact name-only match, so the host can Open it. Add an `includeIdentityMatch` flag to the count and list queries, or use a plain same-name query in that case.
 - `CanSaveAsNewFromSheet` (bool): true when the form has an email or a birthday. When it is false, the sheet hides the Save-as-new button and shows the REQ-DUP-13a hint label. The VM uses the same "has contact" input as the service call (email non-blank, or day/month set). That is only a display decision; the service enforces the rule.
 - XAML: bind the sheet title label to `SameNameSheetTitle`, and add one `Label` under the list (`BodyMedium` style, OnSurfaceVariant) bound to `SameNameMoreText`, with `IsVisible` bound to `HasMoreSameName`.
 
@@ -121,9 +130,10 @@ REQ-DUP-03/05/07/07a are withdrawn; REQ-DUP-12/13/14 are new; REQ-DUP-09 is chan
 | AC | Test |
 |----|------|
 | REQ-DUP-12 | Service (Moq): Create with no email and no birthday, and no namesake, succeeds. Repository (real SQLite, `MigrateAsync` to latest): a row with no email and no birthday inserts. |
-| REQ-DUP-13 | Service (Moq): name-only save when a namesake has an email → `NamesakeNeedsContactMessage` and no save. Update with excludeId: the person's own row is not a namesake. Repository (real SQLite): `SameNameExistsAsync` matches different case or accents and honours excludeId. |
-| REQ-DUP-13a | VM: name-only form with a namesake → sheet open, `CanSaveAsNewFromSheet` false. With an email → true. |
-| REQ-DUP-04/14 | `PersonIdentityIndexTests`: two name-only rows with the same name (different case) → the second throws. The existing `sqlite_master` guard after `MigrateAsync` still passes. |
-| REQ-DUP-09 | VM: 1 match → singular title, no more-line. 2 matches → "2 singers…". TotalCount 7 with 3 matches → 3 rows, "…and 4 more…", `HasMoreSameName` true. Service: passes take 3 and returns TotalCount. Repository: ordering by Id and take. |
+| REQ-DUP-13 | Service (Moq), one test per case:<ul><li>Create, name-only, a namesake has an email: `NamesakeNeedsContactMessage`, no save.</li><li>Create, name-only, an exact name-only namesake: `NamesakeNeedsContactMessage`, not `DuplicateMessage`.</li><li>A whitespace email counts as empty.</li><li>Update, name-only, name changed to a namesake's: rejected.</li><li>Update, the email is cleared while a namesake exists: rejected.</li><li>Update of an already name-only person, name unchanged: saves.</li><li>Update with excludeId: the person's own row is not a namesake.</li></ul> Repository (real SQLite): `SameNameExistsAsync` matches different case or accents and honours excludeId. |
+| REQ-DUP-13a | VM: name-only form with a namesake → sheet open, `CanSaveAsNewFromSheet` false, in insert and in edit mode (Save anyway hidden). With an email → true. Service: name-only → `includeIdentityMatch: true` is passed to the count and list queries. Repository: `includeIdentityMatch: true` returns the exact name-only match; `false` excludes it. |
+| REQ-DUP-14 | Migration test: after `MigrateAsync`, the `People` SQL in `sqlite_master` has no `CK_Persons_EmailOrBirthday`, and `IX_Persons_Identity` exists. |
+| REQ-DUP-04 | `PersonIdentityIndexTests`: two name-only rows with the same name (different case) → the second throws. The existing `sqlite_master` guard after `MigrateAsync` still passes. |
+| REQ-DUP-09 | VM: 1 match → singular title, no more-line. 2 matches → "2 singers…". TotalCount 4 with 3 matches → 3 rows and exactly "…and 1 more. Find them in the Singers list.", `HasMoreSameName` true. TotalCount 3 → no more-line. Service: passes take 3 and returns TotalCount. Repository: ordering by Id and take. |
 
 **Delete (withdrawn ACs):** the tests tagged REQ-DUP-03, REQ-DUP-05, REQ-DUP-07 and REQ-DUP-07a. Delete the `ValidateContact` tests.
