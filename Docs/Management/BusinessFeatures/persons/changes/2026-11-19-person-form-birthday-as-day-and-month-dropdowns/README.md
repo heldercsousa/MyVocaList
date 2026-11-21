@@ -1,12 +1,13 @@
 ---
 id: person-form-birthday-as-day-and-month-dropdowns
 title: Person form birthday as day and month dropdowns
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-19
 section: BusinessFeatures
 parent: persons
 goal: Replace the free-text birthday with two dropdowns (day, month) in English, no year, stored as two nullable integers; Gregorian only, other calendars are a non-goal.
 gate: Helder passes the dropdowns on device.
+closed: 2026-11
 kind: change
 ---
 
