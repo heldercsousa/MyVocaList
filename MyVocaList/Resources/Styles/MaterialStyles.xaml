@@ -79,6 +79,15 @@
         <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
     </Style>
 
+    <!-- ComboBoxEdit follows the same Outlined form-field convention as TextEdit and AutoCompleteEdit (selected value readability) -->
+    <Style TargetType="dx:ComboBoxEdit">
+        <Setter Property="BoxMode" Value="Outlined" />
+        <Setter Property="FocusedBorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+    </Style>
+
     <!-- ================================================================ -->
     <!-- FLYOUT MENU STYLES                                               -->
     <!-- ================================================================ -->

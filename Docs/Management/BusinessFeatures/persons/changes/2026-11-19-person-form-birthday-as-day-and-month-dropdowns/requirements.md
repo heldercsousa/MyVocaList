@@ -8,7 +8,9 @@ The free-text `DD/MM` birthday becomes two optional dropdowns, Day and Month. Va
 
 ## Acceptance Criteria
 
-- **REQ-BDAY-01:** The Person form shall show the birthday as two DevExpress dropdowns side by side, in this order: `Birth day` (1 to 31) and `Birth month` (January to December, English names). It shall not show a free-text or masked birthday field.
+- **REQ-BDAY-01:** The Person form shall show the birthday as two DevExpress dropdowns side by side, in this order: `Birth month` (January to December, English names) and `Birth day` (1 to 31). It shall not show a free-text or masked birthday field.
+
+> **Order changed 2026-11-21 (Helder):** month before day, so the day list is already scoped to the month.
 - **REQ-BDAY-02:** The `Birth day` list shall contain only the days valid for the selected month: 31 for Jan/Mar/May/Jul/Aug/Oct/Dec, 30 for Apr/Jun/Sep/Nov, and 29 for February. When no month is selected, it shall contain 1 to 31.
 - **REQ-BDAY-03:** When the user selects a month and the already-selected day is not valid for it (for example 31, then April), the day selection shall be cleared.
 - **REQ-BDAY-04:** Each dropdown can be cleared, so the birthday stays optional.
@@ -25,3 +27,4 @@ The free-text `DD/MM` birthday becomes two optional dropdowns, Day and Month. Va
 - Other calendars (lunar, Buddhist-era, Persian, Hijri).
 - Localized month names (a later multi-language task).
 - A free-text birthday note.
+- February always offers 29: no birth year is stored, so leap years cannot be computed (Helder, 2026-11-21: a year field would be a separate item).
