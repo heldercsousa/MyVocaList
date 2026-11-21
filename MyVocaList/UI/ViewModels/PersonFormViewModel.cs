@@ -26,7 +26,15 @@ public partial class PersonFormViewModel : ViewModelBase
     private readonly ILogger<PersonFormViewModel> _logger;
 
     // Shell passes all query parameters as strings; parse manually.
-    public string PersonIdRaw { set => PersonId = int.TryParse(value, out var id) ? id : null; }
+    // A loaded singer (pick or Open) re-applies the query to this form; the name that follows the id is its baseline (REQ-DUP-10).
+    public string PersonIdRaw
+    {
+        set
+        {
+            PersonId = int.TryParse(value, out var id) ? id : null;
+            _awaitingLoadedName = PersonId.HasValue;
+        }
+    }
 
     // Birthday day and month arrive as query strings and are parsed into the dropdown selections (REQ-BDAY-09).
     public string PersonBirthDayRaw
@@ -42,7 +50,25 @@ public partial class PersonFormViewModel : ViewModelBase
     }
 
     [ObservableProperty] private int? _personId;
-    [ObservableProperty] private string _personName = string.Empty;
+    private string _personName = string.Empty;
+
+    public string PersonName
+    {
+        get => _personName;
+        set
+        {
+            // REQ-DUP-10: the name that follows a loaded id is the baseline. Captured on every write, not only on a change,
+            // because a loaded name equal to the typed text raises no change event.
+            if (_awaitingLoadedName)
+            {
+                _awaitingLoadedName = false;
+                _loadedName = value?.Trim() ?? string.Empty;
+            }
+
+            if (SetProperty(ref _personName, value ?? string.Empty))
+                OnPersonNameChanged(_personName);
+        }
+    }
     [ObservableProperty] private string _personEmail = string.Empty;
 
     // Birthday dropdowns (REQ-BDAY-01..04). Both optional; the service decides whether the pair is valid.
@@ -93,8 +119,12 @@ public partial class PersonFormViewModel : ViewModelBase
     // (edit-mode dirty-guard, Form Validation Standard).
     private bool _isHydrating = true;
 
-    // Trimmed FullName as loaded from the query (edit mode). Set once, by CompleteHydration (REQ-DUP-10).
+    // Trimmed FullName as loaded from the query (edit mode). Set by CompleteHydration on the first call, and
+    // again by the next name that follows a loaded id (REQ-DUP-10: a pick or an Open re-loads the same form).
     private string _loadedName = string.Empty;
+
+    // True from a PersonIdRaw query write until the name that follows it is captured as the loaded name.
+    private bool _awaitingLoadedName;
 
     public bool IsEditMode => PersonId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Singer" : "New Singer";
@@ -191,7 +221,7 @@ public partial class PersonFormViewModel : ViewModelBase
         ApplyEmailValidation(PersonEmail);
     }
 
-    partial void OnPersonNameChanged(string value)
+    private void OnPersonNameChanged(string value)
     {
         // Counter counts the trimmed string — the same string ValidateNameInput checks —
         // so trailing whitespace cannot inflate the count (counter threshold alignment).
@@ -471,16 +501,17 @@ public partial class PersonFormViewModel : ViewModelBase
     {
         if (suggestion?.Data is not Person person) return;
 
-        Suggestions = [];
-
         await NavigateToEditAsync(person);
     }
 
     /// <summary>
-    /// Opens <paramref name="person"/> in edit mode. Shared by the name-suggestion pick and the same-name sheet (REQ-DUP-09).
+    /// Opens <paramref name="person"/> in edit mode. Shared by the name-suggestion pick and the same-name sheet Open (REQ-DUP-09).
+    /// Both paths clear the name suggestions first, so the loaded name never opens them (REQ-DUP-16).
     /// </summary>
     private async Task NavigateToEditAsync(Person person)
     {
+        Suggestions = [];
+
         // Day and month travel as two integer query parameters; both empty when the singer has no birthday.
         var birthDay = person.BirthDay?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
         var birthMonth = person.BirthMonth?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;

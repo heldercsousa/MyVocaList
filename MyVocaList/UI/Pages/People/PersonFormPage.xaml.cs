@@ -41,10 +41,15 @@ public partial class PersonFormPage : ContentPage
 
     // BUG-088 Fix B: the Open button sits inside dx:BottomSheet content, where the command binding did not fire on device.
     // The handler only forwards the row's own BindingContext; the logic stays in OpenSameNameCommand.
+    // BUG-088 T8 (b): the name field keeps focus when the sheet closes, so the loaded name would read as typing and open
+    // the suggestions. A pick ends the input the same way (AutocompleteDXField unfocuses after SelectCommand), so Open does too.
     private void OnSameNameOpenClicked(object? sender, EventArgs e)
     {
         if (sender is BindableObject { BindingContext: AutocompleteSuggestion match })
+        {
+            nameField.Unfocus();
             _viewModel.OpenSameNameCommand.Execute(match);
+        }
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
