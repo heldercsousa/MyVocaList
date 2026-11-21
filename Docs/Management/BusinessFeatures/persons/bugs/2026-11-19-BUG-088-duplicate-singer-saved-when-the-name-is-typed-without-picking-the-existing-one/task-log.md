@@ -304,3 +304,61 @@ The Infra and Services production changes were written before their replacement 
 
 Build notes: Build passed (0 errors; pre-existing EF1002 warning in `PersonIdentityIndexTests.cs`) | Tests: 2027 passed, 0 failed | Android deploy: passed.
 Files written and re-read: `Domain/Entity/Person.cs`, `Tests/Unit/Domain/PersonBirthdayTests.cs`, `task-log.md`, `tasks.md`.
+
+---
+## Task: T8 — BUG-088 form flow regressions found on device (REQ-DUP-10 clarified, REQ-DUP-16)
+**Plan:** Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/tasks.md
+**Status:** To Review
+**Started:** 2026-11-21
+**Completed:** 2026-11-21
+**Branch:** `task/bug088-t8-form-flow` (from develop c81cf879). Not merged.
+
+### Root cause (a): picked singer saved through the same-name sheet
+- The edit baseline `_loadedName` is set only by `CompleteHydration()` on its first call (the Add-mode hydration, empty name). A pick loads the singer into the same form through the query (`NavigateToEditAsync`), with no new hydration, so the baseline stayed empty.
+- Save with the unchanged name then counted as a change, and `GetSameNamePersonsAsync` ran. The service excluded the loaded id correctly, but the name-only namesake was still listed.
+- Confirmed on device before the fix. The sheet listed only the other namesake, so the loaded id was excluded and the page was in edit mode; the stale value was the baseline. The sheet Save button was hidden by the name-only rule (REQ-DUP-13a), so the label Save as new / Save anyway could not be read on that screen.
+- Fix: a `PersonIdRaw` write arms `_awaitingLoadedName`; the `PersonName` setter captures the next write as `_loadedName` (on every write, so an equal name is also captured). `CompleteHydration` keeps the first-call capture.
+
+### Root cause (b): Open leaves the name suggestions active
+- A pick ends the input: `AutocompleteDXField.OnSelectionChanged` writes the name, then unfocuses the editor and hides the keyboard. The Open path did neither, so the name field kept focus. The query then wrote the loaded name while focused, which the component reads as typed input (RC-B path, `RestartSearch`).
+- Confirmed on device before the fix: after Open the name field kept the caret and the keyboard toolbar (screenshots `t8-b9-open-after-popup.png`, `t8-b10-later.png`). The suggestion popup itself was not captured in my runs, so the popup symptom is inferred from the focus path, not seen.
+- Fix: `PersonFormPage.xaml.cs` `OnSameNameOpenClicked` calls `nameField.Unfocus()` before `OpenSameNameCommand`. `NavigateToEditAsync` now clears `Suggestions` (shared by the pick and the sheet Open, REQ-DUP-16). Note: `Suggestions` is not bound in the page XAML (the field uses `NameOptionSource`), so that clear is the shared-path step, not the device fix.
+
+### Regression tests (Major, VM level) — red then green
+- `PersonFormViewModelBug088Tests.SaveCommand_SingerLoadedIntoSameForm_NameUnchanged_DoesNotQuerySameName` — `// [AC] REQ-DUP-10`
+- `PersonFormViewModelBug088Tests.OpenSameNameCommand_ClearsNameSuggestions` — `// [AC] REQ-DUP-16`
+- RED (before the fix): `dotnet test --filter FullyQualifiedName~PersonFormViewModelBug088Tests`: 2 failed, 22 passed. Failures for the right reasons: Verify GetSameNamePersonsAsync Never failed (the same-name query ran), and `Assert.Empty` on Suggestions failed (one item left).
+- GREEN: `--filter FullyQualifiedName~PersonFormViewModel`: 75 passed, 0 failed. Full suite `dotnet test Tests/MyVocaList.Tests.csproj`: 2037 passed, 0 failed.
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/PersonFormViewModel.cs` (PersonIdRaw arms the baseline capture; PersonName is now an explicit property that captures the loaded name; OnPersonNameChanged is private; Suggestions cleared in NavigateToEditAsync; SuggestionSelectedAsync delegates)
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml.cs` (OnSameNameOpenClicked unfocuses the name field before the command)
+- `Tests/Unit/ViewModels/PersonFormViewModelBug088Tests.cs` (two regression tests above)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/design.md` (three `Spec updated 2026-11-21 (T8 implementation)` notes)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/tasks.md` (T8 ticked)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/task-log.md` (this entry)
+
+### Design concern
+- The baseline capture depends on query order: personId must arrive before personName. `NavigateToEditAsync` and `PersonsViewModel` both send personId first, so this holds. A future route that sends personName first would leave a stale baseline on a reused page. Helder to decide whether to keep this or move to an order-free query property (`PersonNameRaw`), which would change the tested seam.
+
+### Traceability
+| AC | Criterion | Implementation location | Test method |
+|----|-----------|-------------------------|-------------|
+| REQ-DUP-10 | Loaded singer (pick or Open) is the baseline; unchanged name opens no sheet | `PersonFormViewModel.cs` `PersonIdRaw` setter, `PersonName` setter, `_awaitingLoadedName` | `SaveCommand_SingerLoadedIntoSameForm_NameUnchanged_DoesNotQuerySameName` |
+| REQ-DUP-16 | Open clears name suggestions, the same as a pick | `PersonFormViewModel.cs` `NavigateToEditAsync` (`Suggestions = []`) | `OpenSameNameCommand_ClearsNameSuggestions` |
+| REQ-DUP-16 | Open does not leave the name field active (device) | `PersonFormPage.xaml.cs` `OnSameNameOpenClicked` (`nameField.Unfocus()`) | Emulator E2E below (no unit seam for focus) |
+
+### Emulator E2E (emulator-5554, AVD pixel_5_-_api_36_0_1, clean obj/bin net10.0-android, app not uninstalled; emulator stopped after)
+Before the fix (original build):
+- Pick `Helder Sousa` (name-only) → Save → same-name sheet "A singer with this name already exists", the other namesake `h2@x.com` listed, hint "To save a new singer with this name, enter an email or a birthday." (`t8-b3-after-save.png`). Bug (a) reproduced.
+- Type `Helder Sousa` without a pick → Save → sheet → Open → Edit Singer with the name field still focused, caret and keyboard toolbar visible (`t8-b9-open-after-popup.png`, `t8-b10-later.png`).
+After the fix (clean rebuild, install 17:15):
+- Pick `Helder Sousa` (name-only) → title Edit Singer → Save → saved, back to the Singers list, no sheet (`t8-fa2-after-save.png`). Scenario (a) passes.
+- Type `Helder Sousa` without a pick → Save → sheet with 2 rows → Open (first row) → Edit Singer, no caret, no keyboard toolbar, no popup (`t8-fb3-open-later.png`) → Save with the name unchanged → saved, back to the list, no sheet (`t8-fb4-save-after-open.png`). Scenario (b) passes on the focus and sheet path. Suggestions popup not seen before or after; the caret and keyboard change is what was observed.
+- Screenshots are in the scratchpad folder `C:\Users\helde\AppData\Local\Temp\claude\78c429b059350e8f\15c50708-c550-4362-8273-50a7a757e7cf\scratchpad\` (t8-*.png).
+
+Note for Helder: in the scenario (a) pre-fix run the sheet Save button was hidden (name-only form), so the reported label Save as new could not be read on that screen. In edit mode the label is Save anyway (`SameNameSaveButtonText`).
+
+### Build notes
+Build: passed (0 errors, app deploy `dotnet build -t:Run -f net10.0-android`) | Tests: 2037 passed, 0 failed | Commit SHA: see git log (this commit)
+Files written and re-read: `PersonFormViewModel.cs` (PersonIdRaw, PersonName, OnPersonNameChanged, NavigateToEditAsync, SuggestionSelectedAsync), `PersonFormPage.xaml.cs` (OnSameNameOpenClicked), `PersonFormViewModelBug088Tests.cs` (two new tests), design.md (appended notes), tasks.md (T8 ticked), task-log.md (this entry).
