@@ -129,3 +129,40 @@ E2E: emulator not available — requires manual verification. `adb devices` list
 
 ### Design concern
 - None.
+
+### Bug fix — birthday dropdowns do not open (bday-dropdown-open)
+**Plan:** fix commit on task/bday-dropdown-open (Bug Fix Pattern, `workflow.md § Bug Fix Pattern`); Item: person-form-birthday-as-day-and-month-dropdowns
+**Status:** To Review
+**Started:** 2026-11-20
+**Completed:** 2026-11-20
+
+**Symptom:** On the New Singer form, tapping Birth day or Birth month focused the field but the drop-down never opened (also on the arrow icon). No exception in logcat.
+
+**Root cause:** Both birthday `dxe:ComboBoxEdit` controls in `PersonFormPage.xaml` carried `IsReadOnly="True"`. DevExpress `EditBase.IsReadOnly` means "users can change a value in the editor" (Context7 /websites/devexpress_maui); the read-only state suppresses the drop-down. Text entry is already blocked by default on ComboBoxEdit because `IsFilterEnabled` defaults to false, so the attribute was redundant as well as harmful.
+
+**Fix:** Removed `IsReadOnly="True"` from both birthday ComboBoxEdits. No other changes.
+
+**Regression risk:** Low — the change only restores the default ComboBoxEdit behaviour; the keyboard stayed hidden in E2E, so no text entry path was opened.
+
+### Changed files:
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml`
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/task-log.md`
+
+### Verification evidence
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -t:Run` after clean of `obj/bin/Debug/net10.0-android` in the worktree: 0 errors, 10 pre-existing warnings.
+- Emulator (emulator-5554, app not uninstalled, no singer saved, form left via Cancel):
+  - Birth month opens with January..December: `scratchpad/e2e-fix-03-month-open.png`
+  - Keyboard does not appear on dropdown taps: `e2e-fix-03-month-open.png`, `e2e-fix-04-april-day-open.png`
+  - April selected, day list opens 1..30 (scrolled to end): `e2e-fix-04-april-day-open.png`, `e2e-fix-05-april-day-scrolled.png`
+  - Day 30 kept with April: `e2e-fix-06-day30-selected.png`
+  - Switch month to February clears day: `e2e-fix-07-february-selected.png`
+  - February day list ends at 29: `e2e-fix-08-february-days.png`
+  - Day 29 selected: `e2e-fix-09-day29-selected.png`
+  - Month clear icon empties month: `e2e-fix-10-month-cleared.png`
+  - Day clear icon empties day: `e2e-fix-11-day-cleared.png`
+  - Screenshots live in `C:\Users\helde\AppData\Local\Temp\claude\78c429b059350e8f\15c50708-c550-4362-8273-50a7a757e7cf\scratchpad\`
+- Tests: `dotnet test Tests/MyVocaList.Tests.csproj` — see build notes below.
+
+### Deviations and spec gaps
+- Arrow-icon tap was not separately exercised; the field tap was verified (the arrow is part of the same control).
+- FeedbackPage.xaml (Category ComboBoxEdit, line ~32) also has `IsReadOnly="True"`. Same mechanism is expected to block its drop-down, but it was NOT verified on the emulator and NOT changed (separate item).
