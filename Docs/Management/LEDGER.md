@@ -10,7 +10,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| BDAY+BUG-088 | Person birthday dropdowns + duplicate-singer identity | merged into develop; on-device gates open (BDAY T3, BUG-088 T4) | task/person-birthday-and-identity | — | to review | d83d78ca | Helder: clean device data per BUG-088 T4, install, run both gates; see persons/changes/2026-11-19-person-form-birthday-* and bugs/2026-11-19-BUG-088-* |
+| BDAY+BUG-088 | Person birthday dropdowns + duplicate-singer identity | merged; emulator E2E passed (4 UI bugs found+fixed); on-device gates open | task/person-form-e2e-fixes | — | to review | 0b1be1b8 | Helder: clean phone data (no-email-no-birthday singers, duplicates), install, run gates; see persons/changes/2026-11-19-person-form-birthday-* and bugs/2026-11-19-BUG-088-* |
 
 ## Completed (recent)
 
