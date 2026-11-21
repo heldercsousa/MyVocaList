@@ -1,5 +1,6 @@
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.UI.Models;
 using MyVocaList.UI.Services;
 
@@ -12,14 +13,13 @@ public class PersonFormViewModelTests
     private readonly Mock<INavigationService> _navigationMock = new();
     private readonly Mock<ILogger<PersonFormViewModel>> _loggerMock = new();
 
-    // BUG-088 T3 fixture adaptation: the either/or rule and the same-name query are valid/empty by default,
-    // so each save test only sets up the path it covers (the rules themselves are tested in PersonFormViewModelBug088Tests).
+    // BUG-088: the same-name query is empty by default, so each save test only sets up the path it covers
+    // (the sheet rules themselves are tested in PersonFormViewModelBug088Tests).
     public PersonFormViewModelTests()
     {
-        _serviceMock.Setup(s => s.ValidateContact(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>())).Returns((true, ""));
         _serviceMock.Setup(s => s.GetSameNamePersonsAsync(
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Person>());
+            .ReturnsAsync(new SameNameResult([], 0));
     }
 
     private PersonFormViewModel CreateSut() =>

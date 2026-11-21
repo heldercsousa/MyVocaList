@@ -119,19 +119,46 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Person>> GetSameNameDifferentIdentityAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default)
+    public async Task<bool> SameNameExistsAsync(string fullName, int? excludePersonId = null, CancellationToken cancellationToken = default)
+    {
+        return await SameNameQuery(fullName, null, null, null, excludePersonId, includeIdentityMatch: true)
+            .AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<int> CountSameNameAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch, CancellationToken cancellationToken = default)
+    {
+        return await SameNameQuery(fullName, email, birthDay, birthMonth, excludePersonId, includeIdentityMatch)
+            .CountAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Person>> GetSameNameAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch, int take, CancellationToken cancellationToken = default)
+    {
+        return await SameNameQuery(fullName, email, birthDay, birthMonth, excludePersonId, includeIdentityMatch)
+            .OrderBy(p => p.Id)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// BUG-088 same-name query: persons with the same FullName (default collation), NoTracking, excluding excludePersonId.
+    /// When <paramref name="includeIdentityMatch"/> is false, the exact identity match is excluded (the same predicate
+    /// as <see cref="IdentityExistsAsync"/>, as a subquery).
+    /// </summary>
+    private IQueryable<Person> SameNameQuery(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch)
     {
         var name = fullName.Trim();
-        var identityIds = IdentityMatches(fullName, email, birthDay, birthMonth).Select(p => p.Id);
-
-        // Same-name persons, minus the exact identity match (the same predicate as IdentityExistsAsync, as a subquery).
-        return await _dbSet
+        var query = _dbSet
             .AsNoTracking()
             .Where(p => EF.Functions.Collate(p.FullName, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default))
-            .Where(p => !identityIds.Contains(p.Id))
-            .Where(p => excludePersonId == null || p.Id != excludePersonId.Value)
-            .OrderBy(p => p.FullName)
-            .ToListAsync(cancellationToken);
+            .Where(p => excludePersonId == null || p.Id != excludePersonId.Value);
+
+        if (includeIdentityMatch)
+            return query;
+
+        var identityIds = IdentityMatches(fullName, email, birthDay, birthMonth).Select(p => p.Id);
+        return query.Where(p => !identityIds.Contains(p.Id));
     }
 
     /// <summary>

@@ -78,10 +78,32 @@ public class PersonIdentityIndexTests : IAsyncLifetime
         Assert.Equal(["IX_Persons_Identity"], names);
     }
 
-    // [AC] REQ-DUP-05: a row with neither email nor birthday violates CK_Persons_EmailOrBirthday
+    // [AC] REQ-DUP-14: the migrations drop CK_Persons_EmailOrBirthday, so the People table SQL no longer contains it
     [Fact]
-    public async Task EmailOrBirthdayCheck_NeitherEmailNorBirthday_IsRejected()
+    public async Task EmailOrBirthdayCheck_DroppedAfterMigrate_TableSqlHasNoCheck()
     {
-        await Assert.ThrowsAnyAsync<Exception>(() => InsertAsync(1, "Lia Costa", null, null, null));
+        var tableSql = await _db.Database.SqlQueryRaw<string>(
+            "SELECT sql AS Value FROM sqlite_master WHERE type = 'table' AND name = 'People'")
+            .SingleAsync();
+
+        Assert.DoesNotContain("CK_Persons_EmailOrBirthday", tableSql);
+    }
+
+    // [AC] REQ-DUP-12: a name-only row (no email, no birthday) is accepted by the database when no namesake exists
+    [Fact]
+    public async Task IdentityIndex_NameOnlyRow_IsAccepted()
+    {
+        await InsertAsync(1, "Lia Costa", null, null, null);
+
+        Assert.Equal(1, await _db.Set<Person>().CountAsync());
+    }
+
+    // [AC] REQ-DUP-04: two name-only rows with the same name (case-insensitive) are the same identity, so the second is rejected
+    [Fact]
+    public async Task IdentityIndex_TwoNameOnlyRowsSameName_IsRejected()
+    {
+        await InsertAsync(1, "Lia Costa", null, null, null);
+
+        await Assert.ThrowsAnyAsync<Exception>(() => InsertAsync(2, "LIA COSTA", null, null, null));
     }
 }
