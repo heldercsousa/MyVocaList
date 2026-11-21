@@ -2049,6 +2049,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-singer-self-chec
 		Docs\Management\BusinessFeatures\queue-management\changes\2026-11-21-singer-self-check-in-to-the-event-queue\README.md = Docs\Management\BusinessFeatures\queue-management\changes\2026-11-21-singer-self-check-in-to-the-event-queue\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations", "2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations", "{D5FD802E-2EC8-5560-A2A8-72A6FDBF72D6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\README.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\tasks.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\tasks.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2487,6 +2493,7 @@ Global
 		{7BC7AB1C-906A-5C00-A0DC-8BE8270E54B7} = {FA1234BC-0001-4000-8000-000000000034}
 		{16D8834F-FC60-53F4-B331-03B67666D303} = {FA1234BC-0001-4000-8000-00000000007D}
 		{B9D1B194-B090-5F5A-B5C6-240C12584970} = {FA1234BC-0001-4000-8000-0000000000A2}
+		{D5FD802E-2EC8-5560-A2A8-72A6FDBF72D6} = {FA1234BC-0001-4000-8000-00000000007D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
