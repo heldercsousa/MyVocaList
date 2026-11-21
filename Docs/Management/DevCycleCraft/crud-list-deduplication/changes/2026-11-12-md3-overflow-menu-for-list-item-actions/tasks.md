@@ -51,4 +51,4 @@
 - [x] **T11c — `ListItemOverflowButton` wraps `OverflowMenuButton`** (governed; own commit and log entry; runs before T11b)
 - [x] **T11b — `CrudListView` consumes `Menu`** (governed; own commit and log entry)
 - [x] **T12 — Verify** (verifier CONDITIONAL PASS; emulator PASS; merged `9fd344ba`)
-- [ ] **T13 — Helder on-device pass** (revision 2026-11-20b; optional TalkBack for REQ-OVFM-23), then status ✅
+- [x] **T13 — Helder on-device pass** (revision 2026-11-20b; optional TalkBack for REQ-OVFM-23), then status ✅
