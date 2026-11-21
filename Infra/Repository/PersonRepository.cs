@@ -109,4 +109,50 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
             (excludePersonId == null || p.Id != excludePersonId.Value),
             cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<bool> IdentityExistsAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default)
+    {
+        return await IdentityMatches(fullName, email, birthDay, birthMonth)
+            .Where(p => excludePersonId == null || p.Id != excludePersonId.Value)
+            .AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Person>> GetSameNameDifferentIdentityAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default)
+    {
+        var name = fullName.Trim();
+        var identityIds = IdentityMatches(fullName, email, birthDay, birthMonth).Select(p => p.Id);
+
+        // Same-name persons, minus the exact identity match (the same predicate as IdentityExistsAsync, as a subquery).
+        return await _dbSet
+            .AsNoTracking()
+            .Where(p => EF.Functions.Collate(p.FullName, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default))
+            .Where(p => !identityIds.Contains(p.Id))
+            .Where(p => excludePersonId == null || p.Id != excludePersonId.Value)
+            .OrderBy(p => p.FullName)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// BUG-088 identity predicate: FullName + Email + birthday day/month, default collation, no C# normalization.
+    /// A missing email is matched as <c>Email IS NULL</c> (the trim converter stores blank as NULL, so the empty
+    /// string is never a stored value). A missing day or month compares as 0, matching the COALESCE index.
+    /// </summary>
+    private IQueryable<Person> IdentityMatches(string fullName, string? email, int? birthDay, int? birthMonth)
+    {
+        var name = fullName.Trim();
+        var mail = (email ?? string.Empty).Trim();
+        var day = birthDay ?? 0;
+        var month = birthMonth ?? 0;
+
+        var byName = _dbSet.AsNoTracking().Where(p =>
+            EF.Functions.Collate(p.FullName, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default) &&
+            (p.BirthDay ?? 0) == day &&
+            (p.BirthMonth ?? 0) == month);
+
+        return string.IsNullOrEmpty(mail)
+            ? byName.Where(p => p.Email == null)
+            : byName.Where(p => p.Email != null && EF.Functions.Collate(p.Email, CollationConstants.Default) == EF.Functions.Collate(mail, CollationConstants.Default));
+    }
 }

@@ -7,7 +7,8 @@ namespace MyVocaList.Contracts.Models
     public class PersonListItemDto : INotifyPropertyChanged
     {
         public int Id { get; set; } // The ID of the Person from the domain
-        public string BirthdayDayMonth { get; set; }
+        public int? BirthDay { get; set; } // Day 1-31, null when no birthday (REQ-BDAY-07)
+        public int? BirthMonth { get; set; } // Month 1-12, null when no birthday
         public string Email { get; set; }
         private string _fullName;
         private int _participations;

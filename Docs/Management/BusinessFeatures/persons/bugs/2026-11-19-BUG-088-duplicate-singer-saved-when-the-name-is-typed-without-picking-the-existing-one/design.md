@@ -16,8 +16,11 @@ Root cause: in insert mode, `PersonService.CreatePersonAsync` checks only that t
   - Guard: the REQ-DUP-04 test also asserts that `sqlite_master` contains `IX_Persons_Identity` after migrating to the latest migration. This fails if a later rebuild drops the index.
   - Migration name: `PersonIdentityUniqueIndex`. It is added after `PersonBirthDayMonth`. REQ-DUP-04/11.
   - If adding the CHECK makes EF rebuild the table, the rebuild drops raw-SQL indexes. Order the migration so `CREATE UNIQUE INDEX` runs **after** the rebuild, and verify the index exists after migrating (`sqlite_master`).
+  > **Spec updated 2026-11-20:** one migration is not enough. EF's SQLite generator defers the `People` rebuild to the end of the migration, so a raw index in the same migration is dropped even when it is written after the CHECK. The CHECK is therefore in `PersonEmailOrBirthdayCheck` and the raw index in `PersonIdentityUniqueIndex` (a later migration, so the rebuild has already finished). Verified by the `IX_Persons_Identity` test after `MigrateAsync`.
+  > **Spec updated 2026-11-20:** the migration uses the literal `NOCASE_NOACCENT`, not the `CollationConstants.Default` constant, so the migration stays frozen if the constant changes.
 - Repository:
   - `Task<bool> IdentityExistsAsync(string fullName, string? email, int? day, int? month, int? excludeId, CancellationToken ct)`. Use `EF.Functions.Collate(p.FullName, CollationConstants.Default) == fullName`. Compare email with the same Collate and treat null as `''`: `(p.Email ?? "")`. Day and month compare with `?? 0`.
+    > **Spec updated 2026-11-20:** `(p.Email ?? "")` is not translated correctly. The Email trim converter turns the empty constant into NULL, so the comparison never matches. A missing email is matched as `p.Email == null` instead (the converter stores blank as NULL, so `''` is never stored). Both repository queries share one private identity predicate; `GetSameNameDifferentIdentityAsync` excludes it as a subquery.
   - `Task<IReadOnlyList<Person>> GetSameNameDifferentIdentityAsync(string fullName, string? email, int? day, int? month, int? excludeId, CancellationToken ct)`. It returns the same-name persons (same collation, NoTracking) *excluding* the exact-identity match, which uses the same predicate as `IdentityExistsAsync`, negated.
   - Never `ToLower` or `ToUpper` in C# (constraints-registry HARD RULE).
 
@@ -55,6 +58,11 @@ Root cause: in insert mode, `PersonService.CreatePersonAsync` checks only that t
   - Code-behind syncs `IsSameNameSheetVisible` and `Show`/`Close` behind a syncing guard. A user dismissal calls `DismissSameNameSheetCommand`.
   - `ContentPage` keeps `SafeAreaEdges="All"` (text input).
   - Never `DisplayAlert`.
+
+> **Spec updated 2026-11-20:** the same-name rows are `AutocompleteSuggestion` records (`Headline` = FullName, `SupportingText` = `GetDisplayIdentifier()`, `Data` = the `Person`), so the sheet reuses the existing suggestion model. The sheet is `HalfExpandedRatio="0.5"`. <!-- impl decision: reuse the suggestion row type rather than a new record -->
+> **Spec updated 2026-11-20:** the edit-mode "name changed" baseline is the trimmed FullName captured once in `CompleteHydration()` (the first call only) and compared ordinal with the trimmed name at Save. <!-- impl decision: the loaded value must be captured when the query hydration ends, not on every OnAppearing -->
+> **Spec updated 2026-11-20:** the either/or check runs after the Email format check and only sets the Email error when it fails, so it never clears a format error. The same-name query runs inside the busy window, so a second Save tap cannot open the sheet twice. <!-- impl decision: keep the Save flow re-entrancy guard across the async query -->
+> **Spec updated 2026-11-20:** REQ-DUP-07a (both errors together) is asserted at the VM level with mocked rules. With the rule in `ValidateContact` (either/or fires only when day and month are both empty) and `ValidateBirthday` (fires only when exactly one of them is set), the two errors cannot occur together on real data. The independence is implemented, not a co-occurrence. <!-- impl decision: VM applies both errors independently; real-data exclusivity is a property of the rules -->
 
 ## Tests
 | AC | Test |
