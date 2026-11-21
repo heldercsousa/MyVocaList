@@ -23,7 +23,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | — | **Cross-cutting** | — |
 | 2026-11-19 | ↳ Duplicate singer saved when the name is typed without picking the existing one | 🟡 In Progress |
-| 2026-11-19 | ↳ Person form birthday as day and month dropdowns | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
