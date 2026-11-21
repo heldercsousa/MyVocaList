@@ -25,11 +25,13 @@ Helder's directive (2026-11-21): do the POC. Write new code only; existing code 
 | S3 | Duplicate Venues page → `VenuesSfPage` using `CrudListViewSf`; route + DI | done | `1f696102`. `VenuesViewModel` reused unchanged. Hidden route `venues-sf`; DEBUG-only launch hook in `AppShell.xaml.cs` opens it first |
 | S4 | Build net10.0-android, 0 errors | done | 0 errors, 10 warnings, none from Syncfusion. Tests pass (1 flaky repository test passed on retry) |
 | S5 | Emulator run: screenshots of the DX vs Sf Venues pages (list, shimmer, selection, search, empty state, sheets) | done (partial) | `1a9e9974`, `spike-screenshots/`. List + delete sheet OK. **Failed on Sf:** (a) `SfTextInputLayout`+`Entry` search — no EditText in the native tree, no keyboard; (b) row tap / long-press never reach the VM (cause unconfirmed). Shimmer not captured; back-closes-sheet not checked |
-| S5b | Diagnose + fix (a) and (b) in the Sf copies only (≤3 attempts each); re-capture search / empty / selection; check back button closing the sheet | in progress | fresh implementor dispatched |
-| S6 | Spike results written into `findings.md` § Spike results | pending | — |
-| S7 | Commit spike branch + push; docs commit on develop | pending | — |
+| S5b | Diagnose + fix (a) and (b) in the Sf copies only (≤3 attempts each); re-capture search / empty / selection; check back button closing the sheet | done | `21aa8bba` (pushed). (a) `SfTextInputLayout` never sized its `Entry` → replaced by a plain MAUI `Entry` (works). (b) XAML command binding never executed → forwarded from code-behind (tap opens the form; long-press selects). Back button matches DX. Shimmer still not captured. 0 deleted lines vs base re-checked |
+| S6 | Spike results written into `findings.md` § Spike results | done | `findings.md` § 7. Orchestrator screenshot review added a white strip behind the FAB, and noted the Toolkit has no Autocomplete/ComboBox |
+| S7 | Commit spike branch + push; docs commit on develop | done | spike branch pushed at `21aa8bba`; this docs commit on develop |
 
-**Context manifest** (≤ 8 files):
+**POC closed 2026-11-21.** Emulator left running. The worktree is kept, so Helder can deploy the branch and compare: the DEBUG build opens "Venues (Syncfusion POC)" first, and the original Venues is in the flyout.
+
+**Context manifest** (≤ 8 files; spike branch files are listed in `findings.md` § 7):
 - `Docs/Management/cross-cutting/ui-component-library-licensing/README.md`
 - `Docs/Management/cross-cutting/ui-component-library-licensing/findings.md`
 - this file

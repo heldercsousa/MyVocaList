@@ -60,4 +60,49 @@ https://www.syncfusion.com/products/communitylicense — **V**
 | MD3 fit | To be checked in the spike | MD2 |
 | Project rules | Needs the `[Unamendable]` review | Needs the review, and conflicts with MD3 and the native-dialog rule's intent |
 
-**Recommendation:** Syncfusion Community License, if DevExpress confirms 25.2.4 is not licensed for free use. Reject MudBlazor. Validate with a time-boxed spike (`CrudListView` + Venues) before committing to the migration. Every governed component touched needs its own task under `component-change-governance.md`.
+**Recommendation:** Syncfusion Community License, if DevExpress confirms 25.2.4 is not licensed for free use. Reject MudBlazor. Validate with a time-boxed spike (`CrudListView` + Venues) before committing to the migration. Every governed component touched needs its own task under `component-change-governance.md`. *(Revised after the spike — see § 7.)*
+
+## 7. Spike results — Syncfusion Toolkit POC (2026-11-21)
+
+Throwaway branch `task/spike-syncfusion` (worktree `.claude/worktrees/spike-syncfusion`), commits `cb570587` · `1f696102` · `1a9e9974` · `21aa8bba`. Step log: `task-log.md`.
+
+### What was built
+New copies only. `git diff --numstat` against the base `efd4cdf3` shows **0 deleted lines**.
+- **Copies:** `CrudListViewSf`, `SearchBarSf` and `VenuesSfPage`, each beside its original. `VenuesViewModel` is reused unchanged.
+- **Added lines in shared files:**
+  - `Syncfusion.Maui.Toolkit` 1.0.12 in `Directory.Packages.props` and the `.csproj`;
+  - `.ConfigureSyncfusionToolkit()` and the page's DI line in `MauiProgram.cs`;
+  - a hidden `venues-sf` route in `AppShell.xaml`;
+  - a **DEBUG-only launch hook** in `AppShell.xaml.cs` that opens the copy first.
+- **Package:** the free MIT **Syncfusion Toolkit**, no license key. It restores and builds on net10.0-android with 0 errors and no Syncfusion warnings.
+- **Screenshots:** `spike-screenshots/` on the branch, `dx-*` vs `sf-*`.
+
+### Control mapping and emulator result (pixel_5, API 36)
+
+| DX control in `CrudListView` | Replacement | Result |
+|---|---|---|
+| `DXCollectionView` | stock MAUI `CollectionView` + `RefreshView` (the Toolkit has no list control) | Works: list renders identically. **But** DX's `TapCommand`/`LongPressCommand`/`SelectedItemTemplate` have no equivalent. Tap and long-press had to be forwarded from code-behind (`TapGestureRecognizer` + `SfEffectsView.LongPressed`); the XAML command binding never executed (cause not identified) |
+| `BottomSheet` ×2 + exit sheet | `SfBottomSheet` | Works: show/close, cancel, grabber. Back button: 1st press clears selection, 2nd opens the exit sheet, same as DX. Look differs: full-width text buttons with dividers |
+| `TextEdit` (search) | `SfTextInputLayout` + `Entry` | **Failed:** the inner `Entry` got a handler but never got a size; no EditText in the native tree, no keyboard. Replaced by a plain MAUI `Entry`, which works (filter + "No results found") but shows the Android underline and no leading search icon |
+| `ShimmerView` | `SfShimmer` | Builds; never captured on screen (the load is faster than the capture) |
+| `DXButton` in sheets | stock `Button` | Works |
+| FAB `DXButton`, `EmptyState`, `FloatingToolbar`, `SmallAppBar`, `Menu`/`OverflowMenuButton`, `ListItem*` | **not ported** (still DX inside the copy) | — |
+
+**Visible defect seen in the screenshots:** the Sf page paints a white strip behind the FAB at the bottom (`sf-list-loaded.png`, `sf-search-typed.png`); the DX page is dark there. It is a layout/background issue in the copy, not investigated.
+
+### What the spike changes in the analysis
+1. **The free Toolkit covers sheets, shimmer, chips, buttons and popups — not lists or forms.** It has no list control, and no Autocomplete or ComboBox. The app uses `AutoCompleteEdit` and `ComboBoxEdit` in its forms, and the Autocomplete fields are governed components. Those need the **commercial Syncfusion suite** (`SfListView`, `SfAutocomplete`, `SfComboBox`): free under the Community License, but it requires a license key and an account (Helder's step). The commercial suite was **not** tested in this spike. **I**, from the Toolkit control list (Context7 `/syncfusion/maui-toolkit`).
+2. **Gesture wiring is not a mechanical swap.** DX's list commands become code-behind forwarding on every list page.
+3. **Effort revised upward.** The implementor estimates about **3–4 weeks** for the four list pages and their components, forms not included. The first estimate was 1–2 weeks for everything. **I**: total with forms is likely 5–7 weeks solo, plus the governance gates per governed component.
+4. Not tested: forms, the autocomplete fields, dark/light theming, iOS, and scroll performance with large lists.
+
+### Options for Helder (no decision taken)
+
+| Option | Cost | MVP delay | Risk |
+|---|---|---|---|
+| A. Ask DevExpress first (clientservices@devexpress.com) whether 25.2.4 is usable | nothing | none | answer may be "no" |
+| B. Pay one DevExpress Universal year (~US$2.3k) to ship the MVP; plan the migration post-MVP | ~US$2.3k | none | renewal each year if the migration slips |
+| C. Migrate now to Syncfusion (Toolkit + Community-License suite) | free while eligible | about 5–7 weeks **I** | gesture and input gaps seen here; commercial suite untested |
+| D. Next spike before deciding C: one form page (`VenueFormPage`) on `SfAutocomplete`/`SfComboBox` + fix the white strip | about 1 day **I** | small | needs the Community License key first |
+
+The `[Unamendable]` UI Component Priority rule still needs an architecture review before option C. The spike branch is evidence only; it is never merged. If it is ever reused, remove the DEBUG launch hook in `AppShell.xaml.cs` first.
