@@ -24,7 +24,7 @@ The app's catalog and registration side is built. **The queue itself is not buil
 |------|-----------|
 | **Venues** | Create, edit, delete and search. International address fields; pick the place on a map to fill in the name and address (OpenStreetMap Nominatim); venue picture. A venue is a duplicate only if both name and address match. |
 | **Singers** | Create, edit, delete and search. Birthday as day + month dropdowns; the list shows birthday and email. |
-| **Songs & artists** | A catalog where you type the title first, with one search across local songs and Deezer. A Deezer pick fills in the artist, artwork and (via LRCLIB) the lyrics. Fuzzy near-duplicate detection, YouTube karaoke links and a YouTube search, pictures with automatic crop, and an artist-owned song catalog. |
+| **Songs & artists** | A catalog where you type the title first, with one search across local songs and Deezer. A Deezer pick fills in the artist, artwork and (via LRCLIB) the lyrics. Fuzzy near-duplicate detection, YouTube karaoke links and a YouTube search, and pictures with automatic crop. **Artist catalogs** stay in sync with the songs automatically: a saved song (new or edited) appears in its artist's catalog, a changed artist moves it, and a deleted song leaves it. Adding cover songs to a catalog by hand is not built yet. |
 | **Lists** | One shared CRUD list pattern across pages: off-UI-thread loading with a shimmer, persistent search bar, multi-select gestures, MD3 overflow menus. |
 | **App infrastructure** | Settings, backup & restore (local bundle, Tiers 1 + 3), crash and error reporting (Sentry), What's New release notes, update check, in-app suggestions, About page. |
 
@@ -34,7 +34,7 @@ The full list is generated from item frontmatter in [`Docs/Management/BACKLOG.md
 
 **Before the MVP release**
 - **Queue management**: the queue page becomes the list of events. Creating an event opens queue management (rounds, participation/absence, reordering, completion estimate).
-- Catalog follow-ups: a grouped catalog grid filled in automatically from karaoke participations, plus loading indicators for remote searches.
+- Catalog follow-ups: a picker for adding cover songs to an artist's catalog by hand; a grouped catalog grid filled in automatically from karaoke participations (built together with the queue pages); loading indicators for remote searches.
 - **Licensing of the UI component library**: the DevExpress free offer ended, so DevExpress 25.2 is paid. Syncfusion Community is being evaluated. This blocks the MVP.
 - Play Store / Samsung Galaxy Store pre-submission compliance, a full pre-release mobile test pass, and a large-volume data stress test.
 
@@ -77,11 +77,14 @@ These constraints are enforced mechanically by hooks and tests (full list in [`C
 
 ## Getting started
 
-**Requirements:** .NET 10 SDK with the MAUI workload, the Android SDK (or the iOS toolchain on macOS), and access to the DevExpress NuGet feed with a valid DevExpress license.
+**Setting up a machine from scratch** (toolchain, DevExpress feed and license, git hooks, Claude Code, MCP servers): follow [`Docs/DevEnv/devenv-setup.md`](Docs/DevEnv/devenv-setup.md). It is the only setup guide; the commands below are a quick reference.
+
+**Requirements:** .NET 10 SDK or newer with the MAUI workload (Visual Studio 2026), the Android SDK (or the iOS toolchain on macOS), and access to the DevExpress NuGet feed with a valid DevExpress license.
 
 ```bash
 git clone https://github.com/heldercsousa/MyVocaList.git
 cd MyVocaList
+git config core.hooksPath .claude/githooks   # required: enables the pre-commit and commit-msg hooks
 dotnet restore
 dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android
 ```
@@ -123,6 +126,4 @@ Where it lives: [`CLAUDE.md`](CLAUDE.md) (always-loaded rules) · [`.claude/rule
 
 ### Setting up Claude Code for this repo
 
-1. Copy `.env.local.example` to `.env.local` and fill in the MCP keys. Then follow [`.claude/library/dev-env-setup.md`](.claude/library/dev-env-setup.md), which covers loading the keys and Android release signing.
-2. The project's MCP servers (Context7, Microsoft Learn, DevExpress MAUI, Playwright, SQLite and others) are declared in [`.mcp.json`](.mcp.json). Read [`.claude/library/mcp-governance.md`](.claude/library/mcp-governance.md) before adding one.
-3. The `superpowers` plugin is enabled in `.claude/settings.json`. The project skills (`myvocalist-coding` and the vendored .NET/MAUI skills) live in `.claude/skills/`.
+Covered in [`Docs/DevEnv/devenv-setup.md` § 5](Docs/DevEnv/devenv-setup.md#5-claude-code-for-this-repo): env keys, the MCP servers in [`.mcp.json`](.mcp.json), the `superpowers` plugin, the committed skills, and a verification checklist. Read [`.claude/library/mcp-governance.md`](.claude/library/mcp-governance.md) before adding an MCP server.

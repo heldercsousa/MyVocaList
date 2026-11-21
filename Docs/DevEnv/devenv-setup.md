@@ -1,282 +1,136 @@
-# MyVocaList Dev Environment Setup
-> Windows · .NET MAUI 10 · Claude Code CLI
-> Delete from .claude/rules/ and add to .claudeignore after setup is complete.
-> **.NET MAUI 10 requires Visual Studio 2026 Insiders** — VS 2022 17.14 does NOT support .NET 10.
-> Download: visualstudio.microsoft.com/insiders/ → Community edition. Installs alongside VS 2022.
+# MyVocaList: Dev Environment Setup From Scratch
+
+> **The one guide for a new Windows development machine.** It replaces the early-days
+> `SETUP_QUICKSTART.md` and the old version of this file, both deleted on 2026-11-21. Those guides
+> bootstrapped files (`.mcp.json`, `.claude/rules/`, `CLAUDE.md` sections) that now exist in the
+> repo.
+>
+> For three topics this guide sends you to the file that is their single source. Do not copy
+> their content here:
+> - env keys (Context7, Playwright) and Android release signing → [`.claude/library/dev-env-setup.md`](../../.claude/library/dev-env-setup.md)
+> - database, migrations and the MCP query DB → [`.claude/library/database-setup.md`](../../.claude/library/database-setup.md)
+> - adding or changing an MCP server → [`.claude/library/mcp-governance.md`](../../.claude/library/mcp-governance.md)
+>
+> **Last verified:** 2026-11-21 on the author's machine. The versions shown are what that machine
+> runs, not hard minimums. Package versions come only from `Directory.Packages.props`.
+
+Platform: **Windows** (the dev machine). Targets: **Android** and **iOS**. iOS builds need a Mac
+build host and are not covered here.
 
 ---
 
-## CRITICAL: Windows Rules
-- Every stdio MCP server using `npx` MUST use `cmd /c` wrapper — no exceptions
-- Config file: `.mcp.json` in project root (NOT `.claude.json`, NOT `.claude/settings.local.json`)
-- Path format in JSON: forward slashes or escaped backslashes
+## 1. Install the toolchain
 
-Wrong:
-```json
-"command": "npx", "args": ["-y", "package"]
+| Tool | Why the project needs it | Verify |
+|------|--------------------------|--------|
+| **Git for Windows** | Source control. The git hooks are `sh` scripts and run in Git's shell. | `git --version` |
+| **Visual Studio 2026** (18.x) with the **.NET Multi-platform App UI development** workload | Installs the .NET SDK, the MAUI workloads, the Android SDK and a JDK. The author's machine has SDK `11.0.100`. The projects target `net10.0*` and there is no `global.json`, so any SDK from .NET 10 up works. | `dotnet --version` · `dotnet workload list` shows `android`, `ios`, `maui-windows` |
+| **Android emulator** | Running and verifying the app. The SDK lands in `C:\Program Files (x86)\Android\android-sdk`. Create an AVD in Visual Studio's Android Device Manager (the author uses Pixel 5, API 36). | `adb devices` |
+| **Python 3** (standard library only) | Claude Code hooks, git hooks and the backlog generator all run `python`. | `python --version` |
+| **Node.js LTS** | `npx` runs the Playwright MCP server. | `node --version` |
+| **uv** (`uvx`) | Runs the SQLite MCP server. Install: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 \| iex"`, add `%USERPROFILE%\.local\bin` to PATH, then restart the terminal. | `uvx --version` |
+| **GitHub CLI** (`gh`) | Every GitHub operation (the GitHub MCP is disabled on purpose). Run `gh auth login` once. | `gh --version` |
+| **Claude Code** | The AI implementation agent. Install it with the official instructions at <https://docs.claude.com/en/docs/claude-code/setup>. | `claude --version` |
+| **rclone** *(optional)* | Only for `/sln-deploy-googledrive`. Setup: `.claude/library/dev-env-setup.md`. | `rclone version` |
+
+**.NET global tools:**
+
+```powershell
+dotnet tool install --global dotnet-ef               # EF Core migrations (see database-setup.md)
+dotnet tool install --global Redth.MauiDevFlow.CLI   # maui-devflow: inspect and drive the running Debug app
+dotnet tool install --global androidsdk.tool         # android: SDK / AVD command line
 ```
-Correct:
-```json
-"command": "cmd", "args": ["/c", "npx", "-y", "package"]
-```
+
+The DevFlow agent package (`Redth.MauiDevFlow.Agent`) is already referenced by
+`MyVocaList/MyVocaList.csproj`, so nothing needs wiring in code.
 
 ---
 
-## Complete .mcp.json
+## 2. DevExpress (required to build)
 
-Place at `D:\Projects\MyVocaList\.mcp.json`:
+The UI uses **DevExpress .NET MAUI 25.2**, which needs a license. DevExpress's free MAUI offer
+ended on 2024-12-31. The choice of licensed library is open: see the backlog item *UI component
+library licensing* (`Docs/Management/cross-cutting/ui-component-library-licensing/`).
 
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "YOUR_KEY_HERE"
-      }
-    },
-    "sequential-thinking": {
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer REDACTED_GITHUB_TOKEN"
-      }
-    },
-    "devexpress-maui": {
-      "type": "http",
-      "url": "https://gitmcp.io/DevExpress/maui-demo-app"
-    }
-  }
-}
-```
-**In the future:** SQLite MCP will be added. Json:
-```json
- "sqlite": {
-      "command": "cmd",
-      "args": ["/c", "uvx", "mcp-server-sqlite",
-               "--db-path",
-               "C:/Users/Helder/AppData/Local/MyVocaList/myvocalist.db"]
-    }
-```
-Notes:
-- (future only - discard by now) Find SQLite db path: `dir /s /b *.db 2>nul | findstr MyVocaList`
-- If `uvx` not in PATH use full path: `C:/Users/Helder/.local/bin/uvx.exe`
-- (future only - discard by now) SQLite db file must exist before server starts — run app once first
-- If `claude mcp add-json` returns "Invalid input" use `--transport http` flag instead
-- `devexpress-maui` — keep DISABLED during active coding (`/mcp` inside Claude Code)
-- `github` — keep DISABLED during active coding (`/mcp` inside Claude Code).
+1. Add your personal DevExpress NuGet feed. Copy the URL from your account at
+   <https://nuget.devexpress.com>, then run:
+   ```powershell
+   dotnet nuget add source "<your DevExpress feed URL>" -n DevExpress
+   ```
+2. Put your license key in `%APPDATA%\DevExpress\DevExpress_License.txt`. Create this file **by
+   hand** and never commit it. Without it the build still succeeds, but it reports `DX1000` /
+   `DX1001` ("For evaluation purposes only") warnings.
 
 ---
 
-## MauiDevFlow CLI Setup
+## 3. Clone and enable the git hooks
 
-```bash
-dotnet tool install --global Redth.MauiDevFlow.CLI
-dotnet tool install --global androidsdk.tool
-
-# From project root:
-cd D:\Projects\MyVocaList
-maui-devflow update-skill
+```powershell
+git clone https://github.com/heldercsousa/MyVocaList.git
+cd MyVocaList
+git config core.hooksPath .claude/githooks
 ```
 
-This creates `.claude/skills/maui-ai-debugging/` — Claude Code detects it automatically.
-
-**NuGet package** (DEBUG only — check github.com/Redth?tab=packages first, may not be on public nuget.org):
-```xml
-<PackageReference Include="Redth.MauiDevFlow.Agent" Version="*" />
-```
-
-**MauiProgram.cs wiring:**
-```csharp
-#if DEBUG
-using MauiDevFlow.Agent;
-#endif
-
-// inside CreateMauiApp():
-#if DEBUG
-builder.AddMauiDevFlowAgent();
-#endif
-```
-
-**Windows warning:** Agent works partially on Windows + Android emulator. CDP/Blazor incomplete. Test before depending on it.
+The last line is **required** because git does not pick up the hooks on its own:
+- **pre-commit** runs the tests when `.cs` / `.xaml` files are staged. It also checks that the
+  generated BACKLOG is current and runs the process checks (`.sln` registration, `SafeAreaEdges`,
+  task-log `Changed files`).
+- **commit-msg** requires the `Item:` trailer on `feat:` / `refactor:` / `perf:` / `amend:`
+  commits.
 
 ---
 
-## Skill Plugins
-All commands run INSIDE Claude Code session (type `claude` first — these are NOT shell commands):
+## 4. Build, test, run
 
-```
-/plugin marketplace add obra/superpowers
-/plugin install superpowers@obra-superpowers
-# NOTE: TDD enforcement applies to NEW code only — will not delete existing code.
-# Skip enforcement on specific tasks: "add this without TDD enforcement"
-
-/plugin marketplace add nesbo/dotnet-claude-code-skills
-/plugin install ddd-dotnet@nesbo-dotnet-claude-code-skills
-/plugin install data-dotnet@nesbo-dotnet-claude-code-skills
-/plugin install bdd-dotnet@nesbo-dotnet-claude-code-skills
-
-/plugin marketplace add Aaronontheweb/dotnet-skills
-/plugin install dotnet-skills@Aaronontheweb-dotnet-skills
-
-# UX plugins
-/plugin marketplace add teslasoft-de/claude-skills-marketplace
-/plugin install ux@teslasoft-skills
-# Covers: UX research, information architecture, interaction design, visual design
-
-/plugin marketplace add manutej/luxor-claude-marketplace
-/plugin install mobile-design@manutej-luxor-claude-marketplace
-# Covers: mobile UX patterns, touch interactions, gesture design, thumb zones, app navigation
-
-# davidortinau/maui-skills does NOT support /plugin marketplace add
-# Clone into solution root, then run ONE of the commands below from solution root
-# (CMD/PowerShell/Bash) — NOT inside Claude Code
-
-git clone https://github.com/davidortinau/maui-skills.git maui-skills
-
-# ***About maui-current-apis — critical for .NET 10, prevents deprecated API usage** 
-# CMD:
-for %s in (maui-shell-navigation maui-data-binding maui-dependency-injection maui-performance maui-app-lifecycle maui-safe-area maui-unit-testing maui-rest-api maui-geolocation maui-permissions maui-secure-storage maui-authentication maui-localization maui-platform-invoke maui-accessibility maui-animations maui-app-icons-splash maui-local-notifications maui-hot-reload-diagnostics maui-current-apis) do xcopy "maui-skills\plugins\maui-skills\skills\%s" ".claude\skills\%s\" /E /I
-
-# PowerShell:
-@("maui-shell-navigation","maui-data-binding","maui-dependency-injection","maui-performance","maui-app-lifecycle","maui-safe-area","maui-unit-testing","maui-rest-api","maui-geolocation","maui-permissions","maui-secure-storage","maui-authentication","maui-localization","maui-platform-invoke","maui-accessibility","maui-animations","maui-app-icons-splash","maui-local-notifications","maui-hot-reload-diagnostics", "maui-current-apis") | ForEach-Object { xcopy "maui-skills\plugins\maui-skills\skills\$_" ".claude\skills\$_\" /E /I }
-
-# Bash (Git Bash / WSL):
-for s in maui-shell-navigation maui-data-binding maui-dependency-injection maui-performance maui-app-lifecycle maui-safe-area maui-unit-testing maui-rest-api maui-geolocation maui-permissions maui-secure-storage maui-authentication maui-localization maui-platform-invoke maui-accessibility maui-animations maui-app-icons-splash maui-local-notifications maui-hot-reload-diagnostics maui-current-apis; do cp -R "maui-skills/plugins/maui-skills/skills/$s" ".claude/skills/"; done
-
-# Claude Code auto-detects SKILL.md files under .claude/skills/ — no further install needed
-
-# DO NOT copy — DevExpress conflict:
-# maui-collectionview  → use DXCollectionView, not stock CollectionView
-# maui-gestures        → DevExpress has its own gesture handling
-# maui-sqlite-database → teaches sqlite-net-pcl, conflicts with EF Core
-
-# DO NOT copy — not relevant to MyVocaList:
-# maui-maps, maui-speech-to-text, maui-push-notifications, maui-aspire
-# maui-deep-linking, maui-hybridwebview, maui-media-picker, maui-graphics-drawing
-
-# Verify:
-/skills list
+```powershell
+dotnet restore
+dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android          # 0 errors expected
+dotnet test Tests/MyVocaList.Tests.csproj                              # unit + real-SQLite integration tests
+dotnet build MyVocaList/MyVocaList.csproj -t:Run -f net10.0-android   # deploy to the running emulator
 ```
 
-nesbo plugin uses Paramore.Brighter (not MediatR) — DDD patterns transfer, bridge with `mediatr-patterns.md`.
+The app creates and migrates its own SQLite database on the device at startup. Nothing needs to
+run on the desktop for the app to work.
 
 ---
 
-## Verification
+## 5. Claude Code for this repo
 
-```bash
-# Terminal (outside Claude Code):
-claude mcp list
-# Expected: context7 Connected, sequential-thinking Connected, github Connected
-# sqlite MCP deferred to post-MVP
+1. **Env keys.** Do steps 1–5 of `.claude/library/dev-env-setup.md`: copy `.env.local.example`
+   to `.env.local`, fill in `CONTEXT7_API_KEY` and `PLAYWRIGHT_MCP_EXTENSION_TOKEN`, run
+   `load-env.ps1`, then restart the terminal host.
+2. **MCP servers.** These are already declared in the committed [`.mcp.json`](../../.mcp.json):
+   Context7, Microsoft Learn, DevExpress MAUI (GitMCP), Playwright, SQLite and MudBlazor.
+   - **SQLite:** `--db-path` is an absolute path into the author's clone. Point it at
+     `<your clone>/.claude/MyVocaList.db`, then create that database as described in
+     `.claude/library/database-setup.md` ("Initial Setup").
+   - **Playwright** runs in `--extension` mode. It needs the Playwright MCP Bridge browser
+     extension, whose token goes in `PLAYWRIGHT_MCP_EXTENSION_TOKEN`.
+   - **MudBlazor** is disabled in `.claude/settings.json` (`disabledMcpjsonServers`). It needs a
+     local MudMCP checkout, so ignore it unless you work on that.
+   - On Windows every stdio server that uses `npx` / `uvx` must go through `cmd /c`. The
+     committed file already does this.
+3. **Plugin.** `.claude/settings.json` enables only `superpowers@claude-plugins-official`. All the
+   other listed plugins are disabled on purpose. If the plugin is not offered when you first trust
+   the folder, run `/plugin install superpowers@claude-plugins-official` inside Claude Code.
+4. **Skills** are committed under `.claude/skills/`: `myvocalist-coding`, the vendored .NET skills
+   (`VENDORED.md`) and the MAUI skills. Nothing to install.
+5. **Verify.** Start `claude` at the repo root:
+   - The SessionStart hook prints `HOOK HEALTH OK`.
+   - `/mcp` lists the servers as connected (MudBlazor stays disabled).
+   - `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"` prints the active work
+     set.
 
-# Inside Claude Code:
-/skills list
-# Expected: skills from superpowers, dotnet-skills, dotnet-claude-code-skills, maui-skills, maui-ai-debugging
-
-# With Android emulator running + app deployed:
-maui-devflow list
-```
-
-Smoke test (inside Claude Code):
-- `"Use context7 to show me DevExpress MAUI DataForm binding documentation."`
-- `"Use sequential thinking to plan the QueueEntry aggregate."`
-- `"Query the SQLite database and show me all tables."`
-
----
-
-## Context Window Budget
-
-| Server | Tokens |
-|--------|--------|
-| Context7 (HTTP) | ~2,000 |
-| Sequential Thinking | ~500 |
-| SQLite MCP | ~1,500 |
-| GitHub MCP | ~8,000 (80+ tools) |
-| **Total (all 4)** | **~12,000 — acceptable** |
-
-UX plugins (ux@teslasoft, mobile-design@luxor) = 0 base tokens (loaded on demand).
-
-Skill plugins = 0 base tokens (loaded on demand).
-
-**GitHub MCP lifecycle:**
-- MVP coding phase → DISABLED (save 8,000 tokens)
-- Post-MVP issue/PR work → enable, disable again when coding resumes
-- Toggle: `/mcp` inside Claude Code → select github → Enable/Disable
-
-**DevExpress GitMCP:**
-- Building new DevExpress page → Enable, get pattern, disable
-- Iterating existing code → Disabled (`devexpress-patterns.md` serves patterns)
-- `devexpress-patterns.md` takes priority over GitMCP when both active
+How the AI-assisted workflow runs once the setup works: [`CLAUDE.md`](../../CLAUDE.md) and
+[`.claude/rules/`](../../.claude/rules/).
 
 ---
 
-## Rules Files to Create
+## 6. Android release builds *(optional)*
 
-### `.claude/rules/devexpress-patterns.md`
-One minimal working example per DevExpress component. Add as you build pages.
-
-```xml
-<!-- DataForm — ViewModel binding -->
-<dxdf:DataForm DataObject="{Binding FormModel}" />
-<!-- ViewModel exposes single [ObservableProperty] FormModel of POCO type -->
-
-<!-- CollectionView — basic list -->
-<dxcv:DXCollectionView ItemsSource="{Binding Items}">
-  <dxcv:DXCollectionView.ItemTemplate>
-    <DataTemplate>
-      <dxcv:ContentItemBase>...</dxcv:ContentItemBase>
-    </DataTemplate>
-  </dxcv:DXCollectionView.ItemTemplate>
-</dxcv:DXCollectionView>
-```
-
-### `.claude/rules/mediatr-patterns.md`
-```csharp
-// Command
-public record AddSingerCommand(string Name) : IRequest<Result<Singer>>;
-public class AddSingerCommandHandler : IRequestHandler<AddSingerCommand, Result<Singer>>
-{
-    public async Task<Result<Singer>> Handle(AddSingerCommand req, CancellationToken ct) { ... }
-}
-
-// Query
-public record GetQueueQuery : IRequest<Result<IReadOnlyList<QueueEntry>>>;
-
-// Pipeline behavior (validation)
-public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse> { ... }
-```
-
-### `.claudeignore` (project root)
-```
-devexpress-samples/
-MauiDevFlow-samples/
-obj/
-bin/
-*.designer.cs
-.vs/
-```
-
----
-
-## CLAUDE.md — Required Rule Addition
-
-Add this to your `CLAUDE.md` at solution root to prevent skills from overriding DevExpress with stock MAUI controls:
-
-```
-## UI Component Priority
-
-When building UI components, always check devexpress-patterns.md first.
-Use stock MAUI controls only when DevExpress has no equivalent for the
-required functionality.
-```
+Release signing (keystore, `ANDROID_KEYSTORE_PASS` / `ANDROID_KEY_PASS`) and the Google Drive
+upload are covered in `.claude/library/dev-env-setup.md` § Android Release Signing. Deployments run
+only when Helder asks for them.
 
 ---
 
@@ -284,28 +138,11 @@ required functionality.
 
 | Symptom | Fix |
 |---------|-----|
-| MCP server disconnected | stdio: check `cmd /c` wrapper. HTTP: check API key/PAT |
-| `uvx` not found | Full path: `C:/Users/Helder/.local/bin/uvx.exe` |
-| sqlite db not found | Run app once to create db file, then restart MCP server |
-| GitHub MCP auth error | Regenerate PAT: scopes `repo`, `read:org`, `read:user` |
-| `/plugin` not recognized | Must be inside `claude` session, not regular terminal |
-| `maui-devflow list` empty | Debug config, `AddMauiDevFlowAgent()` registered, check `adb devices` |
-| Context window ~70K at startup | Disable GitHub MCP via `/mcp` |
-
----
-
-## Quick Reference
-
-| Command | Where |
-|---------|-------|
-| `claude mcp list` | Terminal |
-| `claude mcp add --transport http name url -H "Header: val"` | Terminal |
-| `claude mcp remove name` | Terminal |
-| `/plugin marketplace add owner/repo` | Claude Code session |
-| `/plugin install name@marketplace` | Claude Code session |
-| `/mcp` | Claude Code session — toggle servers |
-| `/skills list` | Claude Code session |
-| `maui-devflow list` | Terminal |
-| `maui-devflow MAUI tree` | Terminal |
-| `maui-devflow MAUI screenshot` | Terminal |
-| `maui-devflow update-skill` | Terminal, project root |
+| `/mcp` warns a key is missing after `load-env.ps1` | The terminal host kept its old environment. Close **all** terminal windows (and VS / VS Code if Claude Code runs inside them), then open a fresh one. Details: `.claude/library/dev-env-setup.md`. |
+| `uvx` not found | Add `%USERPROFILE%\.local\bin` to PATH, or put the full path to `uvx.exe` in `.mcp.json`. |
+| SQLite MCP fails to start | The `--db-path` file does not exist. Create it (`database-setup.md`) and check the path points at your clone. |
+| Build warnings `DX1000` / `DX1001` | The DevExpress license file is missing (step 2). |
+| App crashes at launch with an NRE in `ShellFlyoutTemplatedContentRenderer.LoadView` | Stale Android build output. Delete every `bin/` and `obj/` folder (`limparBinObj.bat` at the repo root does this), then rebuild. |
+| A tool or agent says there is no emulator | Look in the Visual Studio SDK path `C:\Program Files (x86)\Android\android-sdk\emulator\`, not `C:\Android`. |
+| `maui-devflow list` is empty | Use a Debug build on a running emulator, and check `adb devices`. |
+| Commits go through without tests running | `core.hooksPath` is not set (step 3). |
