@@ -9,7 +9,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 <!-- BACKLOG:GENERATED:BEGIN business-features -->
 | Target | Feature | Status |
 |--------|---------|--------|
-| — | **Artists & Songs Catalog** | 🔴 Blocked |
+| — | **Artists & Songs Catalog** | 🟡 In Progress |
 | 2026-11-11 | ↳ Discuss showing long song titles in list items (MD3-compliant, secondary text line) | 💡 Pending |
 | 2026-11-11 | ↳ Discuss: song identity by lyric, version de-duplication and richer Deezer data in the song UX | 💡 Pending |
 | 2026-11-12 | ↳ Artists list rows: catalog action moves into the overflow menu | 💡 Pending |
@@ -17,6 +17,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-13 | ↳ Backfill Deezer images for songs and artists saved before the artwork item | 💡 Pending |
 | 2026-11-16 | ↳ Songs list searches Deezer: one tap saves a thin song row, lyrics copy with edit mark | 💡 Pending |
 | 2026-11-17 | ↳ Remote and local field searches show a loading indicator | 💡 Pending |
+| 2026-11-21 | ↳ Artist catalog: add cover songs by hand (catalog picker) | 💡 Pending |
 | — | **Queue Entry Point Redesign — QueuePage as CRUD event list** | 💡 Pending |
 | 2026-11-19 | ↳ Catalog as an auto-filled grouped grid, filled from karaoke participations | 💡 Pending |
 | — | | 🏁 **MVP release** |

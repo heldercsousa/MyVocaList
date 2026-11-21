@@ -2069,6 +2069,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-component-library-licens
 		Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md = Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker", "2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker", "{9DF6BB92-FAE0-5AC6-B0EB-A483527A71EA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2510,6 +2515,7 @@ Global
 		{D5FD802E-2EC8-5560-A2A8-72A6FDBF72D6} = {FA1234BC-0001-4000-8000-00000000007D}
 		{B0B281F7-C518-5C98-B978-D21CB993C5B8} = {FA1234BC-0001-4000-8000-00000000007F}
 		{CB86F9BF-7F5F-51C3-B9F9-1A2E81A3D4A4} = {FA1234BC-0001-4000-8000-000000000057}
+		{9DF6BB92-FAE0-5AC6-B0EB-A483527A71EA} = {FA1234BC-0001-4000-8000-00000000007F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
