@@ -366,6 +366,36 @@ public class PersonFormViewModelBug088Tests
     }
 
     [Fact]
+    // [AC] REQ-DUP-16: opening a listed singer clears the name suggestions, the same as a suggestion pick
+    public async Task OpenSameNameCommand_ClearsNameSuggestions()
+    {
+        var sut = CreateSut();
+        var person = new Person("John Doe") { Id = 7, BirthDay = 3, BirthMonth = 4 };
+        var match = new AutocompleteSuggestion("John Doe", person.GetDisplayIdentifier(), person);
+        sut.Suggestions = [match];
+
+        await sut.OpenSameNameCommand.ExecuteAsync(match);
+
+        Assert.Empty(sut.Suggestions);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-10: a singer loaded into the same form after hydration (pick or Open) is the baseline, so saving it unchanged opens no sheet
+    public async Task SaveCommand_SingerLoadedIntoSameForm_NameUnchanged_DoesNotQuerySameName()
+    {
+        var sut = CreateSut();
+        sut.CompleteHydration();   // Add-mode form: hydration ends with an empty name
+        sut.PersonIdRaw = "5";     // a pick or an Open re-applies the query to the same form
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        _serviceMock.Verify(s => s.GetSameNamePersonsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
+        _serviceMock.Verify(s => s.UpdatePersonAsync(5, "John Doe", null, null, "john@example.com", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     // [AC] REQ-DUP-09: Cancel or a user dismissal closes the sheet and saves nothing
     public async Task DismissSameNameSheetCommand_ClosesSheetWithoutSaving()
     {
