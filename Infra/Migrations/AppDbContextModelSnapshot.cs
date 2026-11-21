@@ -348,8 +348,6 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("People", t =>
                         {
                             t.HasCheckConstraint("CK_Persons_Birthday", "(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay IS NOT NULL AND BirthMonth IS NOT NULL AND BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)");
-
-                            t.HasCheckConstraint("CK_Persons_EmailOrBirthday", "Email IS NOT NULL OR BirthDay IS NOT NULL");
                         });
                 });
 

@@ -1,6 +1,7 @@
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
 
@@ -38,16 +39,14 @@ public interface IPersonService
     Task<(bool success, string message)> DeletePersonsAsync(
         IEnumerable<int> ids, CancellationToken cancellationToken = default);
 
-    // --- BUG-088 identity (REQ-DUP-03, REQ-DUP-09) ---
-
-    /// <summary>REQ-DUP-03: at least one of email or birthday is required. Returns (false, "Enter an email or a birthday.") when both are empty.</summary>
-    (bool isValid, string message) ValidateContact(string? email, int? birthDay, int? birthMonth);
+    // --- BUG-088 identity (REQ-DUP-09, REQ-DUP-13a) ---
 
     /// <summary>
-    /// REQ-DUP-09 soft warning: persons with the same FullName (default collation) whose identity differs
-    /// (email or birthday). Excludes excludeId and any exact identity match. Never blocks a save.
+    /// REQ-DUP-09 soft warning: same-name persons (default collation) for the sheet, at most
+    /// PersonService.SameNameListLimit listed, plus the total count. Never blocks a save.
+    /// Name-only input (REQ-DUP-13a) includes the exact identity match in the list.
     /// </summary>
-    Task<IReadOnlyList<Person>> GetSameNamePersonsAsync(
+    Task<SameNameResult> GetSameNamePersonsAsync(
         string fullName, string? email, int? birthDay, int? birthMonth, int? excludeId,
         CancellationToken cancellationToken = default);
 }

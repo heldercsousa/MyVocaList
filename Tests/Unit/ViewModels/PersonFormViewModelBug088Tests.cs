@@ -1,14 +1,14 @@
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.UI.Models;
 using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
-/// <summary>BUG-088 T3: either/or inline error, same-name soft warning sheet and its commands (REQ-DUP-07..10).</summary>
+/// <summary>BUG-088: same-name soft warning sheet, its title and cap, name-only singers and its commands (REQ-DUP-08..13a).</summary>
 public class PersonFormViewModelBug088Tests
 {
     private const string DuplicateMessage = "This singer is already registered.";
-    private const string EitherOrMessage = "Enter an email or a birthday.";
 
     private readonly Mock<IPersonService> _serviceMock = new();
     private readonly Mock<ISnackbarComponent> _snackMock = new();
@@ -21,10 +21,9 @@ public class PersonFormViewModelBug088Tests
         _serviceMock.Setup(s => s.ValidateNameInput(It.IsAny<string>())).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateBirthday(It.IsAny<int?>(), It.IsAny<int?>())).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail(It.IsAny<string>())).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateContact(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>())).Returns((true, ""));
         _serviceMock.Setup(s => s.GetSameNamePersonsAsync(
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Person>());
+            .ReturnsAsync(new SameNameResult([], 0));
         _serviceMock.Setup(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, "Saved", new Person("John Doe")));
         _serviceMock.Setup(s => s.UpdatePersonAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -39,78 +38,13 @@ public class PersonFormViewModelBug088Tests
     private void SetupSameNameMatches(string name, params Person[] matches) =>
         _serviceMock.Setup(s => s.GetSameNamePersonsAsync(
                 name, It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(matches.ToList());
+            .ReturnsAsync(new SameNameResult(matches.ToList(), matches.Length));
 
-    // ── REQ-DUP-07: either/or inline error on Email ─────────────────────────
-
-    [Fact]
-    // [AC] REQ-DUP-07: Save with email and birthday both empty shows the either/or error on Email and does not save
-    public async Task SaveCommand_EmailAndBirthdayEmpty_ShowsEitherOrErrorOnEmailAndDoesNotCallService()
-    {
-        var sut = CreateSut();
-        sut.PersonName = "John Doe";
-        _serviceMock.Setup(s => s.ValidateContact(It.IsAny<string>(), null, null)).Returns((false, EitherOrMessage));
-
-        await sut.SaveCommand.ExecuteAsync(null);
-
-        Assert.True(sut.EmailHasError);
-        Assert.Equal(EitherOrMessage, sut.EmailErrorText);
-        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
-        _serviceMock.Verify(s => s.GetSameNamePersonsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    // [AC] REQ-DUP-07: the either/or error clears when the form is valid on the next Save
-    public async Task SaveCommand_EitherOrResolvedOnNextSave_ClearsEmailError()
-    {
-        var sut = CreateSut();
-        sut.PersonName = "John Doe";
-        _serviceMock.SetupSequence(s => s.ValidateContact(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>()))
-            .Returns((false, EitherOrMessage))
-            .Returns((true, ""));
-
-        await sut.SaveCommand.ExecuteAsync(null);
-        Assert.True(sut.EmailHasError);
-
-        sut.PersonEmail = "john@example.com";
-        await sut.SaveCommand.ExecuteAsync(null);
-
-        Assert.False(sut.EmailHasError);
-        Assert.Equal(string.Empty, sut.EmailErrorText);
-    }
-
-    [Fact]
-    // [AC] REQ-DUP-07a: the either/or error and the birthday error are applied independently and can show together
-    public async Task SaveCommand_EitherOrAndBirthdayErrorBothFail_ShowsBothErrors()
-    {
-        var sut = CreateSut();
-        sut.PersonName = "John Doe";
-        sut.SelectedBirthDay = 15;
-        _serviceMock.Setup(s => s.ValidateBirthday(15, null)).Returns((false, "Select both day and month"));
-        _serviceMock.Setup(s => s.ValidateContact(It.IsAny<string>(), 15, null)).Returns((false, EitherOrMessage));
-
-        await sut.SaveCommand.ExecuteAsync(null);
-
-        Assert.True(sut.BirthdayHasError);
-        Assert.True(sut.BirthdayErrorOnMonth);
-        Assert.True(sut.EmailHasError);
-        Assert.Equal(EitherOrMessage, sut.EmailErrorText);
-    }
-
-    [Fact]
-    // [AC] REQ-DUP-07a: an email format error and the either/or check do not overwrite each other on Email
-    public async Task SaveCommand_InvalidEmailFormat_ShowsFormatErrorNotEitherOr()
-    {
-        var sut = CreateSut();
-        sut.PersonName = "John Doe";
-        sut.PersonEmail = "notanemail";
-        _serviceMock.Setup(s => s.ValidateEmail("notanemail")).Returns((false, "Invalid email"));
-
-        await sut.SaveCommand.ExecuteAsync(null);
-
-        Assert.True(sut.EmailHasError);
-        Assert.Equal("Invalid email", sut.EmailErrorText);
-    }
+    // Total may exceed the listed rows (the service caps the list at 3).
+    private void SetupSameName(int total, params Person[] listed) =>
+        _serviceMock.Setup(s => s.GetSameNamePersonsAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SameNameResult(listed.ToList(), total));
 
     // ── REQ-DUP-09: create mode soft warning ───────────────────────────────
 
@@ -211,6 +145,148 @@ public class PersonFormViewModelBug088Tests
 
         Assert.True(sut.IsSameNameSheetVisible);
         _serviceMock.Verify(s => s.UpdatePersonAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // ── REQ-DUP-09: sheet title and cap ────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-DUP-09: one same-name singer gives the singular title and no more-line
+    public async Task SaveCommand_OneSameNameSinger_SingularTitleAndNoMoreLine()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+        SetupSameName(1, new Person("John Doe") { Id = 7, BirthDay = 3, BirthMonth = 4 });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal("A singer with this name already exists", sut.SameNameSheetTitle);
+        Assert.False(sut.HasMoreSameName);
+        Assert.Equal(string.Empty, sut.SameNameMoreText);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-09: two same-name singers give the plural title with the count
+    public async Task SaveCommand_TwoSameNameSingers_PluralTitleWithCount()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+        SetupSameName(2, new Person("John Doe") { Id = 7 }, new Person("John Doe") { Id = 8 });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal("2 singers with this name already exist", sut.SameNameSheetTitle);
+        Assert.Equal(2, sut.SameNameMatches.Count);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-09: more than 3 same-name singers list 3 rows and show the more-line with the number not listed
+    public async Task SaveCommand_FourSameNameSingers_ListsThreeAndShowsMoreLine()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+        SetupSameName(4, new Person("John Doe") { Id = 7 }, new Person("John Doe") { Id = 8 }, new Person("John Doe") { Id = 9 });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal("4 singers with this name already exist", sut.SameNameSheetTitle);
+        Assert.Equal(3, sut.SameNameMatches.Count);
+        Assert.True(sut.HasMoreSameName);
+        Assert.Equal("…and 1 more. Find them in the Singers list.", sut.SameNameMoreText);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-09: exactly 3 same-name singers are all listed, so there is no more-line
+    public async Task SaveCommand_ThreeSameNameSingers_NoMoreLine()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+        SetupSameName(3, new Person("John Doe") { Id = 7 }, new Person("John Doe") { Id = 8 }, new Person("John Doe") { Id = 9 });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(3, sut.SameNameMatches.Count);
+        Assert.False(sut.HasMoreSameName);
+        Assert.Equal(string.Empty, sut.SameNameMoreText);
+    }
+
+    // ── REQ-DUP-12 / REQ-DUP-13a: name-only singers ────────────────────────
+
+    [Fact]
+    // [AC] REQ-DUP-12: a name-only singer with no namesake saves directly and never opens the sheet
+    public async Task SaveCommand_NameOnlyNoNamesake_SavesWithoutSheet()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.False(sut.IsSameNameSheetVisible);
+        _serviceMock.Verify(s => s.CreatePersonAsync("John Doe", null, null, null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-13a: a name-only form with a namesake opens the sheet without Save as new (create mode)
+    public async Task SaveCommand_NameOnlyWithNamesake_SheetHidesSaveAsNew()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        SetupSameName(1, new Person("John Doe") { Id = 7, Email = "other@example.com" });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsSameNameSheetVisible);
+        Assert.False(sut.CanSaveAsNewFromSheet);
+        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-13a: a name-only edit that changes the name to a namesake's name also hides Save anyway
+    public async Task SaveCommand_EditModeNameOnlyWithNamesake_SheetHidesSaveAnyway()
+    {
+        var sut = CreateSut();
+        sut.PersonIdRaw = "5";
+        sut.PersonName = "John Doe";
+        sut.CompleteHydration();
+        sut.PersonName = "Johnny Doe";
+        SetupSameName(1, new Person("Johnny Doe") { Id = 9, Email = "other@example.com" });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsSameNameSheetVisible);
+        Assert.False(sut.CanSaveAsNewFromSheet);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-13a: with an email or a birthday, the sheet keeps Save as new
+    public async Task SaveCommand_WithEmailAndNamesake_SheetKeepsSaveAsNew()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+        SetupSameName(1, new Person("John Doe") { Id = 7, Email = "other@example.com" });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.CanSaveAsNewFromSheet);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-13a: with only a birthday, the sheet keeps Save as new
+    public async Task SaveCommand_WithBirthdayOnlyAndNamesake_SheetKeepsSaveAsNew()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.SelectedBirthDay = 15;
+        sut.SelectedBirthMonth = sut.Months[2];
+        SetupSameName(1, new Person("John Doe") { Id = 7, BirthDay = 1, BirthMonth = 1 });
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.CanSaveAsNewFromSheet);
     }
 
     // ── REQ-DUP-09: sheet buttons ──────────────────────────────────────────

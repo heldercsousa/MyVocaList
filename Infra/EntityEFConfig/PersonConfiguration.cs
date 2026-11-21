@@ -33,11 +33,6 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
             t.HasCheckConstraint(
                 "CK_Persons_Birthday",
                 "(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay IS NOT NULL AND BirthMonth IS NOT NULL AND BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)");
-
-            // BUG-088 REQ-DUP-05: a singer needs an email or a birthday (identity rule, see the bug's design.md).
-            t.HasCheckConstraint(
-                "CK_Persons_EmailOrBirthday",
-                "Email IS NOT NULL OR BirthDay IS NOT NULL");
         });
 
         // D3 (design.md § D3): trim-on-save enforced here, not in PersonService Create/Update.
@@ -63,8 +58,9 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
                .HasDatabaseName("IX_Persons_ExternalId");
 
         // BUG-088 identity: unique index IX_Persons_Identity (FullName, COALESCE(Email), COALESCE(BirthDay/BirthMonth)).
-        // It is an expression index that EF HasIndex cannot express, so it is created ONLY in migration
-        // PersonIdentityUniqueIndex (raw SQL). Do not re-add an equivalent model index here. Any later migration
+        // It is an expression index that EF HasIndex cannot express, so it is created ONLY by raw SQL in the newest
+        // migration that creates it, PersonIdentityUniqueIndexRestore (the older PersonIdentityUniqueIndex created it
+        // before a later table rebuild). Do not re-add an equivalent model index here. Any later migration
         // that rebuilds the People table drops it and must re-create it (the PersonIdentityIndexTests guard checks).
     }
 }

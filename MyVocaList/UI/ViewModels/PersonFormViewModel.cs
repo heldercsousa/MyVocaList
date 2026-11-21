@@ -3,6 +3,7 @@ using System.Globalization;
 using MyVocaList.Domain.Constants;
 using CommunityToolkit.Mvvm.Input;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.UI.Collections;
 using MyVocaList.UI.Models;
 
@@ -61,8 +62,13 @@ public partial class PersonFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private IEnumerable<AutocompleteSuggestion> _suggestions = [];
 
-    // BUG-088 same-name soft warning (REQ-DUP-09). Rows carry the Person in Data.
+    // BUG-088 same-name soft warning (REQ-DUP-09, REQ-DUP-13a). Rows carry the Person in Data.
     [ObservableProperty] private bool _isSameNameSheetVisible;
+    [ObservableProperty] private string _sameNameSheetTitle = string.Empty;
+    [ObservableProperty] private string _sameNameMoreText = string.Empty;
+    [ObservableProperty] private bool _hasMoreSameName;
+    // False when the form is name-only: Save as new / Save anyway is hidden and the hint is shown instead (REQ-DUP-13a).
+    [ObservableProperty] private bool _canSaveAsNewFromSheet = true;
     public ObservableRangeCollection<AutocompleteSuggestion> SameNameMatches { get; } = [];
     public string SameNameSaveButtonText => IsEditMode ? "Save anyway" : "Save as new";
 
@@ -301,8 +307,6 @@ public partial class PersonFormViewModel : ViewModelBase
         ApplyBirthdayValidation();
         ApplyEmailValidation(PersonEmail);
         var email = NormalizedEmail();
-        // REQ-DUP-07: the either/or error is applied after the email format check and independently of the birthday error (REQ-DUP-07a).
-        ApplyContactValidation(email);
 
         if (NameHasError || BirthdayHasError || EmailHasError)
             return;
@@ -316,7 +320,7 @@ public partial class PersonFormViewModel : ViewModelBase
             {
                 var sameName = await _personService.GetSameNamePersonsAsync(
                     name, email, SelectedBirthDay, SelectedBirthMonth?.Number, PersonId);
-                if (sameName.Count > 0)
+                if (sameName.TotalCount > 0)
                 {
                     ShowSameNameSheet(sameName);
                     return;
@@ -368,23 +372,27 @@ public partial class PersonFormViewModel : ViewModelBase
 
     private string? NormalizedEmail() => string.IsNullOrWhiteSpace(PersonEmail) ? null : PersonEmail.Trim();
 
-    /// <summary>REQ-DUP-07: sets the either/or error on Email. Only sets the error; a valid result never clears an email format error.</summary>
-    private void ApplyContactValidation(string? email)
+    /// <summary>
+    /// REQ-DUP-09: fills the sheet with the listed same-name singers and opens it. Nothing is saved.
+    /// The title counts all same-name singers; the more-line counts the ones not listed (TotalCount minus the listed rows).
+    /// </summary>
+    private void ShowSameNameSheet(SameNameResult sameName)
     {
-        var (isValid, message) = _personService.ValidateContact(email, SelectedBirthDay, SelectedBirthMonth?.Number);
-        if (isValid)
-            return;
-
-        EmailHasError = true;
-        EmailErrorText = message;
-    }
-
-    /// <summary>REQ-DUP-09: fills the sheet with the same-name singers and opens it. Nothing is saved.</summary>
-    private void ShowSameNameSheet(IReadOnlyList<Person> sameName)
-    {
-        SameNameMatches.ReplaceRange(sameName
+        SameNameMatches.ReplaceRange(sameName.Matches
             .Select(p => new AutocompleteSuggestion(p.FullName, p.GetDisplayIdentifier(), p))
             .ToList());
+
+        var notListed = sameName.TotalCount - sameName.Matches.Count;
+        SameNameSheetTitle = sameName.TotalCount == 1
+            ? "A singer with this name already exists"
+            : $"{sameName.TotalCount} singers with this name already exist";
+        HasMoreSameName = notListed > 0;
+        SameNameMoreText = HasMoreSameName
+            ? $"…and {notListed} more. Find them in the Singers list."
+            : string.Empty;
+
+        // REQ-DUP-13a: a name-only form (no email, no birthday) cannot save a new singer with a shared name.
+        CanSaveAsNewFromSheet = !string.IsNullOrWhiteSpace(PersonEmail) || SelectedBirthDay.HasValue || SelectedBirthMonth is not null;
         IsSameNameSheetVisible = true;
     }
 
