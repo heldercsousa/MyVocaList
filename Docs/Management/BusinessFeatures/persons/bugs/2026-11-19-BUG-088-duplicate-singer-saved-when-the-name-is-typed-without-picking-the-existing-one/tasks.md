@@ -11,3 +11,7 @@ Spec: `requirements.md`, `design.md`. Depends on `changes/2026-11-19-person-form
 - [x] **T5: Name-only singers + sheet cap** (`design.md § Spec updated 2026-11-21`). Infra (two migrations), Services, then the VM and XAML (one file at a time). Delete the withdrawn-AC tests and add the new ones. Emulator E2E: register a name-only singer; saving another name-only singer with the same name opens the sheet with no Save as new and the hint, and the service rejects it (REQ-DUP-13); adding an email makes Save as new appear and save; the sheet with 2 matches shows the plural title; with more than 3 it shows the more-line.
 - [ ] **T6: On-device gate (Helder)** for T5. No data cleanup needed before installing.
 - [x] **T7: No internal ID in display** (REQ-DUP-15). Change `Person.GetDisplayIdentifier()` so the fallback returns `string.Empty`, and make `GetDisplayName()` return just the `FullName` when the identifier is empty. Update the fallback test (now `REQ-DUP-15`, red first). Check that an empty `SupportingText` renders cleanly in the sheet row and in the suggestions on the emulator.
+- [ ] **T8: Form flow regressions found on device** (REQ-DUP-10 clarified, REQ-DUP-16).
+  - (a) Add mode, type an existing name, pick the suggestion, Save: the sheet appears as if in Add mode. Expected: no sheet, because the name is unchanged from the picked singer.
+  - (b) Add mode, type an existing name without picking, Save, sheet, Open: the singer loads, but the name suggestions open for the loaded name. Expected: no suggestions.
+  - Regression tests (VM) red first.

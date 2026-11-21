@@ -53,3 +53,8 @@ New and changed criteria:
 ## Spec updated 2026-11-21 (Helder, T6 device check)
 
 - **REQ-DUP-15 (no internal ID shown):** A singer with no email and no birthday shall show **no identifier**. `Person.GetDisplayIdentifier()` returns an empty string instead of `"(ID: n)"`, so the same-name sheet rows and the name suggestions show only the name. The database Id is for developers only, not for the user. This supersedes the "falls back to the ID" case of REQ-BDAY-10 (`changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/`, now shipped). By REQ-DUP-13, at most one singer per name can be name-only, so that row stays distinguishable.
+
+## Spec updated 2026-11-21 (Helder, second device check)
+
+- **REQ-DUP-10 (clarified):** "Edit mode" and "the loaded value" refer to the singer **currently loaded** in the form. When a name suggestion is picked or a sheet Open loads another singer into the same form, that singer becomes the baseline. Saving it without changing the name opens no sheet. If the sheet does open (name changed), it shows the edit-mode **Save anyway** label.
+- **REQ-DUP-16 (no suggestions after Open):** Loading a singer through the sheet's Open button shall not open the name suggestions for the loaded name, the same as a suggestion pick.
