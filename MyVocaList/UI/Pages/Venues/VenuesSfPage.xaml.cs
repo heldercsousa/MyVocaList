@@ -44,4 +44,24 @@ public partial class VenuesSfPage : CrudListPageBase
     {
         exitConfirmSheet.Close();
     }
+
+    /// <summary>
+    /// Row tap. Forwards to the ViewModel the same way CrudListView forwards DXCollectionView.Tap (code-behind),
+    /// because the XAML command binding on the row recognizer never reached the command (S5b finding).
+    /// The row item is the BindingContext of the recognizer's SfEffectsView host.
+    /// </summary>
+    private void OnRowTapped(object sender, TappedEventArgs e)
+    {
+        var item = ((BindableObject)sender).BindingContext;
+        if (ViewModel.ItemTapCommand.CanExecute(item))
+            ViewModel.ItemTapCommand.Execute(item);
+    }
+
+    /// <summary>Row press-and-hold. Forwards to ViewModel.ItemLongPressCommand (SfEffectsView.LongPressed).</summary>
+    private void OnRowLongPressed(object sender, EventArgs e)
+    {
+        var item = ((BindableObject)sender).BindingContext;
+        if (ViewModel.ItemLongPressCommand.CanExecute(item))
+            ViewModel.ItemLongPressCommand.Execute(item);
+    }
 }

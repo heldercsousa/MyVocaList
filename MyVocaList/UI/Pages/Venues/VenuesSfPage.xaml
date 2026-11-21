@@ -42,12 +42,10 @@
 
         <views:CrudListViewSf.ItemTemplate>
             <DataTemplate x:DataType="dto:VenueListItemDto">
-                <toolkit:SfEffectsView LongPressedCommand="{Binding ViewModel.ItemLongPressCommand, Source={x:Reference page}}"
-                                       LongPressedCommandParameter="{Binding .}"
+                <toolkit:SfEffectsView LongPressed="OnRowLongPressed"
                                        TouchDownEffects="Highlight">
                     <toolkit:SfEffectsView.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ViewModel.ItemTapCommand, Source={x:Reference page}}"
-                                              CommandParameter="{Binding .}" />
+                        <TapGestureRecognizer Tapped="OnRowTapped" />
                     </toolkit:SfEffectsView.GestureRecognizers>
                     <lists:ListItem Headline="{Binding Name}"
                                     SupportingText="{Binding AddressSummary}"

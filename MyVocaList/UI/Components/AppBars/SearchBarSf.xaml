@@ -8,7 +8,8 @@
 
     <!-- SPIKE (task/spike-syncfusion): Syncfusion copy of appbars:SearchBar.
          Same BindableProperties (SearchText TwoWay, Placeholder). Elevation (IsElevated) is not ported:
-         the copy keeps SurfaceContainerLow. Input is SfTextInputLayout + Entry. -->
+         the copy keeps SurfaceContainerLow. Input is a plain MAUI Entry (S5b fallback): SfTextInputLayout
+         never measured its hosted Entry on Android (Width/Height -1, no EditText in the native tree). -->
     <Border x:Name="container"
             StrokeShape="RoundRectangle 28"
             HeightRequest="56"
@@ -16,19 +17,18 @@
             Stroke="Transparent"
             BackgroundColor="{StaticResource SurfaceContainerLow}">
 
-        <toolkit:SfTextInputLayout ContainerType="Outlined"
-                                   Hint="{Binding Placeholder, Source={x:Reference self}}"
-                                   HasError="False"
-                                   Margin="8,0"
-                                   VerticalOptions="Center">
-            <Entry x:Name="searchEntry"
-                   Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
-                   TextColor="{StaticResource OnSurface}"
-                   FontSize="16"
-                   Keyboard="Text"
-                   ReturnType="Search"
-                   ClearButtonVisibility="WhileEditing"
-                   SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
-        </toolkit:SfTextInputLayout>
+        <Entry x:Name="searchEntry"
+               Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+               Placeholder="{Binding Placeholder, Source={x:Reference self}}"
+               PlaceholderColor="{StaticResource OnSurfaceVariant}"
+               TextColor="{StaticResource OnSurface}"
+               BackgroundColor="Transparent"
+               FontSize="16"
+               Margin="24,0,16,0"
+               VerticalOptions="Center"
+               Keyboard="Text"
+               ReturnType="Search"
+               ClearButtonVisibility="WhileEditing"
+               SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
     </Border>
 </ContentView>
