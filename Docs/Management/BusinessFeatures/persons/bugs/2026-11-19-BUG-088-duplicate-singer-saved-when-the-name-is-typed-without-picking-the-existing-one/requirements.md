@@ -31,3 +31,21 @@ These tests must fail before the fix and pass after it:
 - REQ-DUP-04: an index test on a real SQLite file using `MigrateAsync`, because an expression index is a migration-only object. Red = the duplicate row is inserted when the schema is migrated only up to `PersonBirthDayMonth`, which is a behavioural failure, not a compile error. Green = the insert throws once `PersonIdentityUniqueIndex` is applied.
 
 These tests start only after the birthday change's T1 is committed on the shared branch.
+
+## Spec updated 2026-11-21 (Helder, after the on-device test)
+
+Email and birthday are **optional again**. A host in a hurry must be able to register a singer by name only. Helder's decision, 2026-11-21. This supersedes:
+- **REQ-DUP-03** (service either/or), **REQ-DUP-05** (`CK_Persons_EmailOrBirthday`), **REQ-DUP-07** (form either/or inline error) and **REQ-DUP-07a** (precedence). All four are withdrawn. Their tests are deleted as part of this change.
+- The Identity paragraph is unchanged: a missing email or birthday still counts as the empty value. So a second name-only singer with the same name is still a duplicate, and is rejected by REQ-DUP-01/02/04.
+
+New and changed criteria:
+- **REQ-DUP-12 (name-only singer):** Create and Update shall accept a singer with no email and no birthday when no *other* person has the same FullName (default collation). The database shall accept that row.
+- **REQ-DUP-13 (namesake needs email or birthday):** Helder, 2026-11-21. When the email and the birthday are both empty and any *other* person (excluding the one being edited) has the same FullName, Create and Update shall return `(false, "Another singer has this name. Enter an email or a birthday to save a new one.", …)` and shall not save. This applies whatever the namesake's email or birthday is, and it is checked before the identity check. The form shows it as the error snackbar (REQ-DUP-08). The DB index backs only the exact name-only duplicate; the rest is enforced by the service.
+- **REQ-DUP-13a (sheet when name-only):** When the same-name sheet opens (REQ-DUP-09) and the form has neither an email nor a birthday, the sheet shall hide **Save as new** / **Save anyway** and show the hint "To save a new singer with this name, enter an email or a birthday." The Open buttons and Cancel stay.
+- **REQ-DUP-14 (migration):** The migration drops `CK_Persons_EmailOrBirthday`, and `IX_Persons_Identity` exists after migrating to the latest migration.
+- **REQ-DUP-09 (changed: sheet title and cap):**
+  - With exactly 1 same-name singer, the title is "A singer with this name already exists".
+  - With N > 1, the title is "N singers with this name already exist".
+  - The sheet lists at most **3** same-name singers, oldest first (lowest Id), each with its Open button.
+  - When N > 3, a line under the list reads "…and M more. Find them in the Singers list.", where M = N − 3.
+  - Buttons are unchanged.

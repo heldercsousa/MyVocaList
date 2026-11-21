@@ -20,6 +20,7 @@
 | 2026-11-11 | ↳ import an artist's song catalog from files (PDF etc.) | 💡 Pending |
 | 2026-11-16 | ↳ Send corrected lyrics back to LRCLIB | 💡 Pending |
 | 2026-11-17 | ↳ Lyrics lookup falls back to the lyrics source's search before recording no lyrics | 💡 Pending |
+| 2026-11-21 | ↳ Singer self check-in to the event queue | 💡 Pending |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ## Dev Cycle Craft

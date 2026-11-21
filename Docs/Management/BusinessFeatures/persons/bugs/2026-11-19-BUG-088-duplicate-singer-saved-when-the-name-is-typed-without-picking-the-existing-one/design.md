@@ -83,3 +83,47 @@ Existing tests whose AC is superseded must be updated as part of this spec chang
 - `PersonRepositoryTests.AddAsync_SameNameNullBirthday_AllowsDuplicate`: now this test needs an email difference.
 - `AddAsync_SameNameSameBirthday_ThrowsDbUpdateException`: now this case is covered by the identity index.
 - Any service or VM test that creates a person with neither email nor birthday: add an email.
+
+## Spec updated 2026-11-21 (Helder, after the on-device test): name-only singers + sheet cap
+
+REQ-DUP-03/05/07/07a are withdrawn; REQ-DUP-12/13/14 are new; REQ-DUP-09 is changed (see `requirements.md`).
+
+### Infra
+- `PersonConfiguration`: remove the `CK_Persons_EmailOrBirthday` `HasCheckConstraint`. Keep `CK_Persons_Birthday`.
+- **Two migrations**, for the same reason as on 2026-11-20 (EF defers the `People` rebuild to the end of a migration, and the rebuild drops raw-SQL indexes):
+  1. `PersonDropEmailOrBirthdayCheck`: scaffolded by `dotnet ef migrations add`. It drops the CHECK, and on SQLite that rebuilds `People`.
+  2. `PersonIdentityUniqueIndexRestore`: an empty scaffold filled by hand.
+     - `Up`: `DROP INDEX IF EXISTS IX_Persons_Identity;` then the same `CREATE UNIQUE INDEX` SQL as `PersonIdentityUniqueIndex`, with the literal `NOCASE_NOACCENT`.
+     - `Down`: `DROP INDEX IF EXISTS IX_Persons_Identity;`.
+  - Update the `PersonConfiguration` comment so it names the newest migration that creates the index.
+- Repository:
+  - `GetSameNameDifferentIdentityAsync` gains a `take` parameter. It orders by `Id` and returns at most `take` rows.
+  - Add `CountSameNameDifferentIdentityAsync(fullName, email, day, month, excludeId, ct)`, which reuses the same predicate.
+  - Add `FindIdentityMatchAsync(...)` → `Person?` (NoTracking), using the identity predicate. It may replace `IdentityExistsAsync` if that is simpler; update callers and tests.
+
+### Services
+- Remove the either/or step from Create and Update, and remove `ValidateContact` from `IPersonService` and `PersonService`. Delete the `EitherOrMessage` constant if nothing else uses it.
+- New step before the identity check (REQ-DUP-13): if email is empty and day and month are both null, call `CountSameNameDifferentIdentityAsync`, or a simpler `SameNameExistsAsync(fullName, excludeId)` (any other person with the same name, any identity). If one exists, return `NamesakeNeedsContactMessage` = "Another singer has this name. Enter an email or a birthday to save a new one." This also covers the exact name-only duplicate. The identity check (step 3) and `DuplicateMessage` are unchanged for the other cases.
+- The `ConstraintViolationException` catch keeps returning `DuplicateMessage`. That race is unreachable, and the generic message is accepted.
+- `GetSameNamePersonsAsync` returns `SameNameResult(IReadOnlyList<Person> Matches, int TotalCount)`, a record in `Contracts/Models` (or wherever the service DTOs live). `Matches` is capped by `PersonService.SameNameListLimit = 3`.
+  - Two queries: a count, then `take: 3`. With `TotalCount == 0`, skip the second query.
+
+### UI
+- VM: remove the either/or inline error and its `ValidateContact` call.
+- `SameNameSheetTitle`, a string property set when the sheet opens: "A singer with this name already exists" when TotalCount is 1, otherwise $"{n} singers with this name already exist".
+- `SameNameMoreText`: $"…and {n - 3} more. Find them in the Singers list." It is empty when TotalCount ≤ 3.
+- `HasMoreSameName` (bool) drives the label's `IsVisible`.
+- When the form is name-only, the sheet query lists **all** same-name persons, including an exact name-only match, so the host can Open it. Add an `includeIdentityMatch` flag to the count and list queries, or use a plain same-name query in that case.
+- `CanSaveAsNewFromSheet` (bool): true when the form has an email or a birthday. When it is false, the sheet hides the Save-as-new button and shows the REQ-DUP-13a hint label. The VM uses the same "has contact" input as the service call (email non-blank, or day/month set). That is only a display decision; the service enforces the rule.
+- XAML: bind the sheet title label to `SameNameSheetTitle`, and add one `Label` under the list (`BodyMedium` style, OnSurfaceVariant) bound to `SameNameMoreText`, with `IsVisible` bound to `HasMoreSameName`.
+
+### Tests (the ones listed here replace the deleted ones; every other existing test stays)
+| AC | Test |
+|----|------|
+| REQ-DUP-12 | Service (Moq): Create with no email and no birthday, and no namesake, succeeds. Repository (real SQLite, `MigrateAsync` to latest): a row with no email and no birthday inserts. |
+| REQ-DUP-13 | Service (Moq): name-only save when a namesake has an email → `NamesakeNeedsContactMessage` and no save. Update with excludeId: the person's own row is not a namesake. Repository (real SQLite): `SameNameExistsAsync` matches different case or accents and honours excludeId. |
+| REQ-DUP-13a | VM: name-only form with a namesake → sheet open, `CanSaveAsNewFromSheet` false. With an email → true. |
+| REQ-DUP-04/14 | `PersonIdentityIndexTests`: two name-only rows with the same name (different case) → the second throws. The existing `sqlite_master` guard after `MigrateAsync` still passes. |
+| REQ-DUP-09 | VM: 1 match → singular title, no more-line. 2 matches → "2 singers…". TotalCount 7 with 3 matches → 3 rows, "…and 4 more…", `HasMoreSameName` true. Service: passes take 3 and returns TotalCount. Repository: ordering by Id and take. |
+
+**Delete (withdrawn ACs):** the tests tagged REQ-DUP-03, REQ-DUP-05, REQ-DUP-07 and REQ-DUP-07a. Delete the `ValidateContact` tests.
