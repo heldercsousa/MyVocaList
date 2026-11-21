@@ -59,6 +59,11 @@ Root cause: in insert mode, `PersonService.CreatePersonAsync` checks only that t
   - `ContentPage` keeps `SafeAreaEdges="All"` (text input).
   - Never `DisplayAlert`.
 
+> **Spec updated 2026-11-20:** the same-name rows are `AutocompleteSuggestion` records (`Headline` = FullName, `SupportingText` = `GetDisplayIdentifier()`, `Data` = the `Person`), so the sheet reuses the existing suggestion model. The sheet is `HalfExpandedRatio="0.5"`. <!-- impl decision: reuse the suggestion row type rather than a new record -->
+> **Spec updated 2026-11-20:** the edit-mode "name changed" baseline is the trimmed FullName captured once in `CompleteHydration()` (the first call only) and compared ordinal with the trimmed name at Save. <!-- impl decision: the loaded value must be captured when the query hydration ends, not on every OnAppearing -->
+> **Spec updated 2026-11-20:** the either/or check runs after the Email format check and only sets the Email error when it fails, so it never clears a format error. The same-name query runs inside the busy window, so a second Save tap cannot open the sheet twice. <!-- impl decision: keep the Save flow re-entrancy guard across the async query -->
+> **Spec updated 2026-11-20:** REQ-DUP-07a (both errors together) is asserted at the VM level with mocked rules. With the rule in `ValidateContact` (either/or fires only when day and month are both empty) and `ValidateBirthday` (fires only when exactly one of them is set), the two errors cannot occur together on real data. The independence is implemented, not a co-occurrence. <!-- impl decision: VM applies both errors independently; real-data exclusivity is a property of the rules -->
+
 ## Tests
 | AC | Test |
 |----|------|

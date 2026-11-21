@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using MyVocaList.Domain.Constants;
+using CommunityToolkit.Mvvm.Input;
 using MyVocaList.Domain.Entity;
+using MyVocaList.UI.Collections;
 using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.ViewModels;
@@ -59,6 +61,11 @@ public partial class PersonFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private IEnumerable<AutocompleteSuggestion> _suggestions = [];
 
+    // BUG-088 same-name soft warning (REQ-DUP-09). Rows carry the Person in Data.
+    [ObservableProperty] private bool _isSameNameSheetVisible;
+    public ObservableRangeCollection<AutocompleteSuggestion> SameNameMatches { get; } = [];
+    public string SameNameSaveButtonText => IsEditMode ? "Save anyway" : "Save as new";
+
     // Character counter
     [ObservableProperty] private string _characterCounterText = string.Empty;
     [ObservableProperty] private bool _showCharacterCounter;
@@ -79,6 +86,9 @@ public partial class PersonFormViewModel : ViewModelBase
     // value would flash an error on the very first blur, before the user has touched anything
     // (edit-mode dirty-guard, Form Validation Standard).
     private bool _isHydrating = true;
+
+    // Trimmed FullName as loaded from the query (edit mode). Set once, by CompleteHydration (REQ-DUP-10).
+    private string _loadedName = string.Empty;
 
     public bool IsEditMode => PersonId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Singer" : "New Singer";
@@ -109,6 +119,9 @@ public partial class PersonFormViewModel : ViewModelBase
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchPersonsCommand = new AsyncRelayCommand<string>(SearchPersonsAsync);
         SuggestionSelectedCommand = new AsyncRelayCommand<AutocompleteSuggestion>(SuggestionSelectedAsync);
+        SaveAsNewCommand = new AsyncRelayCommand(SaveAsNewAsync);
+        OpenSameNameCommand = new AsyncRelayCommand<AutocompleteSuggestion>(OpenSameNameAsync);
+        DismissSameNameSheetCommand = new RelayCommand(() => IsSameNameSheetVisible = false);
         NameOptionSource = new MenuOptionSource((query, ct) => SearchPersonsCoreAsync(query, ct));
 
         RebuildDays(null);
@@ -118,6 +131,9 @@ public partial class PersonFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchPersonsCommand { get; }
     public IAsyncRelayCommand<AutocompleteSuggestion> SuggestionSelectedCommand { get; }
+    public IAsyncRelayCommand SaveAsNewCommand { get; }
+    public IAsyncRelayCommand<AutocompleteSuggestion> OpenSameNameCommand { get; }
+    public IRelayCommand DismissSameNameSheetCommand { get; }
 
     /// <summary>Option source for the Full Name autocomplete field (REQ-ACF-13, -16).</summary>
     public IMenuOptionSource NameOptionSource { get; }
@@ -126,6 +142,7 @@ public partial class PersonFormViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(PageTitle));
+        OnPropertyChanged(nameof(SameNameSaveButtonText));
     }
 
     partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
@@ -135,7 +152,14 @@ public partial class PersonFormViewModel : ViewModelBase
     /// <c>[QueryProperty]</c> values for this navigation. Ends the hydration window so that
     /// subsequent field edits are tracked as dirty (edit-mode dirty-guard).
     /// </summary>
-    public void CompleteHydration() => _isHydrating = false;
+    public void CompleteHydration()
+    {
+        if (!_isHydrating) return;
+
+        // REQ-DUP-10: the name as loaded is the baseline for "name changed" in edit mode.
+        _loadedName = PersonName?.Trim() ?? string.Empty;
+        _isHydrating = false;
+    }
 
     /// <summary>
     /// Blur handler (invoked from the page's <c>Unfocused</c>/<c>BlurredWithoutSelectionCommand</c>).
@@ -276,49 +300,119 @@ public partial class PersonFormViewModel : ViewModelBase
         ApplyNameValidation(name);
         ApplyBirthdayValidation();
         ApplyEmailValidation(PersonEmail);
+        var email = NormalizedEmail();
+        // REQ-DUP-07: the either/or error is applied after the email format check and independently of the birthday error (REQ-DUP-07a).
+        ApplyContactValidation(email);
 
         if (NameHasError || BirthdayHasError || EmailHasError)
             return;
 
-        var birthDay = SelectedBirthDay;
-        var birthMonth = SelectedBirthMonth?.Number;
-        var email = string.IsNullOrWhiteSpace(PersonEmail) ? null : PersonEmail.Trim();
-
         IsBusy = true;
         try
         {
-            if (IsEditMode)
+            // REQ-DUP-09/10: the same-name check is a soft warning and never blocks. Create always checks;
+            // edit checks only when the name differs from the loaded value.
+            if (!IsEditMode || !string.Equals(name, _loadedName, StringComparison.Ordinal))
             {
-                var (success, message) = await _personService.UpdatePersonAsync(
-                    PersonId.Value, name, birthDay, birthMonth, email);
-                if (success)
+                var sameName = await _personService.GetSameNamePersonsAsync(
+                    name, email, SelectedBirthDay, SelectedBirthMonth?.Number, PersonId);
+                if (sameName.Count > 0)
                 {
-                    await _snackbarService.ShowSuccessAsync(message);
-                    await (Shell.Current?.GoToAsync("..") ?? Task.CompletedTask);
-                }
-                else
-                {
-                    await ApplyAsyncFailureAsync(message);
+                    ShowSameNameSheet(sameName);
+                    return;
                 }
             }
-            else
-            {
-                var (success, message, _) = await _personService.CreatePersonAsync(name, birthDay, birthMonth, email);
-                if (success)
-                {
-                    await _snackbarService.ShowSuccessAsync(message);
-                    await (Shell.Current?.GoToAsync("..") ?? Task.CompletedTask);
-                }
-                else
-                {
-                    await ApplyAsyncFailureAsync(message);
-                }
-            }
+
+            await SaveCoreAsync(name, email);
         }
         finally
         {
             IsBusy = false;
         }
+    }
+
+    /// <summary>Saves the form through the service (insert or update). The caller owns <see cref="IsBusy"/>.</summary>
+    private async Task SaveCoreAsync(string name, string? email)
+    {
+        var birthDay = SelectedBirthDay;
+        var birthMonth = SelectedBirthMonth?.Number;
+
+        if (IsEditMode)
+        {
+            var (success, message) = await _personService.UpdatePersonAsync(
+                PersonId.Value, name, birthDay, birthMonth, email);
+            if (success)
+            {
+                await _snackbarService.ShowSuccessAsync(message);
+                await (Shell.Current?.GoToAsync("..") ?? Task.CompletedTask);
+            }
+            else
+            {
+                await ApplyAsyncFailureAsync(message);
+            }
+        }
+        else
+        {
+            var (success, message, _) = await _personService.CreatePersonAsync(name, birthDay, birthMonth, email);
+            if (success)
+            {
+                await _snackbarService.ShowSuccessAsync(message);
+                await (Shell.Current?.GoToAsync("..") ?? Task.CompletedTask);
+            }
+            else
+            {
+                await ApplyAsyncFailureAsync(message);
+            }
+        }
+    }
+
+    private string? NormalizedEmail() => string.IsNullOrWhiteSpace(PersonEmail) ? null : PersonEmail.Trim();
+
+    /// <summary>REQ-DUP-07: sets the either/or error on Email. Only sets the error; a valid result never clears an email format error.</summary>
+    private void ApplyContactValidation(string? email)
+    {
+        var (isValid, message) = _personService.ValidateContact(email, SelectedBirthDay, SelectedBirthMonth?.Number);
+        if (isValid)
+            return;
+
+        EmailHasError = true;
+        EmailErrorText = message;
+    }
+
+    /// <summary>REQ-DUP-09: fills the sheet with the same-name singers and opens it. Nothing is saved.</summary>
+    private void ShowSameNameSheet(IReadOnlyList<Person> sameName)
+    {
+        SameNameMatches.ReplaceRange(sameName
+            .Select(p => new AutocompleteSuggestion(p.FullName, p.GetDisplayIdentifier(), p))
+            .ToList());
+        IsSameNameSheetVisible = true;
+    }
+
+    /// <summary>REQ-DUP-09 "Save as new" (insert) or "Save anyway" (edit): closes the sheet and saves the form.</summary>
+    private async Task SaveAsNewAsync()
+    {
+        if (IsBusy) return;
+
+        IsSameNameSheetVisible = false;
+        IsBusy = true;
+        try
+        {
+            await SaveCoreAsync(PersonName?.Trim() ?? string.Empty, NormalizedEmail());
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>REQ-DUP-09: a listed singer opens in edit mode, the same as a name-suggestion pick.</summary>
+    private async Task OpenSameNameAsync(AutocompleteSuggestion? match)
+    {
+        IsSameNameSheetVisible = false;
+
+        if (match?.Data is not Person person) return;
+
+        await NavigateToEditAsync(person);
     }
 
     /// <summary>
@@ -371,6 +465,14 @@ public partial class PersonFormViewModel : ViewModelBase
 
         Suggestions = [];
 
+        await NavigateToEditAsync(person);
+    }
+
+    /// <summary>
+    /// Opens <paramref name="person"/> in edit mode. Shared by the name-suggestion pick and the same-name sheet (REQ-DUP-09).
+    /// </summary>
+    private async Task NavigateToEditAsync(Person person)
+    {
         // Day and month travel as two integer query parameters; both empty when the singer has no birthday.
         var birthDay = person.BirthDay?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
         var birthMonth = person.BirthMonth?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
