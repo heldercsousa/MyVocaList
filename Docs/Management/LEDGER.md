@@ -10,7 +10,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| BDAY+BUG-088 | Person birthday dropdowns + duplicate-singer identity | merged; emulator E2E passed (4 UI bugs found+fixed); on-device gates open | task/person-form-e2e-fixes | — | to review | 0b1be1b8 | Helder: clean phone data (no-email-no-birthday singers, duplicates), install, run gates; see persons/changes/2026-11-19-person-form-birthday-* and bugs/2026-11-19-BUG-088-* |
+| BUG-088 | Duplicate-singer identity; T5 name-only singers + capped sheet | BDAY closed ✅; T5 merged, 2026 tests, emulator E2E passed; T6 on-device gate open | task/bug088-name-only-and-sheet-cap | — | to review | ea3996b4 | Helder: install, run T6 (name-only save, namesake hint, plural title, more-line); see persons/bugs/2026-11-19-BUG-088-* |
 
 ## Completed (recent)
 
