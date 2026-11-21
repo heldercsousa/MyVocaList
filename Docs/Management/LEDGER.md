@@ -10,7 +10,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| BDAY+BUG-088 | Person birthday dropdowns + duplicate-singer identity | Birthday T1 (domain/infra/services) | task/person-birthday-and-identity | .claude/worktrees/person-identity | dispatched | 06d2ceab | wait for T1, then T2 UI; see persons/changes/2026-11-19-person-form-birthday-* and bugs/2026-11-19-BUG-088-* |
+| BDAY+BUG-088 | Person birthday dropdowns + duplicate-singer identity | merged into develop; on-device gates open (BDAY T3, BUG-088 T4) | task/person-birthday-and-identity | — | to review | d83d78ca | Helder: clean device data per BUG-088 T4, install, run both gates; see persons/changes/2026-11-19-person-form-birthday-* and bugs/2026-11-19-BUG-088-* |
 
 ## Completed (recent)
 
