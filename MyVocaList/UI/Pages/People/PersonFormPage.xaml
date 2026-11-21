@@ -96,9 +96,9 @@
 
         <!-- ── Same-name BottomSheet (BUG-088, REQ-DUP-09) ─────────────────────── -->
         <!--
-            Soft warning: another singer has the same name but a different email or birthday. Tapping a row
-            opens that singer in edit mode. "Save as new" (labelled "Save anyway" in edit mode) saves the form.
-            Cancel, the scrim or Back saves nothing (DismissSameNameSheetCommand).
+            Soft warning: other singers have the same name. Each row's Open button opens that singer in edit mode.
+            "Save as new" (labelled "Save anyway" in edit mode) saves the form; it is hidden for a name-only form,
+            which shows a hint instead (REQ-DUP-13a). Cancel, the scrim or Back saves nothing (DismissSameNameSheetCommand).
         -->
         <dx:BottomSheet x:Name="sameNameSheet"
                         AllowedState="All"
@@ -114,7 +114,7 @@
                 <ScrollView Grid.Row="0">
                     <VerticalStackLayout Padding="0,0,0,8">
 
-                        <Label Text="A singer with this name already exists"
+                        <Label Text="{Binding SameNameSheetTitle}"
                                Style="{StaticResource BottomSheetTitle}"
                                Margin="24,20,24,8" />
 
@@ -145,14 +145,27 @@
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
 
+                        <!-- Rows beyond the list cap (REQ-DUP-09): "…and M more. Find them in the Singers list." -->
+                        <Label Text="{Binding SameNameMoreText}"
+                               IsVisible="{Binding HasMoreSameName}"
+                               StyleClass="Body.Medium"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               Margin="24,8,24,0" />
+
                         <BoxView Style="{StaticResource Divider}" />
 
-                        <!-- Save the form: insert (Save as new) or edit (Save anyway) -->
+                        <!-- Save the form: insert (Save as new) or edit (Save anyway). Hidden for a name-only form (REQ-DUP-13a) -->
                         <VerticalStackLayout Padding="24,12" Spacing="8">
                             <dx:DXButton Content="{Binding SameNameSaveButtonText}"
                                          Style="{StaticResource FilledButton}"
                                          HorizontalOptions="Fill"
+                                         IsVisible="{Binding CanSaveAsNewFromSheet}"
                                          Command="{Binding SaveAsNewCommand}" />
+
+                            <Label Text="To save a new singer with this name, enter an email or a birthday."
+                                   IsVisible="{Binding CanSaveAsNewFromSheet, Converter={StaticResource InverseBoolConverter}}"
+                                   StyleClass="Body.Medium"
+                                   TextColor="{StaticResource OnSurfaceVariant}" />
                         </VerticalStackLayout>
 
                     </VerticalStackLayout>

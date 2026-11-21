@@ -3,6 +3,7 @@ using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.Exceptions;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Domain.UnitOfWork;
@@ -25,8 +26,11 @@ public class PersonService : IPersonService
     /// <summary>BUG-088 REQ-DUP-01/02/06: shown when the identity (name, email, birthday) is already registered.</summary>
     public const string DuplicateIdentityMessage = "This singer is already registered.";
 
-    /// <summary>BUG-088 REQ-DUP-03: shown when neither an email nor a birthday is given.</summary>
-    public const string EmailOrBirthdayRequiredMessage = "Enter an email or a birthday.";
+    /// <summary>BUG-088 REQ-DUP-13: shown when a name-only singer would share a name with another singer.</summary>
+    public const string NamesakeNeedsContactMessage = "Another singer has this name. Enter an email or a birthday to save a new one.";
+
+    /// <summary>BUG-088 REQ-DUP-09: at most this many same-name singers are listed on the sheet.</summary>
+    public const int SameNameListLimit = 3;
 
     public PersonService(IPersonRepository personRepository, IUnitOfWork uow, ILogger<PersonService> logger)
     {
@@ -136,11 +140,6 @@ public class PersonService : IPersonService
         if (!emailValidation.isValid)
             return (false, emailValidation.message, null);
 
-        // BUG-088 REQ-DUP-03: email or birthday required (checked before any save).
-        var contactValidation = ValidateContact(email, birthDay, birthMonth);
-        if (!contactValidation.isValid)
-            return (false, contactValidation.message, null);
-
         try
         {
             return await _uow.ExecuteAsync<(bool success, string message, Person? person)>(async sp =>
@@ -156,6 +155,11 @@ public class PersonService : IPersonService
                     if (emailTaken)
                         return (false, "Email already registered to another singer.", null);
                 }
+
+                // BUG-088 REQ-DUP-13: a name-only singer cannot share its name with another singer.
+                if (IsNameOnly(email, birthDay, birthMonth) &&
+                    await personRepository.SameNameExistsAsync(fullName, null, cancellationToken))
+                    return (false, NamesakeNeedsContactMessage, null);
 
                 // BUG-088 REQ-DUP-01: the identity (name + email + birthday day/month) must be new.
                 var identityTaken = await personRepository.IdentityExistsAsync(
@@ -289,11 +293,6 @@ public class PersonService : IPersonService
         if (!emailValidation.isValid)
             return (false, emailValidation.message);
 
-        // BUG-088 REQ-DUP-03: email or birthday required (checked before any save).
-        var contactValidation = ValidateContact(email, birthDay, birthMonth);
-        if (!contactValidation.isValid)
-            return (false, contactValidation.message);
-
         try
         {
             return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
@@ -313,6 +312,14 @@ public class PersonService : IPersonService
                     if (emailTaken)
                         return (false, "Email already registered to another singer.");
                 }
+
+                // BUG-088 REQ-DUP-13: the edit must not create a name-only namesake. It applies only when the edit
+                // changes the name or clears a contact, so an existing name-only record is never locked.
+                var createsNameOnlyNamesake = IsNameOnly(email, birthDay, birthMonth)
+                    && (fullName.Trim() != person.FullName || HasContact(person));
+                if (createsNameOnlyNamesake &&
+                    await personRepository.SameNameExistsAsync(fullName, id, cancellationToken))
+                    return (false, NamesakeNeedsContactMessage);
 
                 // BUG-088 REQ-DUP-02: another person (not this one) must not already have the resulting identity.
                 var identityTaken = await personRepository.IdentityExistsAsync(
@@ -347,29 +354,35 @@ public class PersonService : IPersonService
     }
 
     /// <inheritdoc />
-    public (bool isValid, string message) ValidateContact(string? email, int? birthDay, int? birthMonth)
-    {
-        // BUG-088 REQ-DUP-03: identity needs an email or a birthday (day and month both set).
-        if (string.IsNullOrWhiteSpace(email) && !birthDay.HasValue && !birthMonth.HasValue)
-            return (false, EmailOrBirthdayRequiredMessage);
-
-        return (true, "");
-    }
-
-    /// <inheritdoc />
-    public async Task<IReadOnlyList<Person>> GetSameNamePersonsAsync(
+    public async Task<SameNameResult> GetSameNamePersonsAsync(
         string fullName, string? email, int? birthDay, int? birthMonth, int? excludeId,
         CancellationToken cancellationToken = default)
     {
         // REQ-DUP-09 soft warning: read only, never blocks a save.
-        return await _uow.ExecuteReadAsync<IReadOnlyList<Person>>(async sp =>
+        // REQ-DUP-13a: a name-only form lists the exact name-only match too, so the host can Open it.
+        var includeIdentityMatch = IsNameOnly(email, birthDay, birthMonth);
+        return await _uow.ExecuteReadAsync<SameNameResult>(async sp =>
         {
             // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
             var personRepository = sp.GetRequiredService<IPersonRepository>();
-            return await personRepository.GetSameNameDifferentIdentityAsync(
-                fullName, email, birthDay, birthMonth, excludeId, cancellationToken);
+            var total = await personRepository.CountSameNameAsync(
+                fullName, email, birthDay, birthMonth, excludeId, includeIdentityMatch, cancellationToken);
+            if (total == 0)
+                return new SameNameResult([], 0);
+
+            var matches = await personRepository.GetSameNameAsync(
+                fullName, email, birthDay, birthMonth, excludeId, includeIdentityMatch, SameNameListLimit, cancellationToken);
+            return new SameNameResult(matches, total);
         }, cancellationToken);
     }
+
+    /// <summary>BUG-088 REQ-DUP-12/13: a name-only singer has no email (null or whitespace) and no birthday.</summary>
+    private static bool IsNameOnly(string? email, int? birthDay, int? birthMonth)
+        => string.IsNullOrWhiteSpace(email) && birthDay == null && birthMonth == null;
+
+    /// <summary>BUG-088 REQ-DUP-13: true when the stored singer has an email or a birthday.</summary>
+    private static bool HasContact(Person person)
+        => !string.IsNullOrWhiteSpace(person.Email) || person.BirthDay != null || person.BirthMonth != null;
 
     /// <inheritdoc />
     public async Task<(bool success, string message)> DeletePersonsAsync(
