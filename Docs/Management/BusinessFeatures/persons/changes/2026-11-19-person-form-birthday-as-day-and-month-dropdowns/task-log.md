@@ -231,3 +231,6 @@ Added an implicit `dx:ComboBoxEdit` style directly after the `dx:AutoCompleteEdi
 - Side effect during navigation: two early coordinate taps (the drawer tap missed) opened the Edit Venue form for an existing venue and focused its Address line 2 field. I left it with Navigate up, without Save. The Venues list is unchanged (same entries, no new venue).
 
 Item: person-form-birthday-as-day-and-month-dropdowns
+- 2026-11-20 fix (focus order): Birth day was declared before Birth month, so keyboard and screen-reader order was day then month; reordered the two ComboBoxEdit blocks so Birth month comes first. Grid.Column values unchanged, no other change.
+- Verification: build MyVocaList net10.0-android 0 errors; dotnet test Tests/MyVocaList.Tests.csproj 2007 passed, 0 failed. No emulator run (declaration order only; visuals unchanged).
+- Closes the focus-order follow-up flagged in the Implementation section above (focus order now matches visual order).
