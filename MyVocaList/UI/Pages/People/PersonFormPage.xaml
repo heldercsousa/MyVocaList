@@ -55,7 +55,6 @@
                                       LabelText="Birth day"
                                       ItemsSource="{Binding Days}"
                                       SelectedItem="{Binding SelectedBirthDay, Mode=TwoWay}"
-                                      IsReadOnly="True"
                                       ClearIconVisibility="Auto"
                                       HasError="{Binding BirthdayErrorOnDay}"
                                       ErrorText="{Binding BirthdayErrorText}" />
@@ -65,7 +64,6 @@
                                       ItemsSource="{Binding Months}"
                                       DisplayMember="Name"
                                       SelectedItem="{Binding SelectedBirthMonth, Mode=TwoWay}"
-                                      IsReadOnly="True"
                                       ClearIconVisibility="Auto"
                                       HasError="{Binding BirthdayErrorOnMonth}"
                                       ErrorText="{Binding BirthdayErrorText}" />
