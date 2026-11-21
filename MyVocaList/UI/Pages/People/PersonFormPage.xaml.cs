@@ -39,6 +39,14 @@ public partial class PersonFormPage : ContentPage
     private void OnEmailUnfocused(object sender, FocusEventArgs e) =>
         _viewModel.ValidateEmailCommand.Execute(null);
 
+    // BUG-088 Fix B: the Open button sits inside dx:BottomSheet content, where the command binding did not fire on device.
+    // The handler only forwards the row's own BindingContext; the logic stays in OpenSameNameCommand.
+    private void OnSameNameOpenClicked(object? sender, EventArgs e)
+    {
+        if (sender is BindableObject { BindingContext: AutocompleteSuggestion match })
+            _viewModel.OpenSameNameCommand.Execute(match);
+    }
+
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(PersonFormViewModel.IsSameNameSheetVisible))

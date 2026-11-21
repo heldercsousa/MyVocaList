@@ -166,3 +166,71 @@ E2E: emulator not available — requires manual verification. `adb devices` list
 ### Deviations and spec gaps
 - Arrow-icon tap was not separately exercised; the field tap was verified (the arrow is part of the same control).
 - FeedbackPage.xaml (Category ComboBoxEdit, line ~32) also has `IsReadOnly="True"`. Same mechanism is expected to block its drop-down, but it was NOT verified on the emulator and NOT changed (separate item).
+
+---
+## Task: Fix A — birthday ComboBox selected value unreadable (E2E finding, 2026-11-21)
+**Plan:** orchestrator emulator E2E finding on PersonFormPage (no plan file)
+**Status:** To Review
+**Started:** 2026-11-21
+**Completed:** 2026-11-21
+
+### Changed files:
+- `MyVocaList/Resources/Styles/MaterialStyles.xaml`
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/task-log.md`
+
+### Root cause
+`MaterialStyles.xaml` has implicit styles for `dx:TextEdit` and `dx:AutoCompleteEdit` only. The two birthday `dxe:ComboBoxEdit` controls had no style, so they used DevExpress defaults: the selected value rendered in near-invisible dark text on the dark page background, and the box looked different from the other form fields.
+
+### Fix
+Added an implicit `dx:ComboBoxEdit` style directly after the `dx:AutoCompleteEdit` style, with the same five setters: `BoxMode` Outlined, `FocusedBorderColor` Primary, `BorderColor` Outline, `BackgroundColor` SurfaceContainerHighest, `TextColor` OnSurface. The `dx:` xmlns already covers `ComboBoxEdit` (the `dxe` clr-namespace is `DevExpress.Maui.Editors`, the same namespace as TextEdit). The drop-down list colors are unchanged. The style is not needed for readability of the list itself (the list is light with dark text on device).
+
+### API check
+`ComboBoxEdit` lives in `DevExpress.Maui.Editors` and inherits `EditBase.BoxMode`, `BorderColor`, `FocusedBorderColor`, `BackgroundColor` and `TextColor` (Context7 `/websites/devexpress_maui`). The Context7 pages show NuGet 26.1.5 while the project pins 25.2.4; the properties used are the same ones the existing TextEdit and AutoCompleteEdit styles already set, so no version-specific API is involved.
+
+### Effect on FeedbackPage (only other consumer)
+`FeedbackPage.xaml` Category `dxe:ComboBoxEdit` sets no colors of its own, so it now uses the same Outlined box as the form fields. `IsReadOnly="True"` was not touched (separate item).
+
+### Verification
+- Build: `dotnet build -f net10.0-android` after deleting `obj/Debug/net10.0-android` and `bin/Debug/net10.0-android`: 0 errors, 10 pre-existing warnings.
+- Emulator (emulator-5554, clean build deployed): New Singer, Birth day set to 1 and Birth month to January. Both selected values render in light readable text on the SurfaceContainerHighest box with the Primary focus border, matching the Full Name field. Screenshot: `C:/Users/helde/AppData/Local/Temp/claude/78c429b059350e8f/15c50708-c550-4362-8273-50a7a757e7cf/scratchpad/e2e-fixAB-07-day-month-set.png.png`.
+- The form was cancelled without saving. Singers still lists only Helder Sousa.
+- Unit tests (`dotnet test Tests/MyVocaList.Tests.csproj`): 2006 passed, 1 failed, 2007 total. The failure is `SongFormViewModelFrozenArtistTests.EditMode_LocalOnlySongAfterLoad_ArtistBecomesEditableAndNotifies` (SongFormViewModel, line 348). This branch changes no .cs or test file (XAML and docs only). Not verified on develop, flagged for Helder.
+
+---
+## Task: Order swap — Birth month before Birth day (Helder, 2026-11-21)
+**Plan:** Helder direct request (no plan file)
+**Status:** To Review
+**Started:** 2026-11-21
+**Completed:** 2026-11-21
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/requirements.md`
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/design.md`
+- `Docs/Management/BusinessFeatures/persons/changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/task-log.md`
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml`
+
+### Spec changes
+- REQ-BDAY-01: order is now `Birth month` then `Birth day`, with the dated note "Order changed 2026-11-21 (Helder)".
+- Non-goals: added the February-29 line (no birth year stored, so no leap-year computation; a year field would be a separate item).
+- design.md UI bullet: column order recorded (month Grid.Column 0, day Grid.Column 1), with a dated spec note.
+
+### Implementation
+- `PersonFormPage.xaml`: only the two `Grid.Column` values were swapped (Birth day 0 to 1, Birth month 1 to 0). The element order in the XAML is unchanged (day element is still declared first), so the keyboard/screen-reader focus order remains day then month. Flagged for Helder: if focus order should follow the visual order, the two blocks need reordering in a follow-up.
+- VM error placement checked (`PersonFormViewModel.cs` lines 279-281): error on Birth month when only the day is set, otherwise on Birth day. No change needed; no test change.
+- Day list rebuild on month change and the clear-invalid-day rule are unchanged.
+
+### Verification
+- Clean `obj/Debug/net10.0-android` and `bin/Debug/net10.0-android` deleted before the build.
+- Build `MyVocaList -f net10.0-android`: 0 errors, 10 warnings (pre-existing).
+- Tests `dotnet test Tests/MyVocaList.Tests.csproj`: 2007 passed, 0 failed, 0 skipped. (The `SongFormViewModelFrozenArtistTests.EditMode_LocalOnlySongAfterLoad_ArtistBecomesEditableAndNotifies` failure noted in the previous entry did not recur in this run.)
+- Emulator (emulator-5554), deployed with `dotnet build -t:Run -f net10.0-android -p:AndroidDeployTarget=Device` (the extra property was added by mistake; it only selects the attached emulator). Build and deploy: 0 errors. App not uninstalled.
+  - New Singer form: Birth month on the left, Birth day on the right. Screenshot: `C:\Users\helde\AppData\Local\Temp\claude\78c429b059350e8f\15c50708-c550-4362-8273-50a7a757e7cf\scratchpad\e2e-order-state.png`
+  - Month list opened; April selected. Screenshot: `...\scratchpad\e2e-order-month-open.png`
+  - Day list after April, scrolled to its end: last item is 30. Screenshot: `...\scratchpad\e2e-order-day-end.png`
+  - Cancelled; nothing saved. Singers list still shows only Helder Sousa.
+- Side effect during navigation: two early coordinate taps (the drawer tap missed) opened the Edit Venue form for an existing venue and focused its Address line 2 field. I left it with Navigate up, without Save. The Venues list is unchanged (same entries, no new venue).
+
+Item: person-form-birthday-as-day-and-month-dropdowns
+- 2026-11-20 fix (focus order): Birth day was declared before Birth month, so keyboard and screen-reader order was day then month; reordered the two ComboBoxEdit blocks so Birth month comes first. Grid.Column values unchanged, no other change.
+- Verification: build MyVocaList net10.0-android 0 errors; dotnet test Tests/MyVocaList.Tests.csproj 2007 passed, 0 failed. No emulator run (declaration order only; visuals unchanged).
+- Closes the focus-order follow-up flagged in the Implementation section above (focus order now matches visual order).
