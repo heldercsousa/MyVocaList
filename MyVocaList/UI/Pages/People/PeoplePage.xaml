@@ -37,7 +37,7 @@
         <views:CrudListView.ItemTemplate>
             <DataTemplate x:DataType="models:PersonListItemDto">
                 <lists:ListItem Headline="{Binding FullName}"
-                                SupportingText="{Binding ParticipationsAbsencesNumber}"
+                                SupportingText="{Binding IdentityLine}"
                                 IsSelected="False">
                     <lists:ListItem.LeadingContent>
                         <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
@@ -55,7 +55,7 @@
         <views:CrudListView.SelectedItemTemplate>
             <DataTemplate x:DataType="models:PersonListItemDto">
                 <lists:ListItem Headline="{Binding FullName}"
-                                SupportingText="{Binding ParticipationsAbsencesNumber}"
+                                SupportingText="{Binding IdentityLine}"
                                 IsSelected="True">
                     <lists:ListItem.LeadingContent>
                         <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
