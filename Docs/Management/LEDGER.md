@@ -10,7 +10,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| BUG-088 | Duplicate-singer identity; T5 name-only singers + capped sheet | BDAY closed ✅; T5 merged, 2026 tests, emulator E2E passed; T6 on-device gate open | task/bug088-name-only-and-sheet-cap | — | to review | ea3996b4 | Helder: install, run T6 (name-only save, namesake hint, plural title, more-line); see persons/bugs/2026-11-19-BUG-088-* |
+| BUG-088+PLIST | Duplicate-singer identity (T5, T7) + Singers list identity line | merged, 2035 tests, emulator E2E passed; on-device gates open | develop | — | to review | 847641b7 | Helder: install; check name-only row (no ID) + Singers list 2nd line; see persons/bugs/2026-11-19-BUG-088-* and changes/2026-11-21-singers-list-* |
 
 ## Completed (recent)
 
