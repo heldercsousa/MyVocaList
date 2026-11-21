@@ -438,50 +438,188 @@ public class PersonServiceTests
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Person>()), Times.Never);
     }
 
-    // [AC] REQ-DUP-03: neither email nor birthday on create is rejected before any save
+    // [AC] REQ-DUP-12: a name-only singer is accepted on create when no other singer has the same name
     [Fact]
-    public async Task CreatePersonAsync_NoEmailNoBirthday_ReturnsEitherOrMessageAndDoesNotSave()
+    public async Task CreatePersonAsync_NameOnlyNoNamesake_Saves()
     {
+        var (success, _, person) = await CreateSut().CreatePersonAsync("John Doe", null, null, null);
+
+        Assert.True(success);
+        Assert.NotNull(person);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Person>()), Times.Once);
+    }
+
+    // [AC] REQ-DUP-13: a name-only singer whose name matches another singer is rejected on create, nothing is saved
+    [Fact]
+    public async Task CreatePersonAsync_NameOnlyWithNamesake_ReturnsNamesakeMessageAndDoesNotSave()
+    {
+        _repoMock.Setup(r => r.SameNameExistsAsync("John Doe", It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var (success, message, person) = await CreateSut().CreatePersonAsync("John Doe", null, null, null);
 
         Assert.False(success);
-        Assert.Equal("Enter an email or a birthday.", message);
+        Assert.Equal("Another singer has this name. Enter an email or a birthday to save a new one.", message);
         Assert.Null(person);
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Person>()), Times.Never);
     }
 
-    // [AC] REQ-DUP-03: neither email nor birthday on update is rejected before any save
+    // [AC] REQ-DUP-13: the namesake message wins over the duplicate message for an exact name-only match
     [Fact]
-    public async Task UpdatePersonAsync_NoEmailNoBirthday_ReturnsEitherOrMessageAndDoesNotSave()
+    public async Task CreatePersonAsync_NameOnlyExactMatch_ReturnsNamesakeMessageNotDuplicate()
     {
+        _repoMock.Setup(r => r.SameNameExistsAsync("John Doe", It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _repoMock.Setup(r => r.IdentityExistsAsync(
+                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(),
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var (success, message, _) = await CreateSut().CreatePersonAsync("John Doe", null, null, null);
+
+        Assert.False(success);
+        Assert.Equal("Another singer has this name. Enter an email or a birthday to save a new one.", message);
+    }
+
+    // [AC] REQ-DUP-13: a whitespace-only email counts as empty, so the name-only namesake rule applies
+    [Fact]
+    public async Task CreatePersonAsync_WhitespaceEmailWithNamesake_ReturnsNamesakeMessage()
+    {
+        _repoMock.Setup(r => r.SameNameExistsAsync("John Doe", It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var (success, message, _) = await CreateSut().CreatePersonAsync("John Doe", null, null, "   ");
+
+        Assert.False(success);
+        Assert.Equal("Another singer has this name. Enter an email or a birthday to save a new one.", message);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny<Person>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-13: a singer with an email is not name-only, so a namesake does not block the create (the identity rule still applies)
+    [Fact]
+    public async Task CreatePersonAsync_WithEmailAndNamesake_DoesNotCheckNamesakeRule()
+    {
+        var (success, _, _) = await CreateSut().CreatePersonAsync("John Doe", null, null, "john@example.com");
+
+        Assert.True(success);
+        _repoMock.Verify(r => r.SameNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-13: an update that renames a name-only singer onto a namesake's name is rejected, nothing is saved
+    [Fact]
+    public async Task UpdatePersonAsync_NameOnlyRenamedToNamesake_ReturnsNamesakeMessageAndDoesNotSave()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Person("Old Name"));
+        _repoMock.Setup(r => r.SameNameExistsAsync("John Doe", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe", null, null, null);
 
         Assert.False(success);
-        Assert.Equal("Enter an email or a birthday.", message);
+        Assert.Equal("Another singer has this name. Enter an email or a birthday to save a new one.", message);
         _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Person>()), Times.Never);
     }
 
-    // [AC] REQ-DUP-03: ValidateContact accepts an email alone or a birthday alone, and rejects neither
+    // [AC] REQ-DUP-13: an update that clears the email of a singer whose name is shared is rejected, nothing is saved
     [Fact]
-    public void ValidateContact_EmailOnly_ReturnsValid()
+    public async Task UpdatePersonAsync_EmailClearedWhileNamesakeExists_ReturnsNamesakeMessageAndDoesNotSave()
     {
-        var (isValid, _) = CreateSut().ValidateContact("john@example.com", null, null);
-        Assert.True(isValid);
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Person("John Doe") { Email = "john@example.com" });
+        _repoMock.Setup(r => r.SameNameExistsAsync("John Doe", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe", null, null, null);
+
+        Assert.False(success);
+        Assert.Equal("Another singer has this name. Enter an email or a birthday to save a new one.", message);
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Person>()), Times.Never);
     }
 
+    // [AC] REQ-DUP-13: an already name-only singer, saved with the same name, is not blocked (old records are never locked)
     [Fact]
-    public void ValidateContact_BirthdayOnly_ReturnsValid()
+    public async Task UpdatePersonAsync_AlreadyNameOnlyUnchangedName_SavesWithoutNamesakeCheck()
     {
-        var (isValid, _) = CreateSut().ValidateContact(null, 15, 3);
-        Assert.True(isValid);
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Person("John Doe"));
+        _repoMock.Setup(r => r.SameNameExistsAsync("John Doe", It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var (success, _) = await CreateSut().UpdatePersonAsync(1, "John Doe", null, null, null);
+
+        Assert.True(success);
+        _repoMock.Verify(r => r.SameNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Person>()), Times.Once);
     }
 
+    // [AC] REQ-DUP-13: the edited singer is not its own namesake (the check excludes its id)
     [Fact]
-    public void ValidateContact_NeitherEmailNorBirthday_ReturnsEitherOrMessage()
+    public async Task UpdatePersonAsync_NameOnlyRenameWithoutOtherNamesake_Saves()
     {
-        var (isValid, message) = CreateSut().ValidateContact("  ", null, null);
-        Assert.False(isValid);
-        Assert.Equal("Enter an email or a birthday.", message);
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Person("Old Name"));
+        _repoMock.Setup(r => r.SameNameExistsAsync("John Doe", It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Returns((string n, int? excludeId, CancellationToken ct) => Task.FromResult(excludeId is null));
+
+        var (success, _) = await CreateSut().UpdatePersonAsync(1, "John Doe", null, null, null);
+
+        Assert.True(success);
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Person>()), Times.Once);
+    }
+
+    // [AC] REQ-DUP-13a: a name-only form asks the repository to include the exact name-only match in the sheet
+    [Fact]
+    public async Task GetSameNamePersonsAsync_NameOnly_IncludesIdentityMatch()
+    {
+        _repoMock.Setup(r => r.CountSameNameAsync("John Doe", null, null, null, null, true, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+        _repoMock.Setup(r => r.GetSameNameAsync("John Doe", null, null, null, null, true, 3, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Person("John Doe") { Id = 4 }]);
+
+        var result = await CreateSut().GetSameNamePersonsAsync("John Doe", null, null, null, null);
+
+        Assert.Equal(1, result.TotalCount);
+        Assert.Single(result.Matches);
+        _repoMock.Verify(r => r.CountSameNameAsync("John Doe", null, null, null, null, true, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // [AC] REQ-DUP-13a: with an email, the exact identity match stays excluded from the sheet
+    [Fact]
+    public async Task GetSameNamePersonsAsync_WithEmail_ExcludesIdentityMatch()
+    {
+        _repoMock.Setup(r => r.CountSameNameAsync("John Doe", "john@example.com", null, null, null, false, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+
+        var result = await CreateSut().GetSameNamePersonsAsync("John Doe", "john@example.com", null, null, null);
+
+        Assert.Equal(0, result.TotalCount);
+        Assert.Empty(result.Matches);
+        _repoMock.Verify(r => r.CountSameNameAsync("John Doe", "john@example.com", null, null, null, false, It.IsAny<CancellationToken>()), Times.Once);
+        _repoMock.Verify(r => r.GetSameNameAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // [AC] REQ-DUP-09: the sheet lists at most 3 same-name singers and reports the full count
+    [Fact]
+    public async Task GetSameNamePersonsAsync_MoreThanLimit_ListsThreeAndReportsTotal()
+    {
+        _repoMock.Setup(r => r.CountSameNameAsync("John Doe", "john@example.com", 15, 3, null, false, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(4);
+        _repoMock.Setup(r => r.GetSameNameAsync("John Doe", "john@example.com", 15, 3, null, false, 3, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Person("John Doe") { Id = 1 }, new Person("John Doe") { Id = 2 }, new Person("John Doe") { Id = 3 }]);
+
+        var result = await CreateSut().GetSameNamePersonsAsync("John Doe", "john@example.com", 15, 3, null);
+
+        Assert.Equal(4, result.TotalCount);
+        Assert.Equal(3, result.Matches.Count);
+        _repoMock.Verify(r => r.GetSameNameAsync("John Doe", "john@example.com", 15, 3, null, false, 3, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // [AC] REQ-DUP-09: no same-name singer means an empty result without a list query
+    [Fact]
+    public async Task GetSameNamePersonsAsync_NoSameName_ReturnsEmptyWithoutListQuery()
+    {
+        var result = await CreateSut().GetSameNamePersonsAsync("John Doe", "john@example.com", 15, 3, null);
+
+        Assert.Equal(0, result.TotalCount);
+        Assert.Empty(result.Matches);
+        _repoMock.Verify(r => r.GetSameNameAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // [AC] REQ-DUP-02: another person (not the one being edited) already has the resulting identity; nothing is saved

@@ -270,17 +270,70 @@ public class PersonRepositoryTests : IAsyncLifetime
         Assert.False(await _repo.IdentityExistsAsync("Ana Lima", "ana@example.com", null, null, person.Id));
     }
 
+    // [AC] REQ-DUP-09: the list excludes the exact identity match when includeIdentityMatch is false
     [Fact]
-    public async Task GetSameNameDifferentIdentityAsync_ReturnsNamesakeButNotExactMatch()
+    public async Task GetSameNameAsync_ExcludesExactMatchWhenNotIncluded()
     {
         var exact = new Person("Lia Costa") { Email = "lia@example.com", BirthDay = 1, BirthMonth = 2 };
         var namesake = new Person("Lia Costa") { Email = "other@example.com" };
         _db.Set<Person>().AddRange(exact, namesake);
         await _db.SaveChangesAsync();
 
-        var results = await _repo.GetSameNameDifferentIdentityAsync("lia costa", "LIA@example.com", 1, 2);
+        var results = await _repo.GetSameNameAsync("lia costa", "LIA@example.com", 1, 2, null, false, 3);
 
         var only = Assert.Single(results);
         Assert.Equal(namesake.Id, only.Id);
+    }
+
+    // [AC] REQ-DUP-13a: with includeIdentityMatch true, a name-only form also lists the exact name-only match
+    [Fact]
+    public async Task GetSameNameAsync_NameOnlyIncludeIdentityMatch_ReturnsExactNameOnlyMatch()
+    {
+        var nameOnly = new Person("Lia Costa");
+        var namesake = new Person("Lia Costa") { Email = "other@example.com" };
+        _db.Set<Person>().AddRange(nameOnly, namesake);
+        await _db.SaveChangesAsync();
+
+        var results = await _repo.GetSameNameAsync("lia costa", null, null, null, null, true, 3);
+
+        Assert.Equal(2, results.Count);
+        Assert.Contains(results, p => p.Id == nameOnly.Id);
+    }
+
+    // [AC] REQ-DUP-13a: the count follows the same includeIdentityMatch rule as the list
+    [Fact]
+    public async Task CountSameNameAsync_NameOnlyWithAndWithoutIdentityMatch_CountsAccordingly()
+    {
+        _db.Set<Person>().AddRange(new Person("Lia Costa"), new Person("Lia Costa") { Email = "other@example.com" });
+        await _db.SaveChangesAsync();
+
+        Assert.Equal(2, await _repo.CountSameNameAsync("lia costa", null, null, null, null, true));
+        Assert.Equal(1, await _repo.CountSameNameAsync("lia costa", null, null, null, null, false));
+    }
+
+    // [AC] REQ-DUP-09: results are ordered by Id (oldest first), at most take rows, and the count is the full total
+    [Fact]
+    public async Task GetSameNameAsync_OrderedByIdAndTakeLimitsRows_CountIsFullTotal()
+    {
+        var people = Enumerable.Range(1, 4).Select(i => new Person("Lia Costa") { Email = $"n{i}@example.com" }).ToList();
+        _db.Set<Person>().AddRange(people);
+        await _db.SaveChangesAsync();
+
+        var results = await _repo.GetSameNameAsync("Lia Costa", "new@example.com", null, null, null, false, 3);
+
+        Assert.Equal(people.Take(3).Select(p => p.Id), results.Select(p => p.Id));
+        Assert.Equal(4, await _repo.CountSameNameAsync("Lia Costa", "new@example.com", null, null, null, false));
+    }
+
+    // [AC] REQ-DUP-13: SameNameExistsAsync matches the name with the default collation and honours excludePersonId
+    [Fact]
+    public async Task SameNameExistsAsync_DifferentCaseAndAccent_ReturnsTrueUnlessExcluded()
+    {
+        var person = new Person("João Silva") { Email = "joao@example.com" };
+        _db.Set<Person>().Add(person);
+        await _db.SaveChangesAsync();
+
+        Assert.True(await _repo.SameNameExistsAsync("JOAO SILVA"));
+        Assert.False(await _repo.SameNameExistsAsync("JOAO SILVA", person.Id));
     }
 }

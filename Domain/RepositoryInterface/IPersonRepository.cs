@@ -30,8 +30,20 @@ public interface IPersonRepository : IBaseRepository<Person>
     Task<bool> IdentityExistsAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// BUG-088 soft warning: persons with the same FullName (default collation) whose identity differs
-    /// (Email or birthday). Excludes excludeId and any exact identity match.
+    /// BUG-088 (REQ-DUP-13): true if another person (not excludePersonId) has the same FullName (default collation),
+    /// whatever their email or birthday.
     /// </summary>
-    Task<IReadOnlyList<Person>> GetSameNameDifferentIdentityAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default);
+    Task<bool> SameNameExistsAsync(string fullName, int? excludePersonId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// BUG-088 (REQ-DUP-09, REQ-DUP-13a): counts persons with the same FullName (default collation), excluding excludePersonId.
+    /// When includeIdentityMatch is false, the exact identity match is excluded (same predicate as IdentityExistsAsync).
+    /// </summary>
+    Task<int> CountSameNameAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// BUG-088 (REQ-DUP-09, REQ-DUP-13a): same-name persons, NoTracking, ordered by Id, at most <paramref name="take"/> rows.
+    /// When includeIdentityMatch is false, the exact identity match is excluded.
+    /// </summary>
+    Task<IReadOnlyList<Person>> GetSameNameAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch, int take, CancellationToken cancellationToken = default);
 }
