@@ -2066,6 +2066,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-component-library-licens
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\ui-component-library-licensing\README.md = Docs\Management\cross-cutting\ui-component-library-licensing\README.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\findings.md = Docs\Management\cross-cutting\ui-component-library-licensing\findings.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md = Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md
 	EndProjectSection
 EndProject
 Global
