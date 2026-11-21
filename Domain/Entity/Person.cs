@@ -42,7 +42,7 @@ public class Person
             return $"({BirthDay.Value} {monthAbbreviation})";
         }
 
-        return $"(ID: {Id})"; // Extreme fallback
+        return string.Empty; // No identifier shown; the database Id is for developers only (REQ-DUP-15)
     }
 
     /// <summary>
@@ -58,7 +58,13 @@ public class Person
             return FullName; // Email goes on a separate line
         }
 
-        // If it's birthday or ID, show it with the name
+        // No identifier (REQ-DUP-15): the name alone, with no trailing space
+        if (string.IsNullOrEmpty(identifier))
+        {
+            return FullName;
+        }
+
+        // If it's birthday, show it with the name
         return $"{FullName} {identifier}";
     }
 
