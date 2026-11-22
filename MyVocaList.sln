@@ -2065,6 +2065,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-component-library-licens
 		Docs\Management\cross-cutting\ui-component-library-licensing\README.md = Docs\Management\cross-cutting\ui-component-library-licensing\README.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\findings.md = Docs\Management\cross-cutting\ui-component-library-licensing\findings.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md = Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\requirements.md = Docs\Management\cross-cutting\ui-component-library-licensing\requirements.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\design.md = Docs\Management\cross-cutting\ui-component-library-licensing\design.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker", "2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker", "{9DF6BB92-FAE0-5AC6-B0EB-A483527A71EA}"

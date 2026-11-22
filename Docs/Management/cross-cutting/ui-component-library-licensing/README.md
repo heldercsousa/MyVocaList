@@ -1,13 +1,13 @@
 ---
 id: ui-component-library-licensing
-title: "**UI component library licensing — DevExpress 25.2 is paid; evaluate Syncfusion Community**"
-status: "💡 Pending"
+title: "**UI library migration — DevExpress → Syncfusion, coexisting page by page**"
+status: "📋 Spec"
 target: —
 section: DevCycleCraft
 kind: feature
 order: 530
-goal: "settle a licensed UI component library before the MVP ships (DevExpress free offer ended 2024-12-31)."
-gate: "Pre-MVP blocker. Helder asks DevExpress about 25.2.4 first; switching vendor needs an architecture review (UI Component Priority is [Unamendable])."
+goal: "replace every DevExpress control with Syncfusion before the MVP launch, keeping the app working at every commit."
+gate: "Pre-MVP blocker. Spec under review; Helder approves the design and the rule amendment before any code."
 pointer: cross-cutting/ui-component-library-licensing/
 ---
 
@@ -16,6 +16,8 @@ pointer: cross-cutting/ui-component-library-licensing/
 Origin: Helder's point 1.8 (2026-11-21). He believes DevExpress retired the free MAUI license for solo developers and asked for the least labor-intensive alternative before the MVP: Syncfusion .NET MAUI or MudBlazor (Blazor Hybrid).
 
 Research: `findings.md` (this folder).
+
+**Decision (Helder, 2026-11-21):** migrate to Syncfusion (Toolkit + Community-License suite), with zero DevExpress before launch. DX and Sf copies coexist; pages cut over one by one (approach B). Spec: `requirements.md`, `design.md`.
 
 Back-reference: none (new item).
 
