@@ -117,3 +117,81 @@ https://lrclib.net/docs.md — **V**
 | 1.7 YouTube embed without a key | Feasible and compliant (`BaseUrl` Referer, link share-back, id only). Watch Deezer §III.2 if shown next to Deezer data | Post-MVP |
 | 1.7 Enhanced lyrics, 100% coverage | Server pipeline + licensed audio + lyrics license | Post-MVP, long term |
 | Compliance of what already ships | Deezer logo, no stored image files, lyrics display risk | **Pre-MVP**, in `store-presubmission-compliance` |
+
+## 5. Update 2026-11-22 — Helder's MVP re-scope and the terms re-checked
+
+### Helder's decisions (2026-11-22)
+- **The catalog is MVP, not post-MVP.** It is how a small band records which songs it can cover in a Bandokê event (live instrumental karaoke).
+- **YouTube integration is MVP, not post-MVP.** It is the main source of karaoke videos. The app records a YouTube id against a song id, so that a video tracked once is found and replayed later. Search must happen inside the app; leaving the app and coming back is a bad experience. Benchmark: the Karaoke VS desktop app (Helder bought a one-year license), which searches YouTube in-app, filters by genre tags, plays a queue of picked videos and shows the YouTube logo throughout.
+- **Compliance overrides earlier choices.** Nothing illegal may be done in the app. If storing only external ids is what compliance needs, it replaces the 2026-11-16 decision that rejected it. Ideally all third-party data loads at runtime. The duplicate-title problem (today solved by trimming extra words off autocomplete titles) still has to be handled.
+- **Question from Helder:** may a Deezer song, artist or album page link to a separate lyrics page or a YouTube search page, so that Deezer data and YouTube video are never on screen together?
+- **Wish:** lyrics shown to the singer, ideally synced to the instrumental, and if possible synced automatically by the app, as a differentiator.
+
+### Deezer, re-checked (Terms "Last updated: 27 October 2026") — https://developers.deezer.com/termsofuse
+- §III.4: "The Developer is not authorised either to make any local copy of any Content available through the Services". §I defines Content as "textual, visual, audio and any other content such as metadata". **V**
+- The developers FAQ that allowed names to be stored locally now answers HTTP 404. **V** Without it, nothing written by Deezer allows storing titles or artist names.
+- **This reverses the 2026-11-16 basis.** The app today saves Deezer titles and artist names in local rows; under §III.4 that is a gap, not "OK". See `../../cross-cutting/store-presubmission-compliance/README.md`.
+- §III.2: "The Developer shall not combine any Content with visual or audiovisual images." **V** The ban has no scope: it does not say "same screen". **I:** a Deezer page that links to a YouTube page inside the same app may still count as combining. The separate-pages idea lowers the exposure but does not remove it. Only Deezer can confirm, and new developer access is closed (§1 above).
+- §III.1 still limits use to "private, personal and non-commercial purpose(s)" and bans revenue "directly or indirectly", including subscription or advertising. **V**
+- **Conclusion (I):** Deezer cannot be the MVP catalog source of an app that plays YouTube videos, stores song titles and may later charge.
+
+### MusicBrainz as the catalog source
+- **Core data is CC0** and may be stored forever and used commercially: "anyone can download and use the core data in any way they see fit". **V** — https://musicbrainz.org/doc/About/Data_License
+- The core data includes **recordings** (title, artist credit, duration, ISRC, MBID), **artists**, **releases**, **release groups**, **works** ("Title, ISWC, disambiguation comment, MBID") and **relationships**. **V** — https://musicbrainz.org/doc/MusicBrainz_Database
+- Tags and genres, ratings and derived statistics are CC BY-NC-SA, not CC0. **V**
+- **Works solve the duplicate-title problem (I).** A *work* is the composition ("Evidências"); each recording, live version or cover links to it. A band's repertoire is naturally a list of works. Grouping by work replaces title trimming.
+- **Public API:** at most 1 call per second per client, and a User-Agent with contact details. "Non-commercial use of this web service is free"; commercial use needs a plan. **V** — https://musicbrainz.org/doc/MusicBrainz_API
+- **Plans** (https://metabrainz.org/supporters/account-type, **V**):
+  - "Stealth Start-Up" costs $0 while "not publicly offering their services";
+  - "Bronze" costs $100/month and up, "For popular mobile apps…";
+  - "a pre-revenue start-up [that expects] revenue in the future" must sign up as commercial.
+
+  A free app published in the store, with a paid tier planned, is therefore commercial. **I**
+- **Way around the API fee (I):** the core data is CC0, so the app can ship, or self-host, its own subset built from the public database dumps (for example Brazilian and popular international works). No API call per user, and no fee. The cost is building and refreshing that subset.
+- **Gaps:**
+  - no regional "popular now" chart;
+  - ListenBrainz gives top recordings per artist (`/1/popularity/top-recordings-for-artist/{mbid}`), but its data license was NOT FOUND, and it has no regional endpoint. **V**
+  - Cover art (Cover Art Archive) is per-image licensed; show it by URL only. **I**
+
+### YouTube, re-checked — https://developers.google.com/youtube/terms/developer-policies
+- **Storage** (§III.E.4):
+  - Authorized and Non-Authorized API Data may be kept "for no longer than 30 calendar days. After 30 calendar days, the API Client must either delete or refresh the stored data". **V**
+  - Video ids are not on the list of longer-lived items. **V**
+  - So a video id obtained from the API must be refreshed at least every 30 days. **I:** `videos.list` costs 1 unit for up to 50 ids from the 10 000-unit daily bucket, so refreshing is cheap.
+  - Whether an id the user pastes from a youtube.com link counts as API Data: NOT FOUND.
+- **In-app search** (https://developers.google.com/youtube/v3/determine_quota_cost):
+  - "Projects that enable the YouTube Data API have a default quota allocation of 100 `search.list` calls". **V**
+  - That is per project, so 100 searches a day **for all users together**.
+  - More quota needs the "Audit and Quota Extension Form", which checks compliance with the Terms; no fee is mentioned. **V** — https://developers.google.com/youtube/v3/guides/quota_and_compliance_audits
+- **Search results** must not be modified or replaced, and results from other sources must not be mixed in "and present[ed] as YouTube search results" (§III.C.5). **V**
+  - Genre chips that add words to the query (for example "sertanejo karaoke") are not covered by that ban. **I**
+  - Each page showing YouTube content must show YouTube branding (§III.F.2). **I** (read through a summary)
+- **Audio:**
+  - the policies guide lists "Offer users the ability to download or separate audio tracks" under "Do not". **V** — https://developers.google.com/youtube/terms/developer-policies-guide
+  - The same guide accepts overlays for "playback controls (e.g. mute, full screen, play, pause, etc.)" that do not conflict with the player UI. **V**
+- **Karaoke VS:** how it searches YouTube (official API with an audited quota, or scraping) could not be found out. **I** Its constant YouTube logo matches §III.F.2.
+
+### Lyrics, re-thought
+- **Mechanical karaoke:** the YouTube karaoke video already carries the synced lyrics, and it is the uploader's content played in the official player. The app does not need to show lyrics itself. **I**
+- **Bandokê:**
+  - the band plays live, so tempo changes from night to night. Timings prepared in advance would drift, so line-by-line advance by an operator tap fits better than automatic sync. **I**
+  - Lyrics still need a source:
+    - Musixmatch's free tier is reported to return only about 30% of the lyrics; full and synced lyrics need a paid commercial plan. **I** (third-party pages)
+    - **User-supplied lyrics** (the band pastes its own lyric sheet, kept on the device, never shared by the app) is the pattern of setlist apps and carries the lowest exposure. **I**
+- **Automatic sync:**
+  - Needs a lawfully owned audio file. YouTube audio cannot be used (guide: no separating audio).
+  - A legal path: the band uploads its own rehearsal recording, and a server aligns the band's lyrics to it (WhisperX or stable-ts forced alignment).
+  - Post-MVP; it is a server feature. **I**
+- **The other karaoke app** with a fixed background and words colored in time: probably a licensed catalog produced in-house (KaraFun-style), hence the limited song list. **I** — https://www.karafun.com/pt-br/subscribe.html
+
+### Revised triage (supersedes §4 where they differ)
+
+| Point | Before | Now |
+|---|---|---|
+| Catalog (band repertoire) | Post-MVP browse ideas | **MVP** (Helder). Source to decide: MusicBrainz is the compliant candidate |
+| 1.6 store only the external id | Rejected 2026-11-16 | **Required for Deezer** by §III.4. Not needed for MusicBrainz (CC0) |
+| 1.7 YouTube in-app search and player | Post-MVP | **MVP** (Helder). Needs the quota audit for in-app search; ids refreshed every 30 days; YouTube branding on every YouTube page |
+| Deezer page → separate YouTube page | — | §III.2 has no scope; residual risk. Prefer not to use Deezer at all |
+| Lyrics for mechanical karaoke | LRCLIB copy | Not needed: the video carries them |
+| Lyrics for Bandokê | LRCLIB copy | User-supplied; operator advances lines. LRCLIB copy stays a pre-MVP risk |
+| Automatic lyric sync | Post-MVP, long term | Post-MVP; band's own recording only |

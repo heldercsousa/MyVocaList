@@ -6,9 +6,8 @@ target: 2026-11-21
 section: BusinessFeatures
 parent: artists-songs
 goal: First-run and everyday browsing of the Deezer catalog without saving songs one by one; Deezer data read-only, lyrics editable.
-gate: Post-MVP; after the UI-library decision and the queue pages. Discuss UX with Helder before any spec.
+gate: Catalog is MVP scope (Helder, 2026-11-22). Helder re-decides the catalog source first, because the Deezer terms ban local copies and audiovisual combination.
 kind: change
-horizon: post-mvp
 ---
 
 # Deezer browse: popular-now cards, artist profile with discography and top hits, read-only Deezer song view
