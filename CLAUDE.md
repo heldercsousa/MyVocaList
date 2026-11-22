@@ -47,8 +47,8 @@ After every task ask what should improve CLAUDE.md, a rules file or a command; u
 
 - **Business logic in Services** `[Unamendable]` — never in ViewModels or pages.
 - **Language** — code, comments, logs, UI text: English only.
-- **Native dialogs** `[Unamendable]` — NEVER `DisplayAlert` / `DisplayActionSheet` / `DisplayPromptAsync`; use `dx:BottomSheet`.
-- **UI Component Priority** `[Unamendable]` — DevExpress first; stock MAUI only when DevExpress has no equivalent.
+- **Native dialogs** `[Unamendable]` — NEVER `DisplayAlert` / `DisplayActionSheet` / `DisplayPromptAsync`; use `SfBottomSheet` (pages not yet migrated keep `dx:BottomSheet` until the DevExpress removal).
+- **UI Component Priority** `[Unamendable]` — Syncfusion first (the Toolkit, then the Community-License suite); stock MAUI only when Syncfusion has no equivalent. No new DevExpress usage; pages not yet migrated keep their DevExpress controls until the migration removes them.
 - **MD3 terminology** — component names, style keys, BindableProperty names and rules docs use official m3.material.io terms; fetch the docs when unsure, never invent names.
 - **SafeAreaEdges** — every `ContentPage` declares `SafeAreaEdges="Container"`, or `"All"` (Container + SoftInput) on pages with text input (MAUI 10 defaults to `None`). Pre-commit checked.
 - **Incremental edits** — XAML/UI: edit ONE file → build → fix → next. Never batch.

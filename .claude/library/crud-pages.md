@@ -15,8 +15,8 @@ Every layout decision must be traceable to the Material Design 3 specification. 
 **2. Use existing custom components when the slot fits.**
 `SmallAppBar`, `SearchAppBar`, `ListItem`, `ListItemLeadingIcon`, `ListItemLeadingAvatar`, `ListItemLeadingImage`, `FloatingToolbar` — these exist and are MD3-compliant. Use them. Only build a new component when no existing custom component covers the need.
 
-**3. DevExpress first. Custom second.**
-Always check `.claude/rules/devexpress-patterns.md` before reaching for a MAUI stock control or a custom component. A DX control that covers 90% of the need beats a custom component written from scratch. Build custom only when DX has no equivalent.
+**3. Syncfusion first. Custom second.**
+Check the Syncfusion Toolkit, then the Community-License suite, before reaching for a MAUI stock control or a custom component. A Syncfusion control that covers 90% of the need beats a custom component written from scratch. Build custom only when Syncfusion has no equivalent. No new DevExpress usage (CLAUDE.md, amended 2026-11-22).
 
 ---
 

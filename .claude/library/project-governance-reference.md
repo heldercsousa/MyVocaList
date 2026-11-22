@@ -89,7 +89,7 @@ Before proposing anything that touches UI, styles, or components, inspect ALL of
 | Business logic in Services | Layer discipline prevents business rules from scattering across the UI and becoming untestable. |
 | Language — English only | Multilingual identifiers make search, grep, and onboarding unreliable. |
 | Native dialogs banned | `DisplayAlert`/`DisplayActionSheet`/`DisplayPromptAsync` bypass the app's theme, violate MD3 interaction patterns, and on Android are not dismissible via back gesture. |
-| UI Component Priority (DevExpress first) | Mixing component libraries produces visual inconsistency and theming conflicts. Blazor Hybrid + MudBlazor is under post-MVP evaluation; DevExpress-first stays in full effect until that spike produces a go decision. |
+| UI Component Priority (Syncfusion first) | Mixing component libraries produces visual inconsistency and theming conflicts. Changed from DevExpress first on 2026-11-22: the DevExpress free offer never covered the packages in use, and Syncfusion's MIT Toolkit plus Community License are free while Helder stays eligible. DevExpress remains only in pages not yet migrated (`Docs/Management/cross-cutting/ui-component-library-licensing/`). |
 | MD3 terminology | Invented names require mental translation and break cross-reference with m3.material.io. |
 | SafeAreaEdges="Container" (or "All" on pages with text input) | .NET MAUI 10 defaults `ContentPage` to `SafeAreaEdges="None"`; content renders behind the status bar/notch without it. `All` = Container + SoftInput (keyboard avoidance). |
 | Incremental XAML edits | XAML errors cascade — batching edits hides which change introduced the error. |
