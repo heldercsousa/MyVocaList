@@ -126,6 +126,7 @@ https://lrclib.net/docs.md — **V**
 - **Compliance overrides earlier choices.** Nothing illegal may be done in the app. If storing only external ids is what compliance needs, it replaces the 2026-11-16 decision that rejected it. Ideally all third-party data loads at runtime. The duplicate-title problem (today solved by trimming extra words off autocomplete titles) still has to be handled.
 - **Question from Helder:** may a Deezer song, artist or album page link to a separate lyrics page or a YouTube search page, so that Deezer data and YouTube video are never on screen together?
 - **Wish:** lyrics shown to the singer, ideally synced to the instrumental, and if possible synced automatically by the app, as a differentiator.
+- **Bandokê lyrics (Helder, 2026-11-22):** Bandokê needs no synced lyrics. It needs only the lyrics shown on a screen, for singers who do not know the song by heart.
 
 ### Deezer, re-checked (Terms "Last updated: 27 October 2026") — https://developers.deezer.com/termsofuse
 - §III.4: "The Developer is not authorised either to make any local copy of any Content available through the Services". §I defines Content as "textual, visual, audio and any other content such as metadata". **V**
@@ -174,8 +175,7 @@ https://lrclib.net/docs.md — **V**
 ### Lyrics, re-thought
 - **Mechanical karaoke:** the YouTube karaoke video already carries the synced lyrics, and it is the uploader's content played in the official player. The app does not need to show lyrics itself. **I**
 - **Bandokê:**
-  - the band plays live, so tempo changes from night to night. Timings prepared in advance would drift, so line-by-line advance by an operator tap fits better than automatic sync. **I**
-  - Lyrics still need a source:
+  - Plain lyrics on a screen, no sync (Helder). The only open question is where the text comes from:
     - Musixmatch's free tier is reported to return only about 30% of the lyrics; full and synced lyrics need a paid commercial plan. **I** (third-party pages)
     - **User-supplied lyrics** (the band pastes its own lyric sheet, kept on the device, never shared by the app) is the pattern of setlist apps and carries the lowest exposure. **I**
 - **Automatic sync:**
@@ -193,5 +193,5 @@ https://lrclib.net/docs.md — **V**
 | 1.7 YouTube in-app search and player | Post-MVP | **MVP** (Helder). Needs the quota audit for in-app search; ids refreshed every 30 days; YouTube branding on every YouTube page |
 | Deezer page → separate YouTube page | — | §III.2 has no scope; residual risk. Prefer not to use Deezer at all |
 | Lyrics for mechanical karaoke | LRCLIB copy | Not needed: the video carries them |
-| Lyrics for Bandokê | LRCLIB copy | User-supplied; operator advances lines. LRCLIB copy stays a pre-MVP risk |
+| Lyrics for Bandokê | LRCLIB copy | Plain lyrics on a screen, no sync (Helder). Source to decide: user-supplied is the lowest risk; the LRCLIB copy stays a pre-MVP risk |
 | Automatic lyric sync | Post-MVP, long term | Post-MVP; band's own recording only |
