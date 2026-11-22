@@ -37,6 +37,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 |--------|----------|--------|
 | — | Large-volume data stress test (1–2 year seed) | 💡 Pending |
 | — | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
+| 2026-11-22 | ↳ Early-version notice in the app inviting feedback and suggestions | 💡 Pending |
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |

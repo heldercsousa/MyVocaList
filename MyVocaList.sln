@@ -2074,6 +2074,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-artist-catalog-a
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{7F5E9DB0-20B5-5C11-99A2-46035572E448}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions", "2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions", "{357FDA73-0F7F-5A1C-A904-36F0818BBF1A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\store-presubmission-compliance\changes\2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions\README.md = Docs\Management\cross-cutting\store-presubmission-compliance\changes\2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2516,6 +2523,8 @@ Global
 		{B0B281F7-C518-5C98-B978-D21CB993C5B8} = {FA1234BC-0001-4000-8000-00000000007F}
 		{CB86F9BF-7F5F-51C3-B9F9-1A2E81A3D4A4} = {FA1234BC-0001-4000-8000-000000000057}
 		{9DF6BB92-FAE0-5AC6-B0EB-A483527A71EA} = {FA1234BC-0001-4000-8000-00000000007F}
+		{7F5E9DB0-20B5-5C11-99A2-46035572E448} = {FA1234BC-0001-4000-8000-00000000006B}
+		{357FDA73-0F7F-5A1C-A904-36F0818BBF1A} = {7F5E9DB0-20B5-5C11-99A2-46035572E448}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

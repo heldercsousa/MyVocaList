@@ -70,7 +70,7 @@ The last column says how each criterion is verified.
 | **REQ-UIMIG-10** | Given a page whose Sf copy passed the parity checklist and Helder's explicit go, when it is cut over, then the commit changes only the page class referenced at that page's user-facing route: the `ShellContent` template in `AppShell.xaml` for a flyout page, or the `Routing.RegisterRoute` type for a pushed page. Reverting that commit opens the DX original again. | E + diff review |
 | **REQ-UIMIG-11** | The system SHALL NOT reference a DevExpress namespace, type or XAML schema in any Sf copy file (name pattern in `design.md` § Check script). | S |
 | **REQ-UIMIG-12** | WHILE the coexistence period lasts, no commit SHALL add a line that references DevExpress. The only exception is the bridge file listed in `design.md` § Sheet-state bridge. | S |
-| **REQ-UIMIG-13** | The system SHALL keep the full test suite passing at every commit of the migration. The one authorized test change is in `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` (Phase 5): the type `BottomSheetState` becomes `SheetState`, and nothing else changes — no assertion, setup value or test case is removed or weakened. *[Authorization pending Helder — `design.md` § Open questions 1.]* | U + diff review |
+| **REQ-UIMIG-13** | The system SHALL keep the full test suite passing at every commit of the migration. The one authorized test change is in `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` (Phase 5): the type `BottomSheetState` becomes `SheetState`, and nothing else changes — no assertion, setup value or test case is removed or weakened. *Authorized by Helder on 2026-11-22 (type name only, Tester role).* | U + diff review |
 
 ### Release without DevExpress (US-4)
 
@@ -108,5 +108,6 @@ Note: a Release app binary contains the key. That is inherent to client-side lic
 - A light theme.
 - Windows and macOS targets.
 - Upgrading .NET MAUI or other packages, apart from adding Syncfusion and removing DevExpress.
-- **iOS parity checks — unless Helder decides otherwise** (`design.md` § Open questions 2).
-- The frozen `MyVocaList/UI/Components/AutocompleteField/**` folder (excluded from the build); its fate is `design.md` § Open questions 3.
+- **iOS and Windows parity.** Android is the only mandatory target (Helder, 2026-11-22). After the migration, a brief iOS trial (simulator, then a device if one becomes available) and a Windows build trial run as non-blocking follow-ups. Helder decides near the Play Store launch whether to publish on iOS or Windows.
+- An in-app "early version — please send feedback" notice. Helder wants one, but it is a separate backlog item, not part of this migration.
+- The frozen `MyVocaList/UI/Components/AutocompleteField/**` folder (excluded from the build) is not ported. It is **deleted** in Phase 5 (Helder, 2026-11-22).

@@ -28,8 +28,10 @@ Phase 2  List pages   list-item Sf set · SearchBarSf · SmallAppBarSf · MenuSf
 Phase 3  Form pages   ImagePickerFieldSf · TapToEditFieldSf · AutocompleteFieldSf
                       → VenueForm · PersonForm · ArtistForm · SongForm · Feedback  (needs the license key)
 Phase 4  Shell        WhatsNew / UpdateAvailable / UpdateRequired sheets Sf · AppShell (in place — see Decision)
-Phase 5  Removal      delete DX originals → ViewModels to SheetState → remove packages + DX init + DX styles
-                      → drop the Sf suffix → remove preview entry → delete migration-only files
+Phase 5  Removal      delete DX originals + frozen AutocompleteField folder → ViewModels to SheetState
+                      → remove packages + DX init + DX styles → drop the Sf suffix → remove preview entry
+                      → delete migration-only files
+After    Trials       iOS simulator/device trial · Windows build trial  (non-blocking; see § Resolved questions)
 ```
 
 - **Order:** each phase needs the previous one (DRY onion: shared pieces before the pages that consume them).
@@ -280,9 +282,16 @@ Proposed for `CLAUDE.md § Constitutional Constraints`. The `[Unamendable]` item
 - **Backward compatibility:** existing DX originals stay valid under the new rule until Phase 5. The DX constraint entries in `.claude/library/constraints-reference.md § DevExpress / UI` keep applying to them, and a new Syncfusion section is added beside them. The DX section is deleted in Phase 5.
 - `.claude/library/component-safety-gate.md` gains each Sf component as it becomes governed.
 
-## Open questions (Helder)
+## Resolved questions (Helder, 2026-11-22)
 
-1. **Test-change authorization:** may the Tester change only the type `BottomSheetState` → `SheetState` in `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` in Phase 5, with no other edit? This is needed by REQ-UIMIG-13 and `testing.md § Builder Must Not Modify Tests`.
-2. **iOS:** the app targets net10.0-ios, but parity can only be checked on Android here. Is an iOS build/device check required before the MVP launch, and on which machine? Until answered, iOS is out of scope.
-3. **Frozen `UI/Components/AutocompleteField/**`** (excluded from the build, DX-based, frozen by D-AC1): delete it in Phase 5, or keep it excluded? It does not ship either way.
-4. **Syncfusion account + Community License:** Helder creates them and sets `SYNCFUSION_LICENSE_KEY` before the first cut-over and before Phase 3. Phases 0–2 work with the trial notice until then.
+1. **Test-change authorization:** granted. The Tester changes only the type `BottomSheetState` → `SheetState` in `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` in Phase 5 (REQ-UIMIG-13).
+2. **Platforms:** Android is the only mandatory target, and parity is checked on Android only. After Phase 5, two non-blocking follow-up trials run:
+   - a brief **iOS** trial on a simulator, then a device if one becomes available. On Windows, the iOS simulator needs a paired Mac build host, so the trial depends on access to one.
+   - a **Windows** build trial. DevExpress MAUI has no Windows support; Syncfusion supports WinUI, so a Windows target becomes possible after removal.
+
+   Sf copies avoid Android-only APIs, except where the DX original already has a platform-specific path (e.g. back handling). Publishing on iOS or Windows is decided near the Play Store launch.
+3. **Frozen `UI/Components/AutocompleteField/**`:** deleted in Phase 5. The release check needs no exclusion for it.
+
+## Remaining precondition (Helder)
+
+- **Syncfusion account + Community License:** Helder creates them and sets `SYNCFUSION_LICENSE_KEY` before the first cut-over and before Phase 3. Phases 0–2 work with the trial notice until then.
