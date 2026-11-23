@@ -200,3 +200,7 @@ Deferred minors:
 - The stroke color lookup does not follow theme switches (the app is dark-only).
 - A tap in the padding does not focus the Entry.
 - `IsPassword`, `Keyboard` and `ReturnCommand` were not exercised on the device. They are covered when `SearchBarSf` consumes the field.
+
+### T1.4 — `VenueMapPickerSfPage` copy, subagent half — merged (2026-11-23)
+
+Implementor `b9a6d926`. Review: spec ✅, quality Approved (2 Minor). The `TextEdit` became `SfTextInputLayout` + `Entry`, and the search icon moved into the layout's `TrailingView` as an `ImageButton` in `SfIconButton` style, using the same `SearchCommand`. The `DXButton` became `SfFilledButton`. Map and code-behind are unchanged. Visual deviations to judge at parity: the DX placeholder is now a floating hint, and the field height differs. At parity, also check that tapping the trailing icon fires `SearchCommand`; if it does not, bind it through RelativeSource. P3 lines: `builder.Services.AddTransient<VenueMapPickerSfPage>();`, `("Venue map picker", "venue-map-picker-sf", typeof(VenueMapPickerSfPage))`.
