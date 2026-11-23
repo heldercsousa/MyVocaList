@@ -245,3 +245,9 @@ Implementor `7ef09111`, then fix round 1 `1975f0d3`: the `SurfaceContainerLow` t
 Orchestrator ruling for T2.6: `IMenuHost.HostedMenu` is typed `Menu?`, so Sf hosts get a new `IMenuHostSf` (`MenuSf? HostedMenu`) as an Sf file, and `IMenuHost` stays unchanged until Phase 5.
 
 Deferred minors: the left-edge clamp was not tested on the device; a lighter `SfButton` disabled fill shows behind dimmed items.
+
+### T2.1 — `ListItemCheckboxSf` — Done (2026-11-23)
+
+The implementor's first version was `d0db918d`. Two fix rounds followed: `b6b8bed1` hosted the checkbox in an `SfButton` instead of a Grid with a tap gesture, and `57ba99ae` wrapped `Content` in a `DataTemplate` and switched the bindings to `RelativeSource AncestorType`. Both re-reviews marked every finding ADDRESSED. Merged.
+
+`CheckEdit` became `SfCheckBox`, the `DXButton` became an `SfButton` host (transparent, 48×48, same Command, with ripple), and `{dx:ThemeColor}` became `{StaticResource Primary}`. Inside the template, `IsChecked` is bound `OneWay`. This is safe because the original `CheckEdit` was input-transparent and never wrote back. The device proof is in `artifacts/parity/t2.1/` (screenshots 12–14 and 06). There are no unit tests: this is Level C.
