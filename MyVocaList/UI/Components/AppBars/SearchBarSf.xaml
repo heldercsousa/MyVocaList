@@ -39,6 +39,8 @@
                                             Placeholder="{Binding Placeholder, Source={x:Reference self}}"
                                             ClearButtonVisibility="WhileEditing"
                                             Keyboard="Text"
+                                            ReturnType="Search"
+                                            ShowOutline="False"
                                             VerticalOptions="Center"
                                             Margin="8,0"
                                             SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />

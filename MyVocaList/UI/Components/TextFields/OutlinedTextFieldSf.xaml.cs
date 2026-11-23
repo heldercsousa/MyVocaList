@@ -30,9 +30,36 @@ public partial class OutlinedTextFieldSf : ContentView
         nameof(ClearButtonVisibility), typeof(ClearButtonVisibility), typeof(OutlinedTextFieldSf),
         ClearButtonVisibility.Never);
 
+    /// <summary>Backs <see cref="ShowOutline"/>.</summary>
+    public static readonly BindableProperty ShowOutlineProperty = BindableProperty.Create(
+        nameof(ShowOutline), typeof(bool), typeof(OutlinedTextFieldSf), true,
+        propertyChanged: static (b, _, _) => ((OutlinedTextFieldSf)b).ApplyOutline(isFocused: false));
+
+    /// <summary>Backs <see cref="ReturnType"/>.</summary>
+    public static readonly BindableProperty ReturnTypeProperty = BindableProperty.Create(
+        nameof(ReturnType), typeof(ReturnType), typeof(OutlinedTextFieldSf), ReturnType.Default);
+
     public OutlinedTextFieldSf()
     {
         InitializeComponent();
+    }
+
+    /// <summary>
+    /// When <c>false</c> the field draws no outline (transparent stroke, thickness 0) in both the resting and the
+    /// focused state, for use inside a container that supplies its own shape, such as the search bar pill.
+    /// Defaults to <c>true</c>.
+    /// </summary>
+    public bool ShowOutline
+    {
+        get => (bool)GetValue(ShowOutlineProperty);
+        set => SetValue(ShowOutlineProperty, value);
+    }
+
+    /// <summary>The action key shown on the soft keyboard (for example <see cref="ReturnType.Search"/>), forwarded to the inner Entry.</summary>
+    public ReturnType ReturnType
+    {
+        get => (ReturnType)GetValue(ReturnTypeProperty);
+        set => SetValue(ReturnTypeProperty, value);
     }
 
     /// <summary>Raised when the user finishes input (return key), forwarded from the inner Entry.</summary>
@@ -82,6 +109,13 @@ public partial class OutlinedTextFieldSf : ContentView
 
     private void ApplyOutline(bool isFocused)
     {
+        if (!ShowOutline)
+        {
+            outline.Stroke = Colors.Transparent;
+            outline.StrokeThickness = 0;
+            return;
+        }
+
         var colorKey = isFocused ? "Primary" : "Outline";
         if (Application.Current?.Resources.TryGetValue(colorKey, out var color) == true && color is Color stroke)
         {
