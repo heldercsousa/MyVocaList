@@ -2,6 +2,13 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:shimmer="clr-namespace:Syncfusion.Maui.Toolkit.Shimmer;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:chips="clr-namespace:Syncfusion.Maui.Toolkit.Chips;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:popup="clr-namespace:Syncfusion.Maui.Toolkit.Popup;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:dx="http://schemas.devexpress.com/maui">
 
     <!-- ================================================================ -->
@@ -354,6 +361,171 @@
         <Setter Property="FontSize" Value="12" />
         <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
         <Setter Property="Padding" Value="16,8,16,4" />
+    </Style>
+
+    <!-- ================================================================ -->
+    <!-- SYNCFUSION (Toolkit) STYLES - dark Material tokens               -->
+    <!-- Brush resources: several Sf properties are Brush-typed.          -->
+    <!-- ================================================================ -->
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
+    <SolidColorBrush x:Key="SurfaceContainerBrush" Color="{StaticResource SurfaceContainer}" />
+    <SolidColorBrush x:Key="SurfaceContainerHighBrush" Color="{StaticResource SurfaceContainerHigh}" />
+    <SolidColorBrush x:Key="SurfaceContainerHighestBrush" Color="{StaticResource SurfaceContainerHighest}" />
+    <SolidColorBrush x:Key="SecondaryContainerBrush" Color="{StaticResource SecondaryContainer}" />
+    <SolidColorBrush x:Key="OutlineBrush" Color="{StaticResource Outline}" />
+    <SolidColorBrush x:Key="OnSurfaceVariantBrush" Color="{StaticResource OnSurfaceVariant}" />
+    <SolidColorBrush x:Key="TransparentBrush" Color="Transparent" />
+
+    <!-- Shimmer: skeleton fill and moving wave -->
+    <Style TargetType="shimmer:SfShimmer">
+        <Setter Property="WaveColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="Fill" Value="{StaticResource SurfaceContainerHighBrush}" />
+    </Style>
+
+    <!-- MD3 bottom sheet: surface container, drag handle = on-surface-variant -->
+    <Style TargetType="bottomsheet:SfBottomSheet">
+        <Setter Property="Background" Value="{StaticResource SurfaceContainerBrush}" />
+        <Setter Property="GrabberBackground" Value="{StaticResource OnSurfaceVariantBrush}" />
+    </Style>
+
+    <!-- MD3 chips: unselected = outlined, selected = secondary container -->
+    <Style TargetType="chips:SfChipGroup">
+        <Setter Property="ChipTextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="ChipBackground" Value="{StaticResource TransparentBrush}" />
+        <Setter Property="ChipStroke" Value="{StaticResource OutlineBrush}" />
+        <Setter Property="SelectedChipBackground" Value="{StaticResource SecondaryContainerBrush}" />
+        <Setter Property="SelectedChipTextColor" Value="{StaticResource OnSecondaryContainer}" />
+        <Setter Property="SelectionIndicatorColor" Value="{StaticResource OnSecondaryContainer}" />
+    </Style>
+
+    <!-- MD3 dialog: surface container high -->
+    <Style TargetType="popup:SfPopup">
+        <Setter Property="PopupStyle">
+            <Setter.Value>
+                <popup:PopupStyle
+                    PopupBackground="{StaticResource SurfaceContainerHighBrush}"
+                    HeaderBackground="{StaticResource SurfaceContainerHighBrush}"
+                    MessageBackground="{StaticResource SurfaceContainerHighBrush}"
+                    FooterBackground="{StaticResource SurfaceContainerHighBrush}"
+                    HeaderTextColor="{StaticResource OnSurface}"
+                    MessageTextColor="{StaticResource OnSurfaceVariant}"
+                    AcceptButtonBackground="{StaticResource TransparentBrush}"
+                    AcceptButtonTextColor="{StaticResource Primary}"
+                    DeclineButtonBackground="{StaticResource TransparentBrush}"
+                    DeclineButtonTextColor="{StaticResource Primary}"
+                    CloseIconColor="{StaticResource OnSurfaceVariant}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- MD3 outlined text field -->
+    <Style TargetType="inputlayout:SfTextInputLayout">
+        <Setter Property="Stroke" Value="{StaticResource Outline}" />
+        <Setter Property="ContainerBackground" Value="{StaticResource TransparentBrush}" />
+        <Setter Property="HintLabelStyle">
+            <Setter.Value>
+                <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- MD3 icon button: 48dp touch target, transparent, icon tinted on-surface-variant.
+         Stock ImageButton on purpose: IconTintColorBehavior cannot tint an SfButton (Android: only Button and ImageView). -->
+    <Style x:Key="SfIconButton" TargetType="ImageButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="behaviors:IconTint.Color" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="Aspect" Value="Center" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.38" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <!-- MD3 text button -->
+    <Style x:Key="SfTextButton" TargetType="buttons:SfButton">
+        <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.38" />
+                            <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <!-- MD3 filled button -->
+    <Style x:Key="SfFilledButton" TargetType="buttons:SfButton">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Padding" Value="24,0" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.38" />
+                            <Setter Property="Background" Value="{StaticResource SurfaceContainerHighestBrush}" />
+                            <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <!-- Same look as the DX FlyoutMenuButton -->
+    <Style x:Key="SfFlyoutMenuButton" TargetType="buttons:SfButton">
+        <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="ShowIcon" Value="True" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="CornerRadius" Value="28" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="HorizontalTextAlignment" Value="Start" />
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.38" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

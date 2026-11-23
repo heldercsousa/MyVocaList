@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Syncfusion Toolkit theme (T0.4a). Merges the Toolkit dark theme dictionary, then overrides keys with the Material tokens of
+    MaterialColors.xaml (merge this file AFTER MaterialColors.xaml in App.xaml).
+    Two layers: (1) common keys (PrimaryBackground, ContentForeground, ...) and (2) control-level keys (SfChipGroup*, SfTextInputLayout*,
+    SfBottomSheet*, SfShimmer*, SfPopup*, SfButton*, SfEffectsView*). Controls read layer 2; the Toolkit resolves layer 1 into layer 2
+    at load time, so layer 1 alone does not recolor controls and a Style setter cannot beat the control's dynamic theme resources.
+    Not overridden on purpose: alpha state layers and *Disabled keys (no alpha token; Toolkit defaults are on-surface at 12%/38%),
+    Overlay, Black/White, SeriesColor*, Segment*, Table*, *SearchResult and the control families the app does not use.
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:themes="clr-namespace:Syncfusion.Maui.Toolkit.Themes;assembly=Syncfusion.Maui.Toolkit">
+
+
+    <ResourceDictionary.MergedDictionaries>
+        <themes:SyncfusionThemeResourceDictionary VisualTheme="MaterialDark" />
+    </ResourceDictionary.MergedDictionaries>
+
+
+    <!-- Primary -->
+    <StaticResource x:Key="PrimaryBackground" Key="Primary" />
+    <StaticResource x:Key="PrimaryBackgroundFocused" Key="Primary" />
+    <StaticResource x:Key="PrimaryBackgroundHovered" Key="Primary" />
+    <StaticResource x:Key="PrimaryBackgroundPressed" Key="Primary" />
+    <StaticResource x:Key="PrimaryBackgroundSelected" Key="Primary" />
+    <StaticResource x:Key="PrimaryBackgroundLight1" Key="OnPrimary" />
+    <StaticResource x:Key="PrimaryBorder" Key="Primary" />
+    <StaticResource x:Key="PrimaryBorderFocused" Key="Primary" />
+    <StaticResource x:Key="PrimaryBorderHovered" Key="Primary" />
+    <StaticResource x:Key="PrimaryBorderPressed" Key="Primary" />
+    <StaticResource x:Key="PrimaryBorderSelected" Key="Primary" />
+    <StaticResource x:Key="PrimaryForeground" Key="OnPrimary" />
+    <StaticResource x:Key="PrimaryForegroundFocused" Key="OnPrimary" />
+    <StaticResource x:Key="PrimaryForegroundHovered" Key="OnPrimary" />
+    <StaticResource x:Key="PrimaryForegroundPressed" Key="OnPrimary" />
+    <StaticResource x:Key="PrimaryForegroundSelected" Key="OnPrimary" />
+
+    <!-- Secondary -->
+    <StaticResource x:Key="SecondaryBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryBackgroundHovered" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryBackgroundPressed" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryBackgroundSelected" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryBorder" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryBorderHovered" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryBorderPressed" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryBorderSelected" Key="SecondaryContainer" />
+    <StaticResource x:Key="SecondaryForeground" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SecondaryForegroundHovered" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SecondaryForegroundPressed" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SecondaryForegroundSelected" Key="OnSecondaryContainer" />
+
+    <!-- Content -->
+    <StaticResource x:Key="ContentBackground" Key="Surface" />
+    <StaticResource x:Key="ContentBackgroundAlt1" Key="SurfaceContainerLow" />
+    <StaticResource x:Key="ContentBackgroundAlt2" Key="SurfaceContainer" />
+    <StaticResource x:Key="ContentBackgroundAlt3" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="ContentBackgroundAlt4" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="ContentBackgroundAlt5" Key="SurfaceVariant" />
+    <StaticResource x:Key="ContentBackgroundHovered" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="ContentBackgroundFocused" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="ContentBackgroundPressed" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="ContentBackgroundSelected" Key="SecondaryContainer" />
+    <StaticResource x:Key="ContentForeground" Key="OnSurface" />
+    <StaticResource x:Key="ContentForegroundAlt1" Key="OnSurfaceVariant" />
+
+    <!-- Border / outline -->
+    <StaticResource x:Key="Border" Key="OutlineVariant" />
+    <StaticResource x:Key="BorderAlt1" Key="Outline" />
+    <StaticResource x:Key="BorderAlt2" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="BorderAlt4" Key="OnSurface" />
+
+    <!-- Foreground states -->
+    <StaticResource x:Key="ForegroundFocused" Key="OnSurface" />
+    <StaticResource x:Key="ForegroundHovered" Key="OnSurface" />
+    <StaticResource x:Key="ForegroundPressed" Key="OnSurface" />
+    <StaticResource x:Key="ForegroundSelected" Key="OnSurface" />
+
+    <!-- Error / status -->
+    <StaticResource x:Key="ErrorBorder" Key="Error" />
+    <StaticResource x:Key="ErrorForeground" Key="Error" />
+    <StaticResource x:Key="InfoBackground" Key="Info" />
+    <StaticResource x:Key="InfoBorder" Key="Info" />
+    <StaticResource x:Key="InfoForeground" Key="Info" />
+    <StaticResource x:Key="SuccessBorder" Key="Success" />
+    <StaticResource x:Key="SuccessForeground" Key="Success" />
+    <StaticResource x:Key="WarningBorder" Key="Warning" />
+    <StaticResource x:Key="WarningForeground" Key="Warning" />
+
+    <!-- Input -->
+    <StaticResource x:Key="InputBackground" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="InputBackgroundHovered" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="InputBackgroundPressed" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="InputBorderHovered" Key="OnSurface" />
+    <StaticResource x:Key="InputBorderPressed" Key="Primary" />
+    <StaticResource x:Key="InputBoxBorder" Key="Outline" />
+    <StaticResource x:Key="PlaceholderForeground" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="TextSelectionFocused" Key="Primary" />
+    <StaticResource x:Key="SliderThumbBackground" Key="Primary" />
+    <StaticResource x:Key="SliderThumbBorder" Key="Primary" />
+
+    <!-- Flyout -->
+    <StaticResource x:Key="FlyoutBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="FlyoutBorder" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="FlyoutBackgroundHovered" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="FlyoutBackgroundFocused" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="FlyoutBackgroundPressed" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="FlyoutBackgroundSelected" Key="SecondaryContainer" />
+
+    <!-- Icon -->
+    <StaticResource x:Key="IconColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="IconColorHovered" Key="OnSurface" />
+    <StaticResource x:Key="IconColorPressed" Key="OnSurfaceVariant" />
+
+    <!-- Chip active -->
+    <StaticResource x:Key="ChipActiveBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActiveBorder" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActiveForeground" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="ChipActiveFocusedBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActiveFocusedBorder" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActiveFocusedForeground" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="ChipActiveHoveredBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActiveHoveredBorder" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActiveHoveredForeground" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="ChipActivePressedBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActivePressedBorder" Key="SecondaryContainer" />
+    <StaticResource x:Key="ChipActivePressedForeground" Key="OnSecondaryContainer" />
+
+    <!-- Chip inactive -->
+    <StaticResource x:Key="ChipInactiveBackground" Key="Surface" />
+    <StaticResource x:Key="ChipInactiveBorder" Key="Outline" />
+    <StaticResource x:Key="ChipInactiveForeground" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="ChipInactiveFocusedBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="ChipInactiveFocusedBorder" Key="Outline" />
+    <StaticResource x:Key="ChipInactiveFocusedForeground" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="ChipInactiveHoveredBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="ChipInactiveHoveredBorder" Key="Outline" />
+    <StaticResource x:Key="ChipInactiveHoveredForeground" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="ChipInactivePressedBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="ChipInactivePressedBorder" Key="Outline" />
+    <StaticResource x:Key="ChipInactivePressedForeground" Key="OnSurfaceVariant" />
+
+    <!-- Toast / tooltip -->
+    <StaticResource x:Key="ToastBackground" Key="InverseSurface" />
+    <StaticResource x:Key="ToastForeground" Key="InverseOnSurface" />
+    <StaticResource x:Key="TooltipBackground" Key="InverseSurface" />
+    <StaticResource x:Key="TooltipBorder" Key="InverseSurface" />
+    <StaticResource x:Key="TooltipContentBorder" Key="InverseSurface" />
+    <StaticResource x:Key="TooltipForeground" Key="InverseOnSurface" />
+
+    <!-- Shimmer -->
+    <StaticResource x:Key="ShimmerWaveColor" Key="SurfaceBright" />
+
+    <!-- Toolkit control-level keys (DefaultTheme): controls read these, not the common keys above. Opaque defaults only; alpha state layers keep the Toolkit default. -->
+    <StaticResource x:Key="SfBottomSheetBackground" Key="SurfaceContainer" />
+    <StaticResource x:Key="SfBottomSheetGrabberBackground" Key="OutlineVariant" />
+    <StaticResource x:Key="SfButtonFocusedBackground" Key="Primary" />
+    <StaticResource x:Key="SfButtonFocusedStroke" Key="OnSurface" />
+    <StaticResource x:Key="SfButtonFocusedTextColor" Key="OnPrimary" />
+    <StaticResource x:Key="SfButtonHoverBackground" Key="Primary" />
+    <StaticResource x:Key="SfButtonHoverStroke" Key="Primary" />
+    <StaticResource x:Key="SfButtonHoverTextColor" Key="OnPrimary" />
+    <StaticResource x:Key="SfButtonNormalBackground" Key="Primary" />
+    <StaticResource x:Key="SfButtonNormalStroke" Key="Primary" />
+    <StaticResource x:Key="SfButtonNormalTextColor" Key="OnPrimary" />
+    <StaticResource x:Key="SfButtonPressedBackground" Key="Primary" />
+    <StaticResource x:Key="SfButtonPressedStroke" Key="Primary" />
+    <StaticResource x:Key="SfButtonPressedTextColor" Key="OnPrimary" />
+    <StaticResource x:Key="SfChipGroupChoiceBackground" Key="SurfaceContainer" />
+    <StaticResource x:Key="SfChipGroupDisabledSelectedTextColor" Key="OnSurface" />
+    <StaticResource x:Key="SfChipGroupDisabledSelectionBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="SfChipGroupHoverClearButtonIconColor" Key="OnSurface" />
+    <StaticResource x:Key="SfChipGroupHoverSelectedTextColor" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SfChipGroupHoverSelectionBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="SfChipGroupHoverStroke" Key="Outline" />
+    <StaticResource x:Key="SfChipGroupHoverTextColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfChipGroupNormalClearButtonIconColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfChipGroupNormalSelectedTextColor" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SfChipGroupNormalSelectionBackground" Key="SecondaryContainer" />
+    <StaticResource x:Key="SfChipGroupNormalSelectionIndicatorColor" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SfChipGroupNormalStroke" Key="Outline" />
+    <StaticResource x:Key="SfChipGroupNormalTextColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfChipGroupPressedClearButtonIconColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfChipGroupPressedSelectedTextColor" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SfChipGroupPressedSelectionIndicatorColor" Key="OnSurface" />
+    <StaticResource x:Key="SfChipGroupPressedStroke" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfChipGroupPressedTextColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfChipNormalClearButtonIconColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfChipNormalSelectionIndicatorColor" Key="OnSecondaryContainer" />
+    <StaticResource x:Key="SfChipNormalStroke" Key="Outline" />
+    <StaticResource x:Key="SfChipNormalTextColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfEffectsViewHighlightBackground" Key="OnSurface" />
+    <StaticResource x:Key="SfEffectsViewRippleBackground" Key="OnSurface" />
+    <StaticResource x:Key="SfEffectsViewSelectionBackground" Key="OnSurface" />
+    <StaticResource x:Key="SfPopupFooterButtonRippleBackground" Key="OnSurface" />
+    <StaticResource x:Key="SfPopupHoverFooterButtonBackground" Key="Primary" />
+    <StaticResource x:Key="SfPopupNormalAcceptButtonTextColor" Key="Primary" />
+    <StaticResource x:Key="SfPopupNormalBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="SfPopupNormalCloseButtonIconStroke" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfPopupNormalDeclineButtonTextColor" Key="Primary" />
+    <StaticResource x:Key="SfPopupNormalFooterBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="SfPopupNormalHeaderBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="SfPopupNormalHeaderTextColor" Key="OnSurface" />
+    <StaticResource x:Key="SfPopupNormalMessageBackground" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="SfPopupNormalMessageTextColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfPopupNormalStroke" Key="SurfaceContainerHigh" />
+    <StaticResource x:Key="SfShimmerFillColor" Key="SurfaceContainer" />
+    <StaticResource x:Key="SfShimmerNormalBackground" Key="Surface" />
+    <StaticResource x:Key="SfShimmerWaveColor" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="SfTextInputLayoutCommonStroke" Key="Primary" />
+    <StaticResource x:Key="SfTextInputLayoutErrorStroke" Key="Error" />
+    <StaticResource x:Key="SfTextInputLayoutFocusedContainerBackground" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="SfTextInputLayoutFocusedHintTextColor" Key="Primary" />
+    <StaticResource x:Key="SfTextInputLayoutHelperTextColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfTextInputLayoutHintTextColor" Key="OnSurfaceVariant" />
+    <StaticResource x:Key="SfTextInputLayoutHoveredStroke" Key="OnSurface" />
+    <StaticResource x:Key="SfTextInputLayoutMouseHoveredContainerBackground" Key="SurfaceBright" />
+    <StaticResource x:Key="SfTextInputLayoutNormalContainerBackground" Key="SurfaceContainerHighest" />
+    <StaticResource x:Key="SfTextInputLayoutNormalErrorTextColor" Key="Error" />
+    <StaticResource x:Key="SfTextInputLayoutPressedHintTextColor" Key="Primary" />
+    <StaticResource x:Key="SfTextInputLayoutStroke" Key="Outline" />
+
+</ResourceDictionary>
