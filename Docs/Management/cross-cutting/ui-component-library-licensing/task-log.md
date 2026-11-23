@@ -271,3 +271,7 @@ Commit `a87f84cf`. Review: spec ✅, quality Approved (1 Minor). Merged.
 **Not checked on the device.** Concurrent Android builds took more than 75 min, so the tint, the popup position, the item command and Back are checked in the Venues Sf parity run (P9), where list rows use this button.
 
 **Deferred Minor, fixed in the next task that edits the file (or at T2.9 parity):** the original's style centered the button vertically (`VerticalOptions=Center`). Add it to the `ImageButton`, or the button sits at the top in rows taller than 48 dp.
+
+### T3.1 — `ImagePickerFieldSf` — Done (2026-11-23)
+
+Commit `016a843b`. The review passed spec ✅ and quality Approved, with 2 Minor findings. Merged. All 10 BindableProperties are unchanged, and the code-behind is copied verbatim. `DXImage` became an `Image` with `IconTint`. The remove `DXButton` became an `ImageButton` with the `SfIconButton` style: 40 dp, the same as the DX original, showing a 24 dp icon. There is no unit test, because this is Level C UI. The visual check happens on the first consuming form page.
