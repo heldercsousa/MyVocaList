@@ -233,3 +233,15 @@ Run by a parity subagent (orchestrator ruling). Commit `c64144c3` registers the 
   - Outlined-button stroke is 1 dp; DX draws about 2 px.
   - The Syncfusion password reveal icon shows "eye-off" while the text is masked.
   - On the DX Settings page, typed text is almost invisible. The Sf copy is readable.
+
+### T2.4 — `MenuSf` — Done (2026-11-23)
+
+Implementor `7ef09111`, then fix round 1 `1975f0d3`: the `SurfaceContainerLow` token for the container, the right edge aligned to the anchor through the offset overload, disabled items dimmed to 0.38, and no indent for items without an icon. The re-review marked every finding ADDRESSED. Merged.
+- `DXPopup` became `SfPopup` and `DXButton` became `SfButton` with a tinted-icon content template.
+- `IMenuHost`, `MenuItemSelection`, `MenuItemShape` and `MenuResolution` are shared, not copied.
+- Android Back closes the popup natively, so the `PopupBackHandler` registration was dropped.
+- Emulator check (`artifacts/parity/t2.4/`): the menu opens, fires the item command, reopens, and Back closes it.
+
+Orchestrator ruling for T2.6: `IMenuHost.HostedMenu` is typed `Menu?`, so Sf hosts get a new `IMenuHostSf` (`MenuSf? HostedMenu`) as an Sf file, and `IMenuHost` stays unchanged until Phase 5.
+
+Deferred minors: the left-edge clamp was not tested on the device; a lighter `SfButton` disabled fill shows behind dimmed items.
