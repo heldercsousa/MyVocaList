@@ -57,21 +57,21 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `MyVocaList/UI/Components/TextFields/OutlinedTextFieldSf.xaml(.cs)`
   - **Demo:** keyboard opens, text binds, outlined look in dark tokens
   - **Review lane:** Standard
-- [ ] **T0.5 Sheet-state bridge** [P — after T0.3; not in a wave with T0.4a]
+- [~] **T0.5 Sheet-state bridge** [P — after T0.3; not in a wave with T0.4a]
   - **Produces:** `DxSheetStateConverter` (key `DxSheetStateToSf`)
   - **Consumes:** T0.1a Sf state enum; T0.3 packages
   - **Risk:** Low — one converter, unit-tested
   - **Files owned:** `MyVocaList/UI/Migration/DxSheetStateConverter.cs`, `Tests/Unit/Migration/DxSheetStateConverterTests.cs` (`App.xaml` resource and any `Tests/MyVocaList.Tests.csproj` reference → orchestrator)
   - **Demo:** six state-transition tests pass
   - **Review lane:** Standard
-- [~] **T0.6a Preview page and route registry** [SEQUENTIAL — after T0.3]
+- [x] **T0.6a Preview page and route registry** [SEQUENTIAL — after T0.3]
   - **Produces:** `PreviewRoutes` (`Entries`, `Register()`), `SyncfusionPreviewPage` — Debug only
   - **Consumes:** T0.1c contextual-route verdict
   - **Risk:** Low
   - **Files owned:** `MyVocaList/UI/Migration/PreviewRoutes.cs`, `MyVocaList/UI/Migration/SyncfusionPreviewPage.xaml(.cs)`, `MyVocaList/MyVocaList.csproj` (Release exclusion)
   - **Demo:** the page builds and lists no entries yet
   - **Review lane:** Standard
-- [ ] **T0.6b Preview wiring** [SEQUENTIAL — after T0.6a]
+- [~] **T0.6b Preview wiring** [SEQUENTIAL — after T0.6a]
   - **Produces:** flyout entry "Syncfusion preview" in Debug; nothing of it in Release
   - **Consumes:** `PreviewRoutes.Register()`
   - **Risk:** Medium — must vanish from Release (REQ-UIMIG-09)

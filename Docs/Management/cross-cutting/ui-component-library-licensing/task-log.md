@@ -108,3 +108,15 @@ Implementor `d0d71f0b` (MAUI 10.0.41 → 10.0.110) + `8a4d7875`; review spec ✅
 | REQ-UIMIG-18 | Release fails without the key; Debug runs | build commands above |
 
 Deferred minors: a `"` or `;` in a key breaks the generated file (the build fails loudly); `dotnet test -c Release` needs the key; `Microsoft.Maui.Essentials` is still pinned at 10.0.0.
+
+### T0.6a — Preview page and route registry (Debug) — Done (2026-11-23)
+
+Implementor `4352e78a`; review spec ✅ quality Approved (4 Minor, deferred). Merged into develop.
+
+### Changed files
+- `MyVocaList/UI/Migration/PreviewRoutes.cs` (new, `#if DEBUG`; `Entries` empty; `Register()` registers `syncfusion-preview` + entries; no contextual entries, per T0.1c)
+- `MyVocaList/UI/Migration/SyncfusionPreviewPage.xaml(.cs)` (new; `.cs` `#if DEBUG`; `SafeAreaEdges="Container"`; empty-state label)
+- `MyVocaList/MyVocaList.csproj` (Release `MauiXaml Remove` for the page)
+
+### Verification
+Debug build: 0 errors. Release build with a dummy key in the shell only: 0 errors. No unit test, because this is Level C plumbing. REQ-UIMIG-08/09 are checked once T0.6b wires the entry.
