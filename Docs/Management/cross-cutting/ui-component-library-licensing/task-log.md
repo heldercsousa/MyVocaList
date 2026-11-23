@@ -120,3 +120,22 @@ Implementor `4352e78a`; review spec ✅ quality Approved (4 Minor, deferred). Me
 
 ### Verification
 Debug build: 0 errors. Release build with a dummy key in the shell only: 0 errors. No unit test, because this is Level C plumbing. REQ-UIMIG-08/09 are checked once T0.6b wires the entry.
+
+### T0.5 — Sheet-state bridge — Done (2026-11-23)
+
+Implementor `fdb0b7ce`; fix round 1 `d354d5a5` (tests for the `Binding.DoNothing` branches); fix round 2 `fcb96e29` (an undefined DX state now does nothing in the `IsOpen` converter, per design). Each round was re-reviewed: ADDRESSED. Merged into develop.
+
+### Changed files
+- `MyVocaList/UI/Migration/DxSheetStateConverter.cs` (new: `DxSheetStateConverter`, `DxSheetStateToIsOpenConverter`)
+- `Tests/Unit/Migration/DxSheetStateConverterTests.cs` (new, 18 cases)
+- Pending, orchestrator ruling: the `App.xaml` resources (`xmlns:migration="clr-namespace:MyVocaList.UI.Migration"`; keys `DxSheetStateToSf`, `DxSheetStateToSfIsOpen`). T0.4a owned `App.xaml` while this task ran, so the lines are added by the next task that edits `App.xaml` from develop after T0.4a merges (T0.4b).
+
+### Verification
+- RED: CS0246, the type was missing.
+- GREEN: `dotnet test --filter DxSheetStateConverterTests` passes 18/18. The full suite passes in the pre-commit hook (2049+).
+
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-UIMIG-07 | with a bottom sheet open, back closes it (state bridge part) | both converters | `Convert_Hidden_IsClosed`, `Convert_HalfExpanded_IsHalfExpanded`, `Convert_FullExpanded_IsFullExpanded`, `ConvertBack_ClosedByUser_IsHidden`, `ConvertBack_DraggedToFull_IsFullExpanded`, `ConvertBack_DraggedToHalf_IsHalfExpanded`, `ConvertBack_Collapsed_IsHidden`, `IsOpen_Hidden_IsFalse`, `IsOpen_HalfExpanded_IsTrue`, `IsOpenBack_False_IsHidden`, plus the DoNothing branch cases |
+
+**Observed flake (not caused by this task):** `SongServiceSaveFromFormImageRealStackTests.SaveFromFormAsync_ExistingArtistWithImage_KeepsStoredArtistImage` sometimes throws `ObjectDisposedException` (SQLitePCL) in a parallel full run. It passes alone and on retry.

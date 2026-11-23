@@ -57,7 +57,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `MyVocaList/UI/Components/TextFields/OutlinedTextFieldSf.xaml(.cs)`
   - **Demo:** keyboard opens, text binds, outlined look in dark tokens
   - **Review lane:** Standard
-- [~] **T0.5 Sheet-state bridge** [P — after T0.3; not in a wave with T0.4a]
+- [x] **T0.5 Sheet-state bridge** [P — after T0.3; not in a wave with T0.4a]
   - **Produces:** `DxSheetStateConverter` (key `DxSheetStateToSf`)
   - **Consumes:** T0.1a Sf state enum; T0.3 packages
   - **Risk:** Low — one converter, unit-tested
