@@ -1,6 +1,6 @@
 # Design — UI library migration: DevExpress → Syncfusion (coexisting)
 
-Status: **draft for review, revised after spec-reviewer pass** (2026-11-21).
+Status: **approved by Helder on 2026-11-22** (revised after the spec-reviewer pass of 2026-11-21).
 - Requirements: `Docs/Management/cross-cutting/ui-component-library-licensing/requirements.md`.
 - Evidence: `findings.md` § 7.
 - The POC branch `task/spike-syncfusion` is reference material only: it is never merged, and its files may be copied into properly tested tasks.
@@ -102,7 +102,7 @@ Today, `ICrudListViewModel.ItemActionsSheetState` and `ConfirmSheetState` are De
 - **ViewModels stay unchanged.**
 - **One migration-only file** bridges the state for Sf copies: `MyVocaList/UI/Migration/DxSheetStateConverter.cs`. It is an `IValueConverter` between `BottomSheetState` and the Sf sheet state, registered under the resource key `DxSheetStateToSf`.
   - Sf XAML references only that key, never a DevExpress type, so REQ-UIMIG-11 holds.
-  - This file is the single exception to REQ-UIMIG-12.
+  - This file and its unit test `Tests/Unit/Migration/DxSheetStateConverterTests.cs` are the only exceptions to REQ-UIMIG-12 (both deleted in Phase 5). *(Test file added 2026-11-22 during planning: the test must name the DX enum.)*
 
 State table (`SfBottomSheet` state property name: **U**, confirmed in Phase 0 control verification):
 
@@ -117,7 +117,7 @@ If `SfBottomSheet` has no half-expanded state, `HalfExpanded` maps to open at `H
 **Phase 5:**
 - An app-owned `public enum SheetState { Hidden, HalfExpanded, FullExpanded }` in `MyVocaList.UI.ViewModels` replaces `BottomSheetState` in `CrudListViewModelBase` and `ICrudListViewModel`.
 - The converter is deleted.
-- The type-only test change in REQ-UIMIG-13 is made by the Tester role. It needs Helder's authorization (§ Open questions 1).
+- The type-only test change in REQ-UIMIG-13 is made by the Tester role. Authorized by Helder on 2026-11-22 (REQ-UIMIG-13, § Resolved questions 1).
 
 `PersonFormPage` and `SongFormPage` use `BottomSheetState` in page code-behind only. Their Sf copies use `SfBottomSheet` directly, so the bridge is not needed there.
 
@@ -148,7 +148,7 @@ The 60 Material Symbols SVGs in `Resources/Images/` stay, referenced by name. Sf
 - **DX reference:** a line matching `DevExpress` or `schemas\.devexpress\.com`, or an XAML prefix declared with that schema (`xmlns:<p>="http://schemas.devexpress.com/maui"`, `clr-namespace:DevExpress`). The script resolves the actually declared prefixes, so a word merely containing "dx" is not a false positive.
 - **`--staged`** (pre-commit):
   - fails if any staged Sf copy file contains a DX reference (REQ-UIMIG-11);
-  - fails if `git diff --cached -U0` adds a line with a DX reference in any file other than `MyVocaList/UI/Migration/DxSheetStateConverter.cs` (REQ-UIMIG-12). Removed lines are never counted, and comment lines count like code.
+  - fails if `git diff --cached -U0` adds a line with a DX reference in any file other than `MyVocaList/UI/Migration/DxSheetStateConverter.cs` and `Tests/Unit/Migration/DxSheetStateConverterTests.cs` (REQ-UIMIG-12). Removed lines are never counted, and comment lines count like code.
 - **`--release`** (Phase 5 + MVP launch build): fails if any tracked `.cs`/`.xaml` compiled by the app or test projects, or `Directory.Packages.props` / any `.csproj`, contains a DX reference (REQ-UIMIG-14). Paths excluded from the build via `<Compile Remove>` are skipped.
 - Also checks that no tracked file contains the value pattern of a Syncfusion key assignment (REQ-UIMIG-17).
 - **Exit codes:** 0 = clean · 1 = violations (prints `path:line: rule`) · 2 = usage or git error.
@@ -161,9 +161,10 @@ The 60 Material Symbols SVGs in `Resources/Images/` stay, referenced by name. Sf
   - Shell contextual-route resolution is **U**: verify it in Phase 0 against Microsoft Learn plus a one-screen check.
   - **Fallback if it does not resolve:** the preview page opens each Sf form directly on its own `-sf` route with a fixed sample record, and Sf lists push DX forms until their forms are cut over.
 - **Cut-over (REQ-UIMIG-10):**
-  - flyout page: the `ShellContent` `ContentTemplate` in `AppShell.xaml` changes from `XPage` to `XSfPage`;
+  - flyout page: the `ShellContent` `ContentTemplate` in `AppShell.xaml` changes from `XPage` to `XSfPage`, and so does the page's entry in `NavigationConfig.PageTypes` (`NavigationService.PushAsync` resolves menu pages through it). `SettingsPage` sits on two routes (`preferences`, `settings`); its cut-over changes both `ShellContent`s and its one `PageTypes` entry. *(Added 2026-11-22 during planning.)*
   - pushed page: `Routing.RegisterRoute(Routes.X, typeof(XPage))` changes to `typeof(XSfPage)`;
   - the cut-over commit changes nothing else. The DX page is deleted in a later commit, after Helder's explicit go.
+- **Preview entry location:** the flyout menu is built by `NavigationConfig.BuildMenuGroups`, so the Debug-only "Syncfusion preview" entry is added there inside `#if DEBUG`. *(Added 2026-11-22.)*
 - **Phase 5:** renames each `XSf`/`XSfPage` back to `X`/`XPage`, removes the preview entry, `SyncfusionPreviewPage`, the preview and contextual routes, and the `UI/Migration` folder.
 
 ## Interaction flows
@@ -211,6 +212,7 @@ Run per page, on the emulator, for both the DX original and the Sf copy. Every s
 
 ### Decision: Rule amendment before any Sf code
 **Chosen approach:** Phase 0 starts with Helder's `amend:` commit to `CLAUDE.md` (wording in § Rule changes), human-reviewed.
+**Done 2026-11-22:** Helder directed the change; the `amend:` commit landed on `develop` before Phase 0.
 **Alternatives considered:** Amending at Phase 5. Rejected: until the amendment lands, Sf code would violate "DevExpress first".
 **Reversibility:** Easily reversible.
 **Rationale:** The constitution must allow Syncfusion before Syncfusion code exists.
@@ -240,7 +242,7 @@ Run per page, on the emulator, for both the DX original and the Sf copy. Every s
 **Rationale:** Keeps every DX original untouched and the ViewModels single.
 
 ### Decision: List control for `CrudListViewSf`
-**Chosen approach:** A time-boxed check at the start of Phase 2: one implementor session of at most 3 hours, throwaway, on a spike branch. It tries `SfListView` against REQ-UIMIG-03 (selected look), REQ-UIMIG-06 (tap/long-press) and the load-more behavior of `CrudListView`.
+**Chosen approach:** A time-boxed check at the start of Phase 2: one implementor session of at most 2 hours (aligned with the 2-hour briefing limit, 2026-11-22), throwaway, on a spike branch. It tries `SfListView` against REQ-UIMIG-03 (selected look), REQ-UIMIG-06 (tap/long-press) and the load-more behavior of `CrudListView`.
 - If it meets all three, use `SfListView`.
 - Otherwise use the § Control mapping fallback (stock `CollectionView` + `DataTemplateSelector` + forwarding).
 - The orchestrator records the outcome in this decision; Helder confirms before `CrudListViewSf` is dispatched.
@@ -261,7 +263,7 @@ Run per page, on the emulator, for both the DX original and the Sf copy. Every s
 **Rationale:** REQ-UIMIG-15.
 
 ### Decision: Removal of DevExpress (Phase 5)
-**Chosen approach:** In order: delete the DX originals, convert ViewModels to `SheetState`, remove the DX init, warm-up, global usings, styles and packages, run `check_dx.py --release`, then rename.
+**Chosen approach:** In order: delete the DX originals (and the stale `UI/Pages/Samples/**` Release exclusion in the csproj; the folder itself is already gone — added 2026-11-22), convert ViewModels to `SheetState`, remove the DX init, warm-up, global usings, styles and packages, run `check_dx.py --release`, then rename.
 **Reversibility:** **Hard to reverse.** After the packages are removed, restoring any DX original needs the DevExpress 25.2.4 packages to resolve from Helder's DevExpress NuGet feed, and a DevExpress license to ship it. Rollback means `git revert` of the Phase 5 commits while the feed still serves 25.2.4.
 **Rationale:** US-4. **Helder approves the start of Phase 5 explicitly.**
 

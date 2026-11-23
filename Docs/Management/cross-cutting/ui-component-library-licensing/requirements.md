@@ -1,6 +1,6 @@
 # Requirements — UI library migration: DevExpress → Syncfusion (coexisting)
 
-Status: **draft for review, revised after spec-reviewer pass** (2026-11-21).
+Status: **approved by Helder on 2026-11-22** (revised after the spec-reviewer pass of 2026-11-21).
 
 Decisions by Helder on 2026-11-21:
 - migrate to Syncfusion, using the Toolkit plus the Community-License suite;
@@ -67,9 +67,9 @@ The last column says how each criterion is verified.
 |---|---|---|
 | **REQ-UIMIG-08** | WHILE a page is not cut over, the system SHALL open its DX original from every user-facing route. Its Sf copy SHALL be reachable only from the preview entry. | E |
 | **REQ-UIMIG-09** | The system SHALL include the preview entry and the preview routes only in Debug builds. | B (Release build has no `-sf` route) |
-| **REQ-UIMIG-10** | Given a page whose Sf copy passed the parity checklist and Helder's explicit go, when it is cut over, then the commit changes only the page class referenced at that page's user-facing route: the `ShellContent` template in `AppShell.xaml` for a flyout page, or the `Routing.RegisterRoute` type for a pushed page. Reverting that commit opens the DX original again. | E + diff review |
+| **REQ-UIMIG-10** | Given a page whose Sf copy passed the parity checklist and Helder's explicit go, when it is cut over, then the commit changes only the page class referenced at that page's user-facing route: the `ShellContent` template(s) in `AppShell.xaml` plus the page's `NavigationConfig.PageTypes` entry for a flyout page, or the `Routing.RegisterRoute` type for a pushed page. Reverting that commit opens the DX original again. | E + diff review |
 | **REQ-UIMIG-11** | The system SHALL NOT reference a DevExpress namespace, type or XAML schema in any Sf copy file (name pattern in `design.md` § Check script). | S |
-| **REQ-UIMIG-12** | WHILE the coexistence period lasts, no commit SHALL add a line that references DevExpress. The only exception is the bridge file listed in `design.md` § Sheet-state bridge. | S |
+| **REQ-UIMIG-12** | WHILE the coexistence period lasts, no commit SHALL add a line that references DevExpress. The only exceptions are the bridge files listed in `design.md` § Sheet-state bridge. | S |
 | **REQ-UIMIG-13** | The system SHALL keep the full test suite passing at every commit of the migration. The one authorized test change is in `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` (Phase 5): the type `BottomSheetState` becomes `SheetState`, and nothing else changes — no assertion, setup value or test case is removed or weakened. *Authorized by Helder on 2026-11-22 (type name only, Tester role).* | U + diff review |
 
 ### Release without DevExpress (US-4)
