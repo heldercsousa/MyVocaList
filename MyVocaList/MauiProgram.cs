@@ -155,7 +155,7 @@ public static class MauiProgram
         // Pages
         builder.Services.AddTransient<VenueFormPage>();
         builder.Services.AddTransient<VenueMapPickerPage>();
-builder.Services.AddTransient<VenueMapPickerSfPage>();
+        builder.Services.AddTransient<VenueMapPickerSfPage>();
         builder.Services.AddTransient<PersonFormPage>();
         builder.Services.AddTransient<VenuesPage>();
         builder.Services.AddTransient<PeoplePage>();
@@ -165,13 +165,13 @@ builder.Services.AddTransient<VenueMapPickerSfPage>();
         builder.Services.AddTransient<SongFormPage>();
         builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<BackupRestorePage>();
-builder.Services.AddTransient<BackupRestoreSfPage>();
+        builder.Services.AddTransient<BackupRestoreSfPage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();
-builder.Services.AddTransient<SettingsSfPage>();
+        builder.Services.AddTransient<SettingsSfPage>();
         builder.Services.AddTransient<AboutViewModel>();
         builder.Services.AddTransient<AboutPage>();
-builder.Services.AddTransient<AboutSfPage>();
+        builder.Services.AddTransient<AboutSfPage>();
 
         // Feedback
         builder.Services.AddTransient<IFeedbackService, FeedbackService>();

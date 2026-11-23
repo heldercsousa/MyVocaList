@@ -18,10 +18,13 @@
         <!-- Search: runs on submit only (REQ-VEN-25), never per keystroke -->
         <inputlayout:SfTextInputLayout Grid.Row="0"
                                        Hint="{Binding SearchPlaceholder}"
+                                       ContainerType="Outlined"
+                                       ReserveSpaceForAssistiveLabels="False"
                                        Margin="16,8">
             <Entry Text="{Binding SearchText, Mode=TwoWay}"
                    TextColor="{StaticResource OnSurface}"
                    ReturnType="Search"
+                   ClearButtonVisibility="WhileEditing"
                    ReturnCommand="{Binding SearchCommand}" />
             <inputlayout:SfTextInputLayout.TrailingView>
                 <ImageButton Source="search_outlined"

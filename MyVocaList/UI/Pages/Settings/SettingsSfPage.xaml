@@ -22,6 +22,7 @@
             <VerticalStackLayout Spacing="12">
                 <inputlayout:SfTextInputLayout
                     Hint="YouTube Data API v3 Key"
+                    ContainerType="Outlined"
                     EnablePasswordVisibilityToggle="True">
                     <Entry
                         Text="{Binding ApiKeyInput, Mode=TwoWay}"
