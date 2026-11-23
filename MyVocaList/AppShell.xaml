@@ -92,7 +92,7 @@
     </FlyoutItem>
 
     <FlyoutItem Route="about" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
+        <ShellContent ContentTemplate="{DataTemplate about:AboutSfPage}" />
     </FlyoutItem>
 
 </Shell>

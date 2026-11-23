@@ -17,7 +17,7 @@ public static class NavigationConfig
         [Routes.Songs] = typeof(SongsPage),
         [Routes.Preferences] = typeof(SettingsSfPage),
         [Routes.Backup] = typeof(BackupRestorePage),
-        [Routes.About] = typeof(AboutPage),
+        [Routes.About] = typeof(AboutSfPage),
 #if DEBUG
         // Satisfies the NavigationConfigTests guard (every menu route has a PageTypes entry). The flyout item itself
         // navigates by Shell route (see BuildMenuGroups) because SyncfusionPreviewPage is not DI-registered.
