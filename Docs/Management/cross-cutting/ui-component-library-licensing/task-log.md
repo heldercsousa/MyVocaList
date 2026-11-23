@@ -35,3 +35,20 @@ Helder's directive (2026-11-21): do the POC. Write new code only; existing code 
 - `Docs/Management/cross-cutting/ui-component-library-licensing/README.md`
 - `Docs/Management/cross-cutting/ui-component-library-licensing/findings.md`
 - this file
+
+## 2026-11-22 — Migration implementation (plan.md, tasks.md)
+
+Plan approved by Helder 2026-11-22 ("plan approved. Start implementation"); autonomy grant the same day (any step inside this project folder, push included). Orchestrator ledger: `.superpowers/sdd/plan/progress.md` (gitignored).
+
+### Checkpoint
+
+**Resume rule:** read this block, then the ledger, then `git log --oneline -10`; continue at the first step not marked `done`.
+
+| # | Step | Status | Evidence / notes |
+|---|------|--------|------------------|
+| M0 | Item 🟡; wave 1 claimed `[~]` | done | `794c9f10` |
+| M1 | Wave 1: T0.1a, T0.1b, T0.1c (scratch worktrees `spike-sf-controls-a/b/c`), T0.2 (`check-dx-script`) | running | dispatched from `794c9f10`; emulator shared through the `artifacts/.emulator-lock` lease |
+| M2 | Review T0.2, merge to develop; apply T0.1 results to design.md | pending | |
+| M3 | T0.3 packages + license target | pending | needs T0.1b ids |
+
+**Context manifest:** `plan.md`, `tasks.md`, `design.md`, `requirements.md`, this file, `.superpowers/sdd/plan/progress.md`.
