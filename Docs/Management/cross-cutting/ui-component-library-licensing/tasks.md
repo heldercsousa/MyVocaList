@@ -71,7 +71,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `MyVocaList/UI/Migration/PreviewRoutes.cs`, `MyVocaList/UI/Migration/SyncfusionPreviewPage.xaml(.cs)`, `MyVocaList/MyVocaList.csproj` (Release exclusion)
   - **Demo:** the page builds and lists no entries yet
   - **Review lane:** Standard
-- [~] **T0.6b Preview wiring** [SEQUENTIAL — after T0.6a]
+- [x] **T0.6b Preview wiring** [SEQUENTIAL — after T0.6a]
   - **Produces:** flyout entry "Syncfusion preview" in Debug; nothing of it in Release
   - **Consumes:** `PreviewRoutes.Register()`
   - **Risk:** Medium — must vanish from Release (REQ-UIMIG-09)

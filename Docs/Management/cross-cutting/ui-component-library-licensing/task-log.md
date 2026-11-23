@@ -139,3 +139,22 @@ Implementor `fdb0b7ce`; fix round 1 `d354d5a5` (tests for the `Binding.DoNothing
 | REQ-UIMIG-07 | with a bottom sheet open, back closes it (state bridge part) | both converters | `Convert_Hidden_IsClosed`, `Convert_HalfExpanded_IsHalfExpanded`, `Convert_FullExpanded_IsFullExpanded`, `ConvertBack_ClosedByUser_IsHidden`, `ConvertBack_DraggedToFull_IsFullExpanded`, `ConvertBack_DraggedToHalf_IsHalfExpanded`, `ConvertBack_Collapsed_IsHidden`, `IsOpen_Hidden_IsFalse`, `IsOpen_HalfExpanded_IsTrue`, `IsOpenBack_False_IsHidden`, plus the DoNothing branch cases |
 
 **Observed flake (not caused by this task):** `SongServiceSaveFromFormImageRealStackTests.SaveFromFormAsync_ExistingArtistWithImage_KeepsStoredArtistImage` sometimes throws `ObjectDisposedException` (SQLitePCL) in a parallel full run. It passes alone and on retry.
+
+### T0.6b — Debug-only preview entry — Done (2026-11-23)
+
+Implementor `ecfc485a`; review: spec ✅, quality Approved (2 Minor). Merged into develop.
+
+### Changed files
+- `MyVocaList/AppShell.xaml.cs`: `#if DEBUG` `PreviewRoutes.Register();`
+- `MyVocaList/Navigation/NavigationConfig.cs`: a `#if DEBUG` "Syncfusion preview" item in the System group. It navigates by route through its own Command. It also has a Debug-only `PageTypes` entry, because the existing `NavigationConfigTests` needs one per menu route; that entry is never used for navigation (orchestrator ruling, since tests are not changed).
+
+### Verification
+- Debug on the emulator: the flyout shows "Syncfusion preview"; the page opens with "No Syncfusion pages to preview yet."; Back returns (`artifacts/parity/t0.6b/`).
+- `dotnet test`: 2039 passed.
+
+| AC | Criterion | Evidence |
+|---|---|---|
+| REQ-UIMIG-08 | user-facing routes still open the DX pages | no user-facing route changed; checked again per page in Recipe P step P5b |
+| REQ-UIMIG-09 | Release has no preview route or entry | Release build (dummy key in the shell only): `syncfusion-preview` and `venues-sf` are absent from all 6 `MyVocaList.dll` (UTF-8 and UTF-16-LE); the positive control finds `syncfusion-preview` in the Debug dll |
+
+Observed flake (not caused by this task): `SongFormViewModelFrozenArtistTests` threw "Collection was modified" once and passed on rerun.
