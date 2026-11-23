@@ -91,6 +91,8 @@ class CheckDxTests(unittest.TestCase):
     def test_exit_codes(self):
         """Exit codes: 0 clean, 1 violations, 2 usage error."""
         self.assertEqual(2, check_dx.main([]))
+        cwd = os.getcwd()
+        self.addCleanup(os.chdir, cwd)
         orig = check_dx.collect_staged
         try:
             check_dx.collect_staged = lambda: ({}, {})
@@ -101,6 +103,36 @@ class CheckDxTests(unittest.TestCase):
                 self.assertEqual(1, check_dx.main(["--staged"]))
         finally:
             check_dx.collect_staged = orig
+
+    def test_parse_added_does_not_treat_plus_plus_plus_content_as_header(self):
+        """[AC] REQ-UIMIG-12: an added line starting with "++ " must not reset the file."""
+        diff = ("diff --git a/x.cs b/x.cs\n--- a/x.cs\n+++ b/x.cs\n@@ -1,0 +1,2 @@\n"
+                "+++ comment\n+using DevExpress.Maui.Core;\n")
+        self.assertEqual({"x.cs": [(1, "++ comment"), (2, "using DevExpress.Maui.Core;")]},
+                         check_dx.parse_added(diff))
+
+    def test_parse_added_handles_two_files_spaces_and_deletions(self):
+        """[AC] REQ-UIMIG-12: hunk line numbers and paths are tracked per file."""
+        diff = ("diff --git a/a b.cs b/a b.cs\n--- a/a b.cs\n+++ b/a b.cs\t\n"
+                "@@ -3 +3,2 @@\n-old\n+n1\n+n2\n@@ -10,0 +12 @@\n+n3\n"
+                "diff --git a/y.xaml b/y.xaml\n--- /dev/null\n+++ b/y.xaml\n@@ -0,0 +1 @@\n+<a/>\n"
+                "diff --git a/gone.cs b/gone.cs\n--- a/gone.cs\n+++ /dev/null\n@@ -1 +0,0 @@\n-x\n")
+        self.assertEqual({"a b.cs": [(3, "n1"), (4, "n2"), (12, "n3")], "y.xaml": [(1, "<a/>")]},
+                         check_dx.parse_added(diff))
+
+    def test_release_exclusions_split_msbuild_lists_and_skip_properties(self):
+        """[AC] REQ-UIMIG-14: `;` lists are split and $(Prop) parts are skipped."""
+        csproj = ('<Compile Remove="NovaPasta\**" />\n'
+                  '<MauiXaml Remove="UI\Old\**\*.xaml; $(Skip)\**;Tmp\**" />\n'
+                  '<None Remove="Other\**" />')
+        self.assertEqual(["MyVocaList/NovaPasta/**", "MyVocaList/UI/Old/**/*.xaml", "MyVocaList/Tmp/**"],
+                         check_dx.release_exclusions(csproj))
+
+    def test_release_flags_license_key_literal(self):
+        """[AC] REQ-UIMIG-17: --release also rejects a license key literal."""
+        files = {"MyVocaList/MauiProgram.cs": 'RegisterLicense("' + "B" * 30 + '");'}
+        self.assertEqual([check_dx.Violation("MyVocaList/MauiProgram.cs", 1, "license-key-in-tracked-file")],
+                         check_dx.check_release(files, []))
 
 
 if __name__ == "__main__":

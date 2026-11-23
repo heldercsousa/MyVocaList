@@ -135,33 +135,65 @@ def _git(*args: str) -> str:
     return result.stdout
 
 
-def _parse_added(diff: str) -> dict[str, list[tuple[int, str]]]:
+def parse_added(diff: str) -> dict[str, list[tuple[int, str]]]:
+    """Added lines per path from a `git diff -U0` text (prefixes a/ b/ expected).
+
+    File headers are recognised only outside a hunk: inside a hunk the `@@`
+    counts say how many old/new lines remain, so an added line whose content
+    starts with `++ ` is never mistaken for a `+++ ` header.
+    """
     added: dict[str, list[tuple[int, str]]] = {}
     path, lineno = None, 0
+    old_left = new_left = 0
     for raw in diff.splitlines():
-        if raw.startswith("+++ "):
-            path = raw[4:] if raw[4:] != "/dev/null" else None
-            if path and path.startswith("b/"):
-                path = path[2:]
+        if old_left > 0 or new_left > 0:
+            if raw.startswith("+"):
+                if path:
+                    added.setdefault(path, []).append((lineno, raw[1:]))
+                lineno += 1
+                new_left -= 1
+                continue
+            if raw.startswith("-"):
+                old_left -= 1
+                continue
+            if raw.startswith("\\"):
+                continue
+            old_left = new_left = 0  # malformed counts: fall through to header logic
+        if raw.startswith("diff --git "):
+            path = None
+        elif raw.startswith("+++ "):
+            target = raw[4:].rstrip("	")
+            if target == "/dev/null":
+                path = None
+            else:
+                path = target[2:] if target.startswith("b/") else target
         elif raw.startswith("@@"):
-            m = re.match(r"@@ -\S+ \+(\d+)(?:,(\d+))? @@", raw)
-            lineno = int(m.group(1)) if m else 0
-        elif raw.startswith("+") and path:
-            added.setdefault(path, []).append((lineno, raw[1:]))
-            lineno += 1
+            m = re.match(r"@@ -\S+? \+(\d+)(?:,(\d+))? @@", raw)
+            if m:
+                lineno = int(m.group(1))
+                new_left = int(m.group(2)) if m.group(2) is not None else 1
+                mo = re.match(r"@@ -\d+(?:,(\d+))? ", raw)
+                old_left = int(mo.group(1)) if mo and mo.group(1) is not None else 1
     return added
 
 
 def collect_staged() -> tuple[dict[str, list[tuple[int, str]]], dict[str, str]]:
-    added = _parse_added(_git("diff", "--cached", "-U0", "--no-color", "--diff-filter=ACMR"))
+    added = parse_added(_git("-c", "diff.noprefix=false", "-c", "diff.mnemonicPrefix=false", "diff", "--cached",
+                     "-U0", "--no-color", "--no-ext-diff", "--diff-filter=ACMR"))
     names = _git("diff", "--cached", "--name-only", "--diff-filter=ACMR").splitlines()
     contents = {n: _git("show", ":" + n) for n in names if _is_dx_file(n)}
     return added, contents
 
 
-def _release_exclusions(csproj_text: str) -> list[str]:
+def release_exclusions(csproj_text: str) -> list[str]:
     base = posixpath.dirname(CSPROJ)
-    return [posixpath.join(base, g.replace("\\", "/")) for g in _REMOVE_ATTR.findall(csproj_text)]
+    result = []
+    for value in _REMOVE_ATTR.findall(csproj_text):
+        for part in value.split(";"):
+            part = part.strip()
+            if part and "$(" not in part and "@(" not in part:
+                result.append(posixpath.join(base, part.replace("\\", "/")))
+    return result
 
 
 def collect_release() -> tuple[dict[str, str], list[str]]:
@@ -172,7 +204,7 @@ def collect_release() -> tuple[dict[str, str], list[str]]:
         if os.path.isfile(n):
             with open(n, encoding="utf-8", errors="replace") as f:
                 files[n] = f.read()
-    excluded = _release_exclusions(files.get(CSPROJ, ""))
+    excluded = release_exclusions(files.get(CSPROJ, ""))
     return files, excluded
 
 
