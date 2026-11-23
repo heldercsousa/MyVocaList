@@ -48,7 +48,31 @@ Plan approved by Helder 2026-11-22 ("plan approved. Start implementation"); auto
 |---|------|--------|------------------|
 | M0 | Item 🟡; wave 1 claimed `[~]` | done | `794c9f10` |
 | M1 | Wave 1: T0.1a, T0.1b, T0.1c (scratch worktrees `spike-sf-controls-a/b/c`), T0.2 (`check-dx-script`) | running | dispatched from `794c9f10`; emulator shared through the `artifacts/.emulator-lock` lease |
-| M2 | Review T0.2, merge to develop; apply T0.1 results to design.md | pending | |
+| M2 | Review T0.2, merge to develop; apply T0.1 results to design.md | T0.2 done; T0.1 pending | T0.2 merged `0ae29cea` |
 | M3 | T0.3 packages + license target | pending | needs T0.1b ids |
 
 **Context manifest:** `plan.md`, `tasks.md`, `design.md`, `requirements.md`, this file, `.superpowers/sdd/plan/progress.md`.
+
+### T0.2 — `check_dx.py` + pre-commit wiring — Done (2026-11-23)
+
+Implementor `ad894e4e`, fix round 1 `e6eb35ee` (review: 3 Important fixed — diff parser `+++` lines, MSBuild `;` lists, missing parser tests; re-review all ADDRESSED). Merged `0ae29cea`.
+
+### Changed files
+- `.claude/scripts/migration/check_dx.py` (new)
+- `.claude/scripts/migration/tests/test_check_dx.py` (new, 16 tests)
+- `.claude/githooks/pre-commit` (DevExpress guard block after the build+test gate)
+- `.gitignore` unchanged: `artifacts/` was already ignored (L76)
+
+### Verification
+- `python -m unittest test_check_dx -v` → 16/16 OK; also green inside the commit hook.
+- Hook: an edit adding no DX line passes; a scratch `FooSf.xaml` with `xmlns:dx` is refused (`sf-file-references-devexpress`, exit 1).
+- `--release` on develop reports 265 lines today (expected until Phase 5).
+
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-UIMIG-11 | Sf files never reference DevExpress | `check_staged` Sf scan | `test_sf_file_with_dx_namespace_fails`, `test_sf_file_name_pattern_is_case_sensitive`, `test_closing_tag_and_markup_extension_forms_are_detected` |
+| REQ-UIMIG-12 | no commit adds a DX line (bridge files exempt) | `check_staged` added-line scan, `parse_added` | `test_added_dx_line_in_dx_original_fails`, `test_bridge_files_are_exempt`, `test_removed_lines_are_ignored`, `test_word_containing_dx_without_declared_prefix_passes`, parser tests |
+| REQ-UIMIG-14 | release check finds no DX reference | `check_release`, `release_exclusions` | `test_release_flags_package_reference`, `test_release_skips_excluded_paths`, exclusion-list test |
+| REQ-UIMIG-17 | no license key in tracked files | key pattern | `test_license_key_literal_is_flagged`, release key test |
+
+Deferred minors (orchestrator ledger): the hook trigger uses `ACM` (a rename plus an edit skips the guard); the license scan only runs on source commits; non-raw test strings give a SyntaxWarning on Python 3.12+; git-quoted paths are not handled. **Note for other sessions:** while DX and Sf coexist, editing an existing DX line counts as adding one, so it is blocked. Log an exception in `.claude/exception-registry.md` and ask Helder (Review Focus 1).

@@ -29,7 +29,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** its `task-log.md` entry; branch `task/spike-sf-controls-c` (the orchestrator writes the combined results into `design.md` after the wave)
   - **Demo:** the design states which page opened for `venue-form` from `venues-sf`
   - **Review lane:** Standard
-- [~] **T0.2 Check script `check_dx.py` + pre-commit wiring** [P]
+- [x] **T0.2 Check script `check_dx.py` + pre-commit wiring** [P]
   - **Produces:** `check_dx.py` (`--staged`, `--release`), its tests, the hook block, `artifacts/` ignored
   - **Consumes:** nothing
   - **Risk:** Medium — a false positive blocks every commit
