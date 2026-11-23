@@ -88,7 +88,7 @@ public class DxSheetStateConverterTests
     public void Convert_UndefinedDxValue_DoesNothing()
     {
         Assert.Same(Binding.DoNothing, _state.Convert((DxSheetState)99, typeof(SfSheetState), null, Culture));
-        Assert.True((bool)_isOpen.Convert((DxSheetState)99, typeof(bool), null, Culture));
+        Assert.Same(Binding.DoNothing, _isOpen.Convert((DxSheetState)99, typeof(bool), null, Culture));
     }
 
     // [AC] REQ-UIMIG-07: with a bottom sheet open, back closes it

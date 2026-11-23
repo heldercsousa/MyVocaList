@@ -36,7 +36,12 @@ public sealed class DxSheetStateConverter : IValueConverter
 public sealed class DxSheetStateToIsOpenConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        => value is DxSheetState state ? state != DxSheetState.Hidden : Binding.DoNothing;
+        => value switch
+        {
+            DxSheetState.Hidden => false,
+            DxSheetState.HalfExpanded or DxSheetState.FullExpanded => true,
+            _ => Binding.DoNothing,
+        };
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => value is false ? DxSheetState.Hidden : Binding.DoNothing;
