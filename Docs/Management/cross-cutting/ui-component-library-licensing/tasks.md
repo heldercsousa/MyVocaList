@@ -165,7 +165,7 @@ Each deletion briefing records the I-4 grep gate first. Paths are under `MyVocaL
   - **Files owned:** `UI/Components/AutocompleteField/**` (deleted); `MyVocaList.csproj` (L159-163 Samples exclusion, L172-176 AutocompleteField exclusions)
   - **Demo:** Debug and Release builds pass · **Review lane:** Standard
 - [ ] **T5.2 `SheetState`; ViewModels off DevExpress; converter retargeted; type-only test edits (Tester, same commit)** [SEQUENTIAL — exception to the 5-file limit logged first]
-  - **Produces:** `SheetState` enum; `SheetStateConverter` (key `SheetStateToSf`) · **Consumes:** T5.1d, Helder's REQ-UIMIG-13 ruling · **Risk:** High (sheet state in every list)
+  - **Produces:** `SheetState` enum; `SheetStateConverter` (key `SheetStateToSf`) · **Consumes:** T5.1d, REQ-UIMIG-13 authorization (granted 2026-11-22) · **Risk:** High (sheet state in every list)
   - **Files owned:** `UI/ViewModels/SheetState.cs`, `UI/ViewModels/CrudListViewModelBase.cs`, `UI/ViewModels/ICrudListViewModel.cs`, `UI/ViewModels/PersonsViewModel.cs`, `UI/ViewModels/VenuesViewModel.cs`, `UI/Converters/SheetStateConverter.cs` (moved), `App.xaml`, `UI/Components/CrudListViewSf.xaml`; Tester: `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs`, `Tests/Unit/Converters/SheetStateConverterTests.cs` (moved)
   - **Demo:** tests pass; sheets open and close on Venues · **Review lane:** Architectural
 - [ ] **T5.3 Remove DX init and warm-up; rewrite DX comments in shared files** [SEQUENTIAL — exception logged first]
@@ -173,8 +173,8 @@ Each deletion briefing records the I-4 grep gate first. Paths are under `MyVocaL
   - **Files owned:** `MauiProgram.cs`, `App.xaml.cs`, `UI/ViewModels/SongFormViewModel.cs`, `UI/ViewModels/ICrudListViewModel.cs`, `UI/ViewModels/PersonsViewModel.cs`, `UI/ViewModels/VenuesViewModel.cs`, `UI/Components/TextFields/AutocompleteDXFieldLogic.cs`, `UI/Components/TextFields/TapToEditFieldLogic.cs`, `UI/Collections/ObservableRangeCollection.cs`, `Platforms/Android/PopupBackHandler.cs`
   - **Demo:** app starts on the emulator; no `UseDevExpress` or warm-up left · **Review lane:** Elevated
 - [ ] **T5.4 Remove DX global usings, styles, packages, setup docs; release check = 0** [SEQUENTIAL — after T5.3]
-  - **Produces:** a DevExpress-free solution · **Consumes:** T5.3, Helder's REQ-UIMIG-13 ruling · **Risk:** High (packages)
-  - **Files owned:** `GlobalUsings.cs`, `Resources/Styles/MaterialStyles.xaml`, `MyVocaList.csproj`, `Directory.Packages.props` (repo root), `Tests/MyVocaList.Tests.csproj`, `Docs/DevEnv/devenv-setup.md` § 2; Tester: the test-comment and `using` lines Helder authorizes
+  - **Produces:** a DevExpress-free solution · **Consumes:** T5.3, REQ-UIMIG-13 authorization (granted 2026-11-22) · **Risk:** High (packages)
+  - **Files owned:** `GlobalUsings.cs`, `Resources/Styles/MaterialStyles.xaml`, `MyVocaList.csproj`, `Directory.Packages.props` (repo root), `Tests/MyVocaList.Tests.csproj`, `Docs/DevEnv/devenv-setup.md` § 2; Tester: the authorized test-comment and `using` lines
   - **Demo:** `python .claude/scripts/migration/check_dx.py --release` exits 0 · **Review lane:** Elevated
 - [ ] **T5.5a Drop the `Sf` suffix — components** [SEQUENTIAL — one commit per rename; exception logged once]
   - **Produces:** components under their original names · **Consumes:** T5.4 · **Risk:** Medium (many references)
