@@ -10,7 +10,6 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| BUG-088 | Duplicate-singer identity (T5, T7, T8 form-flow fixes) | merged, 2037 tests, emulator E2E passed; on-device gate open | develop | — | to review | 8d43d71d | Helder: install; re-run pick-then-Save and sheet Open; see persons/bugs/2026-11-19-BUG-088-* |
 
 ## Completed (recent)
 
@@ -18,6 +17,7 @@ Older closed rows: `LEDGER-archive.md` (moved by `ledger_rotate.py`). SFT merge 
 
 | ID | Feature / Bug | Branch | Merged into develop | Commit |
 |----|---------------|--------|---------------------|--------|
+| BUG-088 | Duplicate singer saved when the name is typed without picking (T5, T7, T8, T9) | worktree-agent-a0ee5d3810b12f260 | 2026-11-22, ✅ Done (Helder authorised closing without re-test) | 38db819a |
 
 ---
 

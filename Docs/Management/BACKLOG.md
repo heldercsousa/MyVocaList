@@ -25,7 +25,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | 2026-11-22 | ↳ Deezer vs MusicBrainz — systematic comparison with pros and cons | 💡 Pending |
 | — | **Cross-cutting** | — |
-| 2026-11-19 | ↳ Duplicate singer saved when the name is typed without picking the existing one | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---

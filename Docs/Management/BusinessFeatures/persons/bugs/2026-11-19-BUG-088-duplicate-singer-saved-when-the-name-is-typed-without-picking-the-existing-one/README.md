@@ -1,13 +1,14 @@
 ---
 id: BUG-088
 title: Duplicate singer saved when the name is typed without picking the existing one
-status: 🟡 In Progress
+status: ✅ Done
 severity: Major
 target: 2026-11-19
 section: BusinessFeatures
 parent: persons
 goal: "A singer with the same name, email and birthday must never be saved twice: enforced in the Person service and by a database unique index. Identity is name + email + birthday day/month; email and birthday are optional unless another singer has the same name."
 gate: Helder passes the fix on device.
+closed: 2026-11
 kind: bug
 ---
 
