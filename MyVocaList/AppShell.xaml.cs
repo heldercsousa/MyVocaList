@@ -30,6 +30,9 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.SongForm, typeof(SongFormPage));
         Routing.RegisterRoute(Routes.Feedback, typeof(FeedbackPage));
         Routing.RegisterRoute(Routes.YouTubeSearch, typeof(YouTubeSearchPage));
+#if DEBUG
+        MyVocaList.UI.Migration.PreviewRoutes.Register();
+#endif
 
         _ = viewModel.InitializeAsync();
     }
