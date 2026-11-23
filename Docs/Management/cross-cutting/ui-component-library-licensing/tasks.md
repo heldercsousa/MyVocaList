@@ -43,7 +43,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `Directory.Packages.props`, `MyVocaList/MyVocaList.csproj`, `MyVocaList/MauiProgram.cs`, `.claude/library/dev-env-setup.md`, `Docs/DevEnv/devenv-setup.md`
   - **Demo:** a Release build without the key fails naming the variable; a Debug build runs on the emulator
   - **Review lane:** Elevated
-- [ ] **T0.4a Theme dictionary and Sf styles** [SEQUENTIAL — after T0.3]
+- [~] **T0.4a Theme dictionary and Sf styles** [SEQUENTIAL — after T0.3]
   - **Produces:** `SyncfusionTheme.xaml`; `IconTint.Color` attached property; styles `SfIconButton`, `SfTextButton`, `SfFilledButton`, `SfFlyoutMenuButton` + implicit Sf styles
   - **Consumes:** T0.1a theme type; T0.3 packages
   - **Risk:** Low — new keys only; DX keys untouched
@@ -64,7 +64,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `MyVocaList/UI/Migration/DxSheetStateConverter.cs`, `Tests/Unit/Migration/DxSheetStateConverterTests.cs` (`App.xaml` resource and any `Tests/MyVocaList.Tests.csproj` reference → orchestrator)
   - **Demo:** six state-transition tests pass
   - **Review lane:** Standard
-- [ ] **T0.6a Preview page and route registry** [SEQUENTIAL — after T0.3]
+- [~] **T0.6a Preview page and route registry** [SEQUENTIAL — after T0.3]
   - **Produces:** `PreviewRoutes` (`Entries`, `Register()`), `SyncfusionPreviewPage` — Debug only
   - **Consumes:** T0.1c contextual-route verdict
   - **Risk:** Low
