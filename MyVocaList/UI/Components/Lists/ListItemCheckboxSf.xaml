@@ -2,30 +2,31 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:sfbuttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     x:Class="MyVocaList.UI.Components.Lists.ListItemCheckboxSf"
     x:Name="self">
 
-    <!-- 48x48 transparent tap target (stock Grid + tap gesture: SfCheckBox is not a button; DXButton had no Sf equivalent that hosts content). -->
-    <Grid
-        BackgroundColor="Transparent"
+    <!-- 48x48 transparent SfButton tap target hosting a non-interactive SfCheckBox; tap routes to ToggleItemSelectionCommand. -->
+    <buttons:SfButton
+        Background="{StaticResource TransparentBrush}"
         WidthRequest="48"
         HeightRequest="48"
         Padding="0"
-        SemanticProperties.Description="Select">
-        <Grid.GestureRecognizers>
-            <TapGestureRecognizer
-                Command="{Binding BindingContext.ToggleItemSelectionCommand, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"
-                CommandParameter="{Binding .}" />
-        </Grid.GestureRecognizers>
-
-        <buttons:SfCheckBox
-            HorizontalOptions="Center"
-            VerticalOptions="Center"
-            InputTransparent="True"
-            IsChecked="{Binding IsChecked, Source={x:Reference self}}"
-            CheckedColor="{StaticResource Primary}"
-            TickColor="{StaticResource OnPrimary}" />
-    </Grid>
+        CornerRadius="24"
+        SemanticProperties.Description="Select"
+        Command="{Binding BindingContext.ToggleItemSelectionCommand, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"
+        CommandParameter="{Binding .}">
+        <buttons:SfButton.Content>
+            <sfbuttons:SfCheckBox
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                InputTransparent="True"
+                IsChecked="{Binding IsChecked, Source={x:Reference self}}"
+                CheckedColor="{StaticResource Primary}"
+                UncheckedColor="{StaticResource OnSurfaceVariant}"
+                TickColor="{StaticResource OnPrimary}" />
+        </buttons:SfButton.Content>
+    </buttons:SfButton>
 </ContentView>
