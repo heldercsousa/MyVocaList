@@ -13,7 +13,6 @@ public static class PreviewRoutes
     // Add one line per Sf page copy, e.g.: ("Venues", "venues-sf", typeof(VenuesSfPage)),
     private static readonly List<(string Title, string Route, Type Page)> _entries = new()
     {
-        ("Backup & restore", "backup-sf", typeof(BackupRestoreSfPage)),
         ("Venue map picker", "venue-map-picker-sf", typeof(VenueMapPickerSfPage)),
     };
 
