@@ -401,3 +401,52 @@ If the device shows a stale open drop-down, the page/VM option is to close it wh
 
 ### Build notes
 Build: deploy of the unfixed develop build succeeded (`dotnet build -t:Run -f net10.0-android`, exit 0). Tests: not run (no code change). Commit: docs only, see git log.
+
+## Task: BUG-088 T9 (2026-11-22, fix) — name drop-down open at Save reappears after Open (REQ-DUP-16)
+**Plan:** Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/tasks.md
+**Status:** To Review
+**Started:** 2026-11-22
+**Completed:** 2026-11-22
+**Branch:** `worktree-agent-a0ee5d3810b12f260` from develop 67a0341b
+
+### Outcome
+Defensive fix, pre-authorised by Helder. The symptom (drop-down reappears after Open) was not reproduced on the emulator by the T9 repro run above, so no root cause is confirmed. The fix closes the name drop-down on the two paths the briefing named, through a bound VM property. `AutocompleteDXField` (governed) is unchanged.
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/PersonFormViewModel.cs`
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml`
+- `Tests/Unit/ViewModels/PersonFormViewModelBug088Tests.cs`
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/design.md`
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/tasks.md`
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/task-log.md`
+
+### Changes
+- `PersonFormViewModel`: new `[ObservableProperty] bool _isNameDropDownOpen` (`IsNameDropDownOpen`). Set false in `ShowSameNameSheet` (Save with the drop-down open) and in `NavigateToEditAsync` (pick and sheet Open).
+- `PersonFormPage.xaml`: `nameField` gets `IsDropDownOpen="{Binding IsNameDropDownOpen, Mode=TwoWay}"`.
+- The optional "start of SaveAsync" reset was not added: the sheet path already clears it.
+- T8's `nameField.Unfocus()` in `OnSameNameOpenClicked` is kept.
+
+### Verification evidence
+**Tests (REQ-DUP-16, `// [AC] REQ-DUP-16`):**
+- `PersonFormViewModelBug088Tests.SaveCommand_SameNameSheetOpens_ClosesNameDropDown`
+- `PersonFormViewModelBug088Tests.OpenSameNameCommand_ClosesNameDropDown`
+
+**Red (re-run 2026-11-22):** the two reset lines (`IsNameDropDownOpen = false;`) were removed from `PersonFormViewModel.cs` in the working tree, keeping the property and the XAML binding. Both tests FAIL with `Assert.False() Failure, Expected: False, Actual: True`. Class result: 2 failed, 24 passed, 26 total. The earlier compile-stage red (CS1061 before the property existed) was recorded by the previous session and was not re-run.
+
+**Green (re-run 2026-11-22):** the VM file was restored from the index (`git checkout`), which is the staged version.
+- `PersonFormViewModelBug088Tests`: 26 passed, 0 failed.
+- Full suite (`Tests/MyVocaList.Tests.csproj`): 2039 passed, 0 failed.
+- Android build `MyVocaList/MyVocaList.csproj -f net10.0-android` after deleting `obj/Debug/net10.0-android` and `bin/Debug/net10.0-android`: 0 errors.
+
+**Emulator E2E** (emulator-5554, AVD pixel_5_-_api_36_0_1, `com.myvocalist` versionName 0.3.0-alpha.0.72, deployed from this worktree build; screenshots in the session scratchpad as f1a-f1c, c1a-c1b, g1a-g1c):
+- Main flow: title `New Singer`, drop-down open with `Helder Sousa` in the field, Save tapped without blur. The sheet "A singer with this name already exists" shows with no drop-down behind it. Open loads `Edit Singer` with no drop-down.
+- Check 1: title `New Singer`, suggestion picked (title becomes `Edit Singer`), Save: no sheet, toast "Helder Sousa updated successfully!".
+- Blurred variant: title `New Singer`, name typed, focus moved to Email (drop-down closed), Save: sheet with no drop-down. Open loads `Edit Singer` with no drop-down.
+- The phone symptom (drop-down reappears after Open) was not reproduced on the emulator before or after the fix.
+
+### Design concern
+- The emulator shows no drop-down after Save with the sheet, even before the fix (T9 repro). The fix is defensive: it closes the drop-down state through a bound property, and it does not explain the phone symptom.
+
+### Build notes
+Build: passed (0 errors) | Tests: 2039 passed, 0 failed | Commit SHA: see the `fix: PersonForm` commit in git log.
+Files written and re-read: `PersonFormViewModel.cs` (property at line ~99, `ShowSameNameSheet` ~429, `NavigateToEditAsync` ~517), `PersonFormPage.xaml` (line 29), `PersonFormViewModelBug088Tests.cs` (end of file), `design.md` (T9 note), `tasks.md` (T9 line).
