@@ -15,7 +15,6 @@ public static class PreviewRoutes
     {
         ("About", "about-sf", typeof(AboutSfPage)),
         ("Backup & restore", "backup-sf", typeof(BackupRestoreSfPage)),
-        ("Settings", "settings-sf", typeof(SettingsSfPage)),
         ("Venue map picker", "venue-map-picker-sf", typeof(VenueMapPickerSfPage)),
     };
 
