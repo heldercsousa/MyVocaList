@@ -50,7 +50,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `MyVocaList/Resources/Styles/SyncfusionTheme.xaml`, `MyVocaList/UI/Behaviors/IconTint.cs`, `MyVocaList/Resources/Styles/MaterialStyles.xaml`, `MyVocaList/App.xaml`
   - **Demo:** shimmer, sheet, chips and an icon button render in the dark tokens
   - **Review lane:** Standard
-- [ ] **T0.4b `OutlinedTextFieldSf`** [SEQUENTIAL — after T0.4a]
+- [~] **T0.4b `OutlinedTextFieldSf`** [SEQUENTIAL — after T0.4a]
   - **Produces:** `OutlinedTextFieldSf` (Text, Placeholder, IsPassword, Keyboard, ReturnCommand, ClearButtonVisibility, Completed)
   - **Consumes:** T0.4a tokens and styles
   - **Risk:** Low — stock `Border` + `Entry`, proven in the POC
@@ -83,9 +83,9 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
 
 Each copy task: **Consumes** T0.3–T0.6b (packages, styles, `OutlinedTextFieldSf`, preview registry) · **Produces** the Sf page on its preview route · Recipe P · Lane Standard. Each cut-over: Recipe X · Lane Standard · **Consumes** the copy's passed parity, Helder's go and the key.
 
-- [ ] **T1.1 `AboutSfPage`** [P] — Files: `MyVocaList/UI/Pages/About/AboutSfPage.xaml(.cs)` · Risk: Low · Demo: preview opens About on Syncfusion; P10, P14 match
-- [ ] **T1.2 `BackupRestoreSfPage`** [P] — Files: `MyVocaList/UI/Pages/BackupRestore/BackupRestoreSfPage.xaml(.cs)` · Risk: Medium (backup actions) · Demo: each button runs its action; P10, P14 match
-- [ ] **T1.3 `SettingsSfPage`** [P] — Files: `MyVocaList/UI/Pages/Settings/SettingsSfPage.xaml(.cs)` · Risk: Medium (password field) · Demo: save works; P10, P12, P14 match
+- [~] **T1.1 `AboutSfPage`** [P] — Files: `MyVocaList/UI/Pages/About/AboutSfPage.xaml(.cs)` · Risk: Low · Demo: preview opens About on Syncfusion; P10, P14 match
+- [~] **T1.2 `BackupRestoreSfPage`** [P] — Files: `MyVocaList/UI/Pages/BackupRestore/BackupRestoreSfPage.xaml(.cs)` · Risk: Medium (backup actions) · Demo: each button runs its action; P10, P14 match
+- [~] **T1.3 `SettingsSfPage`** [P] — Files: `MyVocaList/UI/Pages/Settings/SettingsSfPage.xaml(.cs)` · Risk: Medium (password field) · Demo: save works; P10, P12, P14 match
 - [ ] **T1.4 `VenueMapPickerSfPage`** [P] — Files: `MyVocaList/UI/Pages/Venues/VenueMapPickerSfPage.xaml(.cs)` · Risk: Medium (map pick) · Demo: pick + confirm on `venue-map-picker-sf`
 - [ ] **T1.5 Cut over Settings** [SEQUENTIAL] — Files: `AppShell.xaml` (both `ShellContent`s), `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: `preferences`, `settings` and PushAsync all open the Sf page; no trial notice (first cut-over)
 - [ ] **T1.6 Cut over About** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: flyout and PushAsync open the Sf page
