@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
+    x:Class="MyVocaList.UI.Components.States.EmptyStateSf"
+    x:Name="self">
+
+    <!--
+        MD3 Empty state anatomy:
+        Container → Illustration slot (icon) → Headline → Supporting text (optional)
+        Container is vertically and horizontally centered; consumer sets Margin/IsVisible.
+    -->
+    <VerticalStackLayout
+        VerticalOptions="Center"
+        HorizontalOptions="Center"
+        Spacing="8">
+
+        <!-- Illustration slot: display-only icon, 80×80dp, 64dp icon -->
+        <Image x:Name="illustrationImage"
+               Source="{Binding Illustration, Source={x:Reference self}}"
+               WidthRequest="64"
+               HeightRequest="64"
+               Margin="8"
+               Aspect="AspectFit"
+               HorizontalOptions="Center"
+               InputTransparent="True"
+               behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}" />
+
+        <!-- Headline slot -->
+        <Label x:Name="headlineLabel"
+               Style="{StaticResource EmptyStateHeadline}"
+               Text="{Binding Headline, Source={x:Reference self}}" />
+
+        <!-- Supporting text slot (hidden when empty) -->
+        <Label x:Name="supportingLabel"
+               StyleClass="Body.Medium"
+               TextColor="{StaticResource OnSurfaceVariant}"
+               HorizontalTextAlignment="Center"
+               Text="{Binding SupportingText, Source={x:Reference self}}"
+               IsVisible="False" />
+
+    </VerticalStackLayout>
+</ContentView>
