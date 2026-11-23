@@ -216,3 +216,7 @@ Implementor `2a478167`. Review: spec ✅, quality Approved (2 Minor). Merged.
 ### T2.0 — List control check — Done (2026-11-23)
 
 Scratch branch `task/spike-sflistview`, never merged. Verdict: **`SfListView`**. All three checks passed on the emulator against the real `VenuesViewModel`; details are in design § Decision: List control. 45 test venues (`ZZ Test Venue 01..45`) were created on the emulator to exercise load-more. They stay for the T2.9 load-more parity and are deleted after it.
+
+### T2.2a — `ListItemLeadingAvatarSf`, `ListItemLeadingImageSf` — Done (2026-11-23)
+
+Commits `468543da` and `53bf756e`; the review passed with spec ✅ and quality Approved (1 Minor). The work is merged. The public API matches the originals exactly. `DXImage` became a stock `Image` with `IconTint.Color`, and `DXBorder` became a `Border` whose clipping comes from `StrokeShape`. There is no unit test, because this is Level C. The device check of tint and rendering happens on the first consuming page.
