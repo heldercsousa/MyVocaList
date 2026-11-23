@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<appbars:AppBarBase
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
+    xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    x:Class="MyVocaList.UI.Components.AppBars.SearchAppBarSf"
+    x:Name="self">
+
+    <!-- Container: 64dp height, flat (no pill), color transitions on IsElevated -->
+    <Grid x:Name="container"
+          ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+          ColumnSpacing="0"
+          HeightRequest="64"
+          BackgroundColor="{StaticResource Surface}"
+          VerticalOptions="Fill"
+          Padding="4,0">
+
+        <!-- Leading icon: always back arrow per MD3 search-replaces-appbar pattern -->
+        <ImageButton Grid.Column="0"
+                     x:Name="leadingButton"
+                     Source="arrow_back_outlined"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurface}"
+                     VerticalOptions="Center"
+                     SemanticProperties.Description="Back"
+                     Clicked="OnLeadingButtonClicked" />
+
+        <!-- Search input: borderless OutlinedTextFieldSf on app bar bg (SfTextInputLayout fails here, design § Control mapping) -->
+        <textfields:OutlinedTextFieldSf Grid.Column="1"
+                                        x:Name="searchEdit"
+                                        Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                                        Placeholder="{Binding Placeholder, Source={x:Reference self}}"
+                                        ClearButtonVisibility="WhileEditing"
+                                        Keyboard="Text"
+                                        ReturnType="Search"
+                                        ShowOutline="False"
+                                        VerticalOptions="Center"
+                                        SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
+
+        <!-- Trailing action 1 -->
+        <ImageButton Grid.Column="2"
+                     x:Name="action1Button"
+                     Source="{Binding Action1Icon, Source={x:Reference self}}"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                     VerticalOptions="Center"
+                     IsVisible="{Binding HasAction1, Source={x:Reference self}}"
+                     SemanticProperties.Description="Action"
+                     Command="{Binding Action1Command, Source={x:Reference self}}" />
+
+        <!-- Trailing action 2 -->
+        <ImageButton Grid.Column="3"
+                     x:Name="action2Button"
+                     Source="{Binding Action2Icon, Source={x:Reference self}}"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                     VerticalOptions="Center"
+                     IsVisible="{Binding HasAction2, Source={x:Reference self}}"
+                     SemanticProperties.Description="Action"
+                     Command="{Binding Action2Command, Source={x:Reference self}}" />
+
+        <!-- Trailing action 3 -->
+        <ImageButton Grid.Column="4"
+                     x:Name="action3Button"
+                     Source="{Binding Action3Icon, Source={x:Reference self}}"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                     VerticalOptions="Center"
+                     IsVisible="{Binding HasAction3, Source={x:Reference self}}"
+                     SemanticProperties.Description="Action"
+                     Command="{Binding Action3Command, Source={x:Reference self}}" />
+    </Grid>
+</appbars:AppBarBase>
