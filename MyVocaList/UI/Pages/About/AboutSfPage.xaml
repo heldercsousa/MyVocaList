@@ -87,7 +87,10 @@
                     ItemsSource="{Binding Groups}"
                     DisplayMemberPath="Label"
                     SelectedItem="{Binding SelectedGroup, Mode=TwoWay}"
-                    Margin="0">
+                    ChipFontAttributes="Bold"
+                    ChipTextSize="14"
+                    ChipPadding="3,2,2,3"
+                    Margin="7,11,0,19">
                     <chips:SfChipGroup.ChipLayout>
                         <FlexLayout Wrap="Wrap" />
                     </chips:SfChipGroup.ChipLayout>

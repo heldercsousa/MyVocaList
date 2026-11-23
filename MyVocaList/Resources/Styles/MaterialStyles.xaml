@@ -391,7 +391,8 @@
 
     <!-- MD3 chips: unselected = outlined, selected = secondary container -->
     <Style TargetType="chips:SfChipGroup">
-        <Setter Property="ChipTextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="ChipTextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="ChipFontAttributes" Value="Bold" />
         <Setter Property="ChipBackground" Value="{StaticResource TransparentBrush}" />
         <Setter Property="ChipStroke" Value="{StaticResource OutlineBrush}" />
         <Setter Property="SelectedChipBackground" Value="{StaticResource SecondaryContainerBrush}" />
@@ -421,6 +422,8 @@
 
     <!-- MD3 outlined text field -->
     <Style TargetType="inputlayout:SfTextInputLayout">
+        <Setter Property="ContainerType" Value="Outlined" />
+        <Setter Property="OutlineCornerRadius" Value="4" />
         <Setter Property="Stroke" Value="{StaticResource Outline}" />
         <Setter Property="ContainerBackground" Value="{StaticResource TransparentBrush}" />
         <Setter Property="HintLabelStyle">
@@ -458,11 +461,11 @@
     <Style x:Key="SfTextButton" TargetType="buttons:SfButton">
         <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
         <Setter Property="TextColor" Value="{StaticResource Primary}" />
-        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="CornerRadius" Value="20" />
         <Setter Property="HeightRequest" Value="40" />
-        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -488,11 +491,11 @@
     <Style x:Key="SfFilledButton" TargetType="buttons:SfButton">
         <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
         <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
-        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="CornerRadius" Value="20" />
         <Setter Property="HeightRequest" Value="40" />
-        <Setter Property="Padding" Value="24,0" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
