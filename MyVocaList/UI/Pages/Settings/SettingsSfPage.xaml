@@ -34,9 +34,7 @@
                 <HorizontalStackLayout Spacing="8">
                     <buttons:SfButton
                         Text="Test"
-                        Style="{StaticResource SfTextButton}"
-                        Stroke="{StaticResource OutlineBrush}"
-                        StrokeThickness="1"
+                        Style="{StaticResource SfOutlinedButton}"
                         Command="{Binding TestApiKeyCommand}"
                         IsEnabled="{Binding IsTestingKey, Converter={StaticResource InverseBoolConverter}}" />
                     <buttons:SfButton
@@ -76,9 +74,7 @@
 
             <buttons:SfButton
                 Text="Send Feedback"
-                Style="{StaticResource SfTextButton}"
-                Stroke="{StaticResource OutlineBrush}"
-                StrokeThickness="1"
+                Style="{StaticResource SfOutlinedButton}"
                 HorizontalOptions="Fill"
                 Command="{Binding NavigateToFeedbackCommand}" />
 

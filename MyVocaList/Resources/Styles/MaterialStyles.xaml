@@ -478,6 +478,12 @@
         </Setter>
     </Style>
 
+    <!-- MD3 outlined button: the text button look plus a 1 dp Outline stroke -->
+    <Style x:Key="SfOutlinedButton" TargetType="buttons:SfButton" BasedOn="{StaticResource SfTextButton}">
+        <Setter Property="Stroke" Value="{StaticResource OutlineBrush}" />
+        <Setter Property="StrokeThickness" Value="1" />
+    </Style>
+
     <!-- MD3 filled button -->
     <Style x:Key="SfFilledButton" TargetType="buttons:SfButton">
         <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
