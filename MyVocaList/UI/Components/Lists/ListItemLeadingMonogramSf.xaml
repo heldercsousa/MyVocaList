@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingMonogramSf"
+    x:Name="self">
+
+    <!-- Stock Border replaces dx:DXBorder; RoundRectangle 20 on a 40 dp square gives the same circle. -->
+    <Border
+        WidthRequest="40"
+        HeightRequest="40"
+        StrokeShape="RoundRectangle 20"
+        Stroke="Transparent"
+        BackgroundColor="{Binding MonogramColor, Source={x:Reference self}}">
+
+        <Label
+            Text="{Binding Initials, Source={x:Reference self}}"
+            StyleClass="Label.Large"
+            TextColor="{Binding InitialsColor, Source={x:Reference self}}"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            HorizontalTextAlignment="Center" />
+
+    </Border>
+</ContentView>
