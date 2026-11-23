@@ -26,6 +26,7 @@
                                         Placeholder="{Binding Placeholder, Source={x:Reference self}}"
                                         IsPassword="{Binding IsPassword, Source={x:Reference self}}"
                                         Keyboard="{Binding Keyboard, Source={x:Reference self}}"
+                                        ReturnType="{Binding ReturnType, Source={x:Reference self}}"
                                         ReturnCommand="{Binding ReturnCommand, Source={x:Reference self}}"
                                         ClearButtonVisibility="{Binding ClearButtonVisibility, Source={x:Reference self}}"
                                         Focused="OnEntryFocused"
