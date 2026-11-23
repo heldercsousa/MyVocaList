@@ -158,3 +158,16 @@ Implementor `ecfc485a`; review: spec ✅, quality Approved (2 Minor). Merged int
 | REQ-UIMIG-09 | Release has no preview route or entry | Release build (dummy key in the shell only): `syncfusion-preview` and `venues-sf` are absent from all 6 `MyVocaList.dll` (UTF-8 and UTF-16-LE); the positive control finds `syncfusion-preview` in the Debug dll |
 
 Observed flake (not caused by this task): `SongFormViewModelFrozenArtistTests` threw "Collection was modified" once and passed on rerun.
+
+### T0.4a — Theme dictionary and Sf styles — Done (2026-11-23)
+
+Implementor `98dc1037`; fix round 1 `9545a098` (flyout button icon tinted through `SfButton.Content`; theme header comment), re-review ADDRESSED. The design.md findings were applied by the orchestrator in `3840d2a8`. Merged into develop.
+
+### Changed files
+- `MyVocaList/Resources/Styles/SyncfusionTheme.xaml` (new; MaterialDark plus 107 common-key and 67 control-key overrides, all mapped to tokens)
+- `MyVocaList/UI/Behaviors/IconTint.cs` (new attached property)
+- `MyVocaList/App.xaml` (merges `SyncfusionTheme.xaml` after `MaterialStyles.xaml`)
+- `MyVocaList/Resources/Styles/MaterialStyles.xaml` (new Sf section: implicit styles for SfShimmer, SfBottomSheet, SfChipGroup, SfPopup and SfTextInputLayout; keyed `SfIconButton` (stock `ImageButton` + `IconTint`), `SfTextButton`, `SfFilledButton`, `SfFlyoutMenuButton`; DX styles untouched)
+
+### Verification
+Build 0 errors; 2039 tests pass in the hook; `check_dx` clean. Emulator screenshots in `artifacts/parity/t0.4a/` (07–11). No unit test, since this is Level C styling. Deferred minors: some chip and text-field style setters do nothing against the theme keys; disabled buttons may be dimmed twice; the generic key names `Border`/`IconColor` are overridden at app level.
