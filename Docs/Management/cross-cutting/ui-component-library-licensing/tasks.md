@@ -83,16 +83,16 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
 
 Each copy task: **Consumes** T0.3–T0.6b (packages, styles, `OutlinedTextFieldSf`, preview registry) · **Produces** the Sf page on its preview route · Recipe P · Lane Standard. Each cut-over: Recipe X · Lane Standard · **Consumes** the copy's passed parity, Helder's go and the key.
 
-- [~] **T1.1 `AboutSfPage`** [P] — Files: `MyVocaList/UI/Pages/About/AboutSfPage.xaml(.cs)` · Risk: Low · Demo: preview opens About on Syncfusion; P10, P14 match
-- [~] **T1.2 `BackupRestoreSfPage`** [P] — Files: `MyVocaList/UI/Pages/BackupRestore/BackupRestoreSfPage.xaml(.cs)` · Risk: Medium (backup actions) · Demo: each button runs its action; P10, P14 match
-- [~] **T1.3 `SettingsSfPage`** [P] — Files: `MyVocaList/UI/Pages/Settings/SettingsSfPage.xaml(.cs)` · Risk: Medium (password field) · Demo: save works; P10, P12, P14 match
-- [~] **T1.4 `VenueMapPickerSfPage`** [P] — Files: `MyVocaList/UI/Pages/Venues/VenueMapPickerSfPage.xaml(.cs)` · Risk: Medium (map pick) · Demo: pick + confirm on `venue-map-picker-sf`
+- [x] **T1.1 `AboutSfPage`** [P] — Files: `MyVocaList/UI/Pages/About/AboutSfPage.xaml(.cs)` · Risk: Low · Demo: preview opens About on Syncfusion; P10, P14 match
+- [x] **T1.2 `BackupRestoreSfPage`** [P] — Files: `MyVocaList/UI/Pages/BackupRestore/BackupRestoreSfPage.xaml(.cs)` · Risk: Medium (backup actions) · Demo: each button runs its action; P10, P14 match
+- [x] **T1.3 `SettingsSfPage`** [P] — Files: `MyVocaList/UI/Pages/Settings/SettingsSfPage.xaml(.cs)` · Risk: Medium (password field) · Demo: save works; P10, P12, P14 match
+- [x] **T1.4 `VenueMapPickerSfPage`** [P] — Files: `MyVocaList/UI/Pages/Venues/VenueMapPickerSfPage.xaml(.cs)` · Risk: Medium (map pick) · Demo: pick + confirm on `venue-map-picker-sf`
 - [x] **T1.9 `SfOutlinedButton` style** [SEQUENTIAL — added 2026-11-23 from the T1.2/T1.3 reviews] — Files: `MyVocaList/Resources/Styles/MaterialStyles.xaml` (keyed style `SfOutlinedButton`, MD3 outlined button: transparent, `Outline` stroke 1 dp, `Primary` text), `BackupRestoreSfPage.xaml`, `SettingsSfPage.xaml` (inline `Stroke`/`StrokeThickness` replaced by the style) · Risk: Low · Demo: the outlined buttons render with a visible outline
 - [x] **T1.10 Phase 1 parity fixes** [SEQUENTIAL — added 2026-11-23 from the Phase 1 parity run] — Files: `MaterialStyles.xaml` (outlined text-input container, Sf button label weight), `SettingsSfPage.xaml` (button row), `VenueMapPickerSfPage.xaml` (search field, clear button), `AboutSfPage.xaml` (chip text), `MauiProgram.cs` (indentation of the four DI lines) · Risk: Low · Demo: re-run parity on the four pages; listed differences gone
-- [ ] **T1.5 Cut over Settings** [SEQUENTIAL] — Files: `AppShell.xaml` (both `ShellContent`s), `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: `preferences`, `settings` and PushAsync all open the Sf page; no trial notice (first cut-over)
-- [ ] **T1.6 Cut over About** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: flyout and PushAsync open the Sf page
-- [ ] **T1.7 Cut over BackupRestore** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: as T1.6
-- [ ] **T1.8 Cut over VenueMapPicker** [SEQUENTIAL] — Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: the venue form opens the Sf picker
+- [~] **T1.5 Cut over Settings** [SEQUENTIAL] — Files: `AppShell.xaml` (both `ShellContent`s), `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: `preferences`, `settings` and PushAsync all open the Sf page; no trial notice (first cut-over)
+- [~] **T1.6 Cut over About** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: flyout and PushAsync open the Sf page
+- [~] **T1.7 Cut over BackupRestore** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: as T1.6
+- [~] **T1.8 Cut over VenueMapPicker** [SEQUENTIAL] — Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Risk: Low · Demo: the venue form opens the Sf picker
 
 ## Phase 2 — List components and list pages [after Phase 1 copies]
 
