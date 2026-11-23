@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemCheckboxSf"
+    x:Name="self">
+
+    <!-- 48x48 transparent tap target (stock Grid + tap gesture: SfCheckBox is not a button; DXButton had no Sf equivalent that hosts content). -->
+    <Grid
+        BackgroundColor="Transparent"
+        WidthRequest="48"
+        HeightRequest="48"
+        Padding="0"
+        SemanticProperties.Description="Select">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer
+                Command="{Binding BindingContext.ToggleItemSelectionCommand, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"
+                CommandParameter="{Binding .}" />
+        </Grid.GestureRecognizers>
+
+        <buttons:SfCheckBox
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            InputTransparent="True"
+            IsChecked="{Binding IsChecked, Source={x:Reference self}}"
+            CheckedColor="{StaticResource Primary}"
+            TickColor="{StaticResource OnPrimary}" />
+    </Grid>
+</ContentView>
