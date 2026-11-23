@@ -171,3 +171,16 @@ Implementor `98dc1037`; fix round 1 `9545a098` (flyout button icon tinted throug
 
 ### Verification
 Build 0 errors; 2039 tests pass in the hook; `check_dx` clean. Emulator screenshots in `artifacts/parity/t0.4a/` (07–11). No unit test, since this is Level C styling. Deferred minors: some chip and text-field style setters do nothing against the theme keys; disabled buttons may be dimmed twice; the generic key names `Border`/`IconColor` are overridden at app level.
+
+### T1.1 / T1.2 / T1.3 — Sf page copies, subagent half (P1–P3) — merged (2026-11-23)
+
+The copies are merged into develop: `39ab5c96` (`AboutSfPage`), `2a82a0c8` (`BackupRestoreSfPage`), `8b67df57` (`SettingsSfPage`). Each review gave spec ✅ and quality Approved, with Minor findings only. The parity half (P4–P6: DI and preview registration, then the emulator parity run) follows page by page, so the task boxes stay `[~]` until it is done.
+
+- **T1.1:** `dxe:ChoiceChipGroup` → `SfChipGroup` (Choice, `SelectedItem` two-way, the same binding as DX). Unselected chips use the shared style's `OnSurfaceVariant`; this is judged at parity.
+- **T1.2:** 3 `DXButton` → `SfFilledButton` plus 2 `SfTextButton` with an inline outline. **T1.3:** 4 `DXButton` plus the `PasswordEdit` → `SfTextInputLayout` with the password toggle, `SafeAreaEdges="All"`.
+- **Orchestrator decision:** the outlined-button styling repeated inline in both pages moves into a shared `SfOutlinedButton` style (new task T1.9). Both reviews also note that `SfButton.Stroke` is not in the Toolkit XML. It compiles, and it is checked visually at parity.
+
+P3 registration lines for the parity runs:
+- `builder.Services.AddTransient<AboutSfPage>();`, `("About", "about-sf", typeof(AboutSfPage))`
+- `builder.Services.AddTransient<BackupRestoreSfPage>();`, `("Backup & restore", "backup-sf", typeof(BackupRestoreSfPage))`
+- `builder.Services.AddTransient<SettingsSfPage>();`, `("Settings", "settings-sf", typeof(SettingsSfPage))`
