@@ -32,18 +32,14 @@
                          Command="{Binding BackupNowCommand}" />
 
             <buttons:SfButton Text="Export Backup"
-                         Style="{StaticResource SfTextButton}"
-                         Stroke="{StaticResource OutlineBrush}"
-                         StrokeThickness="1"
+                         Style="{StaticResource SfOutlinedButton}"
                          Command="{Binding ExportCommand}" />
 
             <!-- Restore -->
             <Label Text="Restore" StyleClass="Title.Medium" TextColor="{StaticResource OnSurface}" />
 
             <buttons:SfButton Text="Restore from File"
-                         Style="{StaticResource SfTextButton}"
-                         Stroke="{StaticResource OutlineBrush}"
-                         StrokeThickness="1"
+                         Style="{StaticResource SfOutlinedButton}"
                          Command="{Binding RestoreCommand}" />
 
             <!-- History -->
