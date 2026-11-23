@@ -47,9 +47,10 @@ Plan approved by Helder 2026-11-22 ("plan approved. Start implementation"); auto
 | # | Step | Status | Evidence / notes |
 |---|------|--------|------------------|
 | M0 | Item 🟡; wave 1 claimed `[~]` | done | `794c9f10` |
-| M1 | Wave 1: T0.1a, T0.1b, T0.1c (scratch worktrees `spike-sf-controls-a/b/c`), T0.2 (`check-dx-script`) | running | dispatched from `794c9f10`; emulator shared through the `artifacts/.emulator-lock` lease |
-| M2 | Review T0.2, merge to develop; apply T0.1 results to design.md | T0.2 done; T0.1 pending | T0.2 merged `0ae29cea` |
-| M3 | T0.3 packages + license target | pending | needs T0.1b ids |
+| M1 | Wave 1: T0.1a, T0.1b, T0.1c (scratch worktrees `spike-sf-controls-a/b/c`), T0.2 (`check-dx-script`) | done | all four reported; results below |
+| M2 | Review T0.2, merge to develop; apply T0.1 results to design.md | done | T0.2 merged `0ae29cea`; T0.1 results applied to design.md (this commit) |
+| M3 | T0.3 packages + license target | done | merged `db9b6d90` |
+| M4 | Wave: T0.4a theme + T0.6a preview registry | pending | |
 
 **Context manifest:** `plan.md`, `tasks.md`, `design.md`, `requirements.md`, this file, `.superpowers/sdd/plan/progress.md`.
 
@@ -76,3 +77,34 @@ Implementor `ad894e4e`, fix round 1 `e6eb35ee` (review: 3 Important fixed — di
 | REQ-UIMIG-17 | no license key in tracked files | key pattern | `test_license_key_literal_is_flagged`, release key test |
 
 Deferred minors (orchestrator ledger): the hook trigger uses `ACM` (a rename plus an edit skips the guard); the license scan only runs on source commits; non-raw test strings give a SyntaxWarning on Python 3.12+; git-quoted paths are not handled. **Note for other sessions:** while DX and Sf coexist, editing an existing DX line counts as adding one, so it is blocked. Log an exception in `.claude/exception-registry.md` and ask Helder (Review Focus 1).
+
+### T0.1a / T0.1b / T0.1c — Control verification — Done (2026-11-23)
+
+Scratch branches `task/spike-sf-controls-a|b|c` (never merged). Results applied to `design.md` § Control mapping, § Sheet-state bridge, § Theme mapping, § License key and § Page structure and navigation. Screenshots: `artifacts/parity/t0.1/a-*.png`, `b-*.png`, `c-*.png` (gitignored). Full reports: orchestrator workspace `.superpowers/sdd/plan/task-T0.1{a,b,c}-report.md`.
+
+- **T0.1a (Toolkit):** every row V; nothing escalated. The sheet needs `IsOpen` as well as `State`; dragging it down ends in `Collapsed`; Android Back does not close it. The dark theme dictionary only partly themes the controls. Context7 was wrong in 4 API names, so the nupkg XML is the source of truth.
+- **T0.1b (Community suite):** `SfComboBox`, `SfAutocomplete` (async `IAutocompleteFilterBehavior`) and `SfCheckBox` are V on the emulator. Packages 35.2.12 need MAUI ≥ 10.0.110. With no key, a Debug build showed no visible trial notice.
+- **T0.1c (Shell + stock):** the contextual route **does not resolve**, so the design fallback applies. `Image`, `Border`, `ScrollView` and `StaticResource` are V.
+- **Orchestrator decision (2026-11-23):** the sheet bridge gets a second converter for `IsOpen` (design § Sheet-state bridge, plan T0.5). No unit test applies to T0.1, because it is a spike.
+
+### T0.3 — Packages, license key, host registration — Done (2026-11-23)
+
+Implementor `d0d71f0b` (MAUI 10.0.41 → 10.0.110) + `8a4d7875`; review spec ✅ quality Approved (3 Minor, deferred). Merged `db9b6d90`.
+
+### Changed files
+- `Directory.Packages.props` (MAUI bump; Syncfusion pins)
+- `MyVocaList/MyVocaList.csproj` (PackageReferences; `GenerateSyncfusionLicense` target; Release `<Error>`)
+- `MyVocaList/MauiProgram.cs` (license registration when the key is non-empty; `ConfigureSyncfusionCore()`, `ConfigureSyncfusionToolkit()`)
+- `Docs/DevEnv/devenv-setup.md`, `.claude/library/dev-env-setup.md` (Syncfusion license key section)
+
+### Verification
+- After the bump: build 0 errors; `dotnet test` 2039 passed, 0 failed; the app starts and the Venues, Singers, Songs, Artists, Settings and About pages open (`artifacts/parity/t0.3/`).
+- With the variable unset: `-c Release` fails with `SYNCFUSION_LICENSE_KEY is not set — required for Release builds.`; `-c Debug` gives 0 errors; no generated file is tracked; `check_dx.py --release` reports no `license-key-in-tracked-file`.
+
+| AC | Criterion | Evidence |
+|---|---|---|
+| REQ-UIMIG-16 | no trial notice with the key | pending: needs Helder's key, checked at the first cut-over |
+| REQ-UIMIG-17 | key never tracked | generated under `obj/`; `check_dx.py --release` clean for keys |
+| REQ-UIMIG-18 | Release fails without the key; Debug runs | build commands above |
+
+Deferred minors: a `"` or `;` in a key breaks the generated file (the build fails loudly); `dotnet test -c Release` needs the key; `Microsoft.Maui.Essentials` is still pinned at 10.0.0.

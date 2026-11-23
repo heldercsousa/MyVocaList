@@ -8,21 +8,21 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
 
 ## Phase 0 — Foundation
 
-- [~] **T0.1a Control verification — Toolkit** [P]
+- [x] **T0.1a Control verification — Toolkit** [P]
   - **Produces:** V/failed for `SfBottomSheet`, `SfShimmer`, `SfButton`, `SfTextInputLayout` (Entry/Editor/password), `SfChipGroup`, `SfPopup`; theme dictionary type + color keys; plain `net10.0` asset yes/no
   - **Consumes:** nothing
   - **Risk:** Medium — an "escalate" result blocks later phases
   - **Files owned:** its `task-log.md` entry; branch `task/spike-sf-controls-a` (the orchestrator writes the combined results into `design.md` after the wave)
   - **Demo:** each Toolkit row reads V or failed, with a source and a screenshot
   - **Review lane:** Elevated
-- [~] **T0.1b Control verification — Community suite** [P]
+- [x] **T0.1b Control verification — Community suite** [P]
   - **Produces:** V/failed for `SfComboBox`, `SfAutocomplete` (async), `SfCheckBox`; NuGet ids + versions; host and license calls
   - **Consumes:** nothing
   - **Risk:** Medium — async autocomplete may need escalation
   - **Files owned:** its `task-log.md` entry; branch `task/spike-sf-controls-b` (the orchestrator writes the combined results into `design.md` after the wave)
   - **Demo:** each suite row reads V or failed; package ids and versions written in the design
   - **Review lane:** Elevated
-- [~] **T0.1c Control verification — Shell routes + stock replacements** [P]
+- [x] **T0.1c Control verification — Shell routes + stock replacements** [P]
   - **Produces:** contextual-route verdict; V/failed for `Image`, `Border`, `ScrollView`, `StaticResource` replacements
   - **Consumes:** nothing
   - **Risk:** Low — fallback is already designed
@@ -36,7 +36,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `.claude/scripts/migration/check_dx.py`, `.claude/scripts/migration/tests/test_check_dx.py`, `.claude/githooks/pre-commit`, `.gitignore`
   - **Demo:** staging an Sf file with `xmlns:dx` is refused by the hook
   - **Review lane:** Elevated
-- [~] **T0.3 Packages, license key, host registration** [SEQUENTIAL — after T0.1b]
+- [x] **T0.3 Packages, license key, host registration** [SEQUENTIAL — after T0.1b]
   - **Produces:** Syncfusion packages; generated `SyncfusionLicense.Key`; Release error without the key
   - **Consumes:** T0.1b ids, versions, calls
   - **Risk:** Medium — the build target runs on every build

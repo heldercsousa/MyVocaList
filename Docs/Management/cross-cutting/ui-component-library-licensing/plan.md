@@ -178,11 +178,11 @@ Precondition: P5 passed; Helder's go recorded in the task log; `SYNCFUSION_LICEN
 **Files:**
 - Create: `MyVocaList/UI/Migration/DxSheetStateConverter.cs`
 - Test: `Tests/Unit/Migration/DxSheetStateConverterTests.cs`
-- Orchestrator: `App.xaml` resource `<migration:DxSheetStateConverter x:Key="DxSheetStateToSf" />`; `Tests/MyVocaList.Tests.csproj` Toolkit reference if T0.1a says it is needed
+- Orchestrator: `App.xaml` resources `<migration:DxSheetStateConverter x:Key="DxSheetStateToSf" />` and `<migration:DxSheetStateToIsOpenConverter x:Key="DxSheetStateToSfIsOpen" />`; `Tests/MyVocaList.Tests.csproj` Toolkit reference if T0.1a says it is needed
 
-**Interfaces:** `public sealed class DxSheetStateConverter : IValueConverter` in `MyVocaList.UI.Migration`; `Convert` DX `BottomSheetState` → Sf state; `ConvertBack` Sf → DX, per design § Sheet-state bridge (Sf enum names from T0.1a; `using` aliases for the two same-named enums).
+**Interfaces:** `public sealed class DxSheetStateConverter : IValueConverter` in `MyVocaList.UI.Migration`; `Convert` DX `BottomSheetState` → Sf state; `ConvertBack` Sf → DX, per design § Sheet-state bridge (Sf enum names from T0.1a; `using` aliases for the two same-named enums). *Added 2026-11-23 from T0.1a:* in the same file, `public sealed class DxSheetStateToIsOpenConverter : IValueConverter` (key `DxSheetStateToSfIsOpen`, bound to `SfBottomSheet.IsOpen`): `Hidden` → `false`, other → `true`; `ConvertBack` `false` → `Hidden`, `true` → `Binding.DoNothing`. Sf `Collapsed` converts back to DX `Hidden`.
 
-- [ ] **Step 1: Failing tests**, each tagged `// [AC] REQ-UIMIG-07: with a bottom sheet open, back closes it`: `Convert_Hidden_IsClosed`, `Convert_HalfExpanded_IsHalfExpanded`, `Convert_FullExpanded_IsFullExpanded`, `ConvertBack_ClosedByUser_IsHidden`, `ConvertBack_DraggedToFull_IsFullExpanded`, `ConvertBack_DraggedToHalf_IsHalfExpanded`.
+- [ ] **Step 1: Failing tests**, each tagged `// [AC] REQ-UIMIG-07: with a bottom sheet open, back closes it`: `Convert_Hidden_IsClosed`, `Convert_HalfExpanded_IsHalfExpanded`, `Convert_FullExpanded_IsFullExpanded`, `ConvertBack_ClosedByUser_IsHidden`, `ConvertBack_DraggedToFull_IsFullExpanded`, `ConvertBack_DraggedToHalf_IsHalfExpanded`, plus (2026-11-23) `ConvertBack_Collapsed_IsHidden`, `IsOpen_Hidden_IsFalse`, `IsOpen_HalfExpanded_IsTrue`, `IsOpenBack_False_IsHidden`.
 - [ ] **Step 2:** Run → FAIL. If T0.1a found no plain `net10.0` Toolkit asset, the test project cannot name the Sf enum: replace these tests by an emulator check of the six transitions, record the decision in the task log, and go to Step 3.
 - [ ] **Step 3:** Implement. Unknown input → `Binding.DoNothing`.
 - [ ] **Step 4:** Run → PASS; full suite passes. `check_dx.py --staged` → 0 (bridge files exempt). Commit `feat: DxSheetStateConverter — migration bridge`.
