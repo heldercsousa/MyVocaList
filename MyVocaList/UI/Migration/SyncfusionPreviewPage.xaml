@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MyVocaList.UI.Migration"
+    x:Class="MyVocaList.UI.Migration.SyncfusionPreviewPage"
+    Title="Syncfusion preview"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="8">
+            <Label
+                x:Name="EmptyLabel"
+                Text="No Syncfusion pages to preview yet."
+                StyleClass="Body.Medium"
+                TextColor="{StaticResource OnSurfaceVariant}" />
+            <VerticalStackLayout x:Name="EntriesLayout" Spacing="0">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="local:PreviewItem">
+                        <Label
+                            Text="{Binding Title}"
+                            StyleClass="Body.Large"
+                            TextColor="{StaticResource OnSurface}"
+                            MinimumHeightRequest="48"
+                            VerticalTextAlignment="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    CommandParameter="{Binding Route}"
+                                    Tapped="OnEntryTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

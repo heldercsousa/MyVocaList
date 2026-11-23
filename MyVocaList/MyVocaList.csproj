@@ -168,6 +168,10 @@
 		<None Include="UI\Pages\Samples\**\*.cs" />
 		<None Include="UI\Pages\Samples\**\*.xaml" />
 	</ItemGroup>
+	<!-- Debug-only Syncfusion preview page (T0.6a): XAML dropped from Release; its .cs is #if DEBUG -->
+	<ItemGroup>
+		<MauiXaml Remove="UI\Migration\SyncfusionPreviewPage.xaml" Condition="'$(Configuration)' == 'Release'" />
+	</ItemGroup>
 	<!-- Only include working CollectionView samples in Debug builds -->
 
 	<ItemGroup>
