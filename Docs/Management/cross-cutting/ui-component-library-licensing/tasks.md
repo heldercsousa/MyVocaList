@@ -50,7 +50,7 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
   - **Files owned:** `MyVocaList/Resources/Styles/SyncfusionTheme.xaml`, `MyVocaList/UI/Behaviors/IconTint.cs`, `MyVocaList/Resources/Styles/MaterialStyles.xaml`, `MyVocaList/App.xaml`
   - **Demo:** shimmer, sheet, chips and an icon button render in the dark tokens
   - **Review lane:** Standard
-- [~] **T0.4b `OutlinedTextFieldSf`** [SEQUENTIAL — after T0.4a]
+- [x] **T0.4b `OutlinedTextFieldSf`** [SEQUENTIAL — after T0.4a]
   - **Produces:** `OutlinedTextFieldSf` (Text, Placeholder, IsPassword, Keyboard, ReturnCommand, ClearButtonVisibility, Completed)
   - **Consumes:** T0.4a tokens and styles
   - **Risk:** Low — stock `Border` + `Entry`, proven in the POC

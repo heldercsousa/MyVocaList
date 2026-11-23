@@ -184,3 +184,19 @@ P3 registration lines for the parity runs:
 - `builder.Services.AddTransient<AboutSfPage>();`, `("About", "about-sf", typeof(AboutSfPage))`
 - `builder.Services.AddTransient<BackupRestoreSfPage>();`, `("Backup & restore", "backup-sf", typeof(BackupRestoreSfPage))`
 - `builder.Services.AddTransient<SettingsSfPage>();`, `("Settings", "settings-sf", typeof(SettingsSfPage))`
+
+### T0.4b — `OutlinedTextFieldSf` — Done (2026-11-23)
+
+Implementor `c533d50a`. Review: spec ✅, quality Approved (3 Minor). Merged into develop. **Phase 0 is complete.**
+
+### Changed files
+- `MyVocaList/UI/Components/TextFields/OutlinedTextFieldSf.xaml(.cs)` (new). A stock `Border` around a sealed `Entry` subclass. The Android underline is removed through an `EntryHandler` mapping, scoped by a type check. BindableProperties per the brief.
+- `MyVocaList/App.xaml`: `xmlns:migration` and the T0.5 converter resources `DxSheetStateToSf` and `DxSheetStateToSfIsOpen`, applied here per the orchestrator ruling.
+
+### Verification
+On the emulator (`artifacts/parity/t0.4b/`): the keyboard opens, two-way binding works, the placeholder uses `OnSurfaceVariant`, there is no underline, and the stroke turns `Primary` on focus. 2057 tests pass. `check_dx` is clean. No unit test (Level C).
+
+Deferred minors:
+- The stroke color lookup does not follow theme switches (the app is dark-only).
+- A tap in the padding does not focus the Entry.
+- `IsPassword`, `Keyboard` and `ReturnCommand` were not exercised on the device. They are covered when `SearchBarSf` consumes the field.
