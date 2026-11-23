@@ -503,17 +503,28 @@
         </Setter>
     </Style>
 
-    <!-- Same look as the DX FlyoutMenuButton -->
+    <!-- Same look as the DX FlyoutMenuButton. SfButton cannot tint its own ImageSource (IconTintColorBehavior throws on it), so the
+         content is a DataTemplate (SfButton.Content) with an Image tinted through IconTint plus a Label. Consumers still set the
+         button's ImageSource and Text; the template reads them from the ancestor SfButton. -->
     <Style x:Key="SfFlyoutMenuButton" TargetType="buttons:SfButton">
         <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
-        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
-        <Setter Property="ShowIcon" Value="True" />
         <Setter Property="Padding" Value="16,12" />
         <Setter Property="CornerRadius" Value="28" />
         <Setter Property="HeightRequest" Value="48" />
-        <Setter Property="HorizontalTextAlignment" Value="Start" />
-        <Setter Property="FontFamily" Value="RobotoMedium" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Content">
+            <Setter.Value>
+                <DataTemplate>
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Start">
+                        <Image WidthRequest="24" HeightRequest="24" VerticalOptions="Center"
+                               Source="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=ImageSource}"
+                               behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}" />
+                        <Label VerticalOptions="Center" FontFamily="RobotoMedium" FontSize="14"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               Text="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=Text}" />
+                    </HorizontalStackLayout>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">

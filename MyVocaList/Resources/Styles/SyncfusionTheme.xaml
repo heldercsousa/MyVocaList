@@ -7,6 +7,9 @@
     at load time, so layer 1 alone does not recolor controls and a Style setter cannot beat the control's dynamic theme resources.
     Not overridden on purpose: alpha state layers and *Disabled keys (no alpha token; Toolkit defaults are on-surface at 12%/38%),
     Overlay, Black/White, SeriesColor*, Segment*, Table*, *SearchResult and the control families the app does not use.
+    Why two layers: the Toolkit DefaultTheme resolves the common keys into the Sf* keys once at load (StaticThemeResource), so a common-key
+    override alone never recolors a control. Regenerate the Sf* key list on a Toolkit upgrade by enumerating new DefaultTheme(true) and
+    diffing. Caution: the common keys Border and IconColor are generic names at application level; do not add app keys with those names.
 -->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
