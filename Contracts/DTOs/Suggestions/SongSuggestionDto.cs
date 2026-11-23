@@ -11,7 +11,6 @@ namespace MyVocaList.Contracts.DTOs.Suggestions;
 /// <param name="ExternalId">External provider song id (remote rows).</param>
 /// <param name="ExternalProvider">Provider name.</param>
 /// <param name="IsRemote">True when sourced from a music metadata provider.</param>
-/// <param name="Version">Version label (local: stored; remote: always empty, a Deezer pick carries no version, REQ-SLD-08); empty when none (REQ-SFT-12).</param>
 /// <param name="LocalArtistName">Stored spelling of the local artist; null when the artist is not local (REQ-SFT-13).</param>
 /// <param name="ImageUrl">Song image URL (album cover); null when none (REQ-ART-06).</param>
 /// <param name="ArtistImageUrl">Artist image URL; null when none (REQ-ART-06).</param>
@@ -25,7 +24,6 @@ public sealed record SongSuggestionDto(
     string? ExternalId,
     string? ExternalProvider,
     bool IsRemote,
-    string Version = "",
     string? LocalArtistName = null,
     string? ImageUrl = null,
     string? ArtistImageUrl = null,

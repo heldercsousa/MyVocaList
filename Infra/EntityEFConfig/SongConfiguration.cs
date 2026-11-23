@@ -24,19 +24,6 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .UseCollation(CollationConstants.Default);
 
         // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
-        // Version is non-nullable ("" = canonical version) — TrimForStorage never nulls it.
-        builder.Property(s => s.Version)
-               .IsRequired()
-               .HasMaxLength(60)
-               .HasConversion(TrimValueConverters.Required)
-               .UseCollation(CollationConstants.Default);
-
-        // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
-        builder.Property(s => s.FeaturedArtists)
-               .IsRequired(false)
-               .HasConversion(TrimValueConverters.Optional);
-
-        // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
         builder.Property(s => s.ExternalId)
                .IsRequired(false)
                .HasMaxLength(100)
@@ -65,9 +52,9 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .HasConversion<string>()
                .HasMaxLength(20);
 
-        builder.HasIndex(s => new { s.ArtistId, s.Title, s.Version })
+        builder.HasIndex(s => new { s.ArtistId, s.Title })
                .IsUnique()
-               .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
+               .HasDatabaseName("IX_Songs_ArtistId_Title");
 
         builder.HasIndex(s => new { s.ExternalProvider, s.ExternalId })
                .IsUnique();

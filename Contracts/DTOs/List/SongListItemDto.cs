@@ -9,21 +9,11 @@ public record SongListItemDto(
     string Title,
     int OriginalArtistId,
     string? OriginalArtistName,
-    string? FeaturedArtists,
     string? ExternalProvider,
-    string? Version = null,
     string? ImageUrl = null)
 {
     /// <summary>
-    /// Non-empty parts of artist, version and "feat. &lt;featured artists&gt;", joined by " · " (REQ-ART-20).
+    /// The original artist name, trimmed (REQ-RMV-09: the Songs-list supporting text is the artist only).
     /// </summary>
-    public string SupportingText
-    {
-        get
-        {
-            var featured = string.IsNullOrWhiteSpace(FeaturedArtists) ? null : "feat. " + FeaturedArtists.Trim();
-            return string.Join(" · ", new[] { OriginalArtistName?.Trim(), Version?.Trim(), featured }
-                .Where(part => !string.IsNullOrEmpty(part)));
-        }
-    }
+    public string SupportingText => OriginalArtistName?.Trim() ?? string.Empty;
 }

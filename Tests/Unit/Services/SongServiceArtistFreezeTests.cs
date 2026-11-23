@@ -12,6 +12,7 @@ namespace MyVocaList.Tests.Unit.Services;
 public class SongServiceArtistFreezeTests
 {
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepoMock = new();
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
@@ -67,14 +68,13 @@ public class SongServiceArtistFreezeTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _artistServiceMock,
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, _artistServiceMock,
             _artistResolutionMock.Object, _songResolutionMock),
         _loggerMock.Object);
 
     private static SongFormSaveRequest NewRequest(
         int? songId = null,
         string title = "Don't Cry",
-        string version = "",
         int? artistId = null,
         string? artistText = "Guns N' Roses",
         string? provider = null,
@@ -82,7 +82,7 @@ public class SongServiceArtistFreezeTests
         ArtistDecision? artistDecision = null,
         SongDecision songDecision = SongDecision.None)
         => new(
-            songId, title, version, FeaturedArtists: null, Lyrics: null,
+            songId, title, Lyrics: null,
             artistId, artistText, provider, externalId,
             PendingUrls: [],
             artistDecision ?? new ArtistDecision.None(),
@@ -93,7 +93,7 @@ public class SongServiceArtistFreezeTests
     {
         var stored = new Song
         {
-            Id = 50, ArtistId = StoredArtistId, Title = "Old title", Version = "",
+            Id = 50, ArtistId = StoredArtistId, Title = "Old title",
             ExternalProvider = DeezerProvider, ExternalId = DeezerTrackId,
             OriginalArtist = new Artist { Id = StoredArtistId, Name = "Stored artist 3" }
         };
@@ -188,7 +188,7 @@ public class SongServiceArtistFreezeTests
         var stored = SetupStoredDeezerSong();
 
         var (success, message) = await CreateSut().UpdateSongAsync(
-            50, "Changed title", null, null,
+            50, "Changed title", null,
             artistId: artistId, newArtistName: newArtistName);
 
         Assert.False(success);
@@ -230,14 +230,13 @@ public class SongServiceArtistFreezeTests
         Assert.Equal(OtherArtistId, AddedSong.ArtistId);
     }
 
-    // [AC] REQ-SLD-18: a save as a new version or a new song from a Deezer pick stores no external identity.
+    // [AC] REQ-SLD-18: a save as a new song from a Deezer pick stores no external identity.
     [Theory]
-    [InlineData(SongDecision.SaveAsNewVersion)]
     [InlineData(SongDecision.SaveAsNewSong)]
-    public async Task SaveFromForm_SaveAsNewVersionOrNewSong_StoresNoIdentity(SongDecision decision)
+    public async Task SaveFromForm_SaveAsNewSong_StoresNoIdentity(SongDecision decision)
     {
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            songId: null, title: "Creep", version: "Live", artistId: StoredArtistId, artistText: "Radiohead",
+            songId: null, title: "Creep", artistId: StoredArtistId, artistText: "Radiohead",
             provider: DeezerProvider, externalId: DeezerTrackId, songDecision: decision));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
@@ -252,7 +251,7 @@ public class SongServiceArtistFreezeTests
     {
         _songRepoMock
             .Setup(r => r.GetByIdAsync(60, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Song { Id = 60, ArtistId = StoredArtistId, Title = "Local", Version = "" });
+            .ReturnsAsync(new Song { Id = 60, ArtistId = StoredArtistId, Title = "Local" });
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
             songId: 60, title: "Local", artistId: OtherArtistId, artistText: "Stored artist 4"));

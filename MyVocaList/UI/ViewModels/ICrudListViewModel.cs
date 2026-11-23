@@ -34,6 +34,14 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     IRelayCommand DeleteItemCommand { get; }
     IRelayCommand DismissItemActionsCommand { get; }
 
+    // Item overflow menu (browse mode, REQ-OVFM-01..08)
+    bool IsItemMenuOpen { get; set; }                     // TwoWay with DXPopup.IsOpen
+    IReadOnlyList<ItemMenuAction> ItemMenuActions { get; } // page-specific items, between Edit and Delete
+    IReadOnlyList<MenuItemModel> ItemMenuItems { get; }   // Edit, page-specific items, Delete; built once (REQ-OVFM-18)
+    ICommand OpenItemMenuCommand { get; }                 // parameter: the list item
+    ICommand DismissItemMenuCommand { get; }
+    ICommand ExecuteItemMenuActionCommand { get; }        // parameter: ItemMenuAction
+
     // Toolbar commands
     IRelayCommand SelectAllCommand { get; }
     IRelayCommand DeleteSelectedCommand { get; }

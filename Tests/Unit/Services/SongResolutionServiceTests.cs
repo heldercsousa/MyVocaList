@@ -32,12 +32,10 @@ public class SongResolutionServiceTests
 
     private SongCandidate MakeCandidate(
         string title = "Bohemian Rhapsody",
-        string version = "",
         string? externalProvider = null,
         string? externalId = null,
-        string? featured = null,
         string? lyrics = null) =>
-        new(title, version, featured, lyrics,
+        new(title, lyrics,
             new ArtistCandidate("Queen", null, null),
             externalProvider, externalId);
 
@@ -59,8 +57,8 @@ public class SongResolutionServiceTests
         Assert.Equal(ResolutionKind.NoMatch, result.Kind);
         // No song repo calls when artist is unresolved (except external-id check)
         _songRepoMock.Verify(
-            r => r.FindIdByTitleVersionForArtistAsync(
-                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
+            r => r.FindIdByTitleForArtistAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -77,8 +75,7 @@ public class SongResolutionServiceTests
         var existingSong = new Song
         {
             Id = 42,
-            Title = "Bohemian Rhapsody",
-            Version = ""
+            Title = "Bohemian Rhapsody"
         };
         _songRepoMock
             .Setup(r => r.GetByExternalIdAsync("dz-99", "Deezer", It.IsAny<CancellationToken>()))
@@ -96,7 +93,7 @@ public class SongResolutionServiceTests
     // ── ResolveAsync — exact local match ──────────────────────────────────
 
     [Fact]
-    // [AC] AC-2.2: No external match but exact (ArtistId, Title, Version) local match.
+    // [AC] AC-2.2: No external match but exact (ArtistId, Title) local match.
     public async Task ResolveAsync_ExactLocalHit_ReturnsExactLocalMatch()
     {
         _artistResolutionMock
@@ -108,7 +105,7 @@ public class SongResolutionServiceTests
             .ReturnsAsync((Song)null);
 
         _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(10, "Bohemian Rhapsody", "", null, It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(10, "Bohemian Rhapsody", null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(5);
 
         var candidate = MakeCandidate();
@@ -128,7 +125,7 @@ public class SongResolutionServiceTests
             .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(ArtistExactLocal(7));
         _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(7, "Nao Sei", "", null, It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(7, "Nao Sei", null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(42);
 
         var sut = CreateSut();
@@ -154,11 +151,11 @@ public class SongResolutionServiceTests
             .ReturnsAsync((Song)null);
 
         _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)null);
 
         // BUG-085: the fuzzy pool is the same-artist trigram query over the WHOLE typed title.
-        var fuzzyHit = new SongSearchHit(7, "Bohemian Rhapsdy", "", 10, "Queen", null, null);
+        var fuzzyHit = new SongSearchHit(7, "Bohemian Rhapsdy", 10, "Queen", null, null);
         _songRepoMock
             .Setup(r => r.SearchTitleCandidatesForArtistAsync(10, "Bohemian Rhapsody", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit> { fuzzyHit });
@@ -191,7 +188,7 @@ public class SongResolutionServiceTests
             .ReturnsAsync((Song)null);
 
         _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)null);
 
         _songRepoMock
@@ -223,7 +220,7 @@ public class SongResolutionServiceTests
             .ReturnsAsync((Song)null);
 
         _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)null);
 
         _songRepoMock
@@ -254,11 +251,11 @@ public class SongResolutionServiceTests
             .Setup(r => r.GetByExternalIdAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Song)null);
         _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)null);
         _songRepoMock
             .Setup(r => r.SearchTitleCandidatesForArtistAsync(10, "Patiencee", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { new(3, "Patience Lost", "", 10, "Queen", null, null) });
+            .ReturnsAsync(new List<SongSearchHit> { new(3, "Patience Lost", 10, "Queen", null, null) });
         _scorerMock
             .Setup(s => s.Score("Patiencee", "Patience Lost"))
             .Returns(SimilarityConstants.DefaultThreshold - 0.01);
@@ -281,11 +278,11 @@ public class SongResolutionServiceTests
             .Setup(r => r.GetByExternalIdAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Song)null);
         _songRepoMock
-            .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindIdByTitleForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)null);
         _songRepoMock
             .Setup(r => r.SearchTitleCandidatesForArtistAsync(10, "Patiencee", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { new(3, "Patience", "", 10, "Queen", null, null) });
+            .ReturnsAsync(new List<SongSearchHit> { new(3, "Patience", 10, "Queen", null, null) });
         _scorerMock
             .Setup(s => s.Score("Patiencee", "Patience"))
             .Returns(SimilarityConstants.DefaultThreshold);
@@ -312,5 +309,44 @@ public class SongResolutionServiceTests
         _songRepoMock.Verify(
             r => r.SearchTitleCandidatesForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    // ── ResolveAsync — song identity is (Artist, Title) only (REQ-RMV-06) ──
+
+    [Fact]
+    // [AC] REQ-RMV-06: the exact local lookup is keyed on the artist and the title only; no version takes part.
+    public async Task ResolveAsync_ExactLocalLookup_UsesArtistAndTitleOnly()
+    {
+        _artistResolutionMock
+            .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ArtistExactLocal(10));
+        _songRepoMock
+            .Setup(r => r.FindIdByTitleForArtistAsync(10, "Bohemian Rhapsody", null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(5);
+
+        var result = await CreateSut().ResolveAsync(MakeCandidate());
+
+        Assert.Equal(ResolutionKind.ExactLocalMatch, result.Kind);
+        Assert.Equal(5, result.ExactMatchSongId);
+        _songRepoMock.Verify(
+            r => r.FindIdByTitleForArtistAsync(10, "Bohemian Rhapsody", null, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-RMV-06: a case-only title difference is an exact match on the stored song id (the collation matches it).
+    public async Task ResolveAsync_CaseOnlyTitleDifference_ReturnsExactLocalMatchWithId()
+    {
+        _artistResolutionMock
+            .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ArtistExactLocal(7));
+        _songRepoMock
+            .Setup(r => r.FindIdByTitleForArtistAsync(7, "bohemian rhapsody", null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
+
+        var result = await CreateSut().ResolveAsync(MakeCandidate(title: "bohemian rhapsody"));
+
+        Assert.Equal(ResolutionKind.ExactLocalMatch, result.Kind);
+        Assert.Equal(42, result.ExactMatchSongId);
     }
 }

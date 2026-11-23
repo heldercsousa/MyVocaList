@@ -93,7 +93,9 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
         => _artistService.GetPagedArtistsForListAsync(page, pageSize, query, RoleFilter, ct);
 
     protected override string BuildDeleteConfirmMessage(IList<ArtistListItem> items)
-        => items.Count == 1 ? $"Delete '{items[0].Name}'?" : $"Delete {items.Count} artists?";
+        => items.Count == 1
+            ? $"Delete '{items[0].Name}'? Their catalog entries will also be removed."
+            : $"Delete {items.Count} artists? Their catalog entries will also be removed.";
 
     protected override async Task ExecuteDeleteAsync(IEnumerable<ArtistListItem> items)
     {

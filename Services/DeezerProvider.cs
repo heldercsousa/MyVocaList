@@ -28,15 +28,11 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         var response = await GetAsync<DeezerArtist>($"search/artist?q={Uri.EscapeDataString(term)}", ct);
         return response.Data?.Take(MaxResults)
             .Select(a => new MusicSearchResultDto(
-                a.Id.ToString(),
-                ProviderName,
-                a.Name,
-                null,
-                null,
-                null,
-                ImageUrlRules.Normalize(a.PictureMedium),
-                null,
-                null))
+                ExternalId: a.Id.ToString(),
+                Provider: ProviderName,
+                ArtistName: a.Name,
+                SongTitle: null,
+                ImageUrl: ImageUrlRules.Normalize(a.PictureMedium)))
             .ToList()
             ?? [];
     }
@@ -48,17 +44,15 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         var response = await GetAsync<DeezerTrack>($"search/track?q={Uri.EscapeDataString(term)}", ct);
         return response.Data?.Take(SearchConstants.RemoteSongFetchCount)
             .Select(t => new MusicSearchResultDto(
-                t.Id.ToString(),
-                ProviderName,
-                t.Artist?.Name ?? string.Empty,
-                string.IsNullOrWhiteSpace(t.TitleShort) ? t.Title : t.TitleShort,
-                null,
-                NormaliseVersion(t.TitleVersion),
-                ImageUrlRules.Normalize(t.Album?.CoverMedium),
-                ImageUrlRules.Normalize(t.Artist?.PictureMedium),
-                NormaliseAlbumTitle(t.Album?.Title),
-                NormaliseDuration(t.Duration),
-                t.Artist?.Id?.ToString(CultureInfo.InvariantCulture)))
+                ExternalId: t.Id.ToString(),
+                Provider: ProviderName,
+                ArtistName: t.Artist?.Name ?? string.Empty,
+                SongTitle: string.IsNullOrWhiteSpace(t.TitleShort) ? t.Title : t.TitleShort,
+                ImageUrl: ImageUrlRules.Normalize(t.Album?.CoverMedium),
+                ArtistImageUrl: ImageUrlRules.Normalize(t.Artist?.PictureMedium),
+                AlbumTitle: NormaliseAlbumTitle(t.Album?.Title),
+                DurationSeconds: NormaliseDuration(t.Duration),
+                ExternalArtistId: t.Artist?.Id?.ToString(CultureInfo.InvariantCulture)))
             .ToList()
             ?? [];
     }
@@ -85,29 +79,6 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         }
     }
 
-    /// <summary>
-    /// Trims the Deezer <c>title_version</c> and strips one outer bracket pair, only when the opening
-    /// bracket's same-type matching closer is the last character (REQ-SFT-12).
-    /// </summary>
-    private static string NormaliseVersion(string? raw)
-    {
-        var value = raw?.Trim() ?? string.Empty;
-        if (value.Length < 2) return value;
-
-        var open = value[0];
-        var close = open switch { '(' => ')', '[' => ']', _ => '\0' };
-        if (close == '\0') return value;
-
-        var depth = 0;
-        for (var i = 0; i < value.Length; i++)
-        {
-            if (value[i] == open) depth++;
-            else if (value[i] == close && --depth == 0)
-                return i == value.Length - 1 ? value[1..^1].Trim() : value;
-        }
-        return value;
-    }
-
     /// <summary>Trims the album title; null when absent or blank (REQ-ART-01).</summary>
     private static string? NormaliseAlbumTitle(string? raw)
     {
@@ -132,7 +103,6 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         [property: JsonPropertyName("id")] long Id,
         [property: JsonPropertyName("title")] string Title,
         [property: JsonPropertyName("title_short")] string? TitleShort,
-        [property: JsonPropertyName("title_version")] string? TitleVersion,
         [property: JsonPropertyName("artist")] DeezerTrackArtist? Artist,
         [property: JsonPropertyName("album")] DeezerTrackAlbum? Album,
         [property: JsonPropertyName("duration")] int? Duration);

@@ -10,9 +10,6 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| ITF | Inline Trivial Fix lane — bounded orchestrator inline-edit exception | merged; 38/38 green; one gate left | develop | — | merged | a4c198a | Helder observes the FIRST live ITF fix end-to-end; decide on 4 misbased `agent-*` worktrees. Detail: `DevCycleCraft/inline-trivial-fix/handoff.md` + task-log § Ledger detail |
-| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete, verifier PASS | develop (tooling + docs) | — | to review | 68e1852 | Helder runs the two-terminal live demo; optionally directs the 4 leftover agent worktrees. Detail: `DevCycleCraft/session-continuity-leasing/task-log.md` § Ledger detail |
-| CATALOG-PROP | Song writes propagate to the artist catalog | 📋 spec; D1–D4 closed, `requirements.md`/`design.md` not yet written | — | — | deferred (spec after SFT) | e91947f6 | Write spec from D1–D4, then spec-reviewer + Helder gate. Do not dispatch while an `sft-*` branch owns `SongService`/Migrations. Detail: `BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-…/README.md` § Ledger detail |
 
 ## Completed (recent)
 
@@ -20,9 +17,7 @@ Older closed rows: `LEDGER-archive.md` (moved by `ledger_rotate.py`). SFT merge 
 
 | ID | Feature / Bug | Branch | Merged into develop | Commit |
 |----|---------------|--------|---------------------|--------|
-| SFT | Song form title-first (5.5, 5.6, 5.8, title 250; 6.3 moved out) | task/sft-5.5…5.8, task/title-limit-250 | 2026-11-11 | 686d5aa3 |
-| AC-FIELD | Shared autocomplete field: pick-lock via X, centralised behaviour | develop (T2–T12 merged; T3-C cancelled) | 2026-11-11 closed; T7 run 6 PASS, Rebuild Test 0-1; develop 953/953. Detail: item `task-log.md` § Close-out bookkeeping | 77b408f6 |
-| BID | Build identity — MinVer version + About build details (app-versioning) | develop | 2026-11-10 closed; G3 PASS on S23 (`v0.2.0-alpha.0.4`); follow-ups: release-tag discipline, changelog retirement | 4a839cbe |
+| BUG-088 | Duplicate singer saved when the name is typed without picking (T5, T7, T8, T9) | worktree-agent-a0ee5d3810b12f260 | 2026-11-22, ✅ Done (Helder authorised closing without re-test) | 38db819a |
 
 ---
 

@@ -37,7 +37,7 @@ public class SongSuggestionServiceGroupingTests
             .ReturnsAsync(new List<SongSearchHit>());
         _songRepoMock
             .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(), It.IsAny<CancellationToken>()))
+                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit>());
         _artistRepoMock
             .Setup(r => r.GetByNamesCollatedAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -54,19 +54,19 @@ public class SongSuggestionServiceGroupingTests
         _networkMock.Object,
         _loggerMock.Object);
 
-    // Expression trees cannot contain tuple literals, so Moq predicates build the triple through a method.
-    private static (string Title, string ArtistName, string Version) Triple(string title, string artist, string version)
-        => (title, artist, version);
+    // Expression trees cannot contain tuple literals, so Moq predicates build the pair through a method.
+    private static (string Title, string ArtistName) Pair(string title, string artist)
+        => (title, artist);
 
     private void SetupDeezer(params MusicSearchResultDto[] results)
         => _deezerMock
             .Setup(p => p.SearchSongsAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(results.ToList());
 
-    // Deezer row: (externalId, artistName, title, version, deezer artist id).
-    private static MusicSearchResultDto Row(string externalId, string artistName, string? title, string? version = null,
+    // Deezer row: (externalId, artistName, title, deezer artist id).
+    private static MusicSearchResultDto Row(string externalId, string artistName, string? title,
         string? artistId = "1")
-        => new(externalId, "Deezer", artistName, title, null, version, ExternalArtistId: artistId);
+        => new(ExternalId: externalId, Provider: "Deezer", ArtistName: artistName, SongTitle: title, ExternalArtistId: artistId);
 
     // [AC] REQ-SLD-06: several rows of one song group (same Deezer artist id and title) give one row.
     [Fact]
@@ -128,28 +128,28 @@ public class SongSuggestionServiceGroupingTests
         Assert.Equal(new List<string> { "Creep", "Karma Police", "Zebra" }, result.Remote.Select(r => r.Title).ToList());
     }
 
-    // [AC] REQ-SLD-07: the kept row of a group is the first one with a blank version label.
+    // [AC] REQ-SLD-07 (reduced by REQ-RMV-08): the kept row of a group is the first row, in Deezer's order.
     [Fact]
-    public async Task SearchTitleRemoteAsync_LiveThenPlain_KeepsThePlainRow()
+    public async Task SearchTitleRemoteAsync_LabelledThenPlain_KeepsTheFirstRow()
     {
         SetupDeezer(
-            Row("dz-live", "Radiohead", "Creep", "Live"),
-            Row("dz-plain", "Radiohead", "Creep", null));
+            Row("dz-live", "Radiohead", "Creep"),
+            Row("dz-plain", "Radiohead", "Creep"));
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
 
         var kept = Assert.Single(result.Remote);
-        Assert.Equal("dz-plain", kept.ExternalId);
+        Assert.Equal("dz-live", kept.ExternalId);
     }
 
-    // [AC] REQ-SLD-07: when every row of a group is labelled, the first row is kept.
+    // [AC] REQ-SLD-07 (reduced by REQ-RMV-08): a group of several labelled-by-Deezer rows still keeps its first row.
     [Fact]
-    public async Task SearchTitleRemoteAsync_OnlyLabelledRows_KeepsTheFirst()
+    public async Task SearchTitleRemoteAsync_SeveralRowsOfOneSong_KeepsTheFirst()
     {
         SetupDeezer(
-            Row("dz-1", "Radiohead", "Creep", "Live"),
-            Row("dz-2", "Radiohead", "Creep", "Remix"));
+            Row("dz-1", "Radiohead", "Creep"),
+            Row("dz-2", "Radiohead", "Creep"));
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
@@ -158,55 +158,36 @@ public class SongSuggestionServiceGroupingTests
         Assert.Equal("dz-1", kept.ExternalId);
     }
 
-    // [AC] REQ-SLD-08: a remote row carries no version label, even when Deezer sent one.
+    // [AC] REQ-RMV-08: the library check uses the (Artist, Title) pair of the kept row; no version is passed.
     [Fact]
-    public async Task SearchTitleRemoteAsync_KeptRow_HasBlankVersion()
+    public async Task SearchTitleRemoteAsync_LibraryCheckUsesArtistAndTitle()
     {
-        SetupDeezer(Row("dz-1", "Radiohead", "Creep", "Live"));
-        var sut = CreateSut();
-
-        var result = await sut.SearchTitleRemoteAsync("creep", []);
-
-        var kept = Assert.Single(result.Remote);
-        Assert.Equal("", kept.Version);
-    }
-
-    // [AC] REQ-SLD-09: the library check uses the kept row with a blank version.
-    [Fact]
-    public async Task SearchTitleRemoteAsync_LibraryCheckUsesBlankVersion()
-    {
-        SetupDeezer(Row("dz-1", "Radiohead", "Creep", "Live"));
+        SetupDeezer(Row("dz-1", "Radiohead", "Creep"));
         var sut = CreateSut();
 
         await sut.SearchTitleRemoteAsync("creep", []);
 
         _songRepoMock.Verify(
             r => r.FindByTitleAndArtistNamesAsync(
-                It.Is<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(
-                    items => items.Contains(Triple("Creep", "Radiohead", ""))),
+                It.Is<IReadOnlyCollection<(string Title, string ArtistName)>>(
+                    items => items.Contains(Pair("Creep", "Radiohead")) && items.Count == 1),
                 It.IsAny<CancellationToken>()),
             Times.Once);
-        _songRepoMock.Verify(
-            r => r.FindByTitleAndArtistNamesAsync(
-                It.Is<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(
-                    items => items.Contains(Triple("Creep", "Radiohead", "Live"))),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
     }
 
-    // [AC] REQ-SLD-09: a library song stored with a blank version hides the whole group.
+    // [AC] REQ-SLD-09 (reduced by REQ-RMV-08): a library song matching (artist, title) hides the whole group.
     [Fact]
-    public async Task SearchTitleRemoteAsync_LibrarySongWithBlankVersion_HidesTheGroup()
+    public async Task SearchTitleRemoteAsync_LibrarySongMatchesArtistAndTitle_HidesTheGroup()
     {
         SetupDeezer(
-            Row("dz-1", "Radiohead", "Creep", "Live"),
-            Row("dz-2", "Radiohead", "Creep", null));
+            Row("dz-1", "Radiohead", "Creep"),
+            Row("dz-2", "Radiohead", "Creep"));
         _songRepoMock
             .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.Is<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(
-                    items => items.Contains(Triple("Creep", "Radiohead", ""))),
+                It.Is<IReadOnlyCollection<(string Title, string ArtistName)>>(
+                    items => items.Contains(Pair("Creep", "Radiohead"))),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { new(9, "Creep", "", 3, "Radiohead", null, null) });
+            .ReturnsAsync(new List<SongSearchHit> { new(9, "Creep", 3, "Radiohead", null, null) });
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
@@ -214,26 +195,6 @@ public class SongSuggestionServiceGroupingTests
         var promoted = Assert.Single(result.Promoted);
         Assert.Equal(9, promoted.LocalId);
         Assert.Empty(result.Remote);
-    }
-
-    // [AC] REQ-SLD-09: a library song stored only with a version ("Live") does not hide the group.
-    [Fact]
-    public async Task SearchTitleRemoteAsync_LibrarySongOnlyAsLive_GroupStaysRemote()
-    {
-        SetupDeezer(Row("dz-1", "Radiohead", "Creep", "Live"));
-        _songRepoMock
-            .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.Is<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(
-                    items => items.Contains(Triple("Creep", "Radiohead", "Live"))),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { new(9, "Creep", "Live", 3, "Radiohead", null, null) });
-        var sut = CreateSut();
-
-        var result = await sut.SearchTitleRemoteAsync("creep", []);
-
-        Assert.Empty(result.Promoted);
-        var remote = Assert.Single(result.Remote);
-        Assert.Equal("dz-1", remote.ExternalId);
     }
 
     // [AC] REQ-SLD-10: all rows of the answer are grouped before the limit of five remote rows applies.

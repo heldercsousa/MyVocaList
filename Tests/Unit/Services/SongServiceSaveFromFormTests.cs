@@ -14,6 +14,7 @@ namespace MyVocaList.Tests.Unit.Services;
 public class SongServiceSaveFromFormTests
 {
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepoMock = new();
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
@@ -72,14 +73,13 @@ public class SongServiceSaveFromFormTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _artistServiceMock,
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, _artistServiceMock,
             artistResolution ?? _artistResolutionMock.Object, _songResolutionMock),
         _loggerMock.Object);
 
     private static SongFormSaveRequest NewRequest(
         int? songId = null,
         string title = "Don't Cry",
-        string version = "",
         int? artistId = null,
         string? artistText = "Guns N' Roses",
         string? provider = null,
@@ -87,7 +87,7 @@ public class SongServiceSaveFromFormTests
         ArtistDecision? artistDecision = null,
         SongDecision songDecision = SongDecision.None)
         => new(
-            songId, title, version, FeaturedArtists: null, Lyrics: null,
+            songId, title, Lyrics: null,
             artistId, artistText, provider, externalId,
             PendingUrls: [],
             artistDecision ?? new ArtistDecision.None(),
@@ -181,22 +181,6 @@ public class SongServiceSaveFromFormTests
         Assert.Equal(SaveField.Artist, outcome.FailedField);
         Assert.Equal(serviceMessage, outcome.Message);
         VerifyArtistResolutionNeverCalled();
-        VerifyNothingWritten();
-    }
-
-    [Fact]
-    // [AC] REQ-SFT-12: a pick-filled Version longer than 60 characters fails on the Version field and
-    // saves nothing (D21).
-    public async Task SaveFromForm_VersionOver60_FailsOnVersionField()
-    {
-        var outcome = await CreateSut().SaveFromFormAsync(
-            NewRequest(version: new string('v', 61), artistId: 7));
-
-        Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
-        Assert.Equal(SaveField.Version, outcome.FailedField);
-        Assert.False(string.IsNullOrWhiteSpace(outcome.Message));
-        VerifyArtistResolutionNeverCalled();
-        VerifySongGuardNeverCalled();
         VerifyNothingWritten();
     }
 
@@ -407,7 +391,7 @@ public class SongServiceSaveFromFormTests
     // ── Rule 3: song guard (add mode) ─────────────────────────────────────
 
     [Fact]
-    // [AC] REQ-SFT-22: an exact duplicate (collated artist, title, version) returns SongChoiceNeeded
+    // [AC] REQ-SFT-22: an exact duplicate (collated artist, title) returns SongChoiceNeeded
     // with IsExactSongMatch = true and the stored song as the candidate; nothing is written.
     public async Task SaveFromForm_ExactDuplicateSong_ReturnsSongChoiceNeededExact()
     {
@@ -418,7 +402,7 @@ public class SongServiceSaveFromFormTests
             .Setup(r => r.GetByIdAsync(55, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Song
             {
-                Id = 55, ArtistId = 7, Title = "Don't Cry", Version = "",
+                Id = 55, ArtistId = 7, Title = "Don't Cry",
                 OriginalArtist = new Artist { Id = 7, Name = "Guns N' Roses" }
             });
 
@@ -438,8 +422,8 @@ public class SongServiceSaveFromFormTests
     {
         var fuzzy = new List<SongMatch>
         {
-            new(61, "Dont Cry", "", "Guns N' Roses", 0.96),
-            new(62, "Don't Cry (Acoustic)", "Acoustic", "Guns N' Roses", 0.88)
+            new(61, "Dont Cry", "Guns N' Roses", 0.96),
+            new(62, "Don't Cry (Acoustic)", "Guns N' Roses", 0.88)
         };
         _songResolutionMock
             .Setup(r => r.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
@@ -470,7 +454,7 @@ public class SongServiceSaveFromFormTests
             .Setup(r => r.GetByIdAsync(55, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Song
             {
-                Id = 55, ArtistId = 3, Title = "Don't Cry", Version = "",
+                Id = 55, ArtistId = 3, Title = "Don't Cry",
                 OriginalArtist = new Artist { Id = 3, Name = "Guns N Roses" }
             });
 
@@ -580,47 +564,6 @@ public class SongServiceSaveFromFormTests
 
     // ── Rules 3-4: song decisions ─────────────────────────────────────────
 
-    [Fact]
-    // [AC] REQ-SFT-22: "Save as new version" with an empty Version fails on the Version field
-    // (AC-1.2 validation); the song guard does not re-run and nothing is written.
-    public async Task SaveFromForm_SaveAsNewVersionEmptyVersion_FailsOnVersion()
-    {
-        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            version: "", artistId: 7, songDecision: SongDecision.SaveAsNewVersion));
-
-        Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
-        Assert.Equal(SaveField.Version, outcome.FailedField);
-        Assert.False(string.IsNullOrWhiteSpace(outcome.Message));
-        VerifySongGuardNeverCalled();
-        VerifyNothingWritten();
-    }
-
-    [Fact]
-    // [AC] REQ-SFT-22: "Save as new version" with a Version skips the song guard and writes the song.
-    public async Task SaveFromForm_SaveAsNewVersionDecision_SkipsSongGuard_Writes()
-    {
-        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            version: "Live", artistId: 7, songDecision: SongDecision.SaveAsNewVersion));
-
-        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
-        VerifySongGuardNeverCalled();
-        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
-        Assert.Equal("Live", AddedSong!.Version);
-    }
-
-    [Fact]
-    // [AC] REQ-SFT-23: "Save as new song" skips the song guard and needs no Version.
-    public async Task SaveFromForm_SaveAsNewSongDecision_SkipsSongGuard_NoVersionRequired()
-    {
-        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            version: "", artistId: 7, songDecision: SongDecision.SaveAsNewSong));
-
-        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
-        VerifySongGuardNeverCalled();
-        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
-        Assert.Equal(string.Empty, AddedSong!.Version);
-    }
-
     // ── Rule 5: write ─────────────────────────────────────────────────────
 
     [Fact]
@@ -631,7 +574,7 @@ public class SongServiceSaveFromFormTests
     {
         var stored = new Song
         {
-            Id = 50, ArtistId = 3, Title = "Old title", Version = "",
+            Id = 50, ArtistId = 3, Title = "Old title",
             ExternalProvider = DeezerProvider, ExternalId = DeezerTrackId,
             OriginalArtist = new Artist { Id = 3, Name = "Stored artist 3" }
         };
@@ -653,18 +596,18 @@ public class SongServiceSaveFromFormTests
     }
 
     [Fact]
-    // [AC] REQ-SFT-51: a failure tuple from the write path (here the duplicate (artist, title, version)
+    // [AC] REQ-SFT-51: a failure tuple from the write path (here the duplicate (artist, title)
     // refusal) comes back as Failed carrying the write's message, with no saved id.
     public async Task SaveFromForm_WriteReturnsFailureTuple_ReturnsFailedWithMessage()
     {
         _songRepoMock
-            .Setup(r => r.ExistsByTitleVersionForArtistAsync(7, "Don't Cry", "", It.IsAny<CancellationToken>()))
+            .Setup(r => r.ExistsByTitleForArtistAsync(7, "Don't Cry", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: 7));
 
         Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
-        Assert.Equal("A song with this title and version already exists for this artist", outcome.Message);
+        Assert.Equal("This artist already has a song with this title.", outcome.Message);
         Assert.Null(outcome.SavedSongId);
     }
 
@@ -741,19 +684,19 @@ public class SongServiceSaveFromFormTests
 
     [Fact]
     // [AC] REQ-SFT-51: a song-level refusal after the new artist was created in the same write (here the
-    // duplicate (artist, title, version) check) is not an Artist failure: Failed with SaveField.None and no
+    // duplicate (artist, title) check) is not an Artist failure: Failed with SaveField.None and no
     // saved id.
     public async Task SaveFromForm_NewArtistThenSongRefused_FailsWithFieldNone()
     {
         _songRepoMock
-            .Setup(r => r.ExistsByTitleVersionForArtistAsync(NewArtistId, "Don't Cry", "", It.IsAny<CancellationToken>()))
+            .Setup(r => r.ExistsByTitleForArtistAsync(NewArtistId, "Don't Cry", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: null, artistText: "Brand New Band"));
 
         Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
         Assert.Equal(SaveField.None, outcome.FailedField);
-        Assert.Equal("A song with this title and version already exists for this artist", outcome.Message);
+        Assert.Equal("This artist already has a song with this title.", outcome.Message);
         Assert.Null(outcome.SavedSongId);
         _artistServiceMock.Verify(a => a.CreateArtistAsync(
             "Brand New Band", null, null, It.IsAny<CancellationToken>()), Times.Once);
@@ -783,25 +726,21 @@ public class SongServiceSaveFromFormTests
     }
 
     [Fact]
-    // [AC] REQ-SFT-39: "Save as new version" on an exact external-identity match writes the new row with a null
-    // external identity even though the request carries the held identity (ruling D1): the original song keeps
-    // it, so the unique (ExternalProvider, ExternalId) index is not violated by the second row.
-    public async Task SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity()
+    // [AC] REQ-RMV-06 / REQ-RMV-07: an exact-identity save is never written, even when the request carries
+    // SaveAsNewSong (the sheet offers only Open existing and Cancel for an exact match); the write-time identity check refuses it.
+    public async Task SaveFromForm_SaveAsNewSongOnExactIdentity_RefusedAndNothingWritten()
     {
         _songRepoMock
-            .Setup(r => r.ExistsByExternalIdentityAsync(
-                DeezerProvider, DeezerTrackId, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.ExistsByTitleForArtistAsync(7, "Don't Cry", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            artistId: 7, version: "Live", provider: DeezerProvider, externalId: DeezerTrackId,
-            songDecision: SongDecision.SaveAsNewVersion));
+            artistId: 7, songDecision: SongDecision.SaveAsNewSong));
 
-        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
-        Assert.NotNull(AddedSong);
-        Assert.Null(AddedSong!.ExternalProvider);
-        Assert.Null(AddedSong.ExternalId);
-        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
+        Assert.Equal("This artist already has a song with this title.", outcome.Message);
+        Assert.Null(outcome.SavedSongId);
+        VerifyNothingWritten();
     }
 
     [Fact]
@@ -816,7 +755,7 @@ public class SongServiceSaveFromFormTests
             .ReturnsAsync(true);
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            artistId: 7, version: "", provider: DeezerProvider, externalId: DeezerTrackId,
+            artistId: 7, provider: DeezerProvider, externalId: DeezerTrackId,
             songDecision: SongDecision.SaveAsNewSong));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);

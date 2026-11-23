@@ -16,9 +16,6 @@ public sealed record ArtistCandidate(
 /// </summary>
 public sealed record SongCandidate(
     string Title,
-    /// <summary>Empty string denotes the canonical version; non-empty = deliberate variant (Live/Acoustic/Remix).</summary>
-    string Version,
-    string? FeaturedArtists,
     string? Lyrics,
     ArtistCandidate Artist,
     string? ExternalProvider,

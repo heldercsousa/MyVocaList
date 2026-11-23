@@ -23,6 +23,7 @@ public class SongSaveTrigramDuplicateTests : IAsyncLifetime
     private readonly Mock<IArtistRepository> _artistRepo = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepo = new();
     private readonly Mock<ISongKaraokeUrlService> _urlService = new();
+    private readonly Mock<ICatalogRepository> _catalogRepo = new();
     private readonly Mock<IArtistService> _artistService = new();
     private readonly Mock<IArtistResolutionService> _artistResolution = new();
     private readonly Mock<ISongService> _songServiceForResolution = new();
@@ -43,7 +44,6 @@ public class SongSaveTrigramDuplicateTests : IAsyncLifetime
         {
             ArtistId = _queen.Id,
             Title = "Patience",
-            Version = "",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -76,7 +76,7 @@ public class SongSaveTrigramDuplicateTests : IAsyncLifetime
     public async Task SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate()
     {
         var outcome = await CreateSut().SaveFromFormAsync(new SongFormSaveRequest(
-            null, "Patiencee", "", FeaturedArtists: null, Lyrics: null,
+            null, "Patiencee", Lyrics: null,
             _queen.Id, "Queen", null, null,
             PendingUrls: [],
             new ArtistDecision.None(),
@@ -102,7 +102,7 @@ public class SongSaveTrigramDuplicateTests : IAsyncLifetime
             _resolutionLogger.Object);
 
         var uow = PassthroughUnitOfWork.Over(
-            _songRepo, _artistRepo, _urlRepo, _urlService, _artistService, _artistResolution, resolution);
+            _songRepo, _artistRepo, _urlRepo, _urlService, _catalogRepo.Object, _artistService, _artistResolution, resolution);
 
         return new SongService(
             _songRepo,

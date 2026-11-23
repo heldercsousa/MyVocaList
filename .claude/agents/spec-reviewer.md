@@ -50,8 +50,8 @@ Fresh-context spec reviewer. Read the spec with no prior context bias — verify
 
 ### Constitutional Compliance (CLAUDE.md non-negotiables)
 
-- [ ] No `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync` in any design decision — must use `dx:BottomSheet`
-- [ ] DevExpress-first: no stock MAUI component used where a DevExpress equivalent exists
+- [ ] No `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync` in any design decision — must use `SfBottomSheet` (pages not yet migrated keep `dx:BottomSheet`)
+- [ ] Syncfusion-first: no stock MAUI component used where a Syncfusion equivalent exists; no new DevExpress usage
 - [ ] Business logic is described as living in Services only — not ViewModels or pages
 - [ ] All component names, style keys, and BindableProperty names use official MD3 terminology
 - [ ] All identifiers, labels, and log messages are English only

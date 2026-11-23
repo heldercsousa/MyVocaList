@@ -16,27 +16,6 @@ public interface ISongRepository
     Task<bool> ExistsByTitleForArtistAsync(int artistId, string title, int excludeId, CancellationToken ct);
 
     /// <summary>
-    /// Returns <c>true</c> if a song with the given title and version already exists for the specified artist,
-    /// using the configured case- and accent-insensitive collation.
-    /// </summary>
-    /// <param name="artistId">Scope: original artist of the song.</param>
-    /// <param name="title">Song title to match.</param>
-    /// <param name="version">Version label to match; pass empty string for canonical versions.</param>
-    /// <param name="ct">Cancellation token.</param>
-    Task<bool> ExistsByTitleVersionForArtistAsync(int artistId, string title, string version, CancellationToken ct = default);
-
-    /// <summary>
-    /// Same as <see cref="ExistsByTitleVersionForArtistAsync(int,string,string,CancellationToken)"/> but
-    /// excludes the song with id <paramref name="excludeId"/> (used during edit/update validation).
-    /// </summary>
-    /// <param name="artistId">Scope: original artist of the song.</param>
-    /// <param name="title">Song title to match.</param>
-    /// <param name="version">Version label to match.</param>
-    /// <param name="excludeId">Id of the song being edited — excluded from the uniqueness check.</param>
-    /// <param name="ct">Cancellation token.</param>
-    Task<bool> ExistsByTitleVersionForArtistAsync(int artistId, string title, string version, int excludeId, CancellationToken ct = default);
-
-    /// <summary>
     /// Returns all songs whose title is collation-equal (case- and accent-insensitive) to any
     /// of the given <paramref name="titles"/>, resolved in a single batch query.
     /// Used for remote-suggestion dedup tier (b) — REQ-FORMUX-03.
@@ -47,15 +26,14 @@ public interface ISongRepository
     Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(IEnumerable<string> titles, CancellationToken ct = default);
 
     /// <summary>
-    /// REQ-SFT-42: the id of the collated (artist, title, version) match, or null. Replaces the
+    /// REQ-SFT-42: the id of the collated (artist, title) match, or null. Replaces the
     /// Exists + pool re-match + OrdinalIgnoreCase path (SongResolutionService.cs:96-127).
     /// </summary>
     /// <param name="artistId">Scope: original artist of the song.</param>
     /// <param name="title">Song title to match.</param>
-    /// <param name="version">Version label to match; pass empty string for canonical versions.</param>
     /// <param name="excludeId">Id of the song being edited — excluded from the match; null when creating.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<int?> FindIdByTitleVersionForArtistAsync(int artistId, string title, string version, int? excludeId, CancellationToken ct);
+    Task<int?> FindIdByTitleForArtistAsync(int artistId, string title, int? excludeId, CancellationToken ct);
 
     /// <summary>
     /// REQ-SFT-26: true when another song holds this external identity.
@@ -97,11 +75,11 @@ public interface ISongRepository
     Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct);
 
     /// <summary>
-    /// REQ-SFT-05(b): collated (title, artist name, version) matches. The version comes per item (Q5 = B, D21).
+    /// REQ-SFT-05(b): collated (title, artist name) matches.
     /// </summary>
-    /// <param name="items">Triples to match; the version is empty for the canonical version.</param>
+    /// <param name="items">Pairs to match.</param>
     /// <param name="ct">Cancellation token.</param>
-    Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct);
+    Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName)> items, CancellationToken ct);
 
     /// <summary>Every stored <c>local:</c> image reference of a song (REQ-PIC-11 orphan sweep).</summary>
     Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default);
@@ -109,4 +87,7 @@ public interface ISongRepository
     Task AddAsync(Song song, CancellationToken ct);
     Task UpdateAsync(Song song, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
+
+    /// <summary>REQ-CATPROP-10: number of songs the artist authored (catalog covers are not counted).</summary>
+    Task<int> CountByArtistAsync(int artistId, CancellationToken ct);
 }

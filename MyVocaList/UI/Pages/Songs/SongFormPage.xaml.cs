@@ -45,9 +45,6 @@ public partial class SongFormPage : ContentPage
         ViewModel.InitializeArtistField(); // BUG-008: reliable artist field init after all query props set
     }
 
-    private void OnVersionUnfocused(object sender, FocusEventArgs e) =>
-        ViewModel.ValidateVersionCommand.Execute(null);
-
     // BUG-023: resolutionSheet lost its state binding when IsExpanded was removed
     // without replacement. dx:BottomSheet has no bindable "open" property that can be driven
     // declaratively from XAML — Show()/Close() require a host Page — so the sync is done here in
@@ -127,7 +124,7 @@ public partial class SongFormPage : ContentPage
 
     // BUG-084: AllowDismiss is True, so scrim, Back and swipe hide the sheet without a ViewModel command.
     // A user-initiated Hidden is routed through DismissResolutionSheetCommand (the Cancel path): nothing is
-    // saved, the flag and VersionEntryRequired reset. Sync-driven Close() calls are ignored by the guard.
+    // saved, the flag resets. Sync-driven Close() calls are ignored by the guard.
     private void OnResolutionSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
     {
         if (_isSyncingResolutionSheet) return;

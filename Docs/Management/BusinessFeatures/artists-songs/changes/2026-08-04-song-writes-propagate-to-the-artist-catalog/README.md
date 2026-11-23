@@ -1,12 +1,13 @@
 ---
 id: song-writes-propagate-to-the-artist-catalog
 title: Song writes propagate to the artist catalog
-status: 📋 Spec
+status: ✅ Done
 target: 2026-08-04
 section: BusinessFeatures
 parent: artists-songs
 goal: Creating a song must also create the matching record in that artist's catalog, and editing a song must be reflected there. Today the two can drift apart.
-gate: "Deferred by Helder 2026-11-04 — spec waits until the song-form title-first item is done, so catalog decisions are not built on song entities still changing."
+gate: Deferred by Helder 2026-11-04 — spec waits until the song-form title-first item is done, so catalog decisions are not built on song entities still changing.
+closed: 2026-11
 kind: change
 ---
 
@@ -138,6 +139,21 @@ Consequences the spec must state as expected, not as defects:
 ## Open questions
 
 None outstanding. D1–D4 close every question the "Before any code" section raised.
+
+## Decisions — Helder, 2026-11-19
+
+Taken while the spec (`requirements.md`, `design.md`) was written:
+
+- **D5 — Catalog-mode Delete removes catalog rows, never songs.** Today it calls `DeleteSongsAsync`.
+  It is rewired to remove cover rows. Derived rows are kept, with a message (D2). Songs are deleted only
+  from the main Songs list. → REQ-CATPROP-08.
+- **D6 — Catalog rows never block an artist delete; owned songs still do.** Parent AC-6.2 is kept. The
+  code's check moves from catalog rows to owned songs, because after the backfill a catalog-row check
+  would block every author. Recorded for later: once the queue exists, an artist referenced by queue
+  events can never be deleted, so history is not lost (queue work, not this item). → REQ-CATPROP-10.
+
+Gates cleared: the song-form title-first item is implemented and no longer open (its 2026-11-04 deferral
+is met). The Artist→Person merge idea was dropped on 2026-11-19, so D1–D4 stand as written.
 
 ---
 

@@ -37,9 +37,35 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     [ObservableProperty] private string _confirmActionText = "Delete";
     [ObservableProperty] private bool _isSelectionMode;
     [ObservableProperty] private BottomSheetState _itemActionsSheetState = BottomSheetState.Hidden;
+    [ObservableProperty] private bool _isItemMenuOpen;
 
-    /// <summary>The item the item actions sheet acts on; <c>default</c> when the sheet is closed.</summary>
+    private IReadOnlyList<ItemMenuAction> _itemMenuActions;
+
+    /// <summary>The item the item actions sheet or the item overflow menu acts on; <c>default</c> when both are closed.</summary>
     protected TItem ItemActionsTarget { get; private set; }
+
+    /// <summary>Page-specific overflow menu items. Built once, on first read, by <see cref="BuildItemMenuActions"/>.</summary>
+    public IReadOnlyList<ItemMenuAction> ItemMenuActions => _itemMenuActions ??= BuildItemMenuActions();
+
+    /// <summary>Override in a derived ViewModel to add page-specific items between Edit and Delete. Default: none.</summary>
+    protected virtual IReadOnlyList<ItemMenuAction> BuildItemMenuActions() => [];
+
+    /// <summary>Typed helper for derived ViewModels: wraps a typed action so it receives the target list item.</summary>
+    protected static ItemMenuAction MenuAction(string text, string icon, Func<TItem, Task> execute) =>
+        new(text, icon, item => execute((TItem)item));
+
+    private IReadOnlyList<MenuItemModel> _itemMenuItems;
+
+    /// <summary>The item menu entries in display order: Edit, the page-specific actions, Delete. Built once, on first read.</summary>
+    public IReadOnlyList<MenuItemModel> ItemMenuItems => _itemMenuItems ??= BuildItemMenuItems();
+
+    private IReadOnlyList<MenuItemModel> BuildItemMenuItems()
+    {
+        var items = new List<MenuItemModel> { new("Edit", "edit_outlined", EditItemCommand) };
+        items.AddRange(ItemMenuActions.Select(a => new MenuItemModel(a.Text, a.Icon, ExecuteItemMenuActionCommand, a)));
+        items.Add(new MenuItemModel("Delete", "delete_outlined", DeleteItemCommand));
+        return items;
+    }
 
     protected abstract ObservableRangeCollection<TItem> Items { get; }
     protected abstract ObservableRangeCollection<TItem> SelectedItems { get; }
@@ -75,6 +101,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     public IAsyncRelayCommand EditItemCommand { get; }
     public IRelayCommand DeleteItemCommand { get; }
     public IRelayCommand DismissItemActionsCommand { get; }
+    public ICommand OpenItemMenuCommand { get; }
+    public ICommand DismissItemMenuCommand { get; }
+    public ICommand ExecuteItemMenuActionCommand { get; }
 
     protected CrudListViewModelBase(ILogger logger)
     {
@@ -92,6 +121,17 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         EditItemCommand = new AsyncRelayCommand(EditItemAsync);
         DeleteItemCommand = new RelayCommand(DeleteItem);
         DismissItemActionsCommand = new RelayCommand(CloseItemActions);
+        OpenItemMenuCommand = new RelayCommand<object>(OpenItemMenu);
+        DismissItemMenuCommand = new RelayCommand(CloseItemActions);
+        ExecuteItemMenuActionCommand = new AsyncRelayCommand<ItemMenuAction>(ExecuteItemMenuActionAsync);
+    }
+
+    // TwoWay write-back from the popup (outside tap, own close) and VM-driven closes both land here.
+    // Closing always clears the target; Edit/Delete/page actions capture it before closing.
+    partial void OnIsItemMenuOpenChanged(bool value)
+    {
+        if (!value)
+            ItemActionsTarget = default;
     }
 
     partial void OnSearchTextChanged(string value)
@@ -361,6 +401,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     /// <inheritdoc />
     public bool HandleBack()
     {
+        if (IsItemMenuOpen)
+        {
+            CloseItemActions();
+            return true;
+        }
+
         if (ItemActionsSheetState != BottomSheetState.Hidden)
         {
             CloseItemActions();
@@ -388,6 +434,13 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private Task OnItemTappedAsync(object parameter)
     {
+        // With the menu open, a tap only dismisses it (no scrim; the tap may reach the row beneath) (REQ-OVFM-15).
+        if (IsItemMenuOpen)
+        {
+            CloseItemActions();
+            return Task.CompletedTask;
+        }
+
         if (IsSelectionMode || parameter is not TItem item)
             return Task.CompletedTask;
 
@@ -396,6 +449,13 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void OnItemLongPressed(object parameter)
     {
+        // With the menu open, a long-press only dismisses it; it must not start selection (REQ-OVFM-16).
+        if (IsItemMenuOpen)
+        {
+            CloseItemActions();
+            return;
+        }
+
         if (parameter is not TItem item) return;
 
         if (!IsSelectionMode)
@@ -439,10 +499,27 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         ItemActionsSheetState = BottomSheetState.HalfExpanded;
     }
 
+    private void OpenItemMenu(object parameter)
+    {
+        if (IsSelectionMode || parameter is not TItem item) return;
+
+        ItemActionsTarget = item;
+        IsItemMenuOpen = true;
+    }
+
     private void CloseItemActions()
     {
         ItemActionsSheetState = BottomSheetState.Hidden;
+        IsItemMenuOpen = false;
         ItemActionsTarget = default;
+    }
+
+    private async Task ExecuteItemMenuActionAsync(ItemMenuAction action)
+    {
+        var target = ItemActionsTarget;
+        CloseItemActions();
+        if (target is not null && action is not null)
+            await action.Execute(target);
     }
 
     private async Task EditItemAsync()

@@ -7,6 +7,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
     xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    xmlns:menus="clr-namespace:MyVocaList.UI.Components.Menus"
     x:Class="MyVocaList.UI.Components.CrudListView"
     x:Name="self">
 
@@ -157,6 +158,13 @@
                              Command="{Binding DeleteItemCommand}" />
             </VerticalStackLayout>
         </dx:BottomSheet>
+
+        <!-- Overflow item menu (browse mode, shared MD3 Menu) — anchored per row by OverflowMenuButton via IMenuHost.HostedMenu.
+             State driven by ICrudListViewModel.IsItemMenuOpen (TwoWay). Items: ItemMenuItems (Edit, page actions, Delete). -->
+        <menus:Menu x:Name="itemMenu"
+                    IsOpen="{Binding IsItemMenuOpen, Mode=TwoWay}"
+                    ItemsSource="{Binding ItemMenuItems}"
+                    Closed="OnItemMenuClosed" />
 
     </Grid>
 

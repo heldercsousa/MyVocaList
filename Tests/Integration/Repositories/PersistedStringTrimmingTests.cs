@@ -33,7 +33,7 @@ public class PersistedStringTrimmingTests : IAsyncLifetime
     [Fact]
     public async Task PersonFullName_LeadingTrailingAndInternalWhitespace_PersistedTrimmedAndCollapsed()
     {
-        var person = new Person(" John  Doe ");
+        var person = new Person(" John  Doe ") { Email = "john.doe@example.com" };
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
 
@@ -46,7 +46,8 @@ public class PersistedStringTrimmingTests : IAsyncLifetime
     [Fact]
     public async Task PersonEmail_WhitespaceOnly_PersistedAsNull()
     {
-        var person = new Person("Jane Doe") { Email = "   " };
+        // BUG-088 CHECK: a singer needs an email or a birthday; the whitespace email still persists as null.
+        var person = new Person("Jane Doe") { Email = "   ", BirthDay = 1, BirthMonth = 1 };
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
 
@@ -104,29 +105,5 @@ public class PersistedStringTrimmingTests : IAsyncLifetime
         var reloaded = await _db.Set<Song>().AsNoTracking().FirstAsync(s => s.Id == song.Id);
 
         Assert.Equal("Bohemian Rhapsody", reloaded.Title);
-    }
-
-    // [AC] REQ-TRIM-07: Song.FeaturedArtists — whitespace-only optional field persists as null.
-    [Fact]
-    public async Task SongFeaturedArtists_WhitespaceOnly_PersistedAsNull()
-    {
-        var artist = new Artist { Name = "Queen", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
-        _db.Set<Artist>().Add(artist);
-        await _db.SaveChangesAsync();
-
-        var song = new Song
-        {
-            ArtistId = artist.Id,
-            Title = "Under Pressure",
-            FeaturedArtists = "   ",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-        _db.Set<Song>().Add(song);
-        await _db.SaveChangesAsync();
-
-        var reloaded = await _db.Set<Song>().AsNoTracking().FirstAsync(s => s.Id == song.Id);
-
-        Assert.Null(reloaded.FeaturedArtists);
     }
 }

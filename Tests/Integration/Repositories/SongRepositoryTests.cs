@@ -268,6 +268,49 @@ public class SongRepositoryTests : IAsyncLifetime
         Assert.Equal(0, remaining);
     }
 
+    [Fact]
+    // [AC] REQ-CATPROP-05: deleting a song removes all its catalog rows (existing DB cascade)
+    public async Task DeleteAsync_Song_RemovesDerivedAndCoverCatalogRows()
+    {
+        var author = await SeedArtistAsync("Author");
+        var coverer = await SeedArtistAsync("Coverer");
+        var song = MakeSong(author.Id, "Doomed");
+        var other = MakeSong(author.Id, "Survivor");
+        _db.Set<Song>().AddRange(song, other);
+        await _db.SaveChangesAsync();
+        _db.Set<Catalog>().AddRange(
+            new Catalog { ArtistId = author.Id, SongId = song.Id },
+            new Catalog { ArtistId = coverer.Id, SongId = song.Id },
+            new Catalog { ArtistId = author.Id, SongId = other.Id });
+        await _db.SaveChangesAsync();
+
+        await _repo.DeleteAsync([song.Id], CancellationToken.None);
+        await _db.SaveChangesAsync();
+
+        Assert.Equal(0, await _db.Set<Catalog>().CountAsync(c => c.SongId == song.Id));
+        Assert.True(await _db.Set<Catalog>().AnyAsync(c => c.ArtistId == author.Id && c.SongId == other.Id));
+    }
+
+    // ── CountByArtistAsync ────────────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-CATPROP-10: only owned songs are counted, covers are not
+    public async Task CountByArtistAsync_ReturnsOwnedSongsOnly()
+    {
+        var a = await SeedArtistAsync("A");
+        var b = await SeedArtistAsync("B");
+        var s1 = MakeSong(a.Id, "One");
+        var s2 = MakeSong(a.Id, "Two");
+        var cover = MakeSong(b.Id, "Theirs");
+        _db.Set<Song>().AddRange(s1, s2, cover);
+        await _db.SaveChangesAsync();
+        _db.Set<Catalog>().Add(new Catalog { ArtistId = a.Id, SongId = cover.Id });
+        await _db.SaveChangesAsync();
+
+        Assert.Equal(2, await _repo.CountByArtistAsync(a.Id, CancellationToken.None));
+        Assert.Equal(0, await _repo.CountByArtistAsync(9999, CancellationToken.None));
+    }
+
     // ── Lyrics field ─────────────────────────────────────────────────────
 
     [Fact]
@@ -373,47 +416,46 @@ public class SongRepositoryTests : IAsyncLifetime
     // ── Lookups (SFT) ──────────────────────────────────────────────────────
 
     [Fact]
-    // [AC] REQ-SFT-42: collated (artist, title, version) match ignores accent difference
-    public async Task FindIdByTitleVersionForArtistAsync_AccentOnlyDifference_ReturnsStoredId()
+    // [AC] REQ-SFT-42: collated (artist, title) match ignores accent difference
+    public async Task FindIdByTitleForArtistAsync_AccentOnlyDifference_ReturnsStoredId()
     {
         var artist = await SeedArtistAsync("Ana Carolina");
         var song = MakeSong(artist.Id, "Não Sei");
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
-        var found = await _repo.FindIdByTitleVersionForArtistAsync(
-            artist.Id, "Nao Sei", "", null, CancellationToken.None);
+        var found = await _repo.FindIdByTitleForArtistAsync(
+            artist.Id, "Nao Sei", null, CancellationToken.None);
 
         Assert.Equal(song.Id, found);
     }
 
     [Fact]
-    // [AC] REQ-SFT-29: a different version label is not a match
-    public async Task FindIdByTitleVersionForArtistAsync_DifferentVersion_ReturnsNull()
+    // [AC] REQ-RMV-06: case-only difference is an identity match (collation, not Version)
+    public async Task FindIdByTitleForArtistAsync_CaseOnlyDifference_ReturnsStoredId()
     {
         var artist = await SeedArtistAsync("Radiohead");
         var song = MakeSong(artist.Id, "Creep");
-        song.Version = "Live";
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
-        var found = await _repo.FindIdByTitleVersionForArtistAsync(
-            artist.Id, "Creep", "Acoustic", null, CancellationToken.None);
+        var found = await _repo.FindIdByTitleForArtistAsync(
+            artist.Id, "creep", null, CancellationToken.None);
 
-        Assert.Null(found);
+        Assert.Equal(song.Id, found);
     }
 
     [Fact]
-    // [AC] REQ-SFT-29: excluding the only matching row (the song being edited) yields no match
-    public async Task FindIdByTitleVersionForArtistAsync_ExcludeSelf_ReturnsNull()
+    // [AC] REQ-RMV-06: excluding the only matching row (the song being edited) yields no match
+    public async Task FindIdByTitleForArtistAsync_ExcludeSelf_ReturnsNull()
     {
         var artist = await SeedArtistAsync("The Who");
         var song = MakeSong(artist.Id, "My Generation");
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
-        var found = await _repo.FindIdByTitleVersionForArtistAsync(
-            artist.Id, "My Generation", "", song.Id, CancellationToken.None);
+        var found = await _repo.FindIdByTitleForArtistAsync(
+            artist.Id, "My Generation", song.Id, CancellationToken.None);
 
         Assert.Null(found);
     }

@@ -40,7 +40,7 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     [Fact]
     public async Task SearchTitleCandidatesForArtistAsync_TypedTitleLongerThanStored_FindsStoredTitle()
     {
-        _db.Songs.Add(MakeSong(_queen.Id, "Patience", ""));
+        _db.Songs.Add(MakeSong(_queen.Id, "Patience"));
         await _db.SaveChangesAsync();
 
         var hits = await _repo.SearchTitleCandidatesForArtistAsync(
@@ -57,8 +57,8 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     [Fact]
     public async Task SearchTitleCandidatesForArtistAsync_OtherArtistSameTitle_IsExcluded()
     {
-        var queenPatience = MakeSong(_queen.Id, "Patience", "");
-        _db.Songs.AddRange(queenPatience, MakeSong(_metallica.Id, "Patience", ""));
+        var queenPatience = MakeSong(_queen.Id, "Patience");
+        _db.Songs.AddRange(queenPatience, MakeSong(_metallica.Id, "Patience"));
         await _db.SaveChangesAsync();
 
         var hits = await _repo.SearchTitleCandidatesForArtistAsync(
@@ -78,10 +78,10 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     {
         var quentin = await SeedArtistAsync("Quentin Music");
         _db.Songs.AddRange(
-            MakeSong(_queen.Id, "Bohemian Rhapsody", ""),
-            MakeSong(_queen.Id, "Bohemian Anniversary", ""),
-            MakeSong(_queen.Id, "Somebody to Love", ""),
-            MakeSong(quentin.Id, "Bohemian Dreams", ""));
+            MakeSong(_queen.Id, "Bohemian Rhapsody"),
+            MakeSong(_queen.Id, "Bohemian Anniversary"),
+            MakeSong(_queen.Id, "Somebody to Love"),
+            MakeSong(quentin.Id, "Bohemian Dreams"));
         await _db.SaveChangesAsync();
 
         var hits = await _repo.SearchTitleCandidatesForArtistAsync(
@@ -101,8 +101,8 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     {
         var led = await SeedArtistAsync("Led Zeppelin");
         _db.Songs.AddRange(
-            MakeSong(led.Id, "Stairway to Heaven", ""),
-            MakeSong(led.Id, "Black Dog", ""));
+            MakeSong(led.Id, "Stairway to Heaven"),
+            MakeSong(led.Id, "Black Dog"));
         await _db.SaveChangesAsync();
 
         var hits = await _repo.SearchTitleCandidatesForArtistAsync(
@@ -119,9 +119,9 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     public async Task SearchTitleCandidatesForArtistAsync_ShortTitle_UsesCollatedPrefixFallback()
     {
         _db.Songs.AddRange(
-            MakeSong(_queen.Id, "Abba Song", ""),
-            MakeSong(_queen.Id, "Cab Driver", ""),
-            MakeSong(_metallica.Id, "Abba Other", ""));
+            MakeSong(_queen.Id, "Abba Song"),
+            MakeSong(_queen.Id, "Cab Driver"),
+            MakeSong(_metallica.Id, "Abba Other"));
         await _db.SaveChangesAsync();
 
         var hits = await _repo.SearchTitleCandidatesForArtistAsync(
@@ -139,7 +139,7 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     [InlineData("Paitence")]
     public async Task SearchTitleCandidatesForArtistAsync_TypoInMiddle_StillRetrieves(string typed)
     {
-        _db.Songs.Add(MakeSong(_queen.Id, "Patience", ""));
+        _db.Songs.Add(MakeSong(_queen.Id, "Patience"));
         await _db.SaveChangesAsync();
 
         var hits = await _repo.SearchTitleCandidatesForArtistAsync(
@@ -154,7 +154,7 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     [Fact]
     public async Task SearchTitleCandidatesForArtistAsync_UnrelatedTitle_ReturnsEmpty()
     {
-        _db.Songs.Add(MakeSong(_queen.Id, "Patience", ""));
+        _db.Songs.Add(MakeSong(_queen.Id, "Patience"));
         await _db.SaveChangesAsync();
 
         var hits = await _repo.SearchTitleCandidatesForArtistAsync(
@@ -171,11 +171,10 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
         return artist;
     }
 
-    private static Song MakeSong(int artistId, string title, string version) => new()
+    private static Song MakeSong(int artistId, string title) => new()
     {
         ArtistId = artistId,
         Title = title,
-        Version = version,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
     };

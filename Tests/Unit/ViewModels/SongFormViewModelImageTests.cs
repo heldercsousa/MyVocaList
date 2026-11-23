@@ -55,7 +55,6 @@ public class SongFormViewModelImageTests
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
         songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
             .Returns((SongFormSaveRequest r, CancellationToken _) =>
             {
@@ -70,18 +69,18 @@ public class SongFormViewModelImageTests
 
     private static SongFormSaveOutcome SongChoice() =>
         new(SongFormSaveKind.SongChoiceNeeded, string.Empty, SaveField.None, null, [], true,
-            [new SongMatch(9, "Creep", string.Empty, "Radiohead", 1.0)]);
+            [new SongMatch(9, "Creep", "Radiohead", 1.0)]);
 
     private static SongSuggestionDto LocalDto(
-        int id, string title = "Creep", string artist = "Radiohead", string version = "",
+        int id, string title = "Creep", string artist = "Radiohead",
         string? image = null, string? artistImage = null, string? album = null) =>
-        new(id, title, artist, 1, null, null, false, version, artist, image, artistImage, album);
+        new(id, title, artist, 1, null, null, false, artist, image, artistImage, album);
 
     private static SongSuggestionDto RemoteDto(
-        string title = "Creep", string artist = "Radiohead", string version = "",
+        string title = "Creep", string artist = "Radiohead",
         string? image = Cover, string? artistImage = ArtistPic, string? album = null,
         int? localArtistId = null, string? localArtistName = null) =>
-        new(null, title, artist, localArtistId, "dz-1", "Deezer", true, version, localArtistName, image, artistImage, album);
+        new(null, title, artist, localArtistId, "dz-1", "Deezer", true, localArtistName, image, artistImage, album);
 
     private static AutocompleteSuggestion Pick(SongSuggestionDto dto) => new(dto.Title, string.Empty, dto);
 
@@ -134,21 +133,21 @@ public class SongFormViewModelImageTests
     }
 
     [Fact]
-    public async Task TitleOption_RemoteRow_SupportingTextIsArtistVersionAlbum()
+    public async Task TitleOption_RemoteRow_SupportingTextIsArtistAlbum()
     {
-        // [AC] REQ-ART-07: artist · version · album for the example of the requirement.
-        SetupSearch([], [], [RemoteDto("Commando", "Ramones", "1999 Remaster", album: "Greatest Hits")]);
+        // [AC] REQ-ART-07 (REQ-RMV-01, version part removed): artist · album.
+        SetupSearch([], [], [RemoteDto("Commando", "Ramones", album: "Greatest Hits")]);
 
         var option = await SingleTitleOption(CreateSut());
 
-        Assert.Equal("Ramones · 1999 Remaster · Greatest Hits", option.SupportingText);
+        Assert.Equal("Ramones · Greatest Hits", option.SupportingText);
     }
 
     [Fact]
-    public async Task TitleOption_LocalRowEmptyVersion_SupportingTextIsArtistOnly()
+    public async Task TitleOption_LocalRow_SupportingTextIsArtistOnly()
     {
-        // [AC] REQ-ART-07: a local song with an empty version shows the artist only.
-        SetupSearch([LocalDto(1, "Don't Cry", "Guns N' Roses", "")], [], []);
+        // [AC] REQ-ART-07 (REQ-RMV-01): a local song shows the artist only.
+        SetupSearch([LocalDto(1, "Don't Cry", "Guns N' Roses")], [], []);
 
         var option = await SingleTitleOption(CreateSut());
 
@@ -161,18 +160,18 @@ public class SongFormViewModelImageTests
     public async Task TitleOption_AlbumEqualToTitleIgnoringCase_OmitsAlbum(string album)
     {
         // [AC] REQ-ART-07: the album is omitted when it equals the title ignoring case.
-        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", "Live", album: album)]);
+        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", album: album)]);
 
         var option = await SingleTitleOption(CreateSut());
 
-        Assert.Equal("Radiohead · Live", option.SupportingText);
+        Assert.Equal("Radiohead", option.SupportingText);
     }
 
     [Fact]
     public async Task TitleOption_AlbumDiffersByAccent_KeepsAlbum()
     {
         // [AC] REQ-ART-07: ordinal comparison, accents count as different.
-        SetupSearch([], [], [RemoteDto("Cafe", "Artist", "", album: "Café")]);
+        SetupSearch([], [], [RemoteDto("Cafe", "Artist", album: "Café")]);
 
         var option = await SingleTitleOption(CreateSut());
 
@@ -183,18 +182,18 @@ public class SongFormViewModelImageTests
     public async Task TitleOption_LocalRowCarryingAlbum_IgnoresAlbum()
     {
         // [AC] REQ-ART-07: album is present on Deezer options only (a local row has none).
-        SetupSearch([LocalDto(1, "Creep", "Radiohead", "Live", album: "Pablo Honey")], [], []);
+        SetupSearch([LocalDto(1, "Creep", "Radiohead", album: "Pablo Honey")], [], []);
 
         var option = await SingleTitleOption(CreateSut());
 
-        Assert.Equal("Radiohead · Live", option.SupportingText);
+        Assert.Equal("Radiohead", option.SupportingText);
     }
 
     [Fact]
     public async Task TitleOption_RemoteRowBlankAlbum_OmitsAlbum()
     {
         // [AC] REQ-ART-07: only non-empty parts are joined.
-        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", "", album: "   ")]);
+        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", album: "   ")]);
 
         var option = await SingleTitleOption(CreateSut());
 
@@ -205,7 +204,7 @@ public class SongFormViewModelImageTests
     public async Task TitleOption_LocalRow_TrailingTextIsLibraryAndNoSourceWordInSupportingText()
     {
         // [AC] REQ-ART-08: the source is the trailing text, no longer part of the supporting text.
-        SetupSearch([LocalDto(1, "Creep", "Radiohead", "Live")], [], []);
+        SetupSearch([LocalDto(1, "Creep", "Radiohead")], [], []);
 
         var option = await SingleTitleOption(CreateSut());
 
@@ -217,7 +216,7 @@ public class SongFormViewModelImageTests
     public async Task TitleOption_RemoteRow_TrailingTextIsDeezerAndNoSourceWordInSupportingText()
     {
         // [AC] REQ-ART-08: the Deezer option names its source as trailing text.
-        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", "Live")]);
+        SetupSearch([], [], [RemoteDto("Creep", "Radiohead")]);
 
         var option = await SingleTitleOption(CreateSut());
 
@@ -312,22 +311,20 @@ public class SongFormViewModelImageTests
     }
 
     [Fact]
-    public async Task SelectTitle_RemoteOption_LeavesFeaturedLyricsAndKaraokeUrlsAndWritesNothing()
+    public async Task SelectTitle_RemoteOption_LeavesLyricsAndKaraokeUrlsAndWritesNothing()
     {
-        // [AC] REQ-ART-12: a Deezer pick leaves Featured artists, Lyrics and karaoke URLs unchanged and writes nothing.
+        // [AC] REQ-RMV-11 (REQ-ART-12 minus the Featured artists clause): a Deezer pick leaves Lyrics and karaoke URLs unchanged and writes nothing.
         var songService = new Mock<ISongService>();
         var sut = CreateSut(songService);
-        sut.FeaturedArtists = "Thom Yorke";
         sut.Lyrics = "some lyrics";
 
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto()));
 
-        Assert.Equal("Thom Yorke", sut.FeaturedArtists);
         Assert.Equal("some lyrics", sut.Lyrics);
         Assert.Empty(sut.KaraokeUrls);
         songService.Verify(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
-        songService.Verify(s => s.CreateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
-        songService.Verify(s => s.UpdateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.CreateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.UpdateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

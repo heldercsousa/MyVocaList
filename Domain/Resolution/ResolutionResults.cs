@@ -4,7 +4,6 @@ namespace MyVocaList.Domain.Resolution;
 public sealed record SongMatch(
     int SongId,
     string Title,
-    string Version,
     string ArtistName,
     double Score);
 

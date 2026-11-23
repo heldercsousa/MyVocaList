@@ -37,9 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{2C8F9F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C1B-4E22-4CEE-85FF-453BD80607BD}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\DevEnv\claude-code-task-create-rules.md = Docs\DevEnv\claude-code-task-create-rules.md
 		Docs\DevEnv\devenv-setup.md = Docs\DevEnv\devenv-setup.md
-		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
 		Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf = Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf
 	EndProjectSection
 EndProject
@@ -156,6 +154,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\README.md = Docs\Management\BusinessFeatures\artists-songs\README.md
 		Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md = Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md
+		Docs\Management\BusinessFeatures\artists-songs\spec-changelog.md = Docs\Management\BusinessFeatures\artists-songs\spec-changelog.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
@@ -1060,6 +1059,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "music-sourcing-strategy", "
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\README.md
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\estrategia-gemini-2026-11-14.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\estrategia-gemini-2026-11-14.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\findings.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "social-features", "social-features", "{FA1234BC-0001-4000-8000-00000000005D}"
@@ -1362,6 +1362,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-08-04-song-writes-propagate-to-the-artist-catalog", "2026-08-04-song-writes-propagate-to-the-artist-catalog", "{05001611-A05D-588E-8BD9-A058BA9F4AE3}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-09-24-song-form-title-first-one-search-over-local-and-music-apis", "2026-09-24-song-form-title-first-one-search-over-local-and-music-apis", "{DAA25DC3-31F5-5F11-B9D7-183B7E948BFE}"
@@ -1418,6 +1423,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields", "2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields", "{B9BFB19E-ED0B-51CD-8BE7-5C8572E8922A}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\supersession.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\supersession.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc", "{E260291E-7885-5298-8FF1-F7F717ABA8E3}"
@@ -1449,11 +1459,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu", "2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu", "{507D1DDA-5651-5EA8-A7D2-CFE8E53725DE}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu\README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion", "2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion", "{1AEAE66D-879E-5862-9708-FD682B368FE4}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading", "2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading", "{0D8BFAC9-6917-562E-9401-063111D0ABA3}"
@@ -1740,6 +1745,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-md3-overflow-menu-for-list-item-actions", "2026-11-12-md3-overflow-menu-for-list-item-actions", "{E7175041-820E-54A2-AAA7-84C86EFD6F67}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\requirements.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\requirements.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\design.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\tasks.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\tasks.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\plan.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-md3-overflow-menu-for-list-item-actions\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset", "2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset", "{3F256686-ADBB-5258-8AEF-536101DAA8C6}"
@@ -2008,6 +2018,76 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-18-imagepickerfield
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\README.md
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\task-log.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-11-13-new-component-imagepickerfield-form-picture-with-add-replace-and-remove\changes\2026-11-18-imagepickerfield-bigger-centred-picture-tap-to-pick-corner-remove-button\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-catalog-as-an-auto-filled-grouped-grid-filled-from-karaoke-participations", "2026-11-19-catalog-as-an-auto-filled-grouped-grid-filled-from-karaoke-participations", "{7ECDBA7C-214A-5E27-B4DB-6D142281902F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\queue-management\changes\2026-11-19-catalog-as-an-auto-filled-grouped-grid-filled-from-karaoke-participations\README.md = Docs\Management\BusinessFeatures\queue-management\changes\2026-11-19-catalog-as-an-auto-filled-grouped-grid-filled-from-karaoke-participations\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one", "2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one", "{7BC7AB1C-906A-5C00-A0DC-8BE8270E54B7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\README.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\requirements.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\requirements.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\design.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\design.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\tasks.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\tasks.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\task-log.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-19-person-form-birthday-as-day-and-month-dropdowns", "2026-11-19-person-form-birthday-as-day-and-month-dropdowns", "{16D8834F-FC60-53F4-B331-03B67666D303}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\README.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\requirements.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\requirements.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\design.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\design.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\tasks.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\tasks.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\task-log.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-19-person-form-birthday-as-day-and-month-dropdowns\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-singer-self-check-in-to-the-event-queue", "2026-11-21-singer-self-check-in-to-the-event-queue", "{B9D1B194-B090-5F5A-B5C6-240C12584970}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\queue-management\changes\2026-11-21-singer-self-check-in-to-the-event-queue\README.md = Docs\Management\BusinessFeatures\queue-management\changes\2026-11-21-singer-self-check-in-to-the-event-queue\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations", "2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations", "{D5FD802E-2EC8-5560-A2A8-72A6FDBF72D6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\README.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\tasks.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\tasks.md
+		Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\task-log.md = Docs\Management\BusinessFeatures\persons\changes\2026-11-21-singers-list-shows-birthday-and-email-instead-of-participations\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-deezer-browse-popular-now-cards-artist-profile-with-discography-and-top-hits-read-only-deezer-song-view", "2026-11-21-deezer-browse-popular-now-cards-artist-profile-with-discography-and-top-hits-read-only-deezer-song-view", "{B0B281F7-C518-5C98-B978-D21CB993C5B8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-deezer-browse-popular-now-cards-artist-profile-with-discography-and-top-hits-read-only-deezer-song-view\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-deezer-browse-popular-now-cards-artist-profile-with-discography-and-top-hits-read-only-deezer-song-view\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-component-library-licensing", "ui-component-library-licensing", "{CB86F9BF-7F5F-51C3-B9F9-1A2E81A3D4A4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\ui-component-library-licensing\README.md = Docs\Management\cross-cutting\ui-component-library-licensing\README.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\findings.md = Docs\Management\cross-cutting\ui-component-library-licensing\findings.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md = Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\requirements.md = Docs\Management\cross-cutting\ui-component-library-licensing\requirements.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\design.md = Docs\Management\cross-cutting\ui-component-library-licensing\design.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\plan.md = Docs\Management\cross-cutting\ui-component-library-licensing\plan.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\tasks.md = Docs\Management\cross-cutting\ui-component-library-licensing\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker", "2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker", "{9DF6BB92-FAE0-5AC6-B0EB-A483527A71EA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-21-artist-catalog-add-cover-songs-by-hand-catalog-picker\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{7F5E9DB0-20B5-5C11-99A2-46035572E448}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions", "2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions", "{357FDA73-0F7F-5A1C-A904-36F0818BBF1A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\store-presubmission-compliance\changes\2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions\README.md = Docs\Management\cross-cutting\store-presubmission-compliance\changes\2026-11-22-early-version-notice-in-the-app-inviting-feedback-and-suggestions\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons", "2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons", "{9B43FB31-D4BC-53F8-82EB-A0BDAEC80060}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons\README.md
 	EndProjectSection
 EndProject
 Global
@@ -2341,7 +2421,6 @@ Global
 		{B9E91996-1005-5F32-958D-D573A6E50802} = {FA1234BC-0001-4000-8000-00000000007F}
 		{B6F0D158-8ED8-5C88-8FB0-7C8A8EE61B84} = {FA1234BC-0001-4000-8000-00000000007F}
 		{507D1DDA-5651-5EA8-A7D2-CFE8E53725DE} = {FA1234BC-0001-4000-8000-00000000007F}
-		{1AEAE66D-879E-5862-9708-FD682B368FE4} = {FA1234BC-0001-4000-8000-00000000007F}
 		{0D8BFAC9-6917-562E-9401-063111D0ABA3} = {FA1234BC-0001-4000-8000-00000000007F}
 		{CC336040-11AC-59D0-9120-A32810E740A1} = {FA1234BC-0001-4000-8000-00000000007F}
 		{EFE40EA8-9D75-545D-9F6E-862461E550C0} = {FA1234BC-0001-4000-8000-00000000007F}
@@ -2445,6 +2524,18 @@ Global
 		{C994C33D-A7F6-53F0-8D83-39A8E8720626} = {0720A89A-CD49-57EF-9597-BE5572A82705}
 		{E89362B8-1919-5AA6-81D0-47C38A70CC1A} = {60384D3A-1291-563A-A6E7-C6E38CFBE1BB}
 		{601FB201-2EA4-57D6-980E-0E3167C0800A} = {E89362B8-1919-5AA6-81D0-47C38A70CC1A}
+		{7ECDBA7C-214A-5E27-B4DB-6D142281902F} = {FA1234BC-0001-4000-8000-0000000000A2}
+		{7BC7AB1C-906A-5C00-A0DC-8BE8270E54B7} = {FA1234BC-0001-4000-8000-000000000034}
+		{16D8834F-FC60-53F4-B331-03B67666D303} = {FA1234BC-0001-4000-8000-00000000007D}
+		{B9D1B194-B090-5F5A-B5C6-240C12584970} = {FA1234BC-0001-4000-8000-0000000000A2}
+		{D5FD802E-2EC8-5560-A2A8-72A6FDBF72D6} = {FA1234BC-0001-4000-8000-00000000007D}
+		{B0B281F7-C518-5C98-B978-D21CB993C5B8} = {FA1234BC-0001-4000-8000-00000000007F}
+		{CB86F9BF-7F5F-51C3-B9F9-1A2E81A3D4A4} = {FA1234BC-0001-4000-8000-000000000057}
+		{9DF6BB92-FAE0-5AC6-B0EB-A483527A71EA} = {FA1234BC-0001-4000-8000-00000000007F}
+		{7F5E9DB0-20B5-5C11-99A2-46035572E448} = {FA1234BC-0001-4000-8000-00000000006B}
+		{357FDA73-0F7F-5A1C-A904-36F0818BBF1A} = {7F5E9DB0-20B5-5C11-99A2-46035572E448}
+		{8C9C1BED-BD76-5D80-8086-ED06BDC6FD01} = {FA1234BC-0001-4000-8000-0000000000D5}
+		{9B43FB31-D4BC-53F8-82EB-A0BDAEC80060} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

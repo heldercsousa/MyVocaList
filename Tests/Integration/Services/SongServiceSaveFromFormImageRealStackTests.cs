@@ -19,9 +19,9 @@ public class SongServiceSaveFromFormImageRealStackTests
     private const string OtherArtistImage = "https://cdn-images.dzcdn.net/images/artist/yyy/250x250-000000-80-0-0.jpg";
 
     private static SongFormSaveRequest Request(
-        int? songId, string title, string version, int? artistId, string? artistText,
+        int? songId, string title, int? artistId, string? artistText,
         string? imageUrl, string? artistImageUrl)
-        => new(songId, title, version, FeaturedArtists: null, Lyrics: null,
+        => new(songId, title, Lyrics: null,
             artistId, artistText, ExternalProvider: null, ExternalId: null,
             PendingUrls: [], new ArtistDecision.None(), SongDecision.None,
             imageUrl, artistImageUrl);
@@ -51,7 +51,7 @@ public class SongServiceSaveFromFormImageRealStackTests
         await using var host = UnitOfWorkTestHost.Create();
 
         var outcome = await host.Resolve<ISongService>().SaveFromFormAsync(
-            Request(null, "Bohemian Rhapsody", "", null, "Queen Image Test", SongImage, ArtistImage));
+            Request(null, "Bohemian Rhapsody", null, "Queen Image Test", SongImage, ArtistImage));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
         await using var db = FreshContext(host);
@@ -70,7 +70,7 @@ public class SongServiceSaveFromFormImageRealStackTests
         var artist = await SeedArtistAsync(host, "Fill By Id Artist", imageUrl: null);
 
         var outcome = await host.Resolve<ISongService>().SaveFromFormAsync(
-            Request(null, "Fill By Id Song", "", artist.Id, "Fill By Id Artist", SongImage, ArtistImage));
+            Request(null, "Fill By Id Song", artist.Id, "Fill By Id Artist", SongImage, ArtistImage));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
         await using var db = FreshContext(host);
@@ -86,7 +86,7 @@ public class SongServiceSaveFromFormImageRealStackTests
         var artist = await SeedArtistAsync(host, "Fill By Name Artist", imageUrl: null);
 
         var outcome = await host.Resolve<ISongService>().SaveFromFormAsync(
-            Request(null, "Fill By Name Song", "", null, "Fill By Name Artist", SongImage, ArtistImage));
+            Request(null, "Fill By Name Song", null, "Fill By Name Artist", SongImage, ArtistImage));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
         await using var db = FreshContext(host);
@@ -103,7 +103,7 @@ public class SongServiceSaveFromFormImageRealStackTests
         var artist = await SeedArtistAsync(host, "Keep Image Artist", imageUrl: OtherArtistImage);
 
         var outcome = await host.Resolve<ISongService>().SaveFromFormAsync(
-            Request(null, "Keep Image Song", "", artist.Id, "Keep Image Artist", SongImage, ArtistImage));
+            Request(null, "Keep Image Song", artist.Id, "Keep Image Artist", SongImage, ArtistImage));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
         await using var db = FreshContext(host);
@@ -120,14 +120,14 @@ public class SongServiceSaveFromFormImageRealStackTests
         {
             seed.Songs.Add(new Song
             {
-                ArtistId = artist.Id, Title = "Refused Save Song", Version = "",
+                ArtistId = artist.Id, Title = "Refused Save Song",
                 CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
             });
             await seed.SaveChangesAsync();
         }
 
         var outcome = await host.Resolve<ISongService>().SaveFromFormAsync(
-            Request(null, "Refused Save Song", "", artist.Id, "Refused Save Artist", SongImage, ArtistImage));
+            Request(null, "Refused Save Song", artist.Id, "Refused Save Artist", SongImage, ArtistImage));
 
         Assert.NotEqual(SongFormSaveKind.Saved, outcome.Kind);
         await using var db = FreshContext(host);
@@ -146,7 +146,7 @@ public class SongServiceSaveFromFormImageRealStackTests
         {
             var song = new Song
             {
-                ArtistId = artist.Id, Title = "Edit Mode Song", Version = "",
+                ArtistId = artist.Id, Title = "Edit Mode Song",
                 ImageUrl = OtherSongImage, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
             };
             seed.Songs.Add(song);
@@ -155,12 +155,11 @@ public class SongServiceSaveFromFormImageRealStackTests
         }
 
         var outcome = await host.Resolve<ISongService>().SaveFromFormAsync(
-            Request(songId, "Edit Mode Song", "Live", artist.Id, "Edit Mode Artist", SongImage, ArtistImage));
+            Request(songId, "Edit Mode Song", artist.Id, "Edit Mode Artist", SongImage, ArtistImage));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
         await using var db = FreshContext(host);
         var stored = await db.Songs.SingleAsync(s => s.Id == songId);
-        Assert.Equal("Live", stored.Version);
         Assert.Equal(OtherSongImage, stored.ImageUrl);
         Assert.Equal(OtherArtistImage, (await db.Artists.SingleAsync(a => a.Id == artist.Id)).ImageUrl);
     }

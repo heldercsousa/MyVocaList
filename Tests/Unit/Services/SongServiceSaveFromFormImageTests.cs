@@ -15,6 +15,7 @@ public class SongServiceSaveFromFormImageTests
     private const int NewArtistId = 12;
 
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepoMock = new();
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
@@ -75,7 +76,7 @@ public class SongServiceSaveFromFormImageTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _artistServiceMock,
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, _artistServiceMock,
             _artistResolutionMock.Object, _songResolutionMock),
         _loggerMock.Object);
 
@@ -90,7 +91,7 @@ public class SongServiceSaveFromFormImageTests
         string? imageUrl = null,
         string? artistImageUrl = null)
         => new(
-            songId, "Don't Cry", string.Empty, FeaturedArtists: null, Lyrics: null,
+            songId, "Don't Cry", Lyrics: null,
             artistId, artistText, provider, externalId,
             PendingUrls: [],
             artistDecision ?? new ArtistDecision.None(),
@@ -125,14 +126,12 @@ public class SongServiceSaveFromFormImageTests
     }
 
     [Theory]
-    [InlineData(SongDecision.SaveAsNewVersion)]
     [InlineData(SongDecision.SaveAsNewSong)]
     public async Task SaveFromForm_AddWithExplicitSaveAsNew_NullsIdentityButKeepsImage(SongDecision decision)
     {
         // [AC] REQ-ART-15: the cover is kept when the external identity is nulled for save-as-new
         var request = NewRequest(
-            provider: "Deezer", externalId: "3135556", songDecision: decision, imageUrl: SongImage)
-            with { Version = "Live" };
+            provider: "Deezer", externalId: "3135556", songDecision: decision, imageUrl: SongImage);
 
         var outcome = await CreateSut().SaveFromFormAsync(request);
 
@@ -224,7 +223,7 @@ public class SongServiceSaveFromFormImageTests
         // [AC] REQ-ART-17: edit mode never assigns Song.ImageUrl and the artist rule does not run
         var stored = new Song
         {
-            Id = 40, Title = "Don't Cry", Version = string.Empty, ArtistId = 5, ImageUrl = "https://old.example.com/a.jpg"
+            Id = 40, Title = "Don't Cry", ArtistId = 5, ImageUrl = "https://old.example.com/a.jpg"
         };
         var artist = StoredArtist(5);
         _songRepoMock
@@ -266,7 +265,7 @@ public class SongServiceSaveFromFormImageTests
         // [AC] REQ-ART-18: a refused write leaves the existing artist's image and the song unwritten
         var artist = StoredArtist(5);
         _songRepoMock
-            .Setup(r => r.ExistsByTitleVersionForArtistAsync(5, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.ExistsByTitleForArtistAsync(5, It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(

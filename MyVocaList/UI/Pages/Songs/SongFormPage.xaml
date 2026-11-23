@@ -126,18 +126,6 @@
                                                             BlurWithoutPickCommand="{Binding ArtistBlurredWithoutSelectionCommand}" />
                         </textfields:TapToEditField>
 
-                        <!-- Version field (Task 4.5 — empty = canonical version) -->
-                        <dxe:TextEdit Text="{Binding SongVersion, Mode=TwoWay}"
-                                      LabelText="Version (optional)"
-                                      PlaceholderText="e.g. Live, Acoustic, Remix"
-                                      HasError="{Binding VersionHasError}"
-                                      ErrorText="{Binding VersionErrorText}"
-                                      Unfocused="OnVersionUnfocused" />
-
-                        <dxe:TextEdit Text="{Binding FeaturedArtists, Mode=TwoWay}"
-                                      LabelText="Featured Artists"
-                                      PlaceholderText="e.g. feat. Ivete Sangalo" />
-
                         <Editor Placeholder="{Binding LyricsPlaceholder}"
                                 Text="{Binding Lyrics, Mode=TwoWay}"
                                 MaxLength="10000"
@@ -305,10 +293,6 @@
                                             <Label Text="{Binding ArtistName}"
                                                    StyleClass="Body.Small"
                                                    TextColor="{StaticResource OnSurfaceVariant}" />
-                                            <Label Text="{Binding Version}"
-                                                   StyleClass="Body.Small"
-                                                   TextColor="{StaticResource OnSurfaceVariant}"
-                                                   IsVisible="{Binding Version, Converter={StaticResource IsNotNullConverter}}" />
                                         </VerticalStackLayout>
                                         <dx:DXButton Grid.Column="1"
                                                      Content="Open existing"
@@ -324,27 +308,7 @@
 
                         <BoxView Style="{StaticResource Divider}" />
 
-                        <!-- Save as new version option (exact duplicate only; REQ-SFT-22) -->
-                        <VerticalStackLayout Padding="24,12" Spacing="8"
-                                             IsVisible="{Binding IsExactDuplicate}">
-                            <Label Text="Or save as a new version:"
-                                   StyleClass="Body.Small"
-                                   TextColor="{StaticResource OnSurfaceVariant}" />
-                            <!-- Version entry — revealed when user taps Save As New Version -->
-                            <dxe:TextEdit Text="{Binding SongVersion, Mode=TwoWay}"
-                                          LabelText="Version label (required)"
-                                          PlaceholderText="e.g. Live, Acoustic, Remix 2010"
-                                          HasError="{Binding VersionHasError}"
-                                          ErrorText="{Binding VersionErrorText}"
-                                          IsVisible="{Binding VersionEntryRequired}"
-                                          Unfocused="OnVersionUnfocused" />
-                            <dx:DXButton Content="Save as new version"
-                                         Style="{StaticResource OutlinedButton}"
-                                         HorizontalOptions="Fill"
-                                         Command="{Binding ConfirmSaveAsNewVersionCommand}" />
-                        </VerticalStackLayout>
-
-                        <!-- Save as new song option (possible duplicates only; REQ-SFT-23, no Version needed) -->
+                        <!-- Save as new song option (possible duplicates only; REQ-SFT-23, REQ-RMV-07: never offered for an exact match) -->
                         <VerticalStackLayout Padding="24,12" Spacing="8"
                                              IsVisible="{Binding IsExactDuplicate, Converter={StaticResource InverseBoolConverter}}">
                             <dx:DXButton Content="Save as new song"

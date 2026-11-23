@@ -44,7 +44,7 @@ public class PersonRepositoryTests : IAsyncLifetime
     [Fact]
     public async Task SearchByNameStartsWithAsync_CaseInsensitive_FindsMatch()
     {
-        var person = new Person("João Silva");
+        var person = new Person("João Silva") { Email = "joao.silva@example.com" };
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
 
@@ -116,11 +116,12 @@ public class PersonRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddAsync_SameNameNullBirthday_AllowsDuplicate()
+    public async Task AddAsync_SameNameDifferentEmail_AllowsDuplicate()
     {
-        // Same name + null birthday = allowed (filtered unique index only applies when birthday IS NOT NULL)
+        // BUG-088 (superseded AddAsync_SameNameNullBirthday_AllowsDuplicate): same name is allowed when the
+        // identity differs. Name alone is not unique; the identity index covers name + email + birthday.
         var p1 = Create("John Doe");
-        var p2 = Create("John Doe");   // no birthday — should be allowed
+        var p2 = Create("John Doe");   // different generated email, so a different identity
 
         _db.Set<Person>().AddRange(p1, p2);
 
@@ -130,26 +131,63 @@ public class PersonRepositoryTests : IAsyncLifetime
         Assert.Equal(2, await _db.Set<Person>().CountAsync());
     }
 
+    // [AC] REQ-BDAY-07: a day without a month violates the CHECK constraint
     [Fact]
-    public async Task AddAsync_SameNameSameBirthday_ThrowsDbUpdateException()
+    public async Task SaveChanges_DayWithoutMonth_ThrowsDbUpdateException()
     {
-        var p1 = Create("John Doe");
-        p1.BirthdayDayMonth = "15/03";
-        var p2 = Create("John Doe");
-        p2.BirthdayDayMonth = "15/03";
+        var person = Create("John Doe");
+        person.BirthDay = 15;
+        person.BirthMonth = null;
 
-        _db.Set<Person>().AddRange(p1, p2);
+        _db.Set<Person>().Add(person);
 
         await Assert.ThrowsAsync<DbUpdateException>(() => _db.SaveChangesAsync());
+    }
+
+    // [AC] REQ-BDAY-07: a month without a day violates the CHECK constraint
+    [Fact]
+    public async Task SaveChanges_MonthWithoutDay_ThrowsDbUpdateException()
+    {
+        var person = Create("John Doe");
+        person.BirthDay = null;
+        person.BirthMonth = 3;
+
+        _db.Set<Person>().Add(person);
+
+        await Assert.ThrowsAsync<DbUpdateException>(() => _db.SaveChangesAsync());
+    }
+
+    // [AC] REQ-BDAY-07: day 1-31 and month 1-12 are stored and read back as integers
+    [Fact]
+    public async Task SaveChanges_ValidBirthday_RoundTripsDayAndMonth()
+    {
+        var person = Create("John Doe");
+        person.BirthDay = 15;
+        person.BirthMonth = 3;
+        _db.Set<Person>().Add(person);
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.GetByIdAsync(person.Id);
+
+        Assert.NotNull(found);
+        Assert.Equal(15, found.BirthDay);
+        Assert.Equal(3, found.BirthMonth);
     }
 
     [Fact]
     public async Task AddAsync_NullEmailMultipleTimes_AllowsMultipleNulls()
     {
-        // Nullable unique index: NULL != NULL in SQLite — multiple NULL emails are allowed
-        _db.Set<Person>().AddRange(
-            Create("Alice Brown"),
-            Create("Bob Smith"));  // both have null email
+        // Nullable unique index: NULL != NULL in SQLite — multiple NULL emails are allowed.
+        // Both have null email, so each carries a birthday (BUG-088 CHECK); the birthdays differ.
+        var alice = Create("Alice Brown");
+        alice.Email = null;
+        alice.BirthDay = 1;
+        alice.BirthMonth = 1;
+        var bob = Create("Bob Smith");
+        bob.Email = null;
+        bob.BirthDay = 2;
+        bob.BirthMonth = 2;
+        _db.Set<Person>().AddRange(alice, bob);
 
         // Should not throw
         await _db.SaveChangesAsync();
@@ -193,20 +231,109 @@ public class PersonRepositoryTests : IAsyncLifetime
 
     // ── Helper ────────────────────────────────────────────────────────────
 
-    private static Person Create(string name) => new(name);
+    // BUG-088 CHECK: every singer needs an email or a birthday. A unique generated email keeps the default valid.
+    private static Person Create(string name) => new(name) { Email = $"{Guid.NewGuid():N}@example.com" };
 
     // ── Accent-insensitive search ─────────────────────────────────────────
 
     [Fact]
     public async Task SearchByNameStartsWithAsync_QueryWithoutAccents_FindsAccentedPerson()
     {
-        _db.Set<Person>().Add(new Person("João Silva"));
-        _db.Set<Person>().Add(new Person("Anna Smith")); // should not match "joao"
+        _db.Set<Person>().Add(new Person("João Silva") { Email = "joao.silva@example.com" });
+        _db.Set<Person>().Add(new Person("Anna Smith") { Email = "anna.smith@example.com" }); // should not match "joao"
         await _db.SaveChangesAsync();
 
         var results = await _repo.SearchByNameStartsWithAsync("joao", 10, CancellationToken.None);
 
         Assert.Single(results);
         Assert.Equal("João Silva", results.First().FullName);
+    }
+
+    // ── BUG-088 identity queries (default collation, no C# normalization) ──
+
+    [Fact]
+    public async Task IdentityExistsAsync_SameIdentityDifferentCase_ReturnsTrue()
+    {
+        _db.Set<Person>().Add(new Person("João Silva") { BirthDay = 15, BirthMonth = 3 });
+        await _db.SaveChangesAsync();
+
+        Assert.True(await _repo.IdentityExistsAsync("JOAO SILVA", null, 15, 3));
+    }
+
+    [Fact]
+    public async Task IdentityExistsAsync_ExcludeSelf_ReturnsFalse()
+    {
+        var person = new Person("Ana Lima") { Email = "ana@example.com" };
+        _db.Set<Person>().Add(person);
+        await _db.SaveChangesAsync();
+
+        Assert.False(await _repo.IdentityExistsAsync("Ana Lima", "ana@example.com", null, null, person.Id));
+    }
+
+    // [AC] REQ-DUP-09: the list excludes the exact identity match when includeIdentityMatch is false
+    [Fact]
+    public async Task GetSameNameAsync_ExcludesExactMatchWhenNotIncluded()
+    {
+        var exact = new Person("Lia Costa") { Email = "lia@example.com", BirthDay = 1, BirthMonth = 2 };
+        var namesake = new Person("Lia Costa") { Email = "other@example.com" };
+        _db.Set<Person>().AddRange(exact, namesake);
+        await _db.SaveChangesAsync();
+
+        var results = await _repo.GetSameNameAsync("lia costa", "LIA@example.com", 1, 2, null, false, 3);
+
+        var only = Assert.Single(results);
+        Assert.Equal(namesake.Id, only.Id);
+    }
+
+    // [AC] REQ-DUP-13a: with includeIdentityMatch true, a name-only form also lists the exact name-only match
+    [Fact]
+    public async Task GetSameNameAsync_NameOnlyIncludeIdentityMatch_ReturnsExactNameOnlyMatch()
+    {
+        var nameOnly = new Person("Lia Costa");
+        var namesake = new Person("Lia Costa") { Email = "other@example.com" };
+        _db.Set<Person>().AddRange(nameOnly, namesake);
+        await _db.SaveChangesAsync();
+
+        var results = await _repo.GetSameNameAsync("lia costa", null, null, null, null, true, 3);
+
+        Assert.Equal(2, results.Count);
+        Assert.Contains(results, p => p.Id == nameOnly.Id);
+    }
+
+    // [AC] REQ-DUP-13a: the count follows the same includeIdentityMatch rule as the list
+    [Fact]
+    public async Task CountSameNameAsync_NameOnlyWithAndWithoutIdentityMatch_CountsAccordingly()
+    {
+        _db.Set<Person>().AddRange(new Person("Lia Costa"), new Person("Lia Costa") { Email = "other@example.com" });
+        await _db.SaveChangesAsync();
+
+        Assert.Equal(2, await _repo.CountSameNameAsync("lia costa", null, null, null, null, true));
+        Assert.Equal(1, await _repo.CountSameNameAsync("lia costa", null, null, null, null, false));
+    }
+
+    // [AC] REQ-DUP-09: results are ordered by Id (oldest first), at most take rows, and the count is the full total
+    [Fact]
+    public async Task GetSameNameAsync_OrderedByIdAndTakeLimitsRows_CountIsFullTotal()
+    {
+        var people = Enumerable.Range(1, 4).Select(i => new Person("Lia Costa") { Email = $"n{i}@example.com" }).ToList();
+        _db.Set<Person>().AddRange(people);
+        await _db.SaveChangesAsync();
+
+        var results = await _repo.GetSameNameAsync("Lia Costa", "new@example.com", null, null, null, false, 3);
+
+        Assert.Equal(people.Take(3).Select(p => p.Id), results.Select(p => p.Id));
+        Assert.Equal(4, await _repo.CountSameNameAsync("Lia Costa", "new@example.com", null, null, null, false));
+    }
+
+    // [AC] REQ-DUP-13: SameNameExistsAsync matches the name with the default collation and honours excludePersonId
+    [Fact]
+    public async Task SameNameExistsAsync_DifferentCaseAndAccent_ReturnsTrueUnlessExcluded()
+    {
+        var person = new Person("João Silva") { Email = "joao@example.com" };
+        _db.Set<Person>().Add(person);
+        await _db.SaveChangesAsync();
+
+        Assert.True(await _repo.SameNameExistsAsync("JOAO SILVA"));
+        Assert.False(await _repo.SameNameExistsAsync("JOAO SILVA", person.Id));
     }
 }

@@ -140,7 +140,7 @@ public class SongServiceReadScopeTests
         var urlServiceMock = new Mock<ISongKaraokeUrlService>();
         var loggerMock = new Mock<ILogger<SongService>>();
         var countingUow = new CountingUnitOfWork(
-            PassthroughUnitOfWork.Over(songRepoMock, artistRepoMock, urlRepoMock, urlServiceMock));
+            PassthroughUnitOfWork.Over(songRepoMock, artistRepoMock, urlRepoMock, urlServiceMock, new Mock<ICatalogRepository>().Object));
         var sut = new SongService(
             songRepoMock.Object, artistRepoMock.Object, urlRepoMock.Object, urlServiceMock.Object,
             countingUow, loggerMock.Object);
@@ -162,7 +162,7 @@ public class SongServiceReadScopeTests
         var urlServiceMock = new Mock<ISongKaraokeUrlService>();
         var loggerMock = new Mock<ILogger<SongService>>();
         var countingUow = new CountingUnitOfWork(
-            PassthroughUnitOfWork.Over(songRepoMock, artistRepoMock, urlRepoMock, urlServiceMock));
+            PassthroughUnitOfWork.Over(songRepoMock, artistRepoMock, urlRepoMock, urlServiceMock, new Mock<ICatalogRepository>().Object));
         var sut = new SongService(
             songRepoMock.Object, artistRepoMock.Object, urlRepoMock.Object, urlServiceMock.Object,
             countingUow, loggerMock.Object);

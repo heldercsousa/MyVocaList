@@ -307,10 +307,11 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0);
 
-                    b.Property<string>("BirthdayDayMonth")
-                        .HasMaxLength(5)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
+                    b.Property<int?>("BirthDay")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("BirthMonth")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -344,12 +345,10 @@ namespace MyVocaList.Infra.Migrations
                     b.HasIndex("FullName")
                         .HasDatabaseName("IX_Persons_FullName");
 
-                    b.HasIndex("FullName", "BirthdayDayMonth")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Persons_Name_Birthday")
-                        .HasFilter("[BirthdayDayMonth] IS NOT NULL");
-
-                    b.ToTable("People");
+                    b.ToTable("People", t =>
+                        {
+                            t.HasCheckConstraint("CK_Persons_Birthday", "(BirthDay IS NULL AND BirthMonth IS NULL) OR (BirthDay IS NOT NULL AND BirthMonth IS NOT NULL AND BirthDay BETWEEN 1 AND 31 AND BirthMonth BETWEEN 1 AND 12)");
+                        });
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Song", b =>
@@ -371,10 +370,6 @@ namespace MyVocaList.Infra.Migrations
 
                     b.Property<string>("ExternalProvider")
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
-
-                    b.Property<string>("FeaturedArtists")
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
@@ -401,20 +396,14 @@ namespace MyVocaList.Infra.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("ArtistId", "Title")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Songs_ArtistId_Title");
 
                     b.HasIndex("ExternalProvider", "ExternalId")
                         .IsUnique();
-
-                    b.HasIndex("ArtistId", "Title", "Version")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
 
                     b.ToTable("Songs", (string)null);
 

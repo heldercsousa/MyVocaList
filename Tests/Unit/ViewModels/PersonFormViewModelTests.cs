@@ -1,4 +1,6 @@
 using MyVocaList.Domain.Constants;
+using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.UI.Models;
 using MyVocaList.UI.Services;
 
@@ -10,6 +12,15 @@ public class PersonFormViewModelTests
     private readonly Mock<ISnackbarComponent> _snackMock = new();
     private readonly Mock<INavigationService> _navigationMock = new();
     private readonly Mock<ILogger<PersonFormViewModel>> _loggerMock = new();
+
+    // BUG-088: the same-name query is empty by default, so each save test only sets up the path it covers
+    // (the sheet rules themselves are tested in PersonFormViewModelBug088Tests).
+    public PersonFormViewModelTests()
+    {
+        _serviceMock.Setup(s => s.GetSameNamePersonsAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SameNameResult([], 0));
+    }
 
     private PersonFormViewModel CreateSut() =>
         new(_serviceMock.Object, _snackMock.Object, _navigationMock.Object, _loggerMock.Object);
@@ -70,10 +81,10 @@ public class PersonFormViewModelTests
     {
         var sut = CreateSut();
         sut.PersonName = "John Doe";
-        sut.PersonBirthday = "99/99";
+        sut.SelectedBirthDay = 15;
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
+        _serviceMock.Setup(s => s.ValidateBirthday(15, null)).Returns((false, "Select both day and month"));
 
         await sut.SaveCommand.ExecuteAsync(null);
 
@@ -86,11 +97,10 @@ public class PersonFormViewModelTests
     {
         var sut = CreateSut();
         sut.PersonName = "John Doe";
-        sut.PersonBirthday = "";
         sut.PersonEmail = "notanemail";
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail("notanemail")).Returns((false, "Invalid email"));
 
         await sut.SaveCommand.ExecuteAsync(null);
@@ -105,19 +115,18 @@ public class PersonFormViewModelTests
         var sut = CreateSut();
         sut.PersonId = null;
         sut.PersonName = "John Doe";
-        sut.PersonBirthday = "";
         sut.PersonEmail = "";
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
-        _serviceMock.Setup(s => s.CreatePersonAsync("John Doe", null, null, default))
+        _serviceMock.Setup(s => s.CreatePersonAsync("John Doe", null, null, null, default))
                     .ReturnsAsync((true, "John Doe registered successfully!", new Person("John Doe")));
         _snackMock.Setup(s => s.ShowSuccessAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        _serviceMock.Verify(s => s.CreatePersonAsync("John Doe", null, null, default), Times.Once);
+        _serviceMock.Verify(s => s.CreatePersonAsync("John Doe", null, null, null, default), Times.Once);
     }
 
     [Fact]
@@ -126,19 +135,18 @@ public class PersonFormViewModelTests
         var sut = CreateSut();
         sut.PersonId = 5;
         sut.PersonName = "John Doe";
-        sut.PersonBirthday = "";
         sut.PersonEmail = "";
 
         _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
-        _serviceMock.Setup(s => s.UpdatePersonAsync(5, "John Doe", null, null, default))
+        _serviceMock.Setup(s => s.UpdatePersonAsync(5, "John Doe", null, null, null, default))
                     .ReturnsAsync((true, "John Doe updated successfully!"));
         _snackMock.Setup(s => s.ShowSuccessAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        _serviceMock.Verify(s => s.UpdatePersonAsync(5, "John Doe", null, null, default), Times.Once);
+        _serviceMock.Verify(s => s.UpdatePersonAsync(5, "John Doe", null, null, null, default), Times.Once);
     }
 
     // ── SearchPersonsCommand ──────────────────────────────────────────────
@@ -304,80 +312,203 @@ public class PersonFormViewModelTests
         _serviceMock.Verify(s => s.ValidateNameInput(It.IsAny<string>()), Times.Never);
     }
 
-    // ── Birthday field: blur-first validation ──────────────────────────────
+    // ── Birthday dropdowns: Day list, month clamp, validation, hydration ─────
 
-    [Fact]
-    // [AC] R8: A pristine birthday field must not show a blur error.
-    public void ValidateBirthdayCommand_PristineField_DoesNotSetError()
+    [Theory]
+    // [AC] REQ-BDAY-02: The Birth day list holds only the days valid for the selected month.
+    [InlineData(1, 31)]
+    [InlineData(2, 29)]
+    [InlineData(4, 30)]
+    [InlineData(9, 30)]
+    [InlineData(12, 31)]
+    public void SelectedBirthMonth_Change_RebuildsDaysForThatMonth(int month, int expectedDays)
     {
         var sut = CreateSut();
-        sut.CompleteHydration();
 
-        sut.ValidateBirthdayCommand.Execute(null);
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == month);
 
-        Assert.False(sut.BirthdayHasError);
-        Assert.Empty(sut.BirthdayErrorText);
-        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<string>()), Times.Never);
+        Assert.Equal(expectedDays, sut.Days.Count);
+        Assert.Equal(1, sut.Days.First());
+        Assert.Equal(expectedDays, sut.Days.Last());
     }
 
     [Fact]
-    // [AC] R1: On blur, a dirty invalid birthday field surfaces an inline error.
-    public void ValidateBirthdayCommand_DirtyInvalidField_SetsError()
+    // [AC] REQ-BDAY-02: With no month selected, the Birth day list holds 1 to 31.
+    public void Days_NoMonthSelected_Holds1To31()
     {
         var sut = CreateSut();
-        sut.CompleteHydration();
-        sut.PersonBirthday = "99/99";
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
 
-        sut.ValidateBirthdayCommand.Execute(null);
+        Assert.Null(sut.SelectedBirthMonth);
+        Assert.Equal(31, sut.Days.Count);
+        Assert.Equal(31, sut.Days.Last());
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-02: The Months list holds the twelve English month names in order.
+    public void Months_HoldsEnglishNamesJanuaryToDecember()
+    {
+        var sut = CreateSut();
+
+        Assert.Equal(12, sut.Months.Count);
+        Assert.Equal("January", sut.Months[0].Name);
+        Assert.Equal(1, sut.Months[0].Number);
+        Assert.Equal("December", sut.Months[11].Name);
+        Assert.Equal(12, sut.Months[11].Number);
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-03: Choosing a month that cannot hold the selected day clears the day (31, then April).
+    public void SelectedBirthMonth_DayInvalidForNewMonth_ClearsDay()
+    {
+        var sut = CreateSut();
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == 3);
+        sut.SelectedBirthDay = 31;
+
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == 4);
+
+        Assert.Null(sut.SelectedBirthDay);
+        Assert.Equal(30, sut.Days.Count);
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-03: Choosing a month that still allows the selected day keeps the day.
+    public void SelectedBirthMonth_DayValidForNewMonth_KeepsDay()
+    {
+        var sut = CreateSut();
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == 3);
+        sut.SelectedBirthDay = 15;
+
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == 4);
+
+        Assert.Equal(15, sut.SelectedBirthDay);
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-06: Save with a day but no month shows the error on the empty Birth month dropdown and does not save.
+    public async Task SaveCommand_DayWithoutMonth_ShowsErrorOnMonthAndDoesNotSave()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.SelectedBirthDay = 15;
+        _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(15, null)).Returns((false, "Select both day and month"));
+
+        await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.True(sut.BirthdayHasError);
-        Assert.Equal("Use DD/MM format (e.g.: 15/03)", sut.BirthdayErrorText);
+        Assert.True(sut.BirthdayErrorOnMonth);
+        Assert.False(sut.BirthdayErrorOnDay);
+        Assert.Equal("Select both day and month", sut.BirthdayErrorText);
+        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), default), Times.Never);
     }
 
     [Fact]
-    // [AC] R3: While NOT in error, birthday keystrokes do not run validation.
-    public void OnPersonBirthdayChanged_NotInError_DoesNotValidate()
+    // [AC] REQ-BDAY-06: Save with a month but no day shows the error on the empty Birth day dropdown.
+    public async Task SaveCommand_MonthWithoutDay_ShowsErrorOnDayAndDoesNotSave()
     {
         var sut = CreateSut();
-        sut.CompleteHydration();
+        sut.PersonName = "John Doe";
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == 3);
+        _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, 3)).Returns((false, "Select both day and month"));
 
-        sut.PersonBirthday = "99/99";
+        await sut.SaveCommand.ExecuteAsync(null);
 
-        Assert.False(sut.BirthdayHasError);
-        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<string>()), Times.Never);
+        Assert.True(sut.BirthdayErrorOnDay);
+        Assert.False(sut.BirthdayErrorOnMonth);
+        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), default), Times.Never);
     }
 
     [Fact]
-    // [AC] R2: While in error, a keystroke that makes the birthday valid clears the error immediately.
-    public void OnPersonBirthdayChanged_WhileInError_ClearsErrorWhenValid()
+    // [AC] REQ-BDAY-06: While the birthday is in error, a selection that makes it valid clears the error at once.
+    public async Task BirthdayDropdown_WhileInError_ClearsErrorWhenValid()
     {
         var sut = CreateSut();
-        sut.CompleteHydration();
-        sut.PersonBirthday = "99/99";
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
-        sut.ValidateBirthdayCommand.Execute(null);
+        sut.PersonName = "John Doe";
+        sut.SelectedBirthDay = 15;
+        _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(15, null)).Returns((false, "Select both day and month"));
+        await sut.SaveCommand.ExecuteAsync(null);
         Assert.True(sut.BirthdayHasError);
 
-        _serviceMock.Setup(s => s.ValidateBirthday("15/03")).Returns((true, ""));
-        sut.PersonBirthday = "15/03";
+        _serviceMock.Setup(s => s.ValidateBirthday(15, 3)).Returns((true, ""));
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == 3);
 
         Assert.False(sut.BirthdayHasError);
         Assert.Empty(sut.BirthdayErrorText);
     }
 
     [Fact]
-    // [AC] Edit-mode dirty-guard: hydration must not mark the birthday field dirty.
-    public void OnPersonBirthdayChanged_DuringHydration_DoesNotDirtyOrValidateOnBlur()
+    // [AC] REQ-BDAY-06: While the birthday is not in error, a selection does not run validation.
+    public void BirthdayDropdown_NotInError_DoesNotValidate()
     {
-        var sut = CreateSut();   // hydrating — CompleteHydration() not called
+        var sut = CreateSut();
 
-        sut.PersonBirthday = "99/99";               // simulates pre-population with a stale/invalid value
-        sut.ValidateBirthdayCommand.Execute(null);
+        sut.SelectedBirthDay = 15;
 
         Assert.False(sut.BirthdayHasError);
-        Assert.Empty(sut.BirthdayErrorText);
-        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<string>()), Times.Never);
+        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-09: Query parameters pre-select the stored day and month in edit mode.
+    public void QueryParams_Hydration_PreSelectsDayAndMonth()
+    {
+        var sut = CreateSut();
+
+        sut.PersonBirthMonthRaw = "2";
+        sut.PersonBirthDayRaw = "29";
+
+        Assert.Equal(29, sut.SelectedBirthDay);
+        Assert.NotNull(sut.SelectedBirthMonth);
+        Assert.Equal("February", sut.SelectedBirthMonth!.Name);
+        Assert.Equal(29, sut.Days.Count);
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-09: Hydration with empty query parameters leaves both dropdowns empty.
+    public void QueryParams_EmptyValues_LeaveDropdownsEmpty()
+    {
+        var sut = CreateSut();
+
+        sut.PersonBirthDayRaw = "";
+        sut.PersonBirthMonthRaw = "";
+
+        Assert.Null(sut.SelectedBirthDay);
+        Assert.Null(sut.SelectedBirthMonth);
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-09: Hydration does not run birthday validation.
+    public void QueryParams_Hydration_DoesNotValidate()
+    {
+        var sut = CreateSut();
+
+        sut.PersonBirthDayRaw = "31";
+        sut.PersonBirthMonthRaw = "4";
+
+        Assert.False(sut.BirthdayHasError);
+        _serviceMock.Verify(s => s.ValidateBirthday(It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-BDAY-09: Save sends the selected day and month (as ints) to the service.
+    public async Task SaveCommand_CreateMode_PassesDayAndMonthToService()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.SelectedBirthMonth = sut.Months.Single(m => m.Number == 3);
+        sut.SelectedBirthDay = 15;
+        _serviceMock.Setup(s => s.ValidateNameInput("John Doe")).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(15, 3)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.CreatePersonAsync("John Doe", 15, 3, null, default))
+                    .ReturnsAsync((true, "John Doe registered successfully!", new Person("John Doe")));
+        _snackMock.Setup(s => s.ShowSuccessAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        _serviceMock.Verify(s => s.CreatePersonAsync("John Doe", 15, 3, null, default), Times.Once);
     }
 
     // ── Email field: blur-first validation ─────────────────────────────────
@@ -465,11 +596,11 @@ public class PersonFormViewModelTests
         var sut = CreateSut();
         sut.CompleteHydration();
         sut.PersonName = "A";
-        sut.PersonBirthday = "99/99";
+        sut.SelectedBirthDay = 15;
         sut.PersonEmail = "notanemail";
 
         _serviceMock.Setup(s => s.ValidateNameInput("A")).Returns((false, "Name too short. Minimum 2 characters."));
-        _serviceMock.Setup(s => s.ValidateBirthday("99/99")).Returns((false, "Use DD/MM format (e.g.: 15/03)"));
+        _serviceMock.Setup(s => s.ValidateBirthday(15, null)).Returns((false, "Select both day and month"));
         _serviceMock.Setup(s => s.ValidateEmail("notanemail")).Returns((false, "Invalid email"));
 
         await sut.SaveCommand.ExecuteAsync(null);
@@ -477,7 +608,7 @@ public class PersonFormViewModelTests
         Assert.True(sut.NameHasError);
         Assert.True(sut.BirthdayHasError);
         Assert.True(sut.EmailHasError);
-        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default), Times.Never);
+        _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string>(), default), Times.Never);
     }
 
     // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────
@@ -492,11 +623,11 @@ public class PersonFormViewModelTests
         sut.CompleteHydration();
         sut.PersonName = "Jane Doe";
         _serviceMock.Setup(s => s.ValidateNameInput("Jane Doe")).Returns((true, ""));
-        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null, null)).Returns((true, ""));
         _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
 
         var gate = new TaskCompletionSource<(bool success, string message, Person? person)>();
-        _serviceMock.Setup(s => s.CreatePersonAsync("Jane Doe", null, null, default)).Returns(gate.Task);
+        _serviceMock.Setup(s => s.CreatePersonAsync("Jane Doe", null, null, null, default)).Returns(gate.Task);
 
         var firstCall = sut.SaveCommand.ExecuteAsync(null);
         var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
@@ -504,7 +635,7 @@ public class PersonFormViewModelTests
         gate.SetResult((true, "Singer created", new Person { FullName = "Jane Doe" }));
         await Task.WhenAll(firstCall, secondCall);
 
-        _serviceMock.Verify(s => s.CreatePersonAsync("Jane Doe", null, null, default), Times.Once);
+        _serviceMock.Verify(s => s.CreatePersonAsync("Jane Doe", null, null, null, default), Times.Once);
     }
 
     // ── NameOptionSource ──────────────────────────────────────────────────

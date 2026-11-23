@@ -94,3 +94,9 @@
 | ACF-T2 | `SearchConstants.AutocompleteDebounceMilliseconds` | `task/acf-t2-debounce-constant` (deleted) | merge `78b2b735`; Verifier PASS.; Verifier PASS | 78b2b735 |
 | ACF-T3 | `IMenuOptionSource + AutocompleteDXFieldLogic` | `task/acf-t3-field-logic` (deleted) | merge `83065e07`; Verifier PASS.; Verifier PASS | 83065e07 |
 | ACF-T5 | `PersonFormViewModel.NameOptionSource + trimmed SearchPersonsCoreAsync` | `task/acf-t5-person-option-source` (deleted) | merge `7d228c41`; Verifier PASS.; Verifier PASS | 7d228c41 |
+| CATALOG-PROP | Song writes propagate to the artist catalog | feature/catalog-prop | 2026-11-20 merged (5c13a7c3), closed af9d9b05; develop 1911/1911, Android 0 errors, device check PASS. Detail: item `task-log.md` | 5c13a7c3 |
+| SFT | Song form title-first (5.5, 5.6, 5.8, title 250; 6.3 moved out) | task/sft-5.5…5.8, task/title-limit-250 | 2026-11-11 | 686d5aa3 |
+| AC-FIELD | Shared autocomplete field: pick-lock via X, centralised behaviour | develop (T2–T12 merged; T3-C cancelled) | 2026-11-11 closed; T7 run 6 PASS, Rebuild Test 0-1; develop 953/953. Detail: item `task-log.md` § Close-out bookkeeping | 77b408f6 |
+| BID | Build identity — MinVer version + About build details (app-versioning) | develop | 2026-11-10 closed; G3 PASS on S23 (`v0.2.0-alpha.0.4`); follow-ups: release-tag discipline, changelog retirement | 4a839cbe |
+| ITF | Inline Trivial Fix lane | develop | 2026-07-21 merged (a4c198a); closed 2026-11-19, live-fix gate met. Detail: `DevCycleCraft/inline-trivial-fix/handoff.md` | a4c198a |
+| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | develop | 2026-07-14 merged (68e1852); closed 2026-11-20 by Helder, item 🔵 Superseded, live demo dropped. Detail: `DevCycleCraft/session-continuity-leasing/task-log.md` | 68e1852 |

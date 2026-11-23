@@ -22,7 +22,6 @@ public class SongService : ISongService
 
     public int MaxTitleLength => 250;
     public int ShowCounterAt => 80;
-    public int MaxVersionLength => 60;
 
     /// <summary>Most near-duplicate artists offered on the artist-choice sheet (REQ-SFT-19).</summary>
     private const int MaxArtistChoiceCandidates = 3;
@@ -34,6 +33,9 @@ public class SongService : ISongService
     private const string ArtistNotFoundMessage = "Artist not found";
     private const string DeezerArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
     private const string DeezerTitleFrozenMessage = "The title of a song from the music database cannot be changed.";
+
+    /// <summary>The one duplicate message for an exact song identity (REQ-RMV-06, REQ-RMV-10).</summary>
+    private const string DuplicateTitleMessage = "This artist already has a song with this title.";
 
     public SongService(
         ISongRepository songRepository,
@@ -143,22 +145,8 @@ public class SongService : ISongService
     }
 
     /// <inheritdoc />
-    public (bool isValid, string message) ValidateVersionInput(string? version, bool isRequired = false)
-    {
-        var trimmed = (version ?? string.Empty).Trim();
-
-        if (isRequired && trimmed.Length == 0)
-            return (false, "A version label is required (e.g. Live, Acoustic, Remix)");
-
-        if (trimmed.Length > MaxVersionLength)
-            return (false, $"Version is too long. Maximum {MaxVersionLength} characters.");
-
-        return (true, string.Empty);
-    }
-
-    /// <inheritdoc />
     public Task<(bool success, string message, Song? song)> CreateSongAsync(
-        int artistId, string title, string? featuredArtists = null, string? lyrics = null,
+        int artistId, string title, string? lyrics = null,
         string? externalId = null, string? externalProvider = null, CancellationToken ct = default)
         => _uow.ExecuteAsync<(bool success, string message, Song? song)>(async sp =>
         {
@@ -178,15 +166,15 @@ public class SongService : ISongService
             // Song.Title trimming is enforced by the EF Core ValueConverter configured in
             // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
             // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+            // REQ-RMV-06: identity is (Artist, Title) only, case- and accent-insensitive (collation).
             if (await songRepository.ExistsByTitleForArtistAsync(artistId, title, ct))
-                return (false, "A song with this title already exists for this artist", null);
+                return (false, DuplicateTitleMessage, null);
 
-            // Song.Title/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
+            // Song.Title trimming is enforced by the ValueConverter (design.md § D3).
             var song = new Song
             {
                 ArtistId = artistId,
                 Title = title,
-                FeaturedArtists = featuredArtists,
                 Lyrics = lyrics,
                 LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnCreate(lyrics, null),
                 ExternalId = externalId,
@@ -196,19 +184,24 @@ public class SongService : ISongService
             };
 
             await songRepository.AddAsync(song, ct);
+
+            // REQ-CATPROP-01: the author performs their own song. Staged through the Song navigation so EF
+            // fixes up SongId on the single save; resolved from sp (REQ-UOW-28), committed with the song.
+            await sp.GetRequiredService<ICatalogRepository>()
+                .AddAsync(new Catalog { Song = song, ArtistId = artistId }, ct);
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
             return (true, $"Song '{title.Trim()}' created successfully", song);
         }, ct);
 
     /// <inheritdoc />
     public async Task<(bool success, string message)> UpdateSongAsync(
-        int id, string title, string? featuredArtists, string? lyrics,
-        string? externalId = null, string? externalProvider = null, string? version = null,
+        int id, string title, string? lyrics,
+        string? externalId = null, string? externalProvider = null,
         int? artistId = null, string? newArtistName = null,
         CancellationToken ct = default)
     {
         var (success, message, _) = await UpdateSongCoreAsync(
-            id, title, featuredArtists, lyrics, externalId, externalProvider, version,
+            id, title, lyrics, externalId, externalProvider,
             artistId, newArtistName, ct);
         return (success, message);
     }
@@ -224,8 +217,8 @@ public class SongService : ISongService
     /// <param name="artistImageUrl">The already-normalised pending artist picture (REQ-ART-16 in edit mode).</param>
     /// <param name="fillArtistImage">False for an artist chosen through <c>ArtistDecision.UseExisting</c>.</param>
     private Task<(bool success, string message, SaveField failedField)> UpdateSongCoreAsync(
-        int id, string title, string? featuredArtists, string? lyrics,
-        string? externalId, string? externalProvider, string? version,
+        int id, string title, string? lyrics,
+        string? externalId, string? externalProvider,
         int? artistId, string? newArtistName,
         CancellationToken ct,
         bool imageChanged = false, string? songImageReference = null,
@@ -246,13 +239,6 @@ public class SongService : ISongService
             var (isValid, message) = ValidateTitleInput(title);
             if (!isValid)
                 return (false, message, SaveField.Title);
-
-            if (version != null)
-            {
-                var (versionValid, versionMessage) = ValidateVersionInput(version);
-                if (!versionValid)
-                    return (false, versionMessage, SaveField.Version);
-            }
 
             var song = await songRepository.GetByIdAsync(id, ct);
             if (song == null)
@@ -278,7 +264,7 @@ public class SongService : ISongService
 
             // BUG-067 (REQ-ACREATE-16): the artist FK used to be written on the create path only, so a
             // user changing the artist of a saved song lost the edit silently. null = keep existing
-            // (same semantics as version/externalId below); a supplied id must exist.
+            // (same semantics as externalId below); a supplied id must exist.
             var effectiveArtistId = artistId ?? song.ArtistId;
             Artist? changedToExistingArtist = null;
             if (hasNewArtistName)
@@ -312,16 +298,14 @@ public class SongService : ISongService
                 changedToExistingArtist = newArtist;
             }
 
-            // REQ-SFT-29 / REQ-SFT-27: uniqueness = (collated effective artist, title, effective
-            // version) excluding this song; null version = keep the stored one. Title/Version trimming
-            // is enforced by the EF ValueConverter (design.md § D3), which also applies to this WHERE
-            // parameter. The check runs on the EFFECTIVE artist, so it also refuses an artist change
-            // that would duplicate another song (REQ-PIC-32); that refusal belongs to the Artist field
-            // (the message is unchanged, so UpdateSongAsync, which drops the field, behaves as before).
-            var effectiveVersion = version ?? song.Version ?? string.Empty;
-            if (await songRepository.FindIdByTitleVersionForArtistAsync(
-                    effectiveArtistId, title, effectiveVersion, id, ct) is not null)
-                return (false, "A song with this title and version already exists for this artist",
+            // REQ-RMV-06 / REQ-SFT-29 / REQ-SFT-27: identity = (collated effective artist, title) excluding
+            // this song (REQ-RMV-06: Version no longer takes part). Title trimming is enforced by the EF
+            // ValueConverter (design.md § D3), which also applies to this WHERE parameter. The check runs on
+            // the EFFECTIVE artist, so it also refuses an artist change that would duplicate another song
+            // (REQ-PIC-32); that refusal belongs to the Artist field.
+            if (await songRepository.FindIdByTitleForArtistAsync(
+                    effectiveArtistId, title, id, ct) is not null)
+                return (false, DuplicateTitleMessage,
                     effectiveArtistId != song.ArtistId ? SaveField.Artist : SaveField.None);
 
             // REQ-ART-16 in edit mode (REQ-PIC-40): an existing artist the song is MOVED to is only ever
@@ -335,7 +319,7 @@ public class SongService : ISongService
                 await sp.GetRequiredService<IArtistRepository>().UpdateAsync(changedToExistingArtist, ct);
             }
 
-            // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
+            // Song.Title trimming is enforced by the ValueConverter (design.md § D3).
             // BUG-067 under the unit-of-work pattern: SongRepository.GetByIdAsync eager-loads
             // OriginalArtist (BUG-055). Inside a fresh unit-of-work context the entity is untracked,
             // so ISongRepository.UpdateAsync attaches the whole graph and EF's FK fixup rewrites
@@ -344,17 +328,12 @@ public class SongService : ISongService
             // as the only source of truth, which is exactly what the pre-UOW stopgap's
             // CurrentValues.SetValues achieved ("scalar/FK properties only, no navigation graph").
             song.OriginalArtist = null;
+            var oldArtistId = song.ArtistId;
             song.ArtistId = effectiveArtistId;
             song.Title = title;
-            song.FeaturedArtists = featuredArtists;
             song.LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnUpdate(song.Lyrics, song.LyricsOrigin, lyrics);
             song.Lyrics = lyrics;
             song.UpdatedAt = DateTime.UtcNow;
-
-            // BUG-024: persist the version label when provided; null = keep existing value
-            // (mirrors the externalId/externalProvider null-keeps-existing semantics below).
-            if (version != null)
-                song.Version = version;
 
             // M2: persist external identity when provided; null = keep existing value
             if (externalId != null)
@@ -367,6 +346,18 @@ public class SongService : ISongService
                 song.ImageUrl = songImageReference;
 
             await songRepository.UpdateAsync(song, ct);
+
+            // REQ-CATPROP-03: an author change moves the derived row, after every refusal above. A row the
+            // new author already holds as a cover becomes the derived row (no duplicate). Both calls run on
+            // the unit of work's connection, so a failed save rolls them back (REQ-CATPROP-04).
+            if (effectiveArtistId != oldArtistId)
+            {
+                var catalogRepository = sp.GetRequiredService<ICatalogRepository>();
+                await catalogRepository.RemoveAsync(oldArtistId, song.Id, ct);
+                if (!await catalogRepository.ExistsAsync(effectiveArtistId, song.Id, ct))
+                    await catalogRepository.AddAsync(new Catalog { ArtistId = effectiveArtistId, SongId = song.Id }, ct);
+            }
+
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
             return (true, $"Song updated to '{title}'", SaveField.None);
         }, ct);
@@ -374,12 +365,12 @@ public class SongService : ISongService
 
     /// <inheritdoc />
     public async Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
-        int? artistId, string? newArtistName, string title, string version,
-        string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
+        int? artistId, string? newArtistName, string title,
+        string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct = default)
     {
         var (success, message, song, _) = await CreateSongWithUrlsCoreAsync(
-            artistId, newArtistName, title, version, featuredArtists, lyrics,
+            artistId, newArtistName, title, lyrics,
             externalId, externalProvider, urls, ct);
         return (success, message, song);
     }
@@ -391,8 +382,8 @@ public class SongService : ISongService
     /// <see cref="SaveField.None"/>. Only <see cref="SaveFromFormAsync"/> reads the field.
     /// </summary>
     private Task<(bool success, string message, Song? song, SaveField failedField)> CreateSongWithUrlsCoreAsync(
-        int? artistId, string? newArtistName, string title, string version,
-        string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
+        int? artistId, string? newArtistName, string title,
+        string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct,
         string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false,
         LyricsLookupResult? pickLyricsLookup = null)
@@ -416,8 +407,6 @@ public class SongService : ISongService
             var (isValid, message) = ValidateTitleInput(title);
             if (!isValid)
                 return (false, message, null, SaveField.Title);
-
-            version ??= string.Empty;
 
             // REQ-SFT-26: an external identity already held by another song is rejected BEFORE any
             // artist is created, so a refused save never leaves a new artist behind.
@@ -461,11 +450,11 @@ public class SongService : ISongService
                 effectiveArtistId = artistId.Value;
             }
 
-            // Song.Title/Version trimming is enforced by the EF Core ValueConverter configured in
-            // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
-            // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-            if (await songRepository.ExistsByTitleVersionForArtistAsync(effectiveArtistId, title, version, ct))
-                return (false, "A song with this title and version already exists for this artist", null, SaveField.None);
+            // REQ-RMV-06: identity = (Artist, Title). Title trimming is enforced by the EF Core ValueConverter
+            // configured in SongConfiguration (design.md § D3) — not here. EF applies the same converter to
+            // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+            if (await songRepository.ExistsByTitleForArtistAsync(effectiveArtistId, title, ct))
+                return (false, DuplicateTitleMessage, null, SaveField.None);
 
             // REQ-ART-16 / REQ-ART-18: an existing artist is only ever filled, never overwritten, and only
             // once every refusal above has passed. Explicit UpdateAsync: GetByIdAsync returns the artist
@@ -477,13 +466,11 @@ public class SongService : ISongService
                 await sp.GetRequiredService<IArtistRepository>().UpdateAsync(existingArtist, ct);
             }
 
-            // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
+            // Song.Title trimming is enforced by the ValueConverter (design.md § D3).
             var song = new Song
             {
                 ArtistId = effectiveArtistId,
                 Title = title,
-                Version = version,
-                FeaturedArtists = featuredArtists,
                 Lyrics = lyrics,
                 LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnCreate(lyrics, pickLyricsLookup),
                 ExternalId = externalId,
@@ -495,6 +482,11 @@ public class SongService : ISongService
 
             // Stage the song entity (no SaveChangesAsync yet)
             await songRepository.AddAsync(song, ct);
+
+            // REQ-CATPROP-01: the derived catalog row, staged with the song (the artist id is real here,
+            // even for an artist created in this save: it was flushed above).
+            await sp.GetRequiredService<ICatalogRepository>()
+                .AddAsync(new Catalog { Song = song, ArtistId = effectiveArtistId }, ct);
 
             // Stage URL entities on the SAME context — N3: one SaveChangesAsync commits both atomically
             var urlList = urls?.ToList() ?? [];
@@ -544,10 +536,6 @@ public class SongService : ISongService
         if (!titleValid)
             return SaveFailed(titleMessage, SaveField.Title);
 
-        var (versionValid, versionMessage) = ValidateVersionInput(request.Version);
-        if (!versionValid)
-            return SaveFailed(versionMessage, SaveField.Version);
-
         if (request.ArtistId is null && string.IsNullOrWhiteSpace(request.ArtistText))
             return SaveFailed(ArtistRequiredMessage, SaveField.Artist);
 
@@ -596,30 +584,22 @@ public class SongService : ISongService
         if (resolved.StopOutcome is { } stopOutcome)
             return stopOutcome;
 
-        // Rule 4 (AC-1.2): "Save as new version" requires a non-empty Version.
-        if (request.SongDecision == SongDecision.SaveAsNewVersion)
-        {
-            var (newVersionValid, newVersionMessage) = ValidateVersionInput(request.Version, isRequired: true);
-            if (!newVersionValid)
-                return SaveFailed(newVersionMessage, SaveField.Version);
-        }
-
         // Rule 5 (REQ-SFT-46 / REQ-SFT-51): write through the two write paths only (their shared bodies,
         // see CreateSongWithUrlsCoreAsync / UpdateSongCoreAsync); a failure comes back as Failed with the
         // message unchanged and the field the failing step belongs to (D2).
         if (isAddMode)
         {
-            // REQ-SFT-39 (ruling D1, 2026-11-05): an explicit SaveAsNewVersion / SaveAsNewSong writes the new
+            // REQ-SFT-39 (ruling D1, 2026-11-05): an explicit SaveAsNewSong writes the new
             // row with a NULL external identity, so the identity refusal (REQ-SFT-26) cannot apply to it.
             // Nulled here, BEFORE the write, because the write-time check runs on whatever identity it gets.
             // With no decision (SongDecision.None) the identity is passed through and the refusal stands.
-            var explicitSaveAsNew = request.SongDecision is SongDecision.SaveAsNewVersion or SongDecision.SaveAsNewSong;
+            var explicitSaveAsNew = request.SongDecision == SongDecision.SaveAsNewSong;
             var externalId = explicitSaveAsNew ? null : request.ExternalId;
             var externalProvider = explicitSaveAsNew ? null : request.ExternalProvider;
 
             var (created, createMessage, song, failedField) = await CreateSongWithUrlsCoreAsync(
-                resolved.ArtistId, resolved.NewArtistName, request.Title, request.Version,
-                request.FeaturedArtists, request.Lyrics, externalId, externalProvider,
+                resolved.ArtistId, resolved.NewArtistName, request.Title,
+                request.Lyrics, externalId, externalProvider,
                 request.PendingUrls ?? [], ct,
                 songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup);
 
@@ -633,8 +613,8 @@ public class SongService : ISongService
         // it; REQ-PIC-40: the pending artist picture follows the REQ-ART-16 rule inside the same write.
         var songId = request.SongId!.Value;
         var (updated, updateMessage, updateFailedField) = await UpdateSongCoreAsync(
-            songId, request.Title, request.FeaturedArtists, request.Lyrics,
-            externalId: null, externalProvider: null, version: request.Version,
+            songId, request.Title, request.Lyrics,
+            externalId: null, externalProvider: null,
             artistId: resolved.ArtistId, newArtistName: resolved.NewArtistName, ct: ct,
             imageChanged: request.ImageChanged, songImageReference: songImageUrl,
             artistImageUrl: artistImageUrl, fillArtistImage: resolved.FillArtistImage);
@@ -733,7 +713,7 @@ public class SongService : ISongService
         var songResolutionService = sp.GetRequiredService<ISongResolutionService>();
         var guard = await songResolutionService.ResolveAsync(
             new SongCandidate(
-                request.Title, request.Version ?? string.Empty, request.FeaturedArtists, request.Lyrics,
+                request.Title, request.Lyrics,
                 new ArtistCandidate(guardArtistName, ExternalProvider: null, ExternalId: null),
                 request.ExternalProvider, request.ExternalId),
             ct);
@@ -756,7 +736,7 @@ public class SongService : ISongService
                 _logger.LogDebug("Song form save: exact duplicate song {SongId}; choice needed", exactSongId);
                 return new SongFormSaveOutcome(
                     SongFormSaveKind.SongChoiceNeeded, string.Empty, SaveField.None, null, [], true,
-                    [new SongMatch(existing.Id, existing.Title, existing.Version,
+                    [new SongMatch(existing.Id, existing.Title,
                         existing.OriginalArtist?.Name ?? guardArtistName, ExactSongMatchScore)]);
 
             case ResolutionKind.FuzzyCandidates when guard.FuzzyCandidates.Count > 0:

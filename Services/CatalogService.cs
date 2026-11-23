@@ -65,7 +65,64 @@ public class CatalogService : ICatalogService
             // by IUnitOfWork.ExecuteAsync brings this bulk delete under the unit of work.
             var catalogRepository = sp.GetRequiredService<ICatalogRepository>();
 
+            if (!await catalogRepository.ExistsAsync(artistId, songId, ct))
+                return (false, "Song is not in this catalog.");
+
+            if (await catalogRepository.IsDerivedAsync(artistId, songId, ct))
+            {
+                var artistRepository = sp.GetRequiredService<IArtistRepository>();
+                var artist = await artistRepository.GetByIdAsync(artistId, ct);
+                return (false, $"{artist?.Name} wrote this song, so it stays in their catalog.");
+            }
+
             await catalogRepository.RemoveAsync(artistId, songId, ct);
             return (true, "Song removed from catalog.");
         }, ct);
+
+    /// <inheritdoc />
+    public async Task<(bool success, string message, int removed, int kept)> RemoveSongsFromCatalogAsync(
+        int artistId, IReadOnlyCollection<int> songIds, CancellationToken ct = default)
+    {
+        // REQ-UOW-41: the empty-list check stays outside the unit of work.
+        if (songIds is null || songIds.Count == 0)
+            return (false, "No songs selected.", 0, 0);
+
+        return await _uow.ExecuteAsync<(bool success, string message, int removed, int kept)>(async sp =>
+        {
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            var catalogRepository = sp.GetRequiredService<ICatalogRepository>();
+
+            var artist = await artistRepository.GetByIdAsync(artistId, ct);
+            if (artist is null)
+                return (false, "Artist not found.", 0, 0);
+
+            var (removed, kept) = await catalogRepository.RemoveCoversAsync(artistId, songIds, ct);
+            return (removed > 0, BuildBulkRemoveMessage(artist.Name, removed, kept), removed, kept);
+        }, ct);
+    }
+
+    private static string BuildBulkRemoveMessage(string artistName, int removed, int kept)
+    {
+        if (removed == 0)
+        {
+            return kept switch
+            {
+                0 => "Nothing to remove from the catalog.",
+                1 => $"{artistName} wrote this song, so it stays in their catalog.",
+                _ => $"{artistName} wrote these songs, so they stay in their catalog."
+            };
+        }
+
+        var removedLine = removed == 1
+            ? "Removed 1 song from the catalog."
+            : $"Removed {removed} songs from the catalog.";
+
+        return kept switch
+        {
+            0 => removedLine,
+            1 => $"{removedLine} 1 kept: {artistName} wrote it.",
+            _ => $"{removedLine} {kept} kept: {artistName} wrote them."
+        };
+    }
 }

@@ -37,13 +37,16 @@
         <views:CrudListView.ItemTemplate>
             <DataTemplate x:DataType="models:PersonListItemDto">
                 <lists:ListItem Headline="{Binding FullName}"
-                                SupportingText="{Binding ParticipationsAbsencesNumber}"
+                                SupportingText="{Binding IdentityLine}"
                                 IsSelected="False">
                     <lists:ListItem.LeadingContent>
                         <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <lists:ListItemCheckbox VerticalOptions="Center" />
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <lists:ListItemOverflowButton />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
@@ -52,7 +55,7 @@
         <views:CrudListView.SelectedItemTemplate>
             <DataTemplate x:DataType="models:PersonListItemDto">
                 <lists:ListItem Headline="{Binding FullName}"
-                                SupportingText="{Binding ParticipationsAbsencesNumber}"
+                                SupportingText="{Binding IdentityLine}"
                                 IsSelected="True">
                     <lists:ListItem.LeadingContent>
                         <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />

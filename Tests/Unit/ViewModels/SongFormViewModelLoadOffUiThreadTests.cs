@@ -60,7 +60,7 @@ public class SongFormViewModelLoadOffUiThreadTests
             .Returns(() =>
             {
                 serviceCalled.TrySetResult(Environment.CurrentManagedThreadId);
-                return Task.FromResult<Song?>(new Song { Id = songId, ArtistId = 8, Title = "Blitzkrieg Bop", Version = string.Empty, OriginalArtist = new Artist { Id = 8, Name = "Ramones" } });
+                return Task.FromResult<Song?>(new Song { Id = songId, ArtistId = 8, Title = "Blitzkrieg Bop", OriginalArtist = new Artist { Id = 8, Name = "Ramones" } });
             });
         var sut = CreateSut(songService);
 

@@ -14,7 +14,7 @@ public class ArtistServiceTests
     // against these same mocks, so every existing assertion keeps its original meaning
     // (`plan.md` Task 2.1 Step 5).
     private ArtistService CreateSut() => new(
-        _artistRepoMock.Object, _songRepoMock.Object, _catalogRepoMock.Object,
+        _artistRepoMock.Object, _songRepoMock.Object,
         PassthroughUnitOfWork.Over(_artistRepoMock, _songRepoMock, _catalogRepoMock),
         _loggerMock.Object);
 
@@ -259,37 +259,57 @@ public class ArtistServiceTests
 
     // ── DeleteArtistsAsync ────────────────────────────────────────────────
 
+    // [AC] REQ-CATPROP-10: an artist who owns songs (Song.ArtistId) is refused with the AC-6.2 text; nothing is deleted.
     [Fact]
-    public async Task DeleteArtistsAsync_ArtistWithSongs_ReturnsFalse()
+    public async Task Delete_OwnerOfSongs_Refused()
     {
-        var artist = new Artist { Id = 1, Name = "Artist With Songs" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-                       .ReturnsAsync(artist);
-        _catalogRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
-                        .ReturnsAsync(3);
+                       .ReturnsAsync(new Artist { Id = 1, Name = "Artist With Songs" });
+        _songRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(2);
         var sut = CreateSut();
 
         var (success, message) = await sut.DeleteArtistsAsync([1]);
 
         Assert.False(success);
-        Assert.NotEmpty(message);
+        Assert.Equal("Cannot delete — Artist With Songs owns 2 song(s). Delete their songs first.", message);
         _artistRepoMock.Verify(r => r.DeleteAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    // [AC] REQ-CATPROP-10: when several selected artists own songs, the message names the first in selection order.
     [Fact]
-    public async Task DeleteArtistsAsync_ArtistWithNoSongs_ReturnsSuccess()
+    public async Task Delete_TwoOwners_NamesFirstInSelectionOrder()
     {
-        var artist = new Artist { Id = 1, Name = "Solo Artist" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-                       .ReturnsAsync(artist);
-        _catalogRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
-                        .ReturnsAsync(0);
+                       .ReturnsAsync(new Artist { Id = 1, Name = "First" });
+        _artistRepoMock.Setup(r => r.GetByIdAsync(2, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new Artist { Id = 2, Name = "Second" });
+        _songRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        _songRepoMock.Setup(r => r.CountByArtistAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(4);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.DeleteArtistsAsync([2, 1]);
+
+        Assert.False(success);
+        Assert.Equal("Cannot delete — Second owns 4 song(s). Delete their songs first.", message);
+        _artistRepoMock.Verify(r => r.DeleteAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // [AC] REQ-CATPROP-10: an artist with only catalog rows (no owned songs) is deleted; catalog rows never block.
+    [Fact]
+    public async Task Delete_ArtistWithOnlyCatalogRows_Succeeds()
+    {
+        _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new Artist { Id = 1, Name = "Cover Singer" });
+        _songRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(0);
+        _catalogRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(5);
         _artistRepoMock.Setup(r => r.DeleteAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
                        .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var (success, message) = await sut.DeleteArtistsAsync([1]);
+        var (success, _) = await sut.DeleteArtistsAsync([1]);
 
         Assert.True(success);
+        _artistRepoMock.Verify(r => r.DeleteAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

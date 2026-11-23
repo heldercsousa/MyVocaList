@@ -34,7 +34,7 @@ public class SongSuggestionServiceDurationTests
             .ReturnsAsync(new List<SongSearchHit>());
         _songRepoMock
             .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(), It.IsAny<CancellationToken>()))
+                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit>());
         _artistRepoMock
             .Setup(r => r.GetByNamesCollatedAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -52,7 +52,7 @@ public class SongSuggestionServiceDurationTests
         _loggerMock.Object);
 
     private static SongSearchHit Hit(int id, string title, string artist, int artistId)
-        => new(id, title, "", artistId, artist, null, null, null, null);
+        => new(id, title, artistId, artist, null, null, null, null);
 
     private void SetupCandidates(string query, params SongSearchHit[] hits)
         => _songRepoMock
@@ -69,7 +69,7 @@ public class SongSuggestionServiceDurationTests
     {
         // [AC] REQ-LYR-01: a remote song suggestion copies DurationSeconds from the Deezer result
         SetupDeezer(new MusicSearchResultDto(
-            "dz-1", "Deezer", "Radiohead", "Creep", null, null, null, null, "Pablo Honey", 215));
+            "dz-1", "Deezer", "Radiohead", "Creep", null, null, "Pablo Honey", 215));
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
@@ -84,7 +84,7 @@ public class SongSuggestionServiceDurationTests
     {
         // [AC] REQ-LYR-01: a remote row whose provider result has no duration carries a null DurationSeconds
         SetupDeezer(new MusicSearchResultDto(
-            "dz-1", "Deezer", "Radiohead", "Creep", null, null, null, null, "Pablo Honey"));
+            "dz-1", "Deezer", "Radiohead", "Creep", null, null, "Pablo Honey"));
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);

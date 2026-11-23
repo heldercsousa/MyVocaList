@@ -30,9 +30,9 @@ public class SongSearchHitImageTests : IAsyncLifetime
         var abba = await SeedArtistAsync("ABBA", null);
 
         _db.Songs.AddRange(
-            MakeSong(_gunsArtist.Id, "Don't Cry", "", CoverUrl, "Deezer", "3135556"),
-            MakeSong(abba.Id, "Abba Song", "", null),
-            MakeSong(abba.Id, "Abba Cover", "", CoverUrl));
+            MakeSong(_gunsArtist.Id, "Don't Cry", CoverUrl, "Deezer", "3135556"),
+            MakeSong(abba.Id, "Abba Song", null),
+            MakeSong(abba.Id, "Abba Cover", CoverUrl));
         await _db.SaveChangesAsync();
     }
 
@@ -103,7 +103,7 @@ public class SongSearchHitImageTests : IAsyncLifetime
     public async Task FindByTitleAndArtistNamesAsync_CarriesBothImageUrls()
     {
         var hits = await _repo.FindByTitleAndArtistNamesAsync(
-            [("DON'T CRY", "guns n' roses", "")], CancellationToken.None);
+            [("DON'T CRY", "guns n' roses")], CancellationToken.None);
 
         var hit = Assert.Single(hits);
         Assert.Equal(CoverUrl, hit.ImageUrl);
@@ -124,12 +124,11 @@ public class SongSearchHitImageTests : IAsyncLifetime
         return artist;
     }
 
-    private static Song MakeSong(int artistId, string title, string version, string? imageUrl,
+    private static Song MakeSong(int artistId, string title, string? imageUrl,
         string? provider = null, string? externalId = null) => new()
     {
         ArtistId = artistId,
         Title = title,
-        Version = version,
         ImageUrl = imageUrl,
         ExternalProvider = provider,
         ExternalId = externalId,

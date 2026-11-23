@@ -27,75 +27,61 @@ public class SongRepositoryResolutionTests : IAsyncLifetime
         await _db.DisposeAsync();
     }
 
-    // ── ExistsByTitleVersionForArtistAsync — accent + case insensitive ────
+    // ── ExistsByTitleForArtistAsync — identity (artist, title), accent + case insensitive ────
 
-    // [AC] AC-5.1: ExistsByTitleVersionForArtistAsync matches under NOCASE_NOACCENT collation
+    // [AC] REQ-RMV-06: identity-only duplicate lookup matches under NOCASE_NOACCENT collation
     [Fact]
-    public async Task ExistsByTitleVersionForArtistAsync_AccentAndCaseInsensitive_Matches()
+    public async Task ExistsByTitleForArtistAsync_AccentAndCaseInsensitive_Matches()
     {
         var artist = await SeedArtistAsync("Artista");
-        _db.Songs.Add(MakeSong(artist.Id, "Café", "Live"));
+        _db.Songs.Add(MakeSong(artist.Id, "Café"));
         await _db.SaveChangesAsync();
 
-        var result = await _repo.ExistsByTitleVersionForArtistAsync(
-            artist.Id, "cafe", "live", CancellationToken.None);
+        var result = await _repo.ExistsByTitleForArtistAsync(
+            artist.Id, "cafe", CancellationToken.None);
 
         Assert.True(result);
     }
 
-    // [AC] AC-5.2: ExistsByTitleVersionForArtistAsync excludeId overload excludes target song
+    // [AC] REQ-RMV-06: the excludeId overload excludes the target song (edit mode)
     [Fact]
-    public async Task ExistsByTitleVersionForArtistAsync_ExcludeId_ExcludesSelf()
+    public async Task ExistsByTitleForArtistAsync_ExcludeId_ExcludesSelf()
     {
         var artist = await SeedArtistAsync("Band");
-        var song = MakeSong(artist.Id, "Song Title", "Acoustic");
+        var song = MakeSong(artist.Id, "Song Title");
         _db.Songs.Add(song);
         await _db.SaveChangesAsync();
 
-        var result = await _repo.ExistsByTitleVersionForArtistAsync(
-            artist.Id, "song title", "acoustic", song.Id, CancellationToken.None);
+        var result = await _repo.ExistsByTitleForArtistAsync(
+            artist.Id, "song title", song.Id, CancellationToken.None);
 
         Assert.False(result);
     }
 
-    // [AC] AC-5.3: ExistsByTitleVersionForArtistAsync returns false when only title matches but version differs
+    // [AC] REQ-RMV-06: the same title under a different artist is not an exact match
     [Fact]
-    public async Task ExistsByTitleVersionForArtistAsync_SameTitleDifferentVersion_ReturnsFalse()
-    {
-        var artist = await SeedArtistAsync("Artist");
-        _db.Songs.Add(MakeSong(artist.Id, "Hit Song", "Live"));
-        await _db.SaveChangesAsync();
-
-        var result = await _repo.ExistsByTitleVersionForArtistAsync(
-            artist.Id, "hit song", "acoustic", CancellationToken.None);
-
-        Assert.False(result);
-    }
-
-    // [AC] AC-5.4: ExistsByTitleVersionForArtistAsync returns false for different artist
-    [Fact]
-    public async Task ExistsByTitleVersionForArtistAsync_DifferentArtist_ReturnsFalse()
+    public async Task ExistsByTitleForArtistAsync_DifferentArtist_ReturnsFalse()
     {
         var artist1 = await SeedArtistAsync("Artist One");
         var artist2 = await SeedArtistAsync("Artist Two");
-        _db.Songs.Add(MakeSong(artist1.Id, "Shared Title", ""));
+        _db.Songs.Add(MakeSong(artist1.Id, "Shared Title"));
         await _db.SaveChangesAsync();
 
-        var result = await _repo.ExistsByTitleVersionForArtistAsync(
-            artist2.Id, "shared title", "", CancellationToken.None);
+        var result = await _repo.ExistsByTitleForArtistAsync(
+            artist2.Id, "shared title", CancellationToken.None);
 
         Assert.False(result);
     }
 
-    // [AC] AC-5.5: 3-col unique index rejects duplicate (ArtistId, Title, Version) incl. accent/case variants
+    // [AC] INV-RMV-1 / REQ-RMV-02: the 2-column unique index (ArtistId, Title) rejects a duplicate identity incl. accent/case variants
     [Fact]
-    public async Task DuplicateTitleVersion_ThrowsDbUpdateException()
+    public async Task DuplicateTitleForArtist_ThrowsDbUpdateException()
     {
         var artist = await SeedArtistAsync("The Who");
-        _db.Songs.Add(MakeSong(artist.Id, "My Generation", ""));
+        _db.Songs.Add(MakeSong(artist.Id, "My Generation"));
         await _db.SaveChangesAsync();
 
-        _db.Songs.Add(MakeSong(artist.Id, "my generation", ""));
+        _db.Songs.Add(MakeSong(artist.Id, "my generation"));
 
         await Assert.ThrowsAsync<DbUpdateException>(() => _db.SaveChangesAsync());
     }
@@ -118,11 +104,10 @@ public class SongRepositoryResolutionTests : IAsyncLifetime
         return artist;
     }
 
-    private static Song MakeSong(int artistId, string title, string version) => new()
+    private static Song MakeSong(int artistId, string title) => new()
     {
         ArtistId = artistId,
         Title = title,
-        Version = version,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
     };

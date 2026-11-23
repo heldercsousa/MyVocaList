@@ -518,3 +518,4 @@ nul
 # ITF lane declaration marker (transient, per-worktree) — workflow.md Rule 2
 .itf-active
 /Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/artistis-crud-manual-tests-log.txt
+.env.local

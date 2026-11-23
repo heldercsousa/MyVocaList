@@ -17,7 +17,7 @@ public class SongServiceNewArtistUnitOfWorkTests
         UnitOfWorkTestHost host, string artistName, string title,
         string? externalId = null, string? externalProvider = null)
         => host.Resolve<ISongService>().CreateSongWithUrlsAsync(
-            null, artistName, title, string.Empty, null, null, externalId, externalProvider, []);
+            null, artistName, title, null, externalId, externalProvider, []);
 
     // [AC] REQ-SFT-18: a typed new artist and the song are persisted together - exactly one Artist
     // row and one Song row, and the song points at the new artist's id (ports NestedUnitOfWorkTests:22).
@@ -102,7 +102,7 @@ public class SongServiceNewArtistUnitOfWorkTests
         observed.Clear(); // only contexts seen inside the unit of work under test
 
         var (success, message, _) = await service.CreateSongWithUrlsAsync(
-            null, "Two Level Join Artist", "Two Level Join Song", string.Empty, null, null, null, null, []);
+            null, "Two Level Join Artist", "Two Level Join Song", null, null, null, []);
 
         Assert.True(success, message);
         Assert.True(observed.Count >= 2, $"Expected repositories from >= 2 levels, saw {observed.Count}.");
@@ -136,7 +136,7 @@ public class SongServiceNewArtistUnitOfWorkTests
         var (artistOk, _, holder) = await host.Resolve<IArtistService>().CreateArtistAsync("Holder Artist");
         Assert.True(artistOk);
         var (holderOk, holderMessage, _) = await host.Resolve<ISongService>().CreateSongWithUrlsAsync(
-            holder!.Id, null, "Holder Song", string.Empty, null, null, "dz-777", "deezer", []);
+            holder!.Id, null, "Holder Song", null, "dz-777", "deezer", []);
         Assert.True(holderOk, holderMessage);
 
         var (success, message, song) = await CreateWithNewArtist(
@@ -175,20 +175,14 @@ public class SongServiceNewArtistUnitOfWorkTests
         public Task<bool> ExistsByTitleForArtistAsync(int artistId, string title, int excludeId, CancellationToken ct)
             => _inner.ExistsByTitleForArtistAsync(artistId, title, excludeId, ct);
 
-        public Task<bool> ExistsByTitleVersionForArtistAsync(int artistId, string title, string version, CancellationToken ct = default)
-            => _inner.ExistsByTitleVersionForArtistAsync(artistId, title, version, ct);
-
-        public Task<bool> ExistsByTitleVersionForArtistAsync(int artistId, string title, string version, int excludeId, CancellationToken ct = default)
-            => _inner.ExistsByTitleVersionForArtistAsync(artistId, title, version, excludeId, ct);
-
         public Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesForArtistAsync(int artistId, string title, int take, CancellationToken ct = default)
             => _inner.SearchTitleCandidatesForArtistAsync(artistId, title, take, ct);
 
         public Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(IEnumerable<string> titles, CancellationToken ct = default)
             => _inner.GetByTitlesCollatedAsync(titles, ct);
 
-        public Task<int?> FindIdByTitleVersionForArtistAsync(int artistId, string title, string version, int? excludeId, CancellationToken ct)
-            => _inner.FindIdByTitleVersionForArtistAsync(artistId, title, version, excludeId, ct);
+        public Task<int?> FindIdByTitleForArtistAsync(int artistId, string title, int? excludeId, CancellationToken ct)
+            => _inner.FindIdByTitleForArtistAsync(artistId, title, excludeId, ct);
 
         public Task<bool> ExistsByExternalIdentityAsync(string provider, string externalId, int? excludeId, CancellationToken ct)
             => _inner.ExistsByExternalIdentityAsync(provider, externalId, excludeId, ct);
@@ -202,7 +196,7 @@ public class SongServiceNewArtistUnitOfWorkTests
         public Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct)
             => _inner.FindByExternalIdsAsync(provider, externalIds, ct);
 
-        public Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct)
+        public Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName)> items, CancellationToken ct)
             => _inner.FindByTitleAndArtistNamesAsync(items, ct);
 
         public Task AddAsync(Song song, CancellationToken ct)
@@ -213,5 +207,8 @@ public class SongServiceNewArtistUnitOfWorkTests
 
         public Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct)
             => _inner.DeleteAsync(ids, ct);
+
+        public Task<int> CountByArtistAsync(int artistId, CancellationToken ct)
+            => _inner.CountByArtistAsync(artistId, ct);
     }
 }

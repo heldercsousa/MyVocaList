@@ -270,10 +270,12 @@ Before setting any task status to `To Review`, confirm:
 For any task that introduces or modifies user-facing behavior (UI changes, navigation, data operations visible in the UI), run an E2E emulator check before setting status to `To Review`.
 
 **Gate protocol:**
-1. Deploy to the Android emulator: `dotnet build -t:Run -f net10.0-android` (or equivalent)
-2. Navigate to the affected screen
-3. Execute the scenario described in the task's demo statement
-4. Confirm the expected result is observable (no crashes, no blank screens, correct data displayed)
+1. **Clean Android build first** when the checkout has changed since the last deploy (merge, rebase, branch switch, new worktree, or pulled commits). Delete `MyVocaList/obj/Debug/net10.0-android` and `MyVocaList/bin/Debug/net10.0-android` in the checkout being deployed. Do not uninstall the app, because that wipes the emulator's test data.
+   - Why: stale incremental or fast-deploy output can ship mismatched resource IDs. On 2026-11-20 this crashed every launch with a `NullReferenceException` in `ShellFlyoutTemplatedContentRenderer.LoadView`, on code that was identical to a working build. A crash at launch before a clean build is evidence of nothing.
+2. Deploy to the Android emulator: `dotnet build -t:Run -f net10.0-android` (or equivalent)
+3. Navigate to the affected screen
+4. Execute the scenario described in the task's demo statement
+5. Confirm the expected result is observable (no crashes, no blank screens, correct data displayed)
 
 **If emulator is unavailable:**
 - Set status to `Check build` instead of `To Review`

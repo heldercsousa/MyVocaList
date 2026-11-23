@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace MyVocaList.Domain.Entity;
 
 public class Person
@@ -9,7 +11,8 @@ public class Person
     public int Absences { get; set; } = 0; // Absence counter
 
     // Fields for intelligent differentiation
-    public string? BirthdayDayMonth { get; set; } // Format: "15/03" (optional)
+    public int? BirthDay { get; set; } // Day of month 1-31 (optional, no year; REQ-BDAY-07)
+    public int? BirthMonth { get; set; } // Month 1-12 (optional; both null or both set)
     public string? Email { get; set; } // Optional for marketing/differentiation
 
     public Person(string fullName)
@@ -32,12 +35,14 @@ public class Person
             return Email.ToLowerInvariant();
         }
 
-        if (!string.IsNullOrWhiteSpace(BirthdayDayMonth))
+        if (BirthDay.HasValue && BirthMonth.HasValue)
         {
-            return $"({BirthdayDayMonth})";
+            // English three-letter month regardless of the current culture (REQ-BDAY-10)
+            var monthAbbreviation = CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(BirthMonth.Value);
+            return $"({BirthDay.Value} {monthAbbreviation})";
         }
 
-        return $"(ID: {Id})"; // Extreme fallback
+        return string.Empty; // No identifier shown; the database Id is for developers only (REQ-DUP-15)
     }
 
     /// <summary>
@@ -53,7 +58,13 @@ public class Person
             return FullName; // Email goes on a separate line
         }
 
-        // If it's birthday or ID, show it with the name
+        // No identifier (REQ-DUP-15): the name alone, with no trailing space
+        if (string.IsNullOrEmpty(identifier))
+        {
+            return FullName;
+        }
+
+        // If it's birthday, show it with the name
         return $"{FullName} {identifier}";
     }
 

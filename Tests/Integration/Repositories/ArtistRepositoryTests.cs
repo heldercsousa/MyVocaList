@@ -111,6 +111,25 @@ public class ArtistRepositoryTests : IAsyncLifetime
         Assert.Equal(2, items.Single().CatalogCount);
     }
 
+    [Fact]
+    public async Task PerformersOnly_AuthorWithOnlyDerivedRows_IsReturned()
+    {
+        // [AC] REQ-CATPROP-11: an author with songs and only derived catalog rows appears under Performers, count includes own songs
+        var artist = MakeArtist("Queen");
+        _db.Set<Artist>().Add(artist);
+        await _db.SaveChangesAsync();
+        var song = MakeSong(artist.Id, "Bohemian Rhapsody");
+        _db.Set<Song>().Add(song);
+        await _db.SaveChangesAsync();
+        _db.Set<Catalog>().Add(new Catalog { ArtistId = artist.Id, SongId = song.Id });
+        await _db.SaveChangesAsync();
+
+        var (items, total) = await _repo.GetPagedAsync(1, 20, string.Empty, ArtistRoleFilter.PerformersOnly, CancellationToken.None);
+
+        Assert.Equal(1, total);
+        Assert.Equal(1, items.Single().CatalogCount);
+    }
+
     // ── Case-insensitive search ───────────────────────────────────────────
 
     [Fact]

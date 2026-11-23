@@ -9,29 +9,19 @@ public interface ISongService
     /// <summary>Validates the song title as typed (UI input, pre-truncation).</summary>
     (bool isValid, string message) ValidateTitleInput(string title);
 
-    /// <summary>
-    /// Validates the song version/variant label as typed (UI input). The field is optional in the
-    /// main form (empty = canonical version); pass <paramref name="isRequired"/> true only for the
-    /// "Save as new version" resolution flow, where an empty value is rejected (AC-1.2).
-    /// </summary>
-    (bool isValid, string message) ValidateVersionInput(string? version, bool isRequired = false);
-
     /// <summary>Creates a song. artistId is mandatory — every song has an original/copyright artist.</summary>
     Task<(bool success, string message, Song? song)> CreateSongAsync(
-        int artistId, string title, string? featuredArtists = null, string? lyrics = null,
+        int artistId, string title, string? lyrics = null,
         string? externalId = null, string? externalProvider = null, CancellationToken ct = default);
 
     /// <summary>
-    /// Updates title, featured artists, lyrics, and optionally version and external identity of an
-    /// existing song.
+    /// Updates title, lyrics, and optionally external identity and artist of an existing song.
     /// </summary>
     /// <param name="id">Id of the song to update.</param>
     /// <param name="title">New song title.</param>
-    /// <param name="featuredArtists">Featured-artist names; null clears the field.</param>
     /// <param name="lyrics">Lyrics text; null clears the field.</param>
     /// <param name="externalId">External provider song id; null = keep existing value.</param>
     /// <param name="externalProvider">External provider name; null = keep existing value.</param>
-    /// <param name="version">Variant label (empty string = canonical); null = keep existing value (BUG-024).</param>
     /// <param name="artistId">
     /// Id of the original/copyright artist; null = keep existing value (BUG-067, REQ-ACREATE-16).
     /// When supplied and different from the stored value the song is re-linked to that artist, and
@@ -45,8 +35,8 @@ public interface ISongService
     /// <param name="ct">Cancellation token.</param>
     /// <returns><c>(true, message)</c> on success; <c>(false, reason)</c> on failure.</returns>
     Task<(bool success, string message)> UpdateSongAsync(
-        int id, string title, string? featuredArtists, string? lyrics,
-        string? externalId = null, string? externalProvider = null, string? version = null,
+        int id, string title, string? lyrics,
+        string? externalId = null, string? externalProvider = null,
         int? artistId = null, string? newArtistName = null,
         CancellationToken ct = default);
 
@@ -64,8 +54,6 @@ public interface ISongService
     /// <param name="artistId">Id of an existing original/copyright artist; null when <paramref name="newArtistName"/> is used.</param>
     /// <param name="newArtistName">Name of an artist to create in this unit of work; null/blank when <paramref name="artistId"/> is used.</param>
     /// <param name="title">Song title.</param>
-    /// <param name="version">Variant label; empty string = canonical version.</param>
-    /// <param name="featuredArtists">Optional featured-artist names.</param>
     /// <param name="lyrics">Optional lyrics text.</param>
     /// <param name="externalId">Optional external provider song id.</param>
     /// <param name="externalProvider">Optional external provider name.</param>
@@ -73,8 +61,8 @@ public interface ISongService
     /// <param name="ct">Cancellation token.</param>
     /// <returns><c>(true, message, song)</c> on success; <c>(false, reason, null)</c> on failure.</returns>
     Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
-        int? artistId, string? newArtistName, string title, string version,
-        string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
+        int? artistId, string? newArtistName, string title,
+        string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct = default);
 
     /// <summary>
@@ -93,8 +81,8 @@ public interface ISongService
     Task<SongFormSaveOutcome> SaveFromFormAsync(SongFormSaveRequest request, CancellationToken ct = default);
 
     /// <summary>
-    /// Returns the full song entity for the given id, including FeaturedArtists, Lyrics, Version
-    /// and external identity — used by edit-mode form hydration (BUG-024).
+    /// Returns the full song entity for the given id, including Lyrics and external identity —
+    /// used by edit-mode form hydration (BUG-024).
     /// </summary>
     /// <param name="id">Id of the song to load.</param>
     /// <param name="ct">Cancellation token.</param>

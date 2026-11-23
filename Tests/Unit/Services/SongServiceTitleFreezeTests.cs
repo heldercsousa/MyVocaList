@@ -12,6 +12,7 @@ namespace MyVocaList.Tests.Unit.Services;
 public class SongServiceTitleFreezeTests
 {
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepoMock = new();
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
@@ -67,21 +68,20 @@ public class SongServiceTitleFreezeTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _artistServiceMock,
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, _artistServiceMock,
             _artistResolutionMock.Object, _songResolutionMock),
         _loggerMock.Object);
 
     private static SongFormSaveRequest NewRequest(
         int? songId = null,
         string title = StoredTitle,
-        string version = "",
         int? artistId = null,
         string? artistText = "Stored artist 3",
         string? provider = null,
         string? externalId = null,
         SongDecision songDecision = SongDecision.None)
         => new(
-            songId, title, version, FeaturedArtists: null, Lyrics: null,
+            songId, title, Lyrics: null,
             artistId, artistText, provider, externalId,
             PendingUrls: [],
             new ArtistDecision.None(),
@@ -92,7 +92,7 @@ public class SongServiceTitleFreezeTests
     {
         var stored = new Song
         {
-            Id = 50, ArtistId = StoredArtistId, Title = StoredTitle, Version = "",
+            Id = 50, ArtistId = StoredArtistId, Title = StoredTitle,
             ExternalProvider = DeezerProvider, ExternalId = DeezerTrackId,
             OriginalArtist = new Artist { Id = StoredArtistId, Name = "Stored artist 3" }
         };
@@ -178,7 +178,7 @@ public class SongServiceTitleFreezeTests
         var stored = SetupStoredDeezerSong();
 
         var (success, message) = await CreateSut().UpdateSongAsync(
-            50, "Renamed title", null, null, artistId: StoredArtistId, newArtistName: null);
+            50, "Renamed title", null, artistId: StoredArtistId, newArtistName: null);
 
         Assert.False(success);
         Assert.Equal(FrozenTitleMessage, message);
@@ -192,7 +192,7 @@ public class SongServiceTitleFreezeTests
     {
         _songRepoMock
             .Setup(r => r.GetByIdAsync(60, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Song { Id = 60, ArtistId = StoredArtistId, Title = "Local", Version = "" });
+            .ReturnsAsync(new Song { Id = 60, ArtistId = StoredArtistId, Title = "Local" });
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
             songId: 60, title: "Local renamed", artistId: StoredArtistId));
@@ -203,27 +203,12 @@ public class SongServiceTitleFreezeTests
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    // [AC] REQ-SLD-37: "Save as new version" from a Deezer pick creates a song with the typed title; it is not an update.
-    [Fact]
-    public async Task SaveFromForm_SaveAsNewVersionWithOtherTitle_CreatesSongWithTypedTitle()
-    {
-        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            songId: null, title: "Creep", version: "Live", artistId: StoredArtistId, artistText: "Radiohead",
-            provider: DeezerProvider, externalId: DeezerTrackId, songDecision: SongDecision.SaveAsNewVersion));
-
-        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
-        Assert.NotNull(AddedSong);
-        Assert.Equal("Creep", AddedSong!.Title);
-        Assert.Null(AddedSong.ExternalId);
-        VerifySongNeverUpdated();
-    }
-
     // [AC] REQ-SLD-37: "Save as new song" from a Deezer pick creates a song with the typed title; it is not an update.
     [Fact]
     public async Task SaveFromForm_SaveAsNewSongWithOtherTitle_CreatesSongWithTypedTitle()
     {
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            songId: null, title: "Creep", version: "", artistId: StoredArtistId, artistText: "Radiohead",
+            songId: null, title: "Creep", artistId: StoredArtistId, artistText: "Radiohead",
             provider: DeezerProvider, externalId: DeezerTrackId, songDecision: SongDecision.SaveAsNewSong));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);

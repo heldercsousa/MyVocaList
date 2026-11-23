@@ -1,12 +1,14 @@
+using MyVocaList.UI.Components.Menus;
+
 namespace MyVocaList.UI.Components;
 
 /// <summary>
 /// Shared structural ContentView for CRUD list pages. Hosts the ShimmerView, DXCollectionView,
-/// FloatingToolbar, FAB, empty states, and confirm BottomSheet. Pages pass entity-specific
-/// DataTemplates and commands via BindableProperties; shared commands are bound directly
+/// FloatingToolbar, FAB, empty states, confirm BottomSheet, and the shared overflow <see cref="Menu"/>.
+/// Pages pass entity-specific DataTemplates and commands via BindableProperties; shared commands are bound directly
 /// via the ICrudListViewModel BindingContext.
 /// </summary>
-public partial class CrudListView : ContentView
+public partial class CrudListView : ContentView, IMenuHost
 {
     // -------------------------------------------------------------------------
     // BindableProperties
@@ -196,6 +198,18 @@ public partial class CrudListView : ContentView
     /// </summary>
     private bool _showConfirmWhenActionsHidden;
 
+    /// <summary>
+    /// Set when the confirm sheet must open after the overflow item menu has closed (Delete from the menu).
+    /// </summary>
+    private bool _showConfirmWhenMenuClosed;
+
+    // -------------------------------------------------------------------------
+    // IMenuHost
+    // -------------------------------------------------------------------------
+
+    /// <summary>The shared overflow menu this list hosts (REQ-OVFM-20).</summary>
+    public Menu? HostedMenu => itemMenu;
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -242,12 +256,18 @@ public partial class CrudListView : ContentView
             if (_viewModel.ConfirmSheetState == BottomSheetState.Hidden)
             {
                 _showConfirmWhenActionsHidden = false;
+                _showConfirmWhenMenuClosed = false;
                 confirmSheet.Close();
             }
             else if (itemActionsSheet.State != BottomSheetState.Hidden)
             {
                 // Only one sheet at a time: the confirm sheet opens once the item actions sheet has hidden.
                 _showConfirmWhenActionsHidden = true;
+            }
+            else if (itemMenu.IsOpen)
+            {
+                // Only one surface at a time: the confirm sheet opens once the overflow menu has closed (REQ-OVFM-17).
+                _showConfirmWhenMenuClosed = true;
             }
             else
             {
@@ -386,5 +406,20 @@ public partial class CrudListView : ContentView
             if (_viewModel != null && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
                 confirmSheet.Show(_viewModel.ConfirmSheetState, null);
         }
+    }
+
+    /// <summary>
+    /// Overflow item menu closed (outside tap, back, Edit, or a page action). Flushes a Delete-deferred confirm sheet.
+    /// Never dispatches DismissItemMenuCommand: the TwoWay IsOpen binding has already written the close back.
+    /// The back route is owned by <see cref="Menu"/> (REQ-OVFM-13b), not by this view.
+    /// </summary>
+    private void OnItemMenuClosed(object sender, EventArgs e)
+    {
+        if (!_showConfirmWhenMenuClosed)
+            return;
+
+        _showConfirmWhenMenuClosed = false;
+        if (_viewModel != null && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
+            confirmSheet.Show(_viewModel.ConfirmSheetState, null);
     }
 }

@@ -118,15 +118,14 @@ public class DeezerProviderTests
     }
 
     [Fact]
-    public async Task SearchSongsAsync_MapsIdTitleShortVersionArtistName()
+    public async Task SearchSongsAsync_MapsIdTitleShortAndArtistName()
     {
-        // [AC] REQ-SFT-12: Title = title_short, Version = normalised title_version, plus id and artist name
+        // [AC] REQ-RMV-08: Title = title_short, plus id and artist name (REQ-SFT-12 Title mapping, Version part superseded)
         var (provider, _) = Create(_ => Json(TrackBody("Creep (Live)", "Creep", "(Live)")));
 
         var item = Assert.Single(await provider.SearchSongsAsync("creep"));
 
         Assert.Equal("Creep", item.SongTitle);
-        Assert.Equal("Live", item.Version);
         Assert.Equal("42", item.ExternalId);
         Assert.Equal("Radiohead", item.ArtistName);
     }
@@ -136,31 +135,27 @@ public class DeezerProviderTests
     [InlineData("")]
     public async Task SearchSongsAsync_TitleShortMissing_FallsBackToTitle(string? titleShort)
     {
-        // [AC] REQ-SFT-12: missing/empty title_short falls back to title; missing title_version yields empty Version
+        // [AC] REQ-SFT-12: missing/empty title_short falls back to title
         var (provider, _) = Create(_ => Json(TrackBody("Creep", titleShort, null)));
 
         var item = Assert.Single(await provider.SearchSongsAsync("creep"));
 
         Assert.Equal("Creep", item.SongTitle);
-        Assert.Equal("", item.Version);
     }
 
     [Theory]
-    [InlineData("(Live)", "Live")]
-    [InlineData(" [Remastered 2011] ", "Remastered 2011")]
-    [InlineData("Live at Wembley", "Live at Wembley")]
-    [InlineData("((x))", "(x)")]
-    [InlineData("(Live) (2011)", "(Live) (2011)")]
-    [InlineData("(Live]", "(Live]")]
-    [InlineData("(Live [2011])", "Live [2011]")]
-    [InlineData("", "")]
-    public async Task SearchSongsAsync_NormalisesVersion(string raw, string expected)
+    [InlineData("(Live)")]
+    [InlineData(" [Remastered 2011] ")]
+    [InlineData("")]
+    public async Task SearchSongsAsync_TitleVersionIgnored_TitleUnchanged(string raw)
     {
-        // [AC] REQ-SFT-12: outer brackets are stripped only when the opener's same-type closer is the last character
+        // [AC] REQ-RMV-08: title_version is ignored; the same track with any version label maps to the same row
         var (provider, _) = Create(_ => Json(TrackBody("Creep", "Creep", raw)));
 
         var item = Assert.Single(await provider.SearchSongsAsync("creep"));
 
-        Assert.Equal(expected, item.Version);
+        Assert.Equal("Creep", item.SongTitle);
+        Assert.Equal("Radiohead", item.ArtistName);
+        Assert.Equal("42", item.ExternalId);
     }
 }

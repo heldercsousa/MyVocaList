@@ -13,6 +13,7 @@ namespace MyVocaList.Tests.Unit.Services;
 public class SongServiceEnsureLyricsTests
 {
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongKaraokeUrlRepository> _urlRepoMock = new();
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
@@ -33,7 +34,7 @@ public class SongServiceEnsureLyricsTests
         _urlRepoMock.Object,
         _urlServiceMock.Object,
         uow ?? PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _lyricsMock),
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, _lyricsMock),
         _loggerMock.Object);
 
     private static Song MakeSong(
@@ -47,7 +48,6 @@ public class SongServiceEnsureLyricsTests
             Id = SongId,
             ArtistId = ArtistId,
             Title = StoredTitle,
-            Version = "",
             Lyrics = lyrics,
             LyricsOrigin = origin,
             ExternalProvider = provider,
@@ -237,7 +237,7 @@ public class SongServiceEnsureLyricsTests
     public async Task EnsureLyricsAsync_LookupRunsOutsideAnyUnitOfWork()
     {
         var passthrough = PassthroughUnitOfWork.Over(
-            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _lyricsMock);
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, _catalogRepoMock.Object, _lyricsMock);
         var uow = new ScopeTrackingUnitOfWork(passthrough);
         SetupRead(MakeSong());
         var scopesDuringLookup = -1;

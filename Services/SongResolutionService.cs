@@ -82,9 +82,9 @@ public class SongResolutionService : ISongResolutionService
             // 2. Exact local match
             if (!string.IsNullOrWhiteSpace(candidate.Title))
             {
-                // REQ-SFT-42: one collated lookup (accent/case-insensitive) that returns the stored id.
-                var exactId = await songRepository.FindIdByTitleVersionForArtistAsync(
-                    resolvedArtistId.Value, candidate.Title, candidate.Version, null, ct);
+                // REQ-SFT-42 / REQ-RMV-06: one collated lookup on the song identity (Artist, Title) that returns the stored id.
+                var exactId = await songRepository.FindIdByTitleForArtistAsync(
+                    resolvedArtistId.Value, candidate.Title, null, ct);
 
                 if (exactId is not null)
                 {
@@ -110,7 +110,6 @@ public class SongResolutionService : ISongResolutionService
                     .Select(x => new SongMatch(
                         x.Hit.SongId,
                         x.Hit.Title,
-                        x.Hit.Version,
                         x.Hit.ArtistName,
                         x.Score))
                     .ToList();

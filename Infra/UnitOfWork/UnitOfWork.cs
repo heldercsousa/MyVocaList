@@ -1,5 +1,7 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MyVocaList.Domain.Exceptions;
 using MyVocaList.Domain.UnitOfWork;
 
 namespace MyVocaList.Infra.UnitOfWork;
@@ -49,7 +51,7 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
             // Save-skip (Revision 8, § 6b): save only when the result signals success.
             if (ResultSignalsSuccess(result))
             {
-                await context.SaveChangesAsync(ct);
+                await SaveTranslatedAsync(context, ct);
                 await transaction.CommitAsync(ct);
             }
             else
@@ -84,7 +86,7 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
         try
         {
             await body(scope.ServiceProvider);
-            await context.SaveChangesAsync(ct);   // always -- no signal to inspect
+            await SaveTranslatedAsync(context, ct);   // always -- no signal to inspect
             await transaction.CommitAsync(ct);
         }
         catch
@@ -129,8 +131,25 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
                 "Note that ExecuteReadAsync does not open one: a read never saves (REQ-UOW-34).");
 
         var context = scope.GetRequiredService<AppDbContext>();
-        await context.SaveChangesAsync(ct);
+        await SaveTranslatedAsync(context, ct);
         // No transaction.CommitAsync and no transaction disposal -- see the note above.
+    }
+
+    // BUG-088 REQ-DUP-06: a SQLITE_CONSTRAINT (error 19) from the save becomes a Domain exception, so Services
+    // map it to a business tuple without seeing EF Core or Microsoft.Data.Sqlite. The caller's catch in
+    // ExecuteAsync rolls the transaction back before the translated exception leaves this unit of work.
+    private const int SqliteConstraintErrorCode = 19;
+
+    private static async Task SaveTranslatedAsync(AppDbContext context, CancellationToken ct)
+    {
+        try
+        {
+            await context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteErrorCode: SqliteConstraintErrorCode })
+        {
+            throw new ConstraintViolationException("A database constraint rejected the save.", ex);
+        }
     }
 
     // Save-skip signal detection (Revision 9, § 6b). Exhaustive by construction -- every branch is

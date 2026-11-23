@@ -15,7 +15,7 @@ public class SongRepository : ISongRepository
 {
     private const string TitleSearchSelectSql =
         """
-        SELECT s.Id AS SongId, s.Title AS Title, s.Version AS Version, s.ArtistId AS ArtistId,
+        SELECT s.Id AS SongId, s.Title AS Title, s.ArtistId AS ArtistId,
                a.Name AS ArtistName, s.ExternalProvider AS ExternalProvider, s.ExternalId AS ExternalId,
                s.ImageUrl AS ImageUrl, a.ImageUrl AS ArtistImageUrl
         FROM SongSearch
@@ -42,7 +42,7 @@ public class SongRepository : ISongRepository
     private const string ListSearchSql =
         """
         SELECT s.Id AS Id, s.Title AS Title, s.ArtistId AS OriginalArtistId, a.Name AS OriginalArtistName,
-               s.FeaturedArtists AS FeaturedArtists, s.ExternalProvider AS ExternalProvider, s.Version AS Version,
+               s.ExternalProvider AS ExternalProvider,
                COALESCE(s.ImageUrl, a.ImageUrl) AS ImageUrl
         FROM SongSearch
         JOIN Songs s ON s.Id = SongSearch.rowid
@@ -88,9 +88,7 @@ public class SongRepository : ISongRepository
                     s.Title,
                     s.ArtistId,
                     s.OriginalArtist.Name,
-                    s.FeaturedArtists,
                     s.ExternalProvider,
-                    s.Version,
                     s.ImageUrl ?? s.OriginalArtist.ImageUrl))
                 .ToListAsync(ct);
             return (allItems, allCount);
@@ -147,9 +145,7 @@ public class SongRepository : ISongRepository
                 s.Title,
                 s.ArtistId,
                 s.OriginalArtist.Name,
-                s.FeaturedArtists,
                 s.ExternalProvider,
-                s.Version,
                 s.ImageUrl ?? s.OriginalArtist.ImageUrl))
             .ToListAsync(ct);
 
@@ -216,25 +212,6 @@ public class SongRepository : ISongRepository
                  EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default), ct);
 
     /// <inheritdoc />
-    public async Task<bool> ExistsByTitleVersionForArtistAsync(
-        int artistId, string title, string version, CancellationToken ct = default)
-        => await _db.Songs.AnyAsync(
-            s => s.ArtistId == artistId &&
-                 EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
-                 EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version, CollationConstants.Default),
-            ct);
-
-    /// <inheritdoc />
-    public async Task<bool> ExistsByTitleVersionForArtistAsync(
-        int artistId, string title, string version, int excludeId, CancellationToken ct = default)
-        => await _db.Songs.AnyAsync(
-            s => s.Id != excludeId &&
-                 s.ArtistId == artistId &&
-                 EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
-                 EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version, CollationConstants.Default),
-            ct);
-
-    /// <inheritdoc />
     public async Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(
         IEnumerable<string> titles, CancellationToken ct = default)
     {
@@ -248,13 +225,12 @@ public class SongRepository : ISongRepository
     }
 
     /// <inheritdoc />
-    public async Task<int?> FindIdByTitleVersionForArtistAsync(
-        int artistId, string title, string version, int? excludeId, CancellationToken ct)
+    public async Task<int?> FindIdByTitleForArtistAsync(
+        int artistId, string title, int? excludeId, CancellationToken ct)
         => await _db.Songs
             .Where(s => (excludeId == null || s.Id != excludeId.Value) &&
                         s.ArtistId == artistId &&
-                        EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
-                        EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version, CollationConstants.Default))
+                        EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default))
             .Select(s => (int?)s.Id)
             .FirstOrDefaultAsync(ct);
 
@@ -303,7 +279,7 @@ public class SongRepository : ISongRepository
                 .OrderBy(s => s.Title.Length)
                 .Take(take)
                 .Select(s => new SongSearchHit(
-                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
+                    s.Id, s.Title, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
                     s.ImageUrl, s.OriginalArtist.ImageUrl))
                 .ToListAsync(ct);
         }
@@ -343,29 +319,28 @@ public class SongRepository : ISongRepository
             .AsNoTracking()
             .Where(s => s.ExternalProvider == provider && ids.Contains(s.ExternalId))
             .Select(s => new SongSearchHit(
-                s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
+                s.Id, s.Title, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
                 s.ImageUrl, s.OriginalArtist.ImageUrl))
             .ToListAsync(ct);
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(
-        IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct)
+        IReadOnlyCollection<(string Title, string ArtistName)> items, CancellationToken ct)
     {
         if (items is null || items.Count == 0) return [];
 
-        // One bounded indexed query per triple (the batch is at most a result page); collation decides every match.
+        // One bounded indexed query per pair (the batch is at most a result page); collation decides every match.
         var hits = new Dictionary<int, SongSearchHit>();
-        foreach (var (title, artistName, version) in items)
+        foreach (var (title, artistName) in items)
         {
             var matches = await _db.Songs
                 .AsNoTracking()
                 .Where(s =>
                     EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
-                    EF.Functions.Collate(s.OriginalArtist.Name, CollationConstants.Default) == EF.Functions.Collate(artistName, CollationConstants.Default) &&
-                    EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version ?? string.Empty, CollationConstants.Default))
+                    EF.Functions.Collate(s.OriginalArtist.Name, CollationConstants.Default) == EF.Functions.Collate(artistName, CollationConstants.Default))
                 .Select(s => new SongSearchHit(
-                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
+                    s.Id, s.Title, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
                     s.ImageUrl, s.OriginalArtist.ImageUrl))
                 .ToListAsync(ct);
             foreach (var m in matches) hits[m.SongId] = m;
@@ -402,4 +377,8 @@ public class SongRepository : ISongRepository
             .Where(s => idList.Contains(s.Id))
             .ExecuteDeleteAsync(ct);
     }
+
+    /// <inheritdoc />
+    public async Task<int> CountByArtistAsync(int artistId, CancellationToken ct)
+        => await _db.Songs.CountAsync(s => s.ArtistId == artistId, ct);
 }

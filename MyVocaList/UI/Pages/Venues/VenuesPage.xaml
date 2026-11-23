@@ -44,7 +44,10 @@
                         <lists:ListItemLeadingImage ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" PlaceholderIcon="nightlife_outlined" Margin="0,8" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <lists:ListItemCheckbox VerticalOptions="Center" />
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <lists:ListItemOverflowButton />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>

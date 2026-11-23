@@ -36,7 +36,7 @@ public class SongSuggestionServiceImageTests
             .ReturnsAsync(new List<SongSearchHit>());
         _songRepoMock
             .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(), It.IsAny<CancellationToken>()))
+                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit>());
         _artistRepoMock
             .Setup(r => r.GetByNamesCollatedAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -55,7 +55,7 @@ public class SongSuggestionServiceImageTests
 
     private static SongSearchHit Hit(int id, string title, string artist, int artistId, string? songImage, string? artistImage,
         string? provider = null, string? externalId = null)
-        => new(id, title, "", artistId, artist, provider, externalId, songImage, artistImage);
+        => new(id, title, artistId, artist, provider, externalId, songImage, artistImage);
 
     private void SetupCandidates(string query, params SongSearchHit[] hits)
         => _songRepoMock
@@ -115,7 +115,7 @@ public class SongSuggestionServiceImageTests
     {
         // [AC] REQ-ART-06: a remote title option carries the Deezer cover, artist picture and album title
         SetupDeezer(new MusicSearchResultDto(
-            "dz-1", "Deezer", "Radiohead", "Creep", null, "Live",
+            "dz-1", "Deezer", "Radiohead", "Creep",
             "https://dz/cover.jpg", "https://dz/artist.jpg", "Pablo Honey"));
         var sut = CreateSut();
 
@@ -133,7 +133,7 @@ public class SongSuggestionServiceImageTests
     {
         // [AC] REQ-ART-06: a remote option without a cover shows the artist picture as its row image
         SetupDeezer(new MusicSearchResultDto(
-            "dz-1", "Deezer", "Radiohead", "Creep", null, null, null, "https://dz/artist.jpg", null));
+            "dz-1", "Deezer", "Radiohead", "Creep", null, "https://dz/artist.jpg", null));
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
@@ -149,7 +149,7 @@ public class SongSuggestionServiceImageTests
     {
         // [AC] REQ-ART-06: a Deezer row promoted to a local option shows the stored song's images, not Deezer's, and no album
         SetupDeezer(new MusicSearchResultDto(
-            "dz-1", "Deezer", "Radiohead", "Creep", null, null,
+            "dz-1", "Deezer", "Radiohead", "Creep",
             "https://dz/cover.jpg", "https://dz/artist.jpg", "Pablo Honey"));
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(

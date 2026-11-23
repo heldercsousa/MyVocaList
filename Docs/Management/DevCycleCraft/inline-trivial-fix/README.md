@@ -1,14 +1,15 @@
 ---
 id: inline-trivial-fix
-title: "**Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception**"
-status: "🟡 In Progress"
+title: **Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception**
+status: ✅ Done
 target: 2026-07-12
 section: DevCycleCraft
-kind: feature
-order: 20
-goal: "let the orchestrator apply a fully-diagnosed 1-file/≤5-line fix inline instead of paying a ~25–35k-token subagent round-trip."
-gate: "Helder observes the first live ITF fix end-to-end before ✅ — opportunistic, waits for a qualifying fix."
+goal: let the orchestrator apply a fully-diagnosed 1-file/≤5-line fix inline instead of paying a ~25–35k-token subagent round-trip.
+gate: Helder observes the first live ITF fix end-to-end before ✅ — opportunistic, waits for a qualifying fix.
 pointer: DevCycleCraft/inline-trivial-fix/
+closed: 2026-11
+order: 20
+kind: feature
 ---
 
 # Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception

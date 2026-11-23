@@ -49,13 +49,13 @@ public class VenueCatalogServiceReadScopeTests
         var (songOk, songMessage, song) = await songs.CreateSongAsync(artist!.Id, "Test Song");
         Assert.True(songOk, songMessage);
 
-        var (addOk, addMessage) = await catalog.AddSongToCatalogAsync(artist.Id, song!.Id);
-        Assert.True(addOk, addMessage);
+        // REQ-CATPROP-01: creating the song already wrote the author's derived catalog row, so the former
+        // explicit AddSongToCatalogAsync (a now-refused duplicate) is gone; the read assertions are unchanged.
 
         var (items, totalCount) = await catalog.GetPagedCatalogForArtistAsync(artist.Id, 1, 10);
 
         Assert.Equal(1, totalCount);
-        Assert.Contains(items, i => i.Id == song.Id);
+        Assert.Contains(items, i => i.Id == song!.Id);
     }
 
     // [AC] REQ-UOW-39: two successive GetPagedVenuesForListAsync calls resolve the AppDbContext

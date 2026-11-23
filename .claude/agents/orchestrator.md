@@ -237,6 +237,8 @@ Before dispatching any wave, verify that the spec being implemented is still cur
 
 **Exception:** Committed interface/DTO signatures produced in the previous wave may be included verbatim under a `## Contracts from previous wave` block — these are bounded committed code, not rule file content.
 
+**Ripple lists come from a grep, never from line numbers or one example.** When a task changes a signature, a constructor, an interface or a shared setup, every file it ripples into (callers, mock setups, test doubles, decorators) goes into `Files owned` as the output of a grep run at briefing time. Put the grep pattern in the briefing too. Never point at fixed line numbers (they drift once earlier tasks commit), and never name one file "e.g. `FooTests`" in place of the full list. The subagent re-runs the same grep before its exit checklist and reports any file the list missed. The grep is part of the orchestrator read lane (`§ Orchestrator Read-Scope`). Origin: CATALOG-PROP (2026-11-20). Two briefs built from line numbers or a single example missed files: a test decorator and constructor calls in sibling test classes.
+
 ### Role Scope Declaration
 
 Every subagent briefing must begin with a **role scope block**:

@@ -1,12 +1,13 @@
 ---
 id: post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations
 title: Post-ship review — did the agent-dispatch recalibration meet its expectations
-status: 💡 Pending
+status: ✅ Done
 target: 2026-11-03
 section: DevCycleCraft
 parent: inline-trivial-fix
 goal: "After a few work sessions, confirm the 2026-11-03 dispatch recalibration works: trivial fixes take the ITF lane and the trimmed context stays small."
 gate: "Done when a clean Lane: ITF commit exists and no trivial-fix dispatch is found in recent sessions; otherwise open a follow-up."
+closed: 2026-11
 kind: change
 ---
 

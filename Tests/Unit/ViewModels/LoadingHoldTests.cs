@@ -103,7 +103,6 @@ public class LoadingHoldTests
         ArtistId = 8,
         OriginalArtist = new Artist { Id = 8, Name = "Ramones" },
         Title = "Blitzkrieg Bop",
-        Version = string.Empty
     };
 
     private static async Task WaitUntilAsync(Func<bool> condition)
@@ -117,7 +116,6 @@ public class LoadingHoldTests
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
         songService.Setup(s => s.GetSongByIdAsync(song.Id, It.IsAny<CancellationToken>())).ReturnsAsync(song);
 
         var suggestions = new Mock<ISongSuggestionService>();

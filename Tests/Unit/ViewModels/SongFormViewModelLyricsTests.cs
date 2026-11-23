@@ -65,7 +65,6 @@ public class SongFormViewModelLyricsTests
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
         songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SongFormSaveOutcome(SongFormSaveKind.Saved, "Song created", SaveField.None, 5, [], false, []));
         return songService;
@@ -74,7 +73,7 @@ public class SongFormViewModelLyricsTests
     private static SongSuggestionDto RemoteDto(
         string title = "Creep", string artist = "Radiohead", string? album = "Pablo Honey", int? duration = 238,
         int? localArtistId = null, string? localArtistName = null) =>
-        new(null, title, artist, localArtistId, "dz-1", "Deezer", true, string.Empty, localArtistName,
+        new(null, title, artist, localArtistId, "dz-1", "Deezer", true, localArtistName,
             "https://img.test/cover.jpg", null, album, duration);
 
     private static AutocompleteSuggestion Pick(SongSuggestionDto dto) => new(dto.Title, string.Empty, dto);

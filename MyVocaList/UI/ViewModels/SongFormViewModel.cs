@@ -41,7 +41,6 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private int _artistId;
     [ObservableProperty] private string _artistName = string.Empty;
     [ObservableProperty] private string _songTitle = string.Empty;
-    [ObservableProperty] private string _featuredArtists = string.Empty;
     [ObservableProperty] private bool _titleHasError;
     [ObservableProperty] private string _titleErrorText = string.Empty;
     [ObservableProperty] private string _characterCounterText = string.Empty;
@@ -50,11 +49,6 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isCharacterCounterError;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _isSongLoading;   // REQ-SLD-32: edit-mode load of the stored song is running
-
-    // ── Version field (Task 4.5) ──────────────────────────────────────────
-    [ObservableProperty] private string _songVersion = string.Empty;
-    [ObservableProperty] private bool _versionHasError;
-    [ObservableProperty] private string _versionErrorText = string.Empty;
 
     // ── Artist autocomplete ───────────────────────────────────────────────
     [ObservableProperty] private string _artistSearchText = string.Empty;
@@ -161,8 +155,7 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isResolutionSheetVisible;
     [ObservableProperty] private string _resolutionSheetTitle = ExactDuplicateSheetTitle;
     [ObservableProperty] private IReadOnlyList<SongMatch> _resolutionCandidates = [];
-    [ObservableProperty] private bool _isExactDuplicate;   // true: exact sheet (Save as new version); false: possible duplicates (Save as new song)
-    [ObservableProperty] private bool _versionEntryRequired; // reveals version entry when "Save as new version"
+    [ObservableProperty] private bool _isExactDuplicate;   // true: exact sheet (Open existing / Cancel only, REQ-RMV-07); false: possible duplicates (Save as new song)
 
     [ObservableProperty] private bool _isArtistMatchSheetVisible;
     [ObservableProperty] private IReadOnlyList<ArtistMatch> _artistMatchCandidates = [];
@@ -176,7 +169,6 @@ public partial class SongFormViewModel : ViewModelBase
     // Becomes true once the user edits each field. Guards blur validation so a pristine field the
     // user only tabbed through is not flagged prematurely (Form Validation Standard).
     private bool _titleDirty;
-    private bool _versionDirty;
 
     // True until the page's OnAppearing calls CompleteHydration(). While true, Shell QueryProperty
     // pre-population (edit mode) must NOT mark any field dirty — otherwise a pre-filled invalid
@@ -263,7 +255,6 @@ public partial class SongFormViewModel : ViewModelBase
 
         // Duplicate-song and artist-match sheet commands
         OpenExistingSongCommand = new AsyncRelayCommand<SongMatch>(OpenExistingSongAsync);
-        ConfirmSaveAsNewVersionCommand = new AsyncRelayCommand(ConfirmSaveAsNewVersionAsync);
         ConfirmSaveAsNewSongCommand = new AsyncRelayCommand(ConfirmSaveAsNewSongAsync);
         DismissResolutionSheetCommand = new RelayCommand(DismissResolutionSheet);
         UseExistingArtistCommand = new AsyncRelayCommand<ArtistMatch>(UseExistingArtistAsync);
@@ -286,9 +277,7 @@ public partial class SongFormViewModel : ViewModelBase
     // Duplicate-song sheet
     /// <summary>Opens the stored song's edit form in place of this add form (REQ-SFT-22/24).</summary>
     public IAsyncRelayCommand<SongMatch> OpenExistingSongCommand { get; }
-    /// <summary>"Save as new version": re-invokes the Service with SaveAsNewVersion (REQ-SFT-22).</summary>
-    public IAsyncRelayCommand ConfirmSaveAsNewVersionCommand { get; }
-    /// <summary>"Save as new song": re-invokes the Service with SaveAsNewSong, no Version (REQ-SFT-23).</summary>
+    /// <summary>"Save as new song": re-invokes the Service with SaveAsNewSong (REQ-SFT-23; near-duplicates only, REQ-RMV-07).</summary>
     public IAsyncRelayCommand ConfirmSaveAsNewSongCommand { get; }
     public IRelayCommand DismissResolutionSheetCommand { get; }
 
@@ -322,28 +311,11 @@ public partial class SongFormViewModel : ViewModelBase
         ApplyTitleValidation(SongTitle);
     }
 
-    /// <summary>Blur handler for the version field — see <see cref="ValidateTitle"/>.</summary>
-    [RelayCommand]
-    private void ValidateVersion()
-    {
-        if (!_versionDirty)
-            return;
-
-        ApplyVersionValidation(SongVersion);
-    }
-
     private void ApplyTitleValidation(string value)
     {
         var (isValid, message) = _songService.ValidateTitleInput(value ?? string.Empty);
         TitleHasError = !isValid;
         TitleErrorText = isValid ? string.Empty : message;
-    }
-
-    private void ApplyVersionValidation(string value)
-    {
-        var (isValid, message) = _songService.ValidateVersionInput(value);
-        VersionHasError = !isValid;
-        VersionErrorText = isValid ? string.Empty : message;
     }
 
     // ── QueryProperty change hooks ────────────────────────────────────────
@@ -391,19 +363,6 @@ public partial class SongFormViewModel : ViewModelBase
             return;
 
         ApplyTitleValidation(value);
-    }
-
-    partial void OnSongVersionChanged(string value)
-    {
-        if (_isHydrating)
-            return;
-
-        _versionDirty = true;
-
-        if (!VersionHasError)
-            return;
-
-        ApplyVersionValidation(value);
     }
 
     partial void OnArtistIdChanged(int value)
@@ -587,12 +546,10 @@ public partial class SongFormViewModel : ViewModelBase
 
     private AutocompleteSuggestion ToTitleOption(SongSuggestionDto dto)
     {
-        // REQ-ART-07: artist · version · album; album only on Deezer rows, never when it repeats the title.
+        // REQ-ART-07 (Version part removed, REQ-RMV-01): artist · album; album only on Deezer rows, never when it repeats the title.
         var parts = new List<string>();
         if (!string.IsNullOrWhiteSpace(dto.ArtistName))
             parts.Add(dto.ArtistName);
-        if (!string.IsNullOrWhiteSpace(dto.Version))
-            parts.Add(dto.Version);
         if (dto.IsRemote
             && !string.IsNullOrWhiteSpace(dto.AlbumTitle)
             && !string.Equals(dto.AlbumTitle, dto.Title, StringComparison.OrdinalIgnoreCase))
@@ -847,7 +804,7 @@ public partial class SongFormViewModel : ViewModelBase
 
     /// <summary>
     /// BUG-008/BUG-024: loads the full Song entity in edit mode and hydrates every field that
-    /// <c>SaveFromFormAsync</c> persists (Title, Version, FeaturedArtists, Lyrics, external identity)
+    /// <c>SaveFromFormAsync</c> persists (Title, Lyrics, external identity)
     /// so Save cannot silently wipe stored data. Also loads karaoke URLs and determines
     /// IsArtistLocked (API-imported song: ExternalId set AND no manual edits).
     /// </summary>
@@ -926,8 +883,6 @@ public partial class SongFormViewModel : ViewModelBase
             try
             {
                 SongTitle = song.Title ?? string.Empty;
-                SongVersion = song.Version ?? string.Empty;
-                FeaturedArtists = song.FeaturedArtists ?? string.Empty;
                 Lyrics = song.Lyrics;
 
                 // BUG-055: hydrate the stored artist so the field shows it (name) and Save preserves
@@ -1057,15 +1012,12 @@ public partial class SongFormViewModel : ViewModelBase
 
         // REQ-SLD-38: a frozen Title (plain text of a stored Deezer song) is saved as it was loaded.
         var title = IsTitleFrozen ? _storedTitle.Trim() : (SongTitle?.Trim() ?? string.Empty);
-        var version = SongVersion?.Trim() ?? string.Empty;
 
-        // Safety net: re-run the Title and Version validators on every call, regardless of dirty
-        // state — an untouched required field must still be caught. The Version requirement for
-        // "Save as new version" is the Service's rule (REQ-SFT-22), not checked here.
+        // Safety net: re-run the Title validator on every call, regardless of dirty state — an
+        // untouched required field must still be caught.
         ApplyTitleValidation(title);
-        ApplyVersionValidation(version);
 
-        if (TitleHasError || VersionHasError)
+        if (TitleHasError)
             return;
 
         IsBusy = true;
@@ -1074,7 +1026,7 @@ public partial class SongFormViewModel : ViewModelBase
             ArtistHasError = false;   // a blank or unpicked Artist is the Service's decision (REQ-SFT-21)
             ArtistErrorText = string.Empty;
 
-            var outcome = await _songService.SaveFromFormAsync(BuildSaveRequest(title, version));
+            var outcome = await _songService.SaveFromFormAsync(BuildSaveRequest(title));
             await ApplyOutcomeAsync(outcome);
         }
         catch (Exception ex)
@@ -1094,7 +1046,7 @@ public partial class SongFormViewModel : ViewModelBase
     /// A picked artist travels as <c>ArtistId</c>; otherwise the trimmed typed name travels as
     /// <c>ArtistText</c> and the Service resolves it.
     /// </summary>
-    private SongFormSaveRequest BuildSaveRequest(string title, string version)
+    private SongFormSaveRequest BuildSaveRequest(string title)
     {
         // REQ-SLD-30: a frozen (Deezer) song in edit mode sends the stored artist id, never artist text or a decision.
         var frozenEdit = IsEditMode && IsArtistFrozen;
@@ -1114,8 +1066,6 @@ public partial class SongFormViewModel : ViewModelBase
         return new SongFormSaveRequest(
             SongId,
             title,
-            version,
-            FeaturedArtists?.Trim(),
             Lyrics?.Trim(),
             artistId,
             artistId.HasValue ? null : ArtistSearchText?.Trim(),
@@ -1161,7 +1111,6 @@ public partial class SongFormViewModel : ViewModelBase
                 IsExactDuplicate = outcome.IsExactSongMatch;
                 ResolutionSheetTitle = outcome.IsExactSongMatch ? ExactDuplicateSheetTitle : PossibleDuplicatesSheetTitle;
                 ResolutionCandidates = outcome.SongCandidates;
-                VersionEntryRequired = false;
                 IsResolutionSheetVisible = true;
                 break;
         }
@@ -1169,24 +1118,14 @@ public partial class SongFormViewModel : ViewModelBase
 
     private async Task ApplyFailureAsync(SongFormSaveOutcome outcome)
     {
-        // A Version refusal during "Save as new version" keeps the duplicate sheet open and reveals
-        // the version entry, so the user corrects it there (the sheet is the origin of the choice).
-        var keepVersionSheet = outcome.FailedField == SaveField.Version
-                               && _songDecision == SongDecision.SaveAsNewVersion;
-
         IsArtistMatchSheetVisible = false;
-        IsResolutionSheetVisible = keepVersionSheet;
-        VersionEntryRequired = keepVersionSheet;
+        IsResolutionSheetVisible = false;
 
         switch (outcome.FailedField)
         {
             case SaveField.Title:
                 TitleHasError = true;
                 TitleErrorText = outcome.Message;
-                break;
-            case SaveField.Version:
-                VersionHasError = true;
-                VersionErrorText = outcome.Message;
                 break;
             case SaveField.Artist:
                 ArtistHasError = true;
@@ -1202,7 +1141,6 @@ public partial class SongFormViewModel : ViewModelBase
     {
         IsArtistMatchSheetVisible = false;
         IsResolutionSheetVisible = false;
-        VersionEntryRequired = false;
     }
 
     private void ClearSaveDecisions()
@@ -1226,18 +1164,7 @@ public partial class SongFormViewModel : ViewModelBase
         await _navigationService.GoToAsync($"../{Routes.SongForm}?songId={match.SongId}");
     }
 
-    /// <summary>
-    /// "Save as new version" (REQ-SFT-22): holds the SaveAsNewVersion decision and re-invokes the
-    /// Service, which validates the Version (AC-1.2). The sheet closes on Saved; a Version refusal
-    /// keeps it open with the version entry revealed (see <see cref="ApplyFailureAsync"/>).
-    /// </summary>
-    private async Task ConfirmSaveAsNewVersionAsync()
-    {
-        _songDecision = SongDecision.SaveAsNewVersion;
-        await RunSaveAsync();
-    }
-
-    /// <summary>"Save as new song" (REQ-SFT-23): holds the SaveAsNewSong decision; no Version is required.</summary>
+    /// <summary>"Save as new song" (REQ-SFT-23, near-duplicates only, REQ-RMV-07): holds the SaveAsNewSong decision.</summary>
     private async Task ConfirmSaveAsNewSongAsync()
     {
         _songDecision = SongDecision.SaveAsNewSong;
@@ -1248,7 +1175,6 @@ public partial class SongFormViewModel : ViewModelBase
     private void DismissResolutionSheet()
     {
         IsResolutionSheetVisible = false;
-        VersionEntryRequired = false;
     }
 
     // ── Artist-match sheet actions (REQ-SFT-19) ───────────────────────────

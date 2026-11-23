@@ -13,74 +13,176 @@
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="All">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="16">
+    <Grid>
 
-            <!-- Full Name with autocomplete suggestions (dedup) -->
-            <textfields:AutocompleteDXField x:Name="nameField"
-                                            LabelText="Full Name"
-                                            PlaceholderText="First and last name"
-                                            Text="{Binding PersonName, Mode=TwoWay}"
-                                            HasError="{Binding NameHasError}"
-                                            ErrorText="{Binding NameErrorText}"
-                                            OptionSource="{Binding NameOptionSource}"
-                                            SelectCommand="{Binding SuggestionSelectedCommand}"
-                                            IsPickLockEnabled="False"
-                                            BlurWithoutPickCommand="{Binding ValidateNameCommand}" />
+        <ScrollView>
+            <VerticalStackLayout Padding="24" Spacing="16">
 
-            <!-- Character counter -->
-            <Label Text="{Binding CharacterCounterText}"
-                   IsVisible="{Binding ShowCharacterCounter}"
-                   StyleClass="Body.Small"
-                   HorizontalOptions="End">
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding IsCharacterCounterError}"
-                                 Value="True">
-                        <Setter Property="TextColor" Value="{StaticResource Error}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label"
-                                 Binding="{Binding IsCharacterCounterWarning}"
-                                 Value="True">
-                        <Setter Property="TextColor" Value="{StaticResource Warning}" />
-                    </DataTrigger>
-                </Label.Triggers>
-            </Label>
+                <!-- Full Name with autocomplete suggestions (dedup) -->
+                <textfields:AutocompleteDXField x:Name="nameField"
+                                                LabelText="Full Name"
+                                                PlaceholderText="First and last name"
+                                                Text="{Binding PersonName, Mode=TwoWay}"
+                                                HasError="{Binding NameHasError}"
+                                                ErrorText="{Binding NameErrorText}"
+                                                OptionSource="{Binding NameOptionSource}"
+                                                IsDropDownOpen="{Binding IsNameDropDownOpen, Mode=TwoWay}"
+                                                SelectCommand="{Binding SuggestionSelectedCommand}"
+                                                IsPickLockEnabled="False"
+                                                BlurWithoutPickCommand="{Binding ValidateNameCommand}" />
 
-            <!-- Birthday (optional) -->
-            <dxe:TextEdit x:Name="birthdayEdit"
-                          Text="{Binding PersonBirthday, Mode=TwoWay}"
-                          LabelText="Birthday (optional)"
-                          PlaceholderText="DD/MM"
-                          Mask="00/00"
-                          MaskPlaceholderChar="_"
-                          HasError="{Binding BirthdayHasError}"
-                          ErrorText="{Binding BirthdayErrorText}"
-                          Unfocused="OnBirthdayUnfocused" />
+                <!-- Character counter -->
+                <Label Text="{Binding CharacterCounterText}"
+                       IsVisible="{Binding ShowCharacterCounter}"
+                       StyleClass="Body.Small"
+                       HorizontalOptions="End">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding IsCharacterCounterError}"
+                                     Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Error}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding IsCharacterCounterWarning}"
+                                     Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
 
-            <!-- Email (optional) -->
-            <dxe:TextEdit x:Name="emailEdit"
-                          Text="{Binding PersonEmail, Mode=TwoWay}"
-                          LabelText="Email (optional)"
-                          PlaceholderText="singer@example.com"
-                          Keyboard="Email"
-                          HasError="{Binding EmailHasError}"
-                          ErrorText="{Binding EmailErrorText}"
-                          Unfocused="OnEmailUnfocused" />
+                <!-- Birthday (optional): day and month dropdowns, no year -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                    <dxe:ComboBoxEdit Grid.Column="0"
+                                      LabelText="Birth month"
+                                      ItemsSource="{Binding Months}"
+                                      DisplayMember="Name"
+                                      SelectedItem="{Binding SelectedBirthMonth, Mode=TwoWay}"
+                                      ClearIconVisibility="Auto"
+                                      HasError="{Binding BirthdayErrorOnMonth}"
+                                      ErrorText="{Binding BirthdayErrorText}" />
 
-            <!-- Action buttons -->
-            <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
-                <dx:DXButton Content="Cancel"
-                             Style="{StaticResource OutlinedButton}"
-                             Padding="24,0"
-                             Command="{Binding CancelCommand}" />
-                <dx:DXButton Content="Save"
-                             Style="{StaticResource FilledButton}"
-                             Padding="24,0"
-                             Command="{Binding SaveCommand}" />
-            </HorizontalStackLayout>
+                    <dxe:ComboBoxEdit Grid.Column="1"
+                                      LabelText="Birth day"
+                                      ItemsSource="{Binding Days}"
+                                      SelectedItem="{Binding SelectedBirthDay, Mode=TwoWay}"
+                                      ClearIconVisibility="Auto"
+                                      HasError="{Binding BirthdayErrorOnDay}"
+                                      ErrorText="{Binding BirthdayErrorText}" />
+                </Grid>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Email (optional) -->
+                <dxe:TextEdit x:Name="emailEdit"
+                              Text="{Binding PersonEmail, Mode=TwoWay}"
+                              LabelText="Email (optional)"
+                              PlaceholderText="singer@example.com"
+                              Keyboard="Email"
+                              HasError="{Binding EmailHasError}"
+                              ErrorText="{Binding EmailErrorText}"
+                              Unfocused="OnEmailUnfocused" />
+
+                <!-- Action buttons -->
+                <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
+                    <dx:DXButton Content="Cancel"
+                                 Style="{StaticResource OutlinedButton}"
+                                 Padding="24,0"
+                                 Command="{Binding CancelCommand}" />
+                    <dx:DXButton Content="Save"
+                                 Style="{StaticResource FilledButton}"
+                                 Padding="24,0"
+                                 Command="{Binding SaveCommand}" />
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Same-name BottomSheet (BUG-088, REQ-DUP-09) ─────────────────────── -->
+        <!--
+            Soft warning: other singers have the same name. Each row's Open button opens that singer in edit mode.
+            "Save as new" (labelled "Save anyway" in edit mode) saves the form; it is hidden for a name-only form,
+            which shows a hint instead (REQ-DUP-13a). Cancel, the scrim or Back saves nothing (DismissSameNameSheetCommand).
+        -->
+        <dx:BottomSheet x:Name="sameNameSheet"
+                        AllowedState="All"
+                        HalfExpandedRatio="0.5"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="True"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnSameNameSheetStateChanged">
+            <Grid RowDefinitions="*,Auto">
+
+                <ScrollView Grid.Row="0">
+                    <VerticalStackLayout Padding="0,0,0,8">
+
+                        <Label Text="{Binding SameNameSheetTitle}"
+                               Style="{StaticResource BottomSheetTitle}"
+                               Margin="24,20,24,8" />
+
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Same-name singers: name and display identifier; Open button opens the singer in edit mode -->
+                        <VerticalStackLayout Spacing="0"
+                                             BindableLayout.ItemsSource="{Binding SameNameMatches}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="24,12">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Headline}"
+                                                   StyleClass="Body.Large"
+                                                   TextColor="{StaticResource OnSurface}" />
+                                            <Label Text="{Binding SupportingText}"
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                                        </VerticalStackLayout>
+                                        <dx:DXButton Grid.Column="1"
+                                                     Content="Open"
+                                                     Style="{StaticResource OutlinedButton}"
+                                                     Padding="16,0"
+                                                     VerticalOptions="Center"
+                                                     Clicked="OnSameNameOpenClicked" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <!-- Rows beyond the list cap (REQ-DUP-09): "…and M more. Find them in the Singers list." -->
+                        <Label Text="{Binding SameNameMoreText}"
+                               IsVisible="{Binding HasMoreSameName}"
+                               StyleClass="Body.Medium"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               Margin="24,8,24,0" />
+
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Save the form: insert (Save as new) or edit (Save anyway). Hidden for a name-only form (REQ-DUP-13a) -->
+                        <VerticalStackLayout Padding="24,12" Spacing="8">
+                            <dx:DXButton Content="{Binding SameNameSaveButtonText}"
+                                         Style="{StaticResource FilledButton}"
+                                         HorizontalOptions="Fill"
+                                         IsVisible="{Binding CanSaveAsNewFromSheet}"
+                                         Command="{Binding SaveAsNewCommand}" />
+
+                            <Label Text="To save a new singer with this name, enter an email or a birthday."
+                                   IsVisible="{Binding CanSaveAsNewFromSheet, Converter={StaticResource InverseBoolConverter}}"
+                                   StyleClass="Body.Medium"
+                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
+                    <BoxView Style="{StaticResource Divider}" />
+
+                    <dx:DXButton Content="Cancel"
+                                 Style="{StaticResource BottomSheetCancelAction}"
+                                 Command="{Binding DismissSameNameSheetCommand}" />
+                </VerticalStackLayout>
+
+            </Grid>
+        </dx:BottomSheet>
+
+    </Grid>
 
 </ContentPage>

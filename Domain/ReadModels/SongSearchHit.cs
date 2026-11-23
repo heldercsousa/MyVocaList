@@ -5,7 +5,6 @@ namespace MyVocaList.Domain.ReadModels;
 /// </summary>
 /// <param name="SongId">Song identifier.</param>
 /// <param name="Title">Song title.</param>
-/// <param name="Version">Version label; empty string for the canonical version.</param>
 /// <param name="ArtistId">Original artist identifier.</param>
 /// <param name="ArtistName">Original artist display name.</param>
 /// <param name="ExternalProvider">External provider name, or null.</param>
@@ -13,5 +12,5 @@ namespace MyVocaList.Domain.ReadModels;
 /// <param name="ImageUrl">The stored song image URL, or null (REQ-ART-06).</param>
 /// <param name="ArtistImageUrl">The original artist's stored image URL, or null (REQ-ART-06).</param>
 public sealed record SongSearchHit(
-    int SongId, string Title, string Version, int ArtistId, string ArtistName,
+    int SongId, string Title, int ArtistId, string ArtistName,
     string? ExternalProvider, string? ExternalId, string? ImageUrl = null, string? ArtistImageUrl = null);

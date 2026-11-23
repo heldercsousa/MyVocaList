@@ -20,7 +20,7 @@ public class PersonServiceReadScopeTests
         await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
-        var (createOk, createMessage, created) = await persons.CreatePersonAsync("Jane Doe");
+        var (createOk, createMessage, created) = await persons.CreatePersonAsync("Jane Doe", email: $"{Guid.NewGuid():N}@example.com");
         Assert.True(createOk, createMessage);
 
         var found = await persons.GetPersonByIdAsync(created!.Id);
@@ -49,7 +49,7 @@ public class PersonServiceReadScopeTests
         await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
-        var (createOk, createMessage, created) = await persons.CreatePersonAsync("John Smith");
+        var (createOk, createMessage, created) = await persons.CreatePersonAsync("John Smith", email: $"{Guid.NewGuid():N}@example.com");
         Assert.True(createOk, createMessage);
 
         var found = await persons.GetPersonByNameAsync("John Smith");
@@ -66,9 +66,9 @@ public class PersonServiceReadScopeTests
         await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
-        await persons.CreatePersonAsync("Amanda Silva");
-        await persons.CreatePersonAsync("Amanda Rocha");
-        await persons.CreatePersonAsync("Bruno Costa");
+        await persons.CreatePersonAsync("Amanda Silva", email: $"{Guid.NewGuid():N}@example.com");
+        await persons.CreatePersonAsync("Amanda Rocha", email: $"{Guid.NewGuid():N}@example.com");
+        await persons.CreatePersonAsync("Bruno Costa", email: $"{Guid.NewGuid():N}@example.com");
 
         var results = (await persons.SearchPersonsAsync("Amanda")).ToList();
 
@@ -101,8 +101,8 @@ public class PersonServiceReadScopeTests
         await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
-        await persons.CreatePersonAsync("Carla Nunes");
-        await persons.CreatePersonAsync("Bruno Costa");
+        await persons.CreatePersonAsync("Carla Nunes", email: $"{Guid.NewGuid():N}@example.com");
+        await persons.CreatePersonAsync("Bruno Costa", email: $"{Guid.NewGuid():N}@example.com");
 
         var results = (await persons.SearchPersonsStartsWithAsync("Carla")).ToList();
 
@@ -135,9 +135,9 @@ public class PersonServiceReadScopeTests
         await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
-        await persons.CreatePersonAsync("Ana Lima");
-        await persons.CreatePersonAsync("Beto Alves");
-        await persons.CreatePersonAsync("Caio Reis");
+        await persons.CreatePersonAsync("Ana Lima", email: $"{Guid.NewGuid():N}@example.com");
+        await persons.CreatePersonAsync("Beto Alves", email: $"{Guid.NewGuid():N}@example.com");
+        await persons.CreatePersonAsync("Caio Reis", email: $"{Guid.NewGuid():N}@example.com");
 
         var (items, totalCount) = await persons.GetPagedPersonsForListAsync(1, 2);
 

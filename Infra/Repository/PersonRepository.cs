@@ -109,4 +109,77 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
             (excludePersonId == null || p.Id != excludePersonId.Value),
             cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<bool> IdentityExistsAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId = null, CancellationToken cancellationToken = default)
+    {
+        return await IdentityMatches(fullName, email, birthDay, birthMonth)
+            .Where(p => excludePersonId == null || p.Id != excludePersonId.Value)
+            .AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> SameNameExistsAsync(string fullName, int? excludePersonId = null, CancellationToken cancellationToken = default)
+    {
+        return await SameNameQuery(fullName, null, null, null, excludePersonId, includeIdentityMatch: true)
+            .AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<int> CountSameNameAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch, CancellationToken cancellationToken = default)
+    {
+        return await SameNameQuery(fullName, email, birthDay, birthMonth, excludePersonId, includeIdentityMatch)
+            .CountAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Person>> GetSameNameAsync(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch, int take, CancellationToken cancellationToken = default)
+    {
+        return await SameNameQuery(fullName, email, birthDay, birthMonth, excludePersonId, includeIdentityMatch)
+            .OrderBy(p => p.Id)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// BUG-088 same-name query: persons with the same FullName (default collation), NoTracking, excluding excludePersonId.
+    /// When <paramref name="includeIdentityMatch"/> is false, the exact identity match is excluded (the same predicate
+    /// as <see cref="IdentityExistsAsync"/>, as a subquery).
+    /// </summary>
+    private IQueryable<Person> SameNameQuery(string fullName, string? email, int? birthDay, int? birthMonth, int? excludePersonId, bool includeIdentityMatch)
+    {
+        var name = fullName.Trim();
+        var query = _dbSet
+            .AsNoTracking()
+            .Where(p => EF.Functions.Collate(p.FullName, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default))
+            .Where(p => excludePersonId == null || p.Id != excludePersonId.Value);
+
+        if (includeIdentityMatch)
+            return query;
+
+        var identityIds = IdentityMatches(fullName, email, birthDay, birthMonth).Select(p => p.Id);
+        return query.Where(p => !identityIds.Contains(p.Id));
+    }
+
+    /// <summary>
+    /// BUG-088 identity predicate: FullName + Email + birthday day/month, default collation, no C# normalization.
+    /// A missing email is matched as <c>Email IS NULL</c> (the trim converter stores blank as NULL, so the empty
+    /// string is never a stored value). A missing day or month compares as 0, matching the COALESCE index.
+    /// </summary>
+    private IQueryable<Person> IdentityMatches(string fullName, string? email, int? birthDay, int? birthMonth)
+    {
+        var name = fullName.Trim();
+        var mail = (email ?? string.Empty).Trim();
+        var day = birthDay ?? 0;
+        var month = birthMonth ?? 0;
+
+        var byName = _dbSet.AsNoTracking().Where(p =>
+            EF.Functions.Collate(p.FullName, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default) &&
+            (p.BirthDay ?? 0) == day &&
+            (p.BirthMonth ?? 0) == month);
+
+        return string.IsNullOrEmpty(mail)
+            ? byName.Where(p => p.Email == null)
+            : byName.Where(p => p.Email != null && EF.Functions.Collate(p.Email, CollationConstants.Default) == EF.Functions.Collate(mail, CollationConstants.Default));
+    }
 }

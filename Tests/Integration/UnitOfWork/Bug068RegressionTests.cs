@@ -29,7 +29,7 @@ public class Bug068RegressionTests
         Assert.True(createOk);
 
         var (updateOk, message) = await songs.UpdateSongAsync(
-            song!.Id, "Updated Title", featuredArtists: null, lyrics: null);
+            song!.Id, "Updated Title", lyrics: null);
 
         Assert.True(updateOk, message);
         var reread = await songs.GetSongByIdAsync(song.Id);
@@ -70,10 +70,10 @@ public class Bug068RegressionTests
         await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
-        var (createOk, _, person) = await persons.CreatePersonAsync("Tracking Person");
+        var (createOk, _, person) = await persons.CreatePersonAsync("Tracking Person", email: "tracking.person@example.com");
         Assert.True(createOk);
 
-        var (updateOk, message) = await persons.UpdatePersonAsync(person!.Id, "Updated Person Name");
+        var (updateOk, message) = await persons.UpdatePersonAsync(person!.Id, "Updated Person Name", null, null, "tracking.person@example.com");
 
         Assert.True(updateOk, message);
         var reread = await persons.GetPersonByIdAsync(person.Id);
@@ -126,7 +126,7 @@ public class Bug068RegressionTests
         Assert.True(artistOk, artistMessage);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => songs.CreateSongWithUrlsAsync(
-            artist!.Id, null, "Atomic URL Song", string.Empty, null, null, null, null,
+            artist!.Id, null, "Atomic URL Song", null, null, null,
             ["https://www.youtube.com/watch?v=dQw4w9WgXcQ"]));
 
         Assert.Equal(0, host.Db.Songs.Count(s => s.Title == "Atomic URL Song"));

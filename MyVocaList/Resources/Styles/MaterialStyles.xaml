@@ -79,6 +79,15 @@
         <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
     </Style>
 
+    <!-- ComboBoxEdit follows the same Outlined form-field convention as TextEdit and AutoCompleteEdit (selected value readability) -->
+    <Style TargetType="dx:ComboBoxEdit">
+        <Setter Property="BoxMode" Value="Outlined" />
+        <Setter Property="FocusedBorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+    </Style>
+
     <!-- ================================================================ -->
     <!-- FLYOUT MENU STYLES                                               -->
     <!-- ================================================================ -->
@@ -278,6 +287,23 @@
         <Setter Property="HeightRequest" Value="56" />
         <Setter Property="Padding" Value="16,0" />
         <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <!-- MD3: Menus — vertical menu item (icon + label), Menus - Common tokens; label = Label Large (RobotoMedium 14) -->
+    <Style x:Key="MenuItem" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="HorizontalContentAlignment" Value="Start" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="IconIndent" Value="12" />
+        <Setter Property="IconWidth" Value="20" />
+        <Setter Property="IconHeight" Value="20" />
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="14" />
     </Style>
 
     <!-- Neon glow effect — primary (critical actions) -->

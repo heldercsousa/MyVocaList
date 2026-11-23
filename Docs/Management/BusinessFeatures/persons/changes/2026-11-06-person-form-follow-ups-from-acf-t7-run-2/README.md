@@ -1,12 +1,13 @@
 ---
 id: person-form-follow-ups-from-acf-t7-run-2
 title: Person form follow-ups from ACF T7 run 2
-status: 💡 Pending
+status: ✅ Done
 target: 2026-11-06
 section: BusinessFeatures
 parent: persons
 goal: "Fix three Person-form issues Helder found on device 2026-11-06: menu reappears on edit load and after a pick, duplicate singer saved without a pick, confusing birthday field."
 gate: Helder passes each fix on device.
+closed: 2026-11
 kind: change
 ---
 
@@ -44,3 +45,5 @@ Ruling: record these as tasks nested under the Person feature and tackle them in
 
 > **Update 2026-11-11 (F1 closed):** Helder confirmed on the phone (ACF T7 run 4 line 9 and run 6 line 4) that a pick
 > loads edit mode with the keyboard closed and no new search. F2 and F3 stay open.
+
+> **Update 2026-11-19 (item closed):** F2 moved to `bugs/2026-11-19-BUG-088-*` (Major) and F3 to `changes/2026-11-19-person-form-birthday-as-day-and-month-dropdowns/`, each with the decisions recorded. F1 was closed 2026-11-11.

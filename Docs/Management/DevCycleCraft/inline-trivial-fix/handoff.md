@@ -1,8 +1,8 @@
 # Inline Trivial Fix (ITF) Lane — Handoff
 
-> **Read this first if you are resuming ITF work.** Everything is shipped except one gate: Helder has not yet observed a live ITF fix end-to-end. That gate is *opportunistic* — it waits for a genuinely qualifying fix to appear in normal work. Do not manufacture a fix to close it.
+> **CLOSED 2026-11-19 — ✅ Done, archived.** The live-fix gate was met: `Lane: ITF` commits exist since 2026-11-04 (`8db66028`, `de13e317`, `bb5cd04e`, `f6a4127a`). The dispatch-recalibration post-ship child was closed with it. Only the calibration review below remains, due at ~20 `Lane: ITF` commits (5 so far) — open a new item then. The rest of this file is historical.
 
-**Status:** 🟡 In Progress · rules amended, Guard 3 merged, 38/38 tests green on develop (2026-07-21).
+**Status:** ✅ Done (closed 2026-11-19; was 🟡 In Progress) · rules amended, Guard 3 merged, 38/38 tests green on develop (2026-07-21).
 **BACKLOG row:** Dev Cycle Craft / 2026-07-12 — *Inline Trivial Fix (ITF) lane*.
 
 ## What is already done — do not redo

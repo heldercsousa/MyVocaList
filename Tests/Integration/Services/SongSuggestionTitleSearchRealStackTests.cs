@@ -64,7 +64,8 @@ public class SongSuggestionTitleSearchRealStackTests
         Assert.Equal(RemoteSearchStatus.Ok, result.Status);
         Assert.Equal(3, result.Remote.Count);
         Assert.Contains(result.Remote, r => r.Title == "Commando" && r.ArtistName == "Niska");
-        Assert.Contains(result.Remote, r => r.Title == "Comando" && r.Version == "");
+        // [AC] REQ-RMV-08: the labelled Deezer row ("Ao Vivo" by another artist) is its own group, not collapsed.
+        Assert.Contains(result.Remote, r => r.Title == "Comando" && r.ArtistName == "Banda X");
         Assert.Contains(result.Remote, r => r.Title == "Chasse à l'homme");
     }
 

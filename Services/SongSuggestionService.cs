@@ -136,8 +136,8 @@ public class SongSuggestionService : ISongSuggestionService
     // ── Helpers ──────────────────────────────────────────────────────────
 
     // Groups rows by (Deezer artist id, short title), compared ordinally with no text rewriting (HARD RULE).
-    // A row without an artist id, or without a title, is its own group. The kept row is the first blank-version
-    // row of its group, else the first row; it takes the group's first position and carries no version (REQ-SLD-06 to 08, 11).
+    // A row without an artist id, or without a title, is its own group. The kept row is the first row of its
+    // group, in Deezer's order (REQ-SLD-06, 11; REQ-RMV-08: no version-based collapse step).
     private static List<MusicSearchResultDto> CollapseSongGroups(IReadOnlyList<MusicSearchResultDto> rows)
     {
         var groups = new List<List<MusicSearchResultDto>>();
@@ -167,16 +167,13 @@ public class SongSuggestionService : ISongSuggestionService
             group.Add(row);
         }
 
-        return groups
-            .Select(group => group.FirstOrDefault(r => string.IsNullOrWhiteSpace(r.Version)) ?? group[0])
-            .Select(kept => kept with { Version = string.Empty })
-            .ToList();
+        return groups.Select(group => group[0]).ToList();
     }
 
     // Promoted rows also come through here, so they carry the stored images and no album (REQ-ART-06).
     private static SongSuggestionDto MapLocal(SongSearchHit hit) => new(
         hit.SongId, hit.Title, hit.ArtistName, hit.ArtistId, hit.ExternalId, hit.ExternalProvider,
-        false, hit.Version ?? string.Empty, hit.ArtistName, hit.ImageUrl, hit.ArtistImageUrl, null);
+        false, hit.ArtistName, hit.ImageUrl, hit.ArtistImageUrl, null);
 
     /// <summary>Returns null on any failure/timeout (Unavailable); rethrows caller cancellation.</summary>
     private async Task<IReadOnlyList<MusicSearchResultDto>?> TryFetchDeezerAsync(string q, CancellationToken ct)
@@ -206,7 +203,7 @@ public class SongSuggestionService : ISongSuggestionService
         }
     }
 
-    // Identity first (external id), then collated (title, artist, version). Each triple is looked up on its
+    // Identity first (external id), then collated (title, artist) (REQ-RMV-08). Each pair is looked up on its
     // own so a returned hit maps to its row without any C#-side text comparison (HARD RULE).
     private static async Task<(List<SongSearchHit> Promoted, List<MusicSearchResultDto> Remaining)> DedupAgainstLibraryAsync(
         IServiceProvider sp, IReadOnlyList<MusicSearchResultDto> raw, CancellationToken ct)
@@ -233,8 +230,8 @@ public class SongSuggestionService : ISongSuggestionService
                 continue;
             }
 
-            var triple = (row.SongTitle, row.ArtistName, row.Version ?? string.Empty);
-            var hits = await songRepository.FindByTitleAndArtistNamesAsync([triple], ct);
+            var pair = (row.SongTitle, row.ArtistName);
+            var hits = await songRepository.FindByTitleAndArtistNamesAsync([pair], ct);
             if (hits.Count == 0)
                 remaining.Add(row);
             else
@@ -272,7 +269,7 @@ public class SongSuggestionService : ISongSuggestionService
                 resolved.TryGetValue(r.ArtistName, out artist);
             return new SongSuggestionDto(
                 null, r.SongTitle ?? string.Empty, r.ArtistName, artist?.Id, r.ExternalId, r.Provider,
-                true, r.Version ?? string.Empty, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle,
+                true, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle,
                 r.DurationSeconds);
         }).ToList();
     }
