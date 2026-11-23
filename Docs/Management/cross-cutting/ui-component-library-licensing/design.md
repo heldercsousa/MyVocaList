@@ -46,7 +46,7 @@ After    Trials       iOS simulator/device trial · Windows build trial  (non-bl
 
 | DX control | Primary replacement | Fallback | Status |
 |---|---|---|---|
-| `DXCollectionView` | `SfListView` (Community suite) | stock `CollectionView` + `DataTemplateSelector` for the selected row + code-behind gesture forwarding | primary U (T2.0; `Syncfusion.Maui.ListView` 35.2.12 already arrives transitively with `Syncfusion.Maui.Inputs`) · fallback V (renders; tap/long-press need forwarding; no selected template) |
+| `DXCollectionView` | `SfListView` (Community suite) | stock `CollectionView` + `DataTemplateSelector` for the selected row + code-behind gesture forwarding | primary **V** (T2.0, 2026-11-23; `Syncfusion.Maui.ListView` 35.2.12, arrives with `Syncfusion.Maui.Inputs`; see § Decision: List control) · fallback V (renders; tap/long-press need forwarding; no selected template) |
 | `BottomSheet` | `SfBottomSheet` (Toolkit) | — | V (T0.1a): `State` (`Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState`: `Collapsed, HalfExpanded, FullExpanded, Hidden`) **plus `IsOpen`**, since setting `State` alone does not show it; half-expanded supported; a drag down from full ends in `Collapsed`; **Android Back does not close it** (it pops the page), so the Sf page closes the sheet in `OnBackButtonPressed` through the ViewModel (checked in T2.9 P10) |
 | `ShimmerView` | `SfShimmer` (Toolkit) with `ShimmerBackground`/`WaveColor`/`Fill` from tokens | stock skeleton `Border`s with an opacity animation | V (T0.1a) for a built-in `Type` (`Article`, `Feed`, …); a `CustomView` skeleton renders white, so custom row skeletons use a built-in `Type` or the fallback |
 | `DXButton` | `SfButton` (Toolkit) | stock `Button` / `ImageButton` + CommunityToolkit `IconTintColorBehavior` | V (T0.1a) for text and filled buttons: XAML `Command` binding fires; a disabled button needs an explicit token style; outlined needs `StrokeThickness`; icon placement via `ImageAlignment`. **Icon buttons use the fallback** (T0.4a): `IconTintColorBehavior` throws `NotSupportedException` on an `SfButton`, and the app's icons are SVGs that need tinting, so style `SfIconButton` targets a stock `ImageButton` + `IconTint.Color` (accepted deviation: Syncfusion has no tintable SVG icon button). `SfFlyoutMenuButton` stays an `SfButton`: its `Content` DataTemplate holds an `Image` tinted through `IconTint.Color` plus a `Label`, both bound to the button's `ImageSource` and `Text` (T0.4a fix round 1) |
@@ -276,6 +276,14 @@ Run per page, on the emulator, for both the DX original and the Sf copy. Every s
 - If it meets all three, use `SfListView`.
 - Otherwise use the § Control mapping fallback (stock `CollectionView` + `DataTemplateSelector` + forwarding).
 - The orchestrator records the outcome in this decision; Helder confirms before `CrudListViewSf` is dispatched.
+
+**Outcome (T2.0, 2026-11-23): `SfListView` wins; the fallback is not needed.** Checked on the emulator against the real `VenuesViewModel` (`artifacts/parity/t2.0/`):
+- **Selected look (REQ-UIMIG-03).** `SelectedItemTemplate` for the selected row; `SelectionMode` toggles with the VM's `IsSelectionMode`. `SelectedItems` is get-only, so `CrudListViewSf` syncs it both ways with the VM in code-behind (view-only plumbing; pattern in the T2.0 report).
+- **Gestures (REQ-UIMIG-06).** Tap and long-press reach the VM through the `ItemTapped` / `ItemLongPress` events, forwarded from code-behind. The XAML `TapCommand`/`LongPressCommand` also fire, but they pass the event args, not the item.
+- **Load-more.** `LoadMoreOption="AutoOnScroll"` with `LoadMoreCommand` bound to the VM paging (20 → 200 items). `LoadMoreOption` must switch to `None` when the VM has no more items, which T2.8a handles.
+- **Not tested in T2.0, so checked in T2.9 parity:** end-of-data behavior, pull-to-refresh, back clearing the selection, search and the shimmer.
+
+**Confirmation.** Helder's confirmation before T2.8a is covered by his 2026-11-22 autonomy grant. Recorded by the orchestrator on 2026-11-23.
 
 **Alternatives considered:** Stock `CollectionView` only, as in the POC; it failed REQ-UIMIG-03.
 **Reversibility:** Reversible with effort.

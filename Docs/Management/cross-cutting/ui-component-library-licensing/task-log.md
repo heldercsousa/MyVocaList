@@ -212,3 +212,7 @@ Implementor `2a478167`. Review: spec ✅, quality Approved (2 Minor). Merged.
 - The four outlined buttons in `BackupRestoreSfPage` and `SettingsSfPage` now use this style.
 - Emulator: all four outlines are visible (`artifacts/parity/t1.9/`).
 - The disabled state is inherited from the base style and is checked at parity.
+
+### T2.0 — List control check — Done (2026-11-23)
+
+Scratch branch `task/spike-sflistview`, never merged. Verdict: **`SfListView`**. All three checks passed on the emulator against the real `VenuesViewModel`; details are in design § Decision: List control. 45 test venues (`ZZ Test Venue 01..45`) were created on the emulator to exercise load-more. They stay for the T2.9 load-more parity and are deleted after it.
