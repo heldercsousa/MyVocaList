@@ -257,3 +257,7 @@ The implementor's first version was `d0db918d`. Two fix rounds followed: `b6b8be
 The implementor committed `2a4c4f9c` and `43ad9625`. Fix round 1 (`4b4fbcca`) added a toolbar pressed state: an `SfToolbarIconButton` style in the component's own Resources (Pressed = `SurfaceContainerHighest`), plus view-only Pressed/Released handlers, so a selected button still shows it is pressed. It also hid the decorative empty-state icon from TalkBack. The re-review marked both ADDRESSED. Merged.
 
 In the empty state, the display-only `DXButton` became a tinted `Image`; that row is now added to design § Control mapping. The toolbar now uses a `Border`/`RoundRectangle` and `ImageButton`s. Emulator evidence is in `artifacts/parity/t2.3/`. No unit test (Level C).
+
+### T2.2b — `ListItemLeadingMonogramSf` — Done (2026-11-23)
+
+Commit `1c6aa734`. Review: spec ✅, quality Approved, 1 Minor (`Stroke="Transparent"` is a named color). Merged. `DXBorder` became a stock `Border` (`RoundRectangle 20`, 40×40). The API is identical to the original. There is no unit test because the component is Level C.
