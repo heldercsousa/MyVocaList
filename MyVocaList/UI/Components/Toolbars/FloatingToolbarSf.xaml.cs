@@ -39,7 +39,35 @@ public partial class FloatingToolbarSf : ContentView
     public FloatingToolbarSf()
     {
         InitializeComponent();
+
+        foreach (var button in new[] { action1Button, action2Button, action3Button, action4Button, action5Button })
+        {
+            button.Pressed += OnButtonPressed;
+            button.Released += OnButtonReleased;
+        }
     }
+
+    // A locally set background (selected / unselected, see ApplySelectedState) outranks the style's
+    // Pressed visual state, so the pressed state layer is applied here for every slot.
+    private void OnButtonPressed(object sender, EventArgs e)
+    {
+        if (sender is ImageButton button
+            && Application.Current?.Resources.TryGetValue("SurfaceContainerHighest", out var pressed) == true)
+            button.BackgroundColor = (Color)pressed;
+    }
+
+    private void OnButtonReleased(object sender, EventArgs e)
+    {
+        if (sender is ImageButton button)
+            ApplySelectedState(button, IsSelected(button));
+    }
+
+    private bool IsSelected(ImageButton button) =>
+        (button == action1Button && Action1IsSelected)
+        || (button == action2Button && Action2IsSelected)
+        || (button == action3Button && Action3IsSelected)
+        || (button == action4Button && Action4IsSelected)
+        || (button == action5Button && Action5IsSelected);
 
     // ══════════════════════════════════════════════════════════════════════════
     // Slot 1

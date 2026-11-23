@@ -25,6 +25,7 @@
                Aspect="AspectFit"
                HorizontalOptions="Center"
                InputTransparent="True"
+               AutomationProperties.IsInAccessibleTree="False"
                behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}" />
 
         <!-- Headline slot -->

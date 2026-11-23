@@ -6,6 +6,34 @@
     x:Class="MyVocaList.UI.Components.Toolbars.FloatingToolbarSf"
     x:Name="self">
 
+    <ContentView.Resources>
+        <!-- MD3 icon button on the vibrant toolbar: state layer (pressed) over SecondaryContainer.
+             Pressed uses SurfaceContainerHighest, as the DX VibrantToolbarIconButton did.
+             A locally set background (selected state, see ApplySelectedState) outranks this setter,
+             so the code-behind Pressed/Released handlers cover that case. -->
+        <Style x:Key="SfToolbarIconButton" TargetType="ImageButton" BasedOn="{StaticResource SfIconButton}">
+            <Setter Property="behaviors:IconTint.Color" Value="{StaticResource OnSecondaryContainer}" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Disabled">
+                            <VisualState.Setters>
+                                <Setter Property="Opacity" Value="0.38" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+    </ContentView.Resources>
+
     <!--
         M3 Floating Toolbar — pill container with up to 5 icon-only action slots.
         Height: 64dp · Shape: CornerRadius=32 (pill) · Background: SecondaryContainer (vibrant)
@@ -29,9 +57,7 @@
             <!-- Slot 1 -->
             <ImageButton x:Name="action1Button"
                          Source="{Binding Action1Icon, Source={x:Reference self}}"
-                         Style="{StaticResource SfIconButton}"
-                         behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}"
-                         VerticalOptions="Center"
+                         Style="{StaticResource SfToolbarIconButton}"
                          IsVisible="{Binding HasAction1, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action1Description, Source={x:Reference self}}"
                          Command="{Binding Action1Command, Source={x:Reference self}}" />
@@ -39,9 +65,7 @@
             <!-- Slot 2 -->
             <ImageButton x:Name="action2Button"
                          Source="{Binding Action2Icon, Source={x:Reference self}}"
-                         Style="{StaticResource SfIconButton}"
-                         behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}"
-                         VerticalOptions="Center"
+                         Style="{StaticResource SfToolbarIconButton}"
                          IsVisible="{Binding HasAction2, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action2Description, Source={x:Reference self}}"
                          Command="{Binding Action2Command, Source={x:Reference self}}" />
@@ -49,9 +73,7 @@
             <!-- Slot 3 -->
             <ImageButton x:Name="action3Button"
                          Source="{Binding Action3Icon, Source={x:Reference self}}"
-                         Style="{StaticResource SfIconButton}"
-                         behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}"
-                         VerticalOptions="Center"
+                         Style="{StaticResource SfToolbarIconButton}"
                          IsVisible="{Binding HasAction3, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action3Description, Source={x:Reference self}}"
                          Command="{Binding Action3Command, Source={x:Reference self}}" />
@@ -59,9 +81,7 @@
             <!-- Slot 4 -->
             <ImageButton x:Name="action4Button"
                          Source="{Binding Action4Icon, Source={x:Reference self}}"
-                         Style="{StaticResource SfIconButton}"
-                         behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}"
-                         VerticalOptions="Center"
+                         Style="{StaticResource SfToolbarIconButton}"
                          IsVisible="{Binding HasAction4, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action4Description, Source={x:Reference self}}"
                          Command="{Binding Action4Command, Source={x:Reference self}}" />
@@ -69,9 +89,7 @@
             <!-- Slot 5 -->
             <ImageButton x:Name="action5Button"
                          Source="{Binding Action5Icon, Source={x:Reference self}}"
-                         Style="{StaticResource SfIconButton}"
-                         behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}"
-                         VerticalOptions="Center"
+                         Style="{StaticResource SfToolbarIconButton}"
                          IsVisible="{Binding HasAction5, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action5Description, Source={x:Reference self}}"
                          Command="{Binding Action5Command, Source={x:Reference self}}" />
