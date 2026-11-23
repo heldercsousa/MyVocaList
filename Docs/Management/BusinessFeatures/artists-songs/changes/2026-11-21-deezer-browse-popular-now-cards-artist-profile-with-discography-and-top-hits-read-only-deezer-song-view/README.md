@@ -6,7 +6,7 @@ target: 2026-11-21
 section: BusinessFeatures
 parent: artists-songs
 goal: First-run and everyday browsing of the Deezer catalog without saving songs one by one; Deezer data read-only, lyrics editable.
-gate: Catalog is MVP scope (Helder, 2026-11-22). Helder re-decides the catalog source first, because the Deezer terms ban local copies and audiovisual combination.
+gate: Catalog is MVP scope and Deezer stays (Helder, 2026-11-22). The spec must respect the Deezer terms on local copies and audiovisual combination.
 kind: change
 ---
 

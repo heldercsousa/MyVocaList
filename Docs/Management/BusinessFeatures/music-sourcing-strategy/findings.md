@@ -136,7 +136,10 @@ https://lrclib.net/docs.md — **V**
 - §III.1 still limits use to "private, personal and non-commercial purpose(s)" and bans revenue "directly or indirectly", including subscription or advertising. **V**
 - **Conclusion (I):** Deezer cannot be the MVP catalog source of an app that plays YouTube videos, stores song titles and may later charge.
 
-### MusicBrainz as the catalog source
+### MusicBrainz as the catalog source (considerations only)
+
+**Helder, 2026-11-22:** Deezer stays the source. Nothing moves to MusicBrainz now. A systematic comparison of the two (including the earlier idea of MusicBrainz as a fallback when Deezer is offline) is its own item: `changes/2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons/`.
+
 - **Core data is CC0** and may be stored forever and used commercially: "anyone can download and use the core data in any way they see fit". **V** — https://musicbrainz.org/doc/About/Data_License
 - The core data includes **recordings** (title, artist credit, duration, ISRC, MBID), **artists**, **releases**, **release groups**, **works** ("Title, ISWC, disambiguation comment, MBID") and **relationships**. **V** — https://musicbrainz.org/doc/MusicBrainz_Database
 - Tags and genres, ratings and derived statistics are CC BY-NC-SA, not CC0. **V**
@@ -188,7 +191,7 @@ https://lrclib.net/docs.md — **V**
 
 | Point | Before | Now |
 |---|---|---|
-| Catalog (band repertoire) | Post-MVP browse ideas | **MVP** (Helder). Source to decide: MusicBrainz is the compliant candidate |
+| Catalog (band repertoire) | Post-MVP browse ideas | **MVP** (Helder). Deezer stays; the Deezer vs MusicBrainz comparison item informs any change |
 | 1.6 store only the external id | Rejected 2026-11-16 | **Required for Deezer** by §III.4. Not needed for MusicBrainz (CC0) |
 | 1.7 YouTube in-app search and player | Post-MVP | **MVP** (Helder). Needs the quota audit for in-app search; ids refreshed every 30 days; YouTube branding on every YouTube page |
 | Deezer page → separate YouTube page | — | §III.2 has no scope; residual risk. Prefer not to use Deezer at all |
