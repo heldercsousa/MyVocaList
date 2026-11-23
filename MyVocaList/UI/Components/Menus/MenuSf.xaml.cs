@@ -112,12 +112,9 @@ public partial class MenuSf : ContentView
 
     private void ApplyPopupStyle()
     {
-        var resources = Application.Current?.Resources;
-        var background = resources?.TryGetValue("SurfaceContainerLowBrush", out var value) == true ? value as Brush : null;
-
         popup.PopupStyle = new PopupStyle
         {
-            PopupBackground = background ?? Brush.Transparent,
+            PopupBackground = new SolidColorBrush(ResolveColor("SurfaceContainerLow")),
             CornerRadius = new CornerRadius(16),
             HasShadow = true,
             StrokeThickness = 0,
@@ -137,9 +134,10 @@ public partial class MenuSf : ContentView
         }
         else if (PlacementTarget is { } target)
         {
-            // Below the anchor, left edge aligned with it (emulator-verified). SfPopup has no right-edge-aligned-below position
-            // (AlignBottomRight starts at the anchor right edge and clamps to the screen edge), so this is the closest to DX Right.
-            popup.ShowRelativeToView(target, PopupRelativePosition.AlignBottom);
+            // DX aligned the menu right edge with the anchor right edge. AlignBottom puts the popup below the anchor with the left
+            // edges aligned, so shift it left by (anchor width - menu width) to line the right edges up.
+            var menuWidth = itemsHost.Measure(itemsHost.MaximumWidthRequest, double.PositiveInfinity).Width;
+            popup.ShowRelativeToView(target, PopupRelativePosition.AlignBottom, target.Width - menuWidth, 0);
         }
         else
         {
@@ -216,15 +214,15 @@ public partial class MenuSf : ContentView
                 HeightRequest = 44,
                 Padding = new Thickness(12, 0),
                 CornerRadius = MenuItemShape.For(index, items.Count),
-                IsEnabled = CanRun(item),
-                Content = BuildItemContent(),
+                Content = BuildItemContent(!string.IsNullOrEmpty(item.Icon)),
             };
+            ApplyEnabled(button, item);
 
             button.Clicked += (_, _) => MenuItemSelection.Select(item, () => IsOpen, Close, CloseOnItemSelected);
 
             if (item.Command is { } command)
             {
-                EventHandler handler = (_, _) => button.IsEnabled = CanRun(item);
+                EventHandler handler = (_, _) => ApplyEnabled(button, item);
                 command.CanExecuteChanged += handler;
                 _commandSubscriptions.Add((command, handler));
             }
@@ -235,7 +233,7 @@ public partial class MenuSf : ContentView
 
     // SfButton cannot tint its own ImageSource, so the content is a template (Image tinted through IconTint plus a Label) that
     // reads ImageSource and Text from the ancestor SfButton, as the SfFlyoutMenuButton style does.
-    private static DataTemplate BuildItemContent() => new(() =>
+    private static DataTemplate BuildItemContent(bool hasIcon) => new(() =>
     {
         var ancestor = new RelativeBindingSource(RelativeBindingSourceMode.FindAncestor, typeof(SfButton));
 
@@ -246,11 +244,26 @@ public partial class MenuSf : ContentView
         var label = new Label { VerticalOptions = LayoutOptions.Center, FontFamily = "RobotoMedium", FontSize = 14, TextColor = ResolveColor("OnSurface") };
         label.SetBinding(Label.TextProperty, new Binding(nameof(SfButton.Text), source: ancestor));
 
-        return new HorizontalStackLayout { Spacing = 12, VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Start, Children = { icon, label } };
+        var row = new HorizontalStackLayout { Spacing = 12, VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Start };
+        if (hasIcon)
+        {
+            row.Children.Add(icon);
+        }
+
+        row.Children.Add(label);
+        return row;
     });
 
     private static Color ResolveColor(string key) =>
         Application.Current?.Resources.TryGetValue(key, out var value) == true && value is Color color ? color : Colors.Transparent;
+
+    // Disabled items dim to 0.38 like the SfFlyoutMenuButton Disabled state (the custom content ignores IsEnabled on its own).
+    private static void ApplyEnabled(SfButton button, MenuItemModel item)
+    {
+        var enabled = CanRun(item);
+        button.IsEnabled = enabled;
+        button.Opacity = enabled ? 1 : 0.38;
+    }
 
     private static bool CanRun(MenuItemModel item) => item.Command is null || item.Command.CanExecute(item.CommandParameter);
 
