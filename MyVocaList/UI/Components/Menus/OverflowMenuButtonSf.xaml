@@ -9,6 +9,7 @@
          else the nearest ancestor IMenuHostSf (REQ-OVFM-20). Pressed state lives in code-behind (REQ-OVFM-22). -->
     <ImageButton x:Name="button"
                  Style="{StaticResource SfIconButton}"
+                 VerticalOptions="Center"
                  Source="more_vert_outlined"
                  SemanticProperties.Description="{Binding Description, Source={x:Reference self}}"
                  InputTransparent="False"
