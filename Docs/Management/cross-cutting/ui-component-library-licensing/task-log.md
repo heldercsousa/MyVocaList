@@ -64,3 +64,24 @@ Commit `54f35e72`. Review: spec ✅, quality Approved, 3 Minor findings. Merged.
 - Emulator proof is in `artifacts/parity/t3.2/`: tap enters edit mode, the keyboard opens, text binds, and commit and cancel work. Consumers set `ContainerType="Outlined"` on their `SfTextInputLayout`.
 
 **Deviation, carried to T3.3 by orchestrator ruling:** the original's `AutocompleteDXField` handling is removed. That handling covered three things: it released `IsLocked` on tap, it had a special case in `FocusEditor`, and a pick returned the field to text state. `ReleasesPickOnEdit` stays in the API but does nothing for now. T3.3 restores the hook for `AutocompleteFieldSf` at three points in `TapToEditFieldSf`: `OnTextTapped`, `FocusWrappedEditor`, and `Attach`/`Detach`. For that, T3.3 owns `TapToEditFieldSf`.
+
+## T1.5–T1.8 — Phase 1 cut-overs — Done (2026-11-23)
+
+Helder's go for these cut-overs is covered by his pre-authorization of 2026-11-22. The commits are:
+- `098e1ce9` Settings: both `ShellContent`s plus `PageTypes`;
+- `13cf75c5` About;
+- `50cb9e42` BackupRestore;
+- `b2bd3611` VenueMapPicker, a pushed route in `AppShell.xaml.cs`.
+
+Each commit holds only the X1 lines and that page's `PreviewRoutes` removal; the orchestrator checked the combined diff. Merged.
+
+**Verification (X2):**
+- Build: 0 errors.
+- Tests: 2056 passed. One failure, `SongRepositorySearchTests.BuildTrigramMatch_NoWordOfThreeChars_ReturnsNull`, is a known SQLite `ObjectDisposedException` flake that is unrelated to navigation.
+- Pages: the flyout opens the Sf Settings, About and Backup pages. The venue form's "Pick on map" opens the Sf picker. "Syncfusion preview" now lists no pages. Screenshots are in `artifacts/parity/cutover-p1/`.
+
+**Revert check (REQ-UIMIG-10):** reverting `b2bd3611` builds with 0 errors and restores the DX registration. The revert was aborted afterwards.
+
+**Pending:** REQ-UIMIG-16 waits for Helder's Syncfusion key. A Debug build without the key shows no trial notice.
+
+The DX originals stay in the code until T5.1a.
