@@ -85,3 +85,18 @@ Each commit holds only the X1 lines and that page's `PreviewRoutes` removal; the
 **Pending:** REQ-UIMIG-16 waits for Helder's Syncfusion key. A Debug build without the key shows no trial notice.
 
 The DX originals stay in the code until T5.1a.
+
+## T2.5 — `SearchBarSf`, `SmallAppBarSf` — Done (2026-11-23)
+
+The implementor committed `05694b7a` and `e2ec34e9`. Fix round 1 (`18f10cef`) gave `OutlinedTextFieldSf` two new properties: `ShowOutline` (default true) and `ReturnType`. `SearchBarSf` uses a borderless field with the Search key. The re-review marked both Important findings ADDRESSED. Merged.
+
+The search field is `OutlinedTextFieldSf`, an accepted deviation. Emulator results (`artifacts/parity/t2.5/*-v2.png`):
+- the keyboard opens;
+- text reaches the VM;
+- the Search key fires Completed;
+- clear empties the field;
+- no underline and no inner outline appear.
+
+`SmallAppBarSf` renders correctly. No unit test (Level C).
+
+`OutlinedTextFieldSf` now has a second consumer pattern, so it is governed once a second consumer binds to it. At that point it goes into `component-safety-gate.md`.
