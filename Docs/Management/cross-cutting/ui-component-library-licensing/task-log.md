@@ -261,3 +261,13 @@ In the empty state, the display-only `DXButton` became a tinted `Image`; that ro
 ### T2.2b — `ListItemLeadingMonogramSf` — Done (2026-11-23)
 
 Commit `1c6aa734`. Review: spec ✅, quality Approved, 1 Minor (`Stroke="Transparent"` is a named color). Merged. `DXBorder` became a stock `Border` (`RoundRectangle 20`, 40×40). The API is identical to the original. There is no unit test because the component is Level C.
+
+### T2.6 — `OverflowMenuButtonSf` — Done (2026-11-23)
+
+Commit `a87f84cf`. Review: spec ✅, quality Approved (1 Minor). Merged.
+- `DXButton` became an `ImageButton` with the `SfIconButton` style, and `Menu` became `MenuSf`.
+- New `IMenuHostSf` (`MenuSf? HostedMenu`). It is a migration copy of `IMenuHost`, which stays unchanged, and it merges back in Phase 5.
+
+**Not checked on the device.** Concurrent Android builds took more than 75 min, so the tint, the popup position, the item command and Back are checked in the Venues Sf parity run (P9), where list rows use this button.
+
+**Deferred Minor, fixed in the next task that edits the file (or at T2.9 parity):** the original's style centered the button vertically (`VerticalOptions=Center`). Add it to the `ImageButton`, or the button sits at the top in rows taller than 48 dp.
