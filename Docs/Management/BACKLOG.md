@@ -43,5 +43,5 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
-| — | **UI library migration — DevExpress → Syncfusion, coexisting page by page** | 🗺️ Plan |
+| — | **UI library migration — DevExpress → Syncfusion, coexisting page by page** | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->

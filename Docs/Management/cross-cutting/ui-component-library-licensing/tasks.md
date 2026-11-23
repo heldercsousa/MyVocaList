@@ -8,28 +8,28 @@ Done before Phase 0: the `amend:` commit making the rule "Syncfusion first" (202
 
 ## Phase 0 — Foundation
 
-- [ ] **T0.1a Control verification — Toolkit** [P]
+- [~] **T0.1a Control verification — Toolkit** [P]
   - **Produces:** V/failed for `SfBottomSheet`, `SfShimmer`, `SfButton`, `SfTextInputLayout` (Entry/Editor/password), `SfChipGroup`, `SfPopup`; theme dictionary type + color keys; plain `net10.0` asset yes/no
   - **Consumes:** nothing
   - **Risk:** Medium — an "escalate" result blocks later phases
   - **Files owned:** its `task-log.md` entry; branch `task/spike-sf-controls-a` (the orchestrator writes the combined results into `design.md` after the wave)
   - **Demo:** each Toolkit row reads V or failed, with a source and a screenshot
   - **Review lane:** Elevated
-- [ ] **T0.1b Control verification — Community suite** [P]
+- [~] **T0.1b Control verification — Community suite** [P]
   - **Produces:** V/failed for `SfComboBox`, `SfAutocomplete` (async), `SfCheckBox`; NuGet ids + versions; host and license calls
   - **Consumes:** nothing
   - **Risk:** Medium — async autocomplete may need escalation
   - **Files owned:** its `task-log.md` entry; branch `task/spike-sf-controls-b` (the orchestrator writes the combined results into `design.md` after the wave)
   - **Demo:** each suite row reads V or failed; package ids and versions written in the design
   - **Review lane:** Elevated
-- [ ] **T0.1c Control verification — Shell routes + stock replacements** [P]
+- [~] **T0.1c Control verification — Shell routes + stock replacements** [P]
   - **Produces:** contextual-route verdict; V/failed for `Image`, `Border`, `ScrollView`, `StaticResource` replacements
   - **Consumes:** nothing
   - **Risk:** Low — fallback is already designed
   - **Files owned:** its `task-log.md` entry; branch `task/spike-sf-controls-c` (the orchestrator writes the combined results into `design.md` after the wave)
   - **Demo:** the design states which page opened for `venue-form` from `venues-sf`
   - **Review lane:** Standard
-- [ ] **T0.2 Check script `check_dx.py` + pre-commit wiring** [P]
+- [~] **T0.2 Check script `check_dx.py` + pre-commit wiring** [P]
   - **Produces:** `check_dx.py` (`--staged`, `--release`), its tests, the hook block, `artifacts/` ignored
   - **Consumes:** nothing
   - **Risk:** Medium — a false positive blocks every commit
