@@ -362,3 +362,42 @@ Note for Helder: in the scenario (a) pre-fix run the sheet Save button was hidde
 ### Build notes
 Build: passed (0 errors, app deploy `dotnet build -t:Run -f net10.0-android`) | Tests: 2037 passed, 0 failed | Commit SHA: see git log (this commit)
 Files written and re-read: `PersonFormViewModel.cs` (PersonIdRaw, PersonName, OnPersonNameChanged, NavigateToEditAsync, SuggestionSelectedAsync), `PersonFormPage.xaml.cs` (OnSameNameOpenClicked), `PersonFormViewModelBug088Tests.cs` (two new tests), design.md (appended notes), tasks.md (T8 ticked), task-log.md (this entry).
+
+## Task: BUG-088 T9 — suggestions reappear after Open when the drop-down was open at Save (REQ-DUP-16)
+**Plan:** Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/tasks.md
+**Status:** blocked: repro not confirmed
+**Started:** 2026-11-22
+**Completed:** 2026-11-22
+**Branch:** `worktree-agent-ab7380a3b56e22623` from develop 37a2a7c7 (T8 content present; old hash 8d43d71d not used)
+
+### Outcome
+No code change. The symptom did not reproduce on the emulator in four variants, so no root cause is confirmed. Per systematic-debugging, no fix was applied to an unreproduced cause. The VM regression test was not written (no fix to test). AutocompleteDXField was not edited.
+
+### Evidence (emulator-5554, AVD pixel_5_-_api_36_0_1, clean obj/bin net10.0-android, unfixed develop build, app not uninstalled)
+- Run A (Helder's path): Add, type `Helder Sousa` (drop-down open with one row, `r1-typed.png`), tap Save without blurring. Same-name sheet opens; the drop-down is not visible (`r2-after-save.png`). Open → Edit Singer, name field focused with caret, no drop-down at 4 s or 7 s (`r3-after-open.png`, `r4-later.png`).
+- Run B (blurred control: tap blank area before Save): Save → Open → Edit Singer, caret on name field, no drop-down (`r5-control-after-open.png`).
+- Run C (Cancel instead of Open): Save → sheet → Cancel → New Singer, name field refocused with caret, no drop-down (`r6-cancel-sheet.png`).
+- Run D (blur by tapping blank area, then tap name field again): no drop-down (`r7-refocus.png`).
+- Observations: the open drop-down is visible before Save and not visible after Save. Focus returns to the name field after the sheet closes, in both the blurred and unblurred variants, so focus alone does not separate them here.
+- Not reproduced: the drop-down reappearing after Open with the prior list.
+- Screenshots: `C:\Users\helde\AppData\Local\Temp\claude\78c429b059350e8f\15c50708-c550-4362-8273-50a7a757e7cf\scratchpad\` (r1..r7 .png).
+
+### Code facts (read only)
+- `AutocompleteDXField.IsDropDownOpen` is a public TwoWay bindable property. It is set false in ApplyMode, RestartSearch (rejected query), OnTextChanged (non-user change), and OnSelectionChanged (pick). OnUnfocused does not set it false.
+- `PersonFormPage.xaml` does not bind `Suggestions`; the field is fed by `NameOptionSource`. So the VM's `Suggestions = []` in `NavigateToEditAsync` does not reach the popup.
+- Open navigates with `../person-form?...` (`NavigateToEditAsync`, `PersonFormViewModel.cs`), which pops the form and pushes a new transient `PersonFormPage`.
+- The earlier agent's notes cite `AutocompleteField.xaml.cs` with a mobile copy of Suggestions, and a stale-on-focus comment near line 55. Neither exists in this checkout (`MyVocaList/UI/Components/TextFields/` holds only `AutocompleteDXField.*`, `TapToEditField.*`). Those notes are not evidence.
+
+### Open questions for Helder
+1. On the device, does the drop-down stay visible above the same-name sheet after Save? On the emulator it is not visible once Save is tapped. Which device and keyboard?
+2. Does the list reappear only after a keystroke, or after a tap that moves focus into the name field following Open? On the emulator, plain focus did not bring it back.
+3. Decision needed: an instrumented diagnostic build (log `IsDropDownOpen`, `Suggestions`/`ItemsSource` at Save, sheet open, Open, and the new page's first Text write) run on the device, or defer.
+
+### Candidate fix (not implemented)
+If the device shows a stale open drop-down, the page/VM option is to close it when the same-name sheet opens and before Open navigates: a VM-bound `IsDropDownOpen` (TwoWay) set false in `SaveAsync` when the sheet is shown, and in `OpenSameNameAsync`. That is VM-testable. The `nameField.Unfocus()` from T8 is kept.
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-11-19-BUG-088-duplicate-singer-saved-when-the-name-is-typed-without-picking-the-existing-one/task-log.md`
+
+### Build notes
+Build: deploy of the unfixed develop build succeeded (`dotnet build -t:Run -f net10.0-android`, exit 0). Tests: not run (no code change). Commit: docs only, see git log.
