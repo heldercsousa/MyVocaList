@@ -80,19 +80,19 @@
     </FlyoutItem>
 
     <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="backup" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestorePage}" />
+        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestoreSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="settings" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="about" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
+        <ShellContent ContentTemplate="{DataTemplate about:AboutSfPage}" />
     </FlyoutItem>
 
 </Shell>

@@ -13,10 +13,6 @@ public static class PreviewRoutes
     // Add one line per Sf page copy, e.g.: ("Venues", "venues-sf", typeof(VenuesSfPage)),
     private static readonly List<(string Title, string Route, Type Page)> _entries = new()
     {
-        ("About", "about-sf", typeof(AboutSfPage)),
-        ("Backup & restore", "backup-sf", typeof(BackupRestoreSfPage)),
-        ("Settings", "settings-sf", typeof(SettingsSfPage)),
-        ("Venue map picker", "venue-map-picker-sf", typeof(VenueMapPickerSfPage)),
     };
 
     /// <summary>Preview entries shown on the Syncfusion preview page.</summary>
