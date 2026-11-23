@@ -122,7 +122,7 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 
 ## Phase 3 — Forms [after Phase 2 copies; key set]
 
-- [ ] **T3.1 `ImagePickerFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Media/ImagePickerFieldSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean · Lane: Standard
+- [~] **T3.1 `ImagePickerFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Media/ImagePickerFieldSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean · Lane: Standard
 - [ ] **T3.2 `TapToEditFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.4a, `TapToEditFieldLogic` · Files: `MyVocaList/UI/Components/TextFields/TapToEditFieldSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean · Lane: Standard
 - [ ] **T3.3 `AutocompleteFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.1b verdict, `AutocompleteDXFieldLogic`, suggestion services · Files: `MyVocaList/UI/Components/TextFields/AutocompleteFieldSf.xaml(.cs)` · Risk: High (async suggestions) · Demo: builds; check script clean · Lane: Elevated
 - [ ] **T3.4 `VenueFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `VenueFormViewModel` · Files: `MyVocaList/UI/Pages/Venues/VenueFormSfPage.xaml(.cs)` · Risk: Medium · Demo: P12 (+ P13) match DX · Lane: Standard
