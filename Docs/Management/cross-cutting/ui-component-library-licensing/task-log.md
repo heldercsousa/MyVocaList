@@ -55,3 +55,12 @@ Plan approved by Helder 2026-11-22 ("plan approved. Start implementation"); auto
 | M4 | Wave: T0.4a theme + T0.6a preview registry | pending | |
 
 **Context manifest:** `plan.md`, `tasks.md`, `design.md`, `requirements.md`, this file, `.superpowers/sdd/plan/progress.md`.
+
+## T3.2 — `TapToEditFieldSf` — Done (2026-11-23)
+
+Commit `54f35e72`. Review: spec ✅, quality Approved, 3 Minor findings. Merged.
+- The copy keeps every BindableProperty and every state transition (tap, focus, blur, commit, cancel). `TapToEditFieldLogic` is shared and unchanged.
+- `DXImage` became an `Image` with `IconTint`.
+- Emulator proof is in `artifacts/parity/t3.2/`: tap enters edit mode, the keyboard opens, text binds, and commit and cancel work. Consumers set `ContainerType="Outlined"` on their `SfTextInputLayout`.
+
+**Deviation, carried to T3.3 by orchestrator ruling:** the original's `AutocompleteDXField` handling is removed. That handling covered three things: it released `IsLocked` on tap, it had a special case in `FocusEditor`, and a pick returned the field to text state. `ReleasesPickOnEdit` stays in the API but does nothing for now. T3.3 restores the hook for `AutocompleteFieldSf` at three points in `TapToEditFieldSf`: `OnTextTapped`, `FocusWrappedEditor`, and `Attach`/`Detach`. For that, T3.3 owns `TapToEditFieldSf`.
