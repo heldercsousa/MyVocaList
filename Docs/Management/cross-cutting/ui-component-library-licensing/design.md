@@ -59,6 +59,7 @@ After    Trials       iOS simulator/device trial · Windows build trial  (non-bl
 | `CheckEdit` | `SfCheckBox` (Community suite) | stock `CheckBox` | V (T0.1b): `IsChecked` (bindable, two-way), `CheckedColor`, `UncheckedColor`, `TickColor` (not `CheckMarkColor`) |
 | `DXPopup` | `SfPopup` (Toolkit) | — (escalate) | V (T0.1a): `Show()`/`Dismiss()`/`IsOpen`, `ShowRelativeToView`, templates; Android Back closes it by itself, so `PopupBackHandler` is likely unneeded (confirm on `MenuSf`) |
 | `DXImage` | stock `Image` | — | V (T0.1c; tint through `IconTintColorBehavior`) |
+| `DXButton` used as a display-only icon (`InputTransparent`, no command) | stock `Image` + `IconTint.Color` | — | V (T2.3, `EmptyStateSf`; accepted: nothing to press) |
 | `DXBorder` | stock `Border` | — | V (T0.1c) |
 | `DXScrollView` | stock `ScrollView` | — | V (T0.1c; renders, not swipe-tested) |
 | `{dx:ThemeColor Primary}` | `{StaticResource Primary}` | — | V (T0.1c): the only usage is `ListItemCheckbox.xaml:22`; `Primary` exists in `MaterialColors.xaml` |

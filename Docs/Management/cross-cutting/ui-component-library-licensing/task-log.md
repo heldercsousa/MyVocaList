@@ -251,3 +251,9 @@ Deferred minors: the left-edge clamp was not tested on the device; a lighter `Sf
 The implementor's first version was `d0db918d`. Two fix rounds followed: `b6b8bed1` hosted the checkbox in an `SfButton` instead of a Grid with a tap gesture, and `57ba99ae` wrapped `Content` in a `DataTemplate` and switched the bindings to `RelativeSource AncestorType`. Both re-reviews marked every finding ADDRESSED. Merged.
 
 `CheckEdit` became `SfCheckBox`, the `DXButton` became an `SfButton` host (transparent, 48×48, same Command, with ripple), and `{dx:ThemeColor}` became `{StaticResource Primary}`. Inside the template, `IsChecked` is bound `OneWay`. This is safe because the original `CheckEdit` was input-transparent and never wrote back. The device proof is in `artifacts/parity/t2.1/` (screenshots 12–14 and 06). There are no unit tests: this is Level C.
+
+### T2.3 — `EmptyStateSf`, `FloatingToolbarSf` — Done (2026-11-23)
+
+The implementor committed `2a4c4f9c` and `43ad9625`. Fix round 1 (`4b4fbcca`) added a toolbar pressed state: an `SfToolbarIconButton` style in the component's own Resources (Pressed = `SurfaceContainerHighest`), plus view-only Pressed/Released handlers, so a selected button still shows it is pressed. It also hid the decorative empty-state icon from TalkBack. The re-review marked both ADDRESSED. Merged.
+
+In the empty state, the display-only `DXButton` became a tinted `Image`; that row is now added to design § Control mapping. The toolbar now uses a `Border`/`RoundRectangle` and `ImageButton`s. Emulator evidence is in `artifacts/parity/t2.3/`. No unit test (Level C).
