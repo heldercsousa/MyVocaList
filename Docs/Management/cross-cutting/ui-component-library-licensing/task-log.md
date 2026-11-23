@@ -220,3 +220,16 @@ Scratch branch `task/spike-sflistview`, never merged. Verdict: **`SfListView`**.
 ### T2.2a — `ListItemLeadingAvatarSf`, `ListItemLeadingImageSf` — Done (2026-11-23)
 
 Commits `468543da` and `53bf756e`; the review passed with spec ✅ and quality Approved (1 Minor). The work is merged. The public API matches the originals exactly. `DXImage` became a stock `Image` with `IconTint.Color`, and `DXBorder` became a `Border` whose clipping comes from `StrokeShape`. There is no unit test, because this is Level C. The device check of tint and rendering happens on the first consuming page.
+
+### Phase 1 parity run (Recipe P, P4–P6) — 2026-11-23
+
+Run by a parity subagent (orchestrator ruling). Commit `c64144c3` registers the four Sf pages: DI lines plus `PreviewRoutes` entries. Merged as `21b12ad3`. Build 0 errors, 2057 tests pass. Screenshots in `artifacts/parity/{about,backup,settings,venue-map-picker}/`. Full report: `.superpowers/sdd/plan/task-T1.parity-report.md`.
+
+- **Functional:** all pass. About: the chips switch content. Backup: Back Up Now, Export, and Restore picker cancel all work. Settings: type, reveal, save and clear work, and the value was restored. Map picker: search through the icon and through Enter, pick and confirm all work.
+- **P5b (`[AC] REQ-UIMIG-08`):** pass. The flyout and the venue form's "Pick on map" still open the DX originals. The Sf copies open only from "Syncfusion preview". The only user route for Settings is `preferences`.
+- **P14:** page background `#131318`, status bar and filled-button fill are identical.
+- **Visible differences, fixed in T1.10:** the outlined text field (Sf was filled), button label weight, the Settings button row (Sf stretched it), the map-picker search field look and its missing clear button, and the About chip text and spacing.
+- **Kept as MD3-correct deviations (listed for Helder):**
+  - Outlined-button stroke is 1 dp; DX draws about 2 px.
+  - The Syncfusion password reveal icon shows "eye-off" while the text is masked.
+  - On the DX Settings page, typed text is almost invisible. The Sf copy is readable.
