@@ -275,3 +275,22 @@ Commit `a87f84cf`. Review: spec ✅, quality Approved (1 Minor). Merged.
 ### T3.1 — `ImagePickerFieldSf` — Done (2026-11-23)
 
 Commit `016a843b`. The review passed spec ✅ and quality Approved, with 2 Minor findings. Merged. All 10 BindableProperties are unchanged, and the code-behind is copied verbatim. `DXImage` became an `Image` with `IconTint`. The remove `DXButton` became an `ImageButton` with the `SfIconButton` style: 40 dp, the same as the DX original, showing a 24 dp icon. There is no unit test, because this is Level C UI. The visual check happens on the first consuming form page.
+
+### T1.10 — Phase 1 parity fixes — Done (2026-11-23)
+
+Implementor `97b2fa3c`. Review: spec ✅, 3 Minor (dead setters left in place with no comment; pixel-tuned chip values without a comment). Merged.
+- Settings and map picker fields are now outlined (`ContainerType` set explicitly).
+- Sf button labels are bold, with `Padding=0`.
+- The Settings row is packed left at DX widths.
+- The map picker field has a clear button and the DX gap.
+- About chip text uses `OnSurface`, with DX weight and spacing.
+- The `MauiProgram.cs` DI lines are re-indented.
+- 2057 tests pass. New `sf-*-v2.png` screenshots are in `artifacts/parity/<page>/`.
+
+**Remaining differences, listed for Helder:**
+- Outline is 1 dp, where DX draws about 2 px.
+- Outlined Sf fields float the hint onto the outline and are about 12 px taller.
+- About chips are about 10 dp wider, and the selected chip has no outline.
+- Reveal icon convention.
+
+The `Padding=0` change was checked against the Phase 2 consumers that use these styles (none of `MenuSf`, `ListItemCheckboxSf`, `SfFlyoutMenuButton`); it is safe.
