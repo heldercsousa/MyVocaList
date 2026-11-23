@@ -97,8 +97,8 @@ Each copy task: **Consumes** T0.3–T0.6b (packages, styles, `OutlinedTextFieldS
 
 Component tasks: Recipe C · **Produces** the named Sf component with the DX original's bindable API · Lane Standard unless noted.
 
-- [ ] **T2.0 List control check (2 h, throwaway)** [SEQUENTIAL] — Produces: verdict in `design.md` § Decision: List control · Consumes: T0.3, T0.4a · Files: `design.md`; branch `task/spike-sflistview` · Risk: Medium · Demo: verdict recorded; **Helder confirms** · Lane: Architectural
-- [ ] **T2.1 `ListItemCheckboxSf`** [P, wave 2a] — Consumes: T0.4a · Files: `MyVocaList/UI/Components/Lists/ListItemCheckboxSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean
+- [~] **T2.0 List control check (2 h, throwaway)** [SEQUENTIAL] — Produces: verdict in `design.md` § Decision: List control · Consumes: T0.3, T0.4a · Files: `design.md`; branch `task/spike-sflistview` · Risk: Medium · Demo: verdict recorded; **Helder confirms** · Lane: Architectural
+- [~] **T2.1 `ListItemCheckboxSf`** [P, wave 2a] — Consumes: T0.4a · Files: `MyVocaList/UI/Components/Lists/ListItemCheckboxSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean
 - [ ] **T2.2a `ListItemLeadingAvatarSf`, `ListItemLeadingImageSf`** [P, wave 2a] — Consumes: T0.4a · Files: `MyVocaList/UI/Components/Lists/ListItemLeadingAvatarSf.xaml(.cs)`, `…/ListItemLeadingImageSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean
 - [ ] **T2.3 `EmptyStateSf`, `FloatingToolbarSf`** [P, wave 2a] — Consumes: T0.4a · Files: `MyVocaList/UI/Components/States/EmptyStateSf.xaml(.cs)`, `MyVocaList/UI/Components/Toolbars/FloatingToolbarSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean
 - [ ] **T2.4 `MenuSf`** [P, wave 2a] — Consumes: T0.4a, `IMenuHost` · Files: `MyVocaList/UI/Components/Menus/MenuSf.xaml(.cs)` · Risk: Medium (popup back handling) · Demo: builds; check script clean
