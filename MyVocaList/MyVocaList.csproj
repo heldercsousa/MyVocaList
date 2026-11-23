@@ -124,6 +124,13 @@
 		<PackageReference Include="DevExpress.Maui.Controls" />
 		<PackageReference Include="DevExpress.Maui.Editors" />
 
+		<!-- Syncfusion MAUI Packages (Syncfusion.Licensing is transitive; referenced because MauiProgram calls it) -->
+		<PackageReference Include="Syncfusion.Maui.Toolkit" />
+		<PackageReference Include="Syncfusion.Maui.Core" />
+		<PackageReference Include="Syncfusion.Maui.Inputs" />
+		<PackageReference Include="Syncfusion.Maui.Buttons" />
+		<PackageReference Include="Syncfusion.Licensing" />
+
 		<!-- Serilog Packages -->
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Extensions.Logging" />
@@ -221,6 +228,19 @@
 		<Exec Command="python &quot;$(MSBuildThisFileDirectory)../.claude/scripts/backlog/backlog_gen.py&quot; --root &quot;$(MSBuildThisFileDirectory)..&quot; snapshot &gt; &quot;$(_BidStatusFile)&quot;" ContinueOnError="true" IgnoreExitCode="true" />
 		<ItemGroup Condition="Exists('$(_BidStatusFile)')">
 			<EmbeddedResource Include="$(_BidStatusFile)" LogicalName="build-status.txt" />
+		</ItemGroup>
+	</Target>
+
+	<!-- Syncfusion license key (REQ-UIMIG-16/17/18): read from the build environment, compiled into a generated file under obj/
+	     (never tracked). Release builds fail when the variable is empty; Debug builds fall back to the trial notice. -->
+	<Target Name="GenerateSyncfusionLicense" BeforeTargets="CoreCompile">
+		<Error Condition="'$(Configuration)' == 'Release' and '$(SYNCFUSION_LICENSE_KEY)' == ''" Text="SYNCFUSION_LICENSE_KEY is not set — required for Release builds." />
+		<PropertyGroup>
+			<_SyncfusionLicenseFile>$(IntermediateOutputPath)SyncfusionLicense.g.cs</_SyncfusionLicenseFile>
+		</PropertyGroup>
+		<WriteLinesToFile File="$(_SyncfusionLicenseFile)" Lines="namespace MyVocaList%3B internal static class SyncfusionLicense { public const string Key = @&quot;$(SYNCFUSION_LICENSE_KEY)&quot;%3B }" Overwrite="true" WriteOnlyWhenDifferent="true" />
+		<ItemGroup>
+			<Compile Include="$(_SyncfusionLicenseFile)" />
 		</ItemGroup>
 	</Target>
 

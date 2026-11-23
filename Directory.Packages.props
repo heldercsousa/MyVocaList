@@ -75,6 +75,16 @@
     <PackageVersion Include="DevExpress.Maui.Editors" Version="25.2.4" />
   </ItemGroup>
   <!-- ================================================================ -->
+  <!-- Syncfusion MAUI (35.2.12 requires Microsoft.Maui.Controls >= 10.0.110) -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="Syncfusion.Maui.Toolkit" Version="1.0.12" />
+    <PackageVersion Include="Syncfusion.Maui.Core" Version="35.2.12" />
+    <PackageVersion Include="Syncfusion.Maui.Inputs" Version="35.2.12" />
+    <PackageVersion Include="Syncfusion.Maui.Buttons" Version="35.2.12" />
+    <PackageVersion Include="Syncfusion.Licensing" Version="35.2.12" />
+  </ItemGroup>
+  <!-- ================================================================ -->
   <!-- Dev Tools                                                        -->
   <!-- ================================================================ -->
   <ItemGroup>

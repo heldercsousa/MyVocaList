@@ -61,6 +61,22 @@ library licensing* (`Docs/Management/cross-cutting/ui-component-library-licensin
    hand** and never commit it. Without it the build still succeeds, but it reports `DX1000` /
    `DX1001` ("For evaluation purposes only") warnings.
 
+### 2a. Syncfusion license key (Release builds only)
+
+The UI is migrating to **Syncfusion .NET MAUI**. Its license key is read at build time from the
+user environment variable `SYNCFUSION_LICENSE_KEY` and compiled into a generated file under
+`obj/`. The key is never committed.
+
+1. Get the key from your Syncfusion Community License account (the account owner does this).
+2. Set it as a user environment variable on Windows, then restart Visual Studio or the shell so
+   the new value is picked up:
+   ```powershell
+   setx SYNCFUSION_LICENSE_KEY "<your Syncfusion license key>"
+   ```
+3. A **Release** build fails without it, with `SYNCFUSION_LICENSE_KEY is not set — required for
+   Release builds.` A **Debug** build works without it, and the app then shows Syncfusion's trial
+   notice.
+
 ---
 
 ## 3. Clone and enable the git hooks

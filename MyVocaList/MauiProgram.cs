@@ -2,6 +2,8 @@ using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Syncfusion.Maui.Core.Hosting;
+using Syncfusion.Maui.Toolkit.Hosting;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions;
@@ -31,10 +33,16 @@ public static class MauiProgram
                 config = new ConfigurationBuilder().AddJsonStream(stream).Build();
         }
 
+        // REQ-UIMIG-16: the key is generated at build time from SYNCFUSION_LICENSE_KEY; empty (Debug without a key) shows the trial notice.
+        if (!string.IsNullOrEmpty(SyncfusionLicense.Key))
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(SyncfusionLicense.Key);
+
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
+            .ConfigureSyncfusionCore()
+            .ConfigureSyncfusionToolkit()
             .UseDevExpress(useLocalization: false)
             .UseDevExpressCollectionView()
             .UseDevExpressControls()

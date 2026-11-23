@@ -19,6 +19,15 @@ After step 4, env vars are **automatically available** to Claude Code on every r
 
 > **Design note:** `.env.local` is the source of truth for key rotation across the team. Each dev maintains their own `.env.local` (never committed). The script is a one-time bridge to the registry.
 
+## Syncfusion license key (Release builds)
+
+Full procedure: `Docs/DevEnv/devenv-setup.md § 2a`. Summary:
+
+- Variable: `SYNCFUSION_LICENSE_KEY` (user environment variable; never write the real key in any tracked file).
+- Helder gets the key from his Syncfusion Community License account.
+- Windows: `setx SYNCFUSION_LICENSE_KEY "<key>"`, then restart VS or the shell.
+- MSBuild reads it and generates `$(IntermediateOutputPath)SyncfusionLicense.g.cs`. **Release builds fail without it** (`SYNCFUSION_LICENSE_KEY is not set — required for Release builds.`); Debug builds work and show the trial notice.
+
 ## Android Release Signing (`/sln-deploy-googledrive`)
 
 Required to build a signed APK and upload it to Google Drive.
