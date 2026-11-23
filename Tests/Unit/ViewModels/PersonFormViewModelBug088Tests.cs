@@ -432,4 +432,39 @@ public class PersonFormViewModelBug088Tests
         Assert.False(sut.IsBusy);
         _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
     }
+
+    // ── REQ-DUP-16: the name drop-down closes when the same-name sheet takes over ──
+
+    [Fact]
+    // [AC] REQ-DUP-16: Save with the name drop-down still open closes it when the same-name sheet opens
+    public async Task SaveCommand_SameNameSheetOpens_ClosesNameDropDown()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+        SetupSameNameMatches("John Doe", new Person("John Doe") { Id = 7, BirthDay = 3, BirthMonth = 4 });
+        sut.IsNameDropDownOpen = true;   // the drop-down is open at Save, without a blur
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsSameNameSheetVisible);
+        Assert.False(sut.IsNameDropDownOpen);
+    }
+
+    [Fact]
+    // [AC] REQ-DUP-16: Open on a same-name row closes the name drop-down, so the loaded singer's name does not reopen it
+    public async Task OpenSameNameCommand_ClosesNameDropDown()
+    {
+        var sut = CreateSut();
+        sut.PersonName = "John Doe";
+        sut.PersonEmail = "john@example.com";
+        SetupSameNameMatches("John Doe", new Person("John Doe") { Id = 7, BirthDay = 3, BirthMonth = 4 });
+        await sut.SaveCommand.ExecuteAsync(null);
+        var match = sut.SameNameMatches[0];
+        sut.IsNameDropDownOpen = true;   // the field reports the drop-down open again before Open
+
+        await sut.OpenSameNameCommand.ExecuteAsync(match);
+
+        Assert.False(sut.IsNameDropDownOpen);
+    }
 }

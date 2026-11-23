@@ -95,6 +95,8 @@ public partial class PersonFormViewModel : ViewModelBase
     [ObservableProperty] private bool _hasMoreSameName;
     // False when the form is name-only: Save as new / Save anyway is hidden and the hint is shown instead (REQ-DUP-13a).
     [ObservableProperty] private bool _canSaveAsNewFromSheet = true;
+    // BUG-088 REQ-DUP-16: two-way with the name field's drop-down. Closed when the same-name sheet takes over or Open loads a singer.
+    [ObservableProperty] private bool _isNameDropDownOpen;
     public ObservableRangeCollection<AutocompleteSuggestion> SameNameMatches { get; } = [];
     public string SameNameSaveButtonText => IsEditMode ? "Save anyway" : "Save as new";
 
@@ -423,6 +425,8 @@ public partial class PersonFormViewModel : ViewModelBase
 
         // REQ-DUP-13a: a name-only form (no email, no birthday) cannot save a new singer with a shared name.
         CanSaveAsNewFromSheet = !string.IsNullOrWhiteSpace(PersonEmail) || SelectedBirthDay.HasValue || SelectedBirthMonth is not null;
+        // BUG-088 REQ-DUP-16: Save can be tapped with the name drop-down still open; the sheet takes over, so the drop-down closes.
+        IsNameDropDownOpen = false;
         IsSameNameSheetVisible = true;
     }
 
@@ -511,6 +515,7 @@ public partial class PersonFormViewModel : ViewModelBase
     private async Task NavigateToEditAsync(Person person)
     {
         Suggestions = [];
+        IsNameDropDownOpen = false;   // BUG-088 REQ-DUP-16: the drop-down never reopens for the loaded singer's name
 
         // Day and month travel as two integer query parameters; both empty when the singer has no birthday.
         var birthDay = person.BirthDay?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;

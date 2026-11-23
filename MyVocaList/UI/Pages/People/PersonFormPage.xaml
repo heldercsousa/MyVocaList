@@ -26,6 +26,7 @@
                                                 HasError="{Binding NameHasError}"
                                                 ErrorText="{Binding NameErrorText}"
                                                 OptionSource="{Binding NameOptionSource}"
+                                                IsDropDownOpen="{Binding IsNameDropDownOpen, Mode=TwoWay}"
                                                 SelectCommand="{Binding SuggestionSelectedCommand}"
                                                 IsPickLockEnabled="False"
                                                 BlurWithoutPickCommand="{Binding ValidateNameCommand}" />

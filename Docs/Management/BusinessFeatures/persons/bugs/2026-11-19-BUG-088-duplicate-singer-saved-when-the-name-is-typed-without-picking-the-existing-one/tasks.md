@@ -15,3 +15,4 @@ Spec: `requirements.md`, `design.md`. Depends on `changes/2026-11-19-person-form
   - (a) Add mode, type an existing name, pick the suggestion, Save: the sheet appears as if in Add mode. Expected: no sheet, because the name is unchanged from the picked singer.
   - (b) Add mode, type an existing name without picking, Save, sheet, Open: the singer loads, but the name suggestions open for the loaded name. Expected: no suggestions.
   - Regression tests (VM) red first.
+- [x] **T9: Name drop-down open at Save reappears after Open** (REQ-DUP-16). Defensive fix, pre-authorised by Helder: the name field's `IsDropDownOpen` is bound TwoWay to `IsNameDropDownOpen`; it is set false when the same-name sheet opens and when a singer is loaded (`NavigateToEditAsync`). VM tests red first (compile, then assertion), then green. Emulator E2E on the device image. `AutocompleteDXField` is governed and unchanged.
