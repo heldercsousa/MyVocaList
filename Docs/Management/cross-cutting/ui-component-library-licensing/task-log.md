@@ -173,3 +173,15 @@ Merged after one fix round. The re-review marked every finding ADDRESSED.
 - A Syncfusion trial-license dialog appears in Debug when this page opens. Your license key removes it (REQ-UIMIG-16).
 - Large font scale has not been checked on a device.
 - After a pick, focus jumps to another field. The DX original makes the same `Unfocus()` call; check this on the Song form at parity.
+
+## T3.4 — `VenueFormSfPage` copy, subagent half — merged (2026-11-24)
+
+Implementer commit `f697dae6`, then fix round 1 `0370736a`: live character counters on the six address fields (`ShowCharCount` + `CharMaxLength`), and the map button's icon tinted through an `SfButton.Content` template. The re-review marked both findings ADDRESSED. Merged. Parity (P4–P6) is still to do, so the task box stays `[~]`.
+
+There are seven outlined `SfTextInputLayout` fields, plus `ImagePickerFieldSf` and the Sf button styles. The code-behind is unchanged and still pushes the map picker on `Routes.VenueMapPicker`.
+
+**Check at parity:** the map icon's tint and size, and the pressed and disabled looks of the custom button content.
+
+**Follow-up:** a shared `SfFilledTonalButton` style (MD3 filled tonal button). For now the map button sets SecondaryContainer tokens on the page itself.
+
+P3 lines are in the report: `.superpowers/sdd/plan/task-T3.4-report.md`.
