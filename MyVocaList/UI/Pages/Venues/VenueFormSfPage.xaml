@@ -5,6 +5,7 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
     xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
     x:Class="MyVocaList.UI.Pages.Venues.VenueFormSfPage"
     x:DataType="vm:VenueFormViewModel"
@@ -62,14 +63,25 @@
                    TextColor="{StaticResource OnSurface}" />
 
             <!-- Filled tonal look: SfFilledButton with the SecondaryContainer tokens (no Sf tonal style exists). -->
-            <buttons:SfButton Text="{Binding MapButtonText}"
+            <buttons:SfButton Style="{StaticResource SfFilledButton}"
+                              Text="{Binding MapButtonText}"
                               ImageSource="map_outlined"
-                              ShowIcon="True"
-                              Style="{StaticResource SfFilledButton}"
                               Background="{StaticResource SecondaryContainerBrush}"
-                              TextColor="{StaticResource OnSecondaryContainer}"
                               HorizontalOptions="Fill"
-                              Command="{Binding PickOnMapCommand}" />
+                              Command="{Binding PickOnMapCommand}">
+                <buttons:SfButton.Content>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="Center">
+                            <Image WidthRequest="18" HeightRequest="18" VerticalOptions="Center"
+                                   Source="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=ImageSource}"
+                                   behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}" />
+                            <Label VerticalOptions="Center" FontAttributes="Bold" FontSize="14"
+                                   TextColor="{StaticResource OnSecondaryContainer}"
+                                   Text="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=Text}" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </buttons:SfButton.Content>
+            </buttons:SfButton>
 
             <Label Text="Find the place on the map to fill the address, or type it below."
                    StyleClass="Body.Small"
@@ -77,6 +89,8 @@
 
             <inputlayout:SfTextInputLayout Hint="Street address"
                                            ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="100"
                                            HasError="{Binding AddressLine1HasError}"
                                            ErrorText="{Binding AddressLine1ErrorText}">
                 <Entry
@@ -87,6 +101,8 @@
 
             <inputlayout:SfTextInputLayout Hint="Address line 2 (optional)"
                                            ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="100"
                                            HasError="{Binding AddressLine2HasError}"
                                            ErrorText="{Binding AddressLine2ErrorText}">
                 <Entry
@@ -97,6 +113,8 @@
 
             <inputlayout:SfTextInputLayout Hint="City"
                                            ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="80"
                                            HasError="{Binding CityHasError}"
                                            ErrorText="{Binding CityErrorText}">
                 <Entry
@@ -107,6 +125,8 @@
 
             <inputlayout:SfTextInputLayout Hint="State / Province / Region"
                                            ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="80"
                                            HasError="{Binding RegionHasError}"
                                            ErrorText="{Binding RegionErrorText}">
                 <Entry
@@ -117,6 +137,8 @@
 
             <inputlayout:SfTextInputLayout Hint="Postal code"
                                            ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="20"
                                            HasError="{Binding PostalCodeHasError}"
                                            ErrorText="{Binding PostalCodeErrorText}">
                 <Entry
@@ -127,6 +149,8 @@
 
             <inputlayout:SfTextInputLayout Hint="Country"
                                            ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="60"
                                            HasError="{Binding CountryHasError}"
                                            ErrorText="{Binding CountryErrorText}">
                 <Entry
