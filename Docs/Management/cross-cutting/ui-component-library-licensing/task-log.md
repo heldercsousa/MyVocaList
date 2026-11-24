@@ -201,3 +201,11 @@ The BUG-088 fix carries over through `IsDropDownOpen` (two-way) and the VM reset
 **To check at parity:** a drag-down closes the sheet and it reopens on the next duplicate name; BUG-088 holds at P13; Back closes the sheet.
 
 **P3 lines:** `builder.Services.AddTransient<PersonFormSfPage>();` and `("Person form", "person-form-sf", typeof(PersonFormSfPage))`. With no query, the page opens as an empty create form.
+
+## T3.6 — `ArtistFormSfPage` copy, subagent half — merged (2026-11-24)
+
+Implementor `3de1ae6b`. Review: spec ✅, quality Approved (1 Minor). Merged; parity (P4–P6) still to do.
+
+The copy swaps in the Sf autocomplete, tap-to-edit and image-picker fields and the Sf button styles. The code-behind differs only by class name. The page has no `SfTextInputLayout`, icon button or in-page sheet, so the earlier copy lessons do not apply here.
+
+**Parity checks:** autocomplete drop-down and blur behavior (P13), the outlined button, and the circle picker.
