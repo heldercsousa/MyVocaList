@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sflv="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
+    xmlns:pulltorefresh="clr-namespace:Syncfusion.Maui.Toolkit.PullToRefresh;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    x:Class="MyVocaList.UI.Components.CrudListViewSf"
+    x:Name="self">
+
+    <!-- Syncfusion copy of CrudListView. Root Grid: Row 0 (Auto) = persistent SearchBar; Row 1 (Auto) = optional
+         FilterContent slot; Row 2 (*) = list + overlays -->
+    <Grid x:Name="rootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition x:Name="filterRow" Height="0" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: persistent MD3 Search bar (standalone/docked) — REQ-SEARCHBAR-01/09 -->
+        <appbars:SearchBarSf x:Name="searchBar"
+                             Grid.Row="0"
+                             SearchText="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                             Placeholder="{Binding SearchPlaceholder, Source={x:Reference self}}"
+                             IsElevated="{Binding IsSearchBarElevated, Source={x:Reference self}}" />
+
+        <!-- Row 1: FilterContent slot — Content + visibility assigned in code-behind OnFilterContentChanged.
+             A ContentView host (not ContentPresenter): ContentPresenter only renders inside a ControlTemplate. -->
+        <ContentView x:Name="filterContentHost"
+                     Grid.Row="1"
+                     IsVisible="False" />
+
+        <!-- Row 2: list area (list, skeleton, empty states, toolbar + FAB) -->
+        <Grid x:Name="listArea" Grid.Row="2">
+
+            <!-- Pull-to-refresh (Toolkit) hosting the SfListView (T2.0 verdict). Selection mode, SelectedItems sync,
+                 LoadMoreOption and the gestures are driven from code-behind (SelectedItems is get-only; the XAML
+                 Tap/LongPress commands pass event args, not the item). -->
+            <pulltorefresh:SfPullToRefresh x:Name="pullToRefresh"
+                                           IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                                           RefreshCommand="{Binding RefreshCommand}"
+                                           ProgressColor="{StaticResource Primary}"
+                                           ProgressBackground="{StaticResource SurfaceContainerHighBrush}">
+                <pulltorefresh:SfPullToRefresh.PullableContent>
+                    <sflv:SfListView x:Name="listView"
+                                     ItemsSource="{Binding ItemsSource, Source={x:Reference self}}"
+                                     ItemTemplate="{Binding ItemTemplate, Source={x:Reference self}}"
+                                     SelectedItemTemplate="{Binding SelectedItemTemplate, Source={x:Reference self}}"
+                                     AutoFitMode="DynamicHeight"
+                                     SelectionMode="None"
+                                     SelectionGesture="Tap"
+                                     SelectionBackground="Transparent"
+                                     ShowItemSeparator="False"
+                                     LoadMoreOption="None"
+                                     LoadMoreCommand="{Binding LoadMoreCommand}"
+                                     BackgroundColor="{StaticResource Surface}"
+                                     Margin="0,0,0,88"
+                                     Scrolling="OnListViewScrolling"
+                                     ItemTapped="OnItemTapped"
+                                     ItemLongPress="OnItemLongPress"
+                                     SelectionChanged="OnListViewSelectionChanged" />
+                </pulltorefresh:SfPullToRefresh.PullableContent>
+            </pulltorefresh:SfPullToRefresh>
+
+            <!-- Loading skeleton: stock Border bones (SfShimmer CustomView renders white; the DX skeleton is custom-shaped,
+                 so the design § Control mapping fallback applies). Opaque Surface overlay while IsInitialLoading;
+                 the opacity pulse runs in code-behind. -->
+            <Grid x:Name="skeletonHost"
+                  BackgroundColor="{StaticResource Surface}"
+                  IsVisible="{Binding IsInitialLoading}">
+                <VerticalStackLayout x:Name="skeletonBones" Spacing="0" VerticalOptions="Start">
+                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Empty state: no items of this entity type registered -->
+            <states:EmptyStateSf
+                Illustration="{Binding EmptyNoItemsIllustration, Source={x:Reference self}}"
+                Headline="{Binding EmptyNoItemsHeadline, Source={x:Reference self}}"
+                IsVisible="{Binding IsEmptyNoItems, Source={x:Reference self}}"
+                Margin="32,32,32,88" />
+
+            <!-- Empty state: search returned no results — bound directly via ICrudListViewModel BindingContext -->
+            <states:EmptyStateSf
+                Illustration="search_outlined"
+                Headline="No results found"
+                IsVisible="{Binding IsEmptyNoResults}"
+                Margin="32,32,32,88" />
+
+            <!-- Toolbar + FAB slot: added in T2.8b -->
+
+        </Grid>
+
+        <!-- Confirm and item-actions sheets, overflow menu: added in T2.8b -->
+
+    </Grid>
+
+</ContentView>
