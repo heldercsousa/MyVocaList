@@ -128,7 +128,7 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 - [~] **T3.4 `VenueFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `VenueFormViewModel` · Files: `MyVocaList/UI/Pages/Venues/VenueFormSfPage.xaml(.cs)` · Risk: Medium · Demo: P12 (+ P13) match DX · Lane: Standard
 - [~] **T3.5 `PersonFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `PersonFormViewModel` · Files: `MyVocaList/UI/Pages/People/PersonFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
 - [~] **T3.6 `ArtistFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `ArtistFormViewModel` · Files: `MyVocaList/UI/Pages/Artists/ArtistFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
-- [ ] **T3.7 `SongFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `SongFormViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
+- [~] **T3.7 `SongFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `SongFormViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
 - [~] **T3.8 `FeedbackSfPage`** [SEQUENTIAL] — Recipe P · Consumes: T0.1b `SfComboBox` verdict, `FeedbackViewModel` · Files: `MyVocaList/UI/Pages/Feedback/FeedbackSfPage.xaml(.cs)` · Risk: Medium · Demo: send feedback works; P12 matches · Lane: Standard
 - [ ] **T3.9 Cut over VenueForm** [SEQUENTIAL] — Recipe X · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the list opens the Sf form
 - [ ] **T3.10 Cut over PersonForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the singers list opens the Sf page
