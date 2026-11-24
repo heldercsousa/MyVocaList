@@ -212,8 +212,8 @@ public partial class CrudListViewSf : ContentView, IMenuHostSf
     // IMenuHostSf
     // -------------------------------------------------------------------------
 
-    /// <summary>The shared overflow menu this list hosts (REQ-OVFM-20). Added in T2.8b.</summary>
-    public MenuSf? HostedMenu => null;
+    /// <summary>The shared overflow menu this list hosts (REQ-OVFM-20).</summary>
+    public MenuSf? HostedMenu => itemMenu;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -454,5 +454,25 @@ public partial class CrudListViewSf : ContentView, IMenuHostSf
     {
         if (_viewModel?.ItemLongPressCommand is { } command && command.CanExecute(e.DataItem))
             command.Execute(e.DataItem);
+    }
+
+    // -------------------------------------------------------------------------
+    // BottomSheet event handler
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Item actions sheet closed (drag down ends in Collapsed, or the ViewModel hid it). The TwoWay State binding has
+    /// already written Hidden back; DismissItemActionsCommand also clears the item-actions target, as CrudListView does
+    /// on a swipe-dismiss. The command is idempotent, so a close the ViewModel started is unaffected.
+    /// </summary>
+    private void OnItemActionsSheetStateChanged(object sender, Syncfusion.Maui.Toolkit.BottomSheet.StateChangedEventArgs e)
+    {
+        var closed = e.NewState is Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Hidden
+            or Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Collapsed;
+        var wasOpen = e.OldState is not Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Hidden
+            and not Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Collapsed;
+
+        if (closed && wasOpen)
+            _viewModel?.DismissItemActionsCommand.Execute(null);
     }
 }
