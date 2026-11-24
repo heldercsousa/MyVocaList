@@ -115,3 +115,16 @@ The original `SearchAppBar` uses a bare `TextEdit`, borderless with the Search k
 **Notes carried forward:**
 - **T2.8/T2.9:** `OverflowMenuButtonSf` does nothing when it has no `Menu` and no `IMenuHostSf` ancestor, so the Sf page or `CrudListViewSf` must implement `IMenuHostSf` where the DX one implements `IMenuHost`.
 - **Coupling:** `SearchAppBarSf` focuses the inner `Entry` through `OutlinedTextFieldSf.Content`. A public Focus/Unfocus forward on `OutlinedTextFieldSf` is the cleaner fix. It is a governed-component change, so it is logged as a follow-up.
+
+## T3.8 — `FeedbackSfPage` copy, subagent half — merged (2026-11-24)
+
+Implementor `20a892f8`. Review: spec ✅, Minor findings only. Merged; parity (P4–P6) is still to do, so the box stays `[~]`.
+
+**Replacements:**
+- `ComboBoxEdit` → `SfComboBox` inside `SfTextInputLayout`. This nesting is supported; `ShowBorder="False"` on the combo; the dark properties include `SelectedDropDownItemTextStyle`.
+- Text and multiline fields → `SfTextInputLayout` with `ContainerType="Outlined"`.
+- Buttons → `SfFilledButton`.
+
+**Fix at parity:** the message `Editor` has no maximum height. DX capped it at 10 lines, so add `MaximumHeightRequest` ≈ 240. If the page crashes at launch, `SfComboBox.TextColor` is the first suspect: it is absent from the 35.2.12 XML, although T0.1b accepted it.
+
+**P3 lines:** `builder.Services.AddTransient<FeedbackSfPage>();`, `("Feedback", "feedback-sf", typeof(FeedbackSfPage))`.
