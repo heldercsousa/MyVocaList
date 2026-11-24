@@ -100,3 +100,18 @@ The search field is `OutlinedTextFieldSf`, an accepted deviation. Emulator resul
 `SmallAppBarSf` renders correctly. No unit test (Level C).
 
 `OutlinedTextFieldSf` now has a second consumer pattern, so it is governed once a second consumer binds to it. At that point it goes into `component-safety-gate.md`.
+
+## T2.7 — `SearchAppBarSf`, `ListItemOverflowButtonSf` — Done (2026-11-24)
+
+Merged. The work landed in three commits:
+- `ef890c67`: `VerticalOptions=Center` on `OverflowMenuButtonSf`, the Minor deferred from T2.6.
+- `544070a4`: `SearchAppBarSf`.
+- `b55ae05c`: `ListItemOverflowButtonSf`.
+
+Review: spec ✅, quality Approved, 3 Minor.
+
+The original `SearchAppBar` uses a bare `TextEdit`, borderless with the Search key. The copy matches it with `OutlinedTextFieldSf` (`ShowOutline=False`, `ReturnType=Search`).
+
+**Notes carried forward:**
+- **T2.8/T2.9:** `OverflowMenuButtonSf` does nothing when it has no `Menu` and no `IMenuHostSf` ancestor, so the Sf page or `CrudListViewSf` must implement `IMenuHostSf` where the DX one implements `IMenuHost`.
+- **Coupling:** `SearchAppBarSf` focuses the inner `Entry` through `OutlinedTextFieldSf.Content`. A public Focus/Unfocus forward on `OutlinedTextFieldSf` is the cleaner fix. It is a governed-component change, so it is logged as a follow-up.
