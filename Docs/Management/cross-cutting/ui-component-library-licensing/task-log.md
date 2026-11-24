@@ -185,3 +185,19 @@ There are seven outlined `SfTextInputLayout` fields, plus `ImagePickerFieldSf` a
 **Follow-up:** a shared `SfFilledTonalButton` style (MD3 filled tonal button). For now the map button sets SecondaryContainer tokens on the page itself.
 
 P3 lines are in the report: `.superpowers/sdd/plan/task-T3.4-report.md`.
+
+## T3.5 — `PersonFormSfPage` copy, subagent half — merged (2026-11-24)
+
+Implementer commit `e01b0e40`; fix round 1 `2de2f177`. The fix closes the same-name sheet explicitly after a drag-down. It is a 5-line diff, and the orchestrator checked it directly. Merged; parity (P4–P6) is still to do.
+
+What the copy uses:
+- `AutocompleteFieldSf`;
+- `SfComboBox` inside `SfTextInputLayout`;
+- the Sf buttons;
+- an `SfBottomSheet` driven directly through `IsOpen` + `State`.
+
+The BUG-088 fix carries over through `IsDropDownOpen` (two-way) and the VM reset. An `OnBackButtonPressed` override was added: `SfBottomSheet` does not close on Back the way the DX sheet did, so the override dismisses the open sheet through the VM.
+
+**To check at parity:** a drag-down closes the sheet and it reopens on the next duplicate name; BUG-088 holds at P13; Back closes the sheet.
+
+**P3 lines:** `builder.Services.AddTransient<PersonFormSfPage>();` and `("Person form", "person-form-sf", typeof(PersonFormSfPage))`. With no query, the page opens as an empty create form.
