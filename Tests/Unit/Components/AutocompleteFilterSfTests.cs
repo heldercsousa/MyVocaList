@@ -47,7 +47,7 @@ public class AutocompleteFilterSfTests
         Assert.Empty(Assert.IsAssignableFrom<IEnumerable<AutocompleteSuggestion>>(result));
     }
 
-    // [AC] REQ-UIMIG-01: only the latest query's options are shown; a superseded search answers nothing.
+    // [AC] REQ-ACF-26: latest query wins; a superseded search answers nothing.
     [Fact]
     public async Task FilterAsync_NewerQuery_CancelsThePreviousSearch()
     {
@@ -71,7 +71,7 @@ public class AutocompleteFilterSfTests
         Assert.Equal(new[] { Second }, Assert.IsAssignableFrom<IEnumerable<AutocompleteSuggestion>>(newer));
     }
 
-    // [AC] REQ-UIMIG-01: a search cancelled by the field (pick, blur, text written in code) answers nothing.
+    // [AC] REQ-ACF-26: a search cancelled by the field (pick, blur, text written in code) answers nothing.
     [Fact]
     public async Task Cancel_InFlightSearch_ThrowsOperationCanceled()
     {
@@ -88,7 +88,7 @@ public class AutocompleteFilterSfTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => search);
     }
 
-    // [AC] REQ-UIMIG-01: a search that ignores its token but finishes after a cancel still answers nothing.
+    // [AC] REQ-ACF-26: a search that ignores its token but finishes after a cancel still answers nothing.
     [Fact]
     public async Task FilterAsync_CancelledWhileSearchIgnoresToken_ThrowsOperationCanceled()
     {
@@ -100,6 +100,34 @@ public class AutocompleteFilterSfTests
         pending.SetResult([First]);
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => search);
+    }
+
+    // [AC] REQ-ACF-31: a failing search shows no options, never the stale options of an earlier query.
+    [Fact]
+    public async Task FilterAsync_SearchFails_ReturnsAnEmptyList()
+    {
+        var filter = new AutocompleteFilterSf(
+            (_, _) => Task.FromException<IReadOnlyList<AutocompleteSuggestion>?>(new InvalidOperationException("db down")),
+            _ => { });
+
+        var result = await filter.FilterAsync("jo");
+
+        Assert.Empty(Assert.IsAssignableFrom<IEnumerable<AutocompleteSuggestion>>(result));
+    }
+
+    // [AC] REQ-UIMIG-01: a failing search is logged, as the DX original's faulted search reached the global handler.
+    [Fact]
+    public async Task FilterAsync_SearchFails_ReportsTheException()
+    {
+        var failure = new InvalidOperationException("db down");
+        Exception? reported = null;
+        var filter = new AutocompleteFilterSf(
+            (_, _) => Task.FromException<IReadOnlyList<AutocompleteSuggestion>?>(failure),
+            ex => reported = ex);
+
+        await filter.FilterAsync("jo");
+
+        Assert.Same(failure, reported);
     }
 
     // [AC] REQ-UIMIG-01: the Sf menu pre-selects no row, as the DX original (no highlight, no auto-appended text).

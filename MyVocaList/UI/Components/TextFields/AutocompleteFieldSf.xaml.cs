@@ -286,7 +286,7 @@ public partial class AutocompleteFieldSf : ContentView
     /// <summary>Creates the field in its default, editable state.</summary>
     public AutocompleteFieldSf()
     {
-        _filter = new AutocompleteFilterSf(SearchAsync);
+        _filter = new AutocompleteFilterSf(SearchAsync, LogSearchFailure);
 
         InitializeComponent();
 
@@ -500,7 +500,68 @@ public partial class AutocompleteFieldSf : ContentView
         if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
             return null;
 
-        return AutocompleteDXFieldLogic.ShowsMenu(options) ? options : null;
+        if (!AutocompleteDXFieldLogic.ShowsMenu(options))
+            return null;
+
+        ApplyRowHeight(options);
+        return options;
+    }
+
+    // A search that failed with anything but a cancellation: AutocompleteFilterSf shows no options and reports it
+    // here, because the control would swallow it (the DX original's faulted search reached GlobalExceptionHandler).
+    private static void LogSearchFailure(Exception exception) =>
+        Serilog.Log.ForContext("SourceContext", nameof(AutocompleteFieldSf))
+            .Error(exception, "Autocomplete option search failed");
+
+    // ── Menu row height (view-only) ────────────────────────────────────────
+
+    // The control gives every menu row one height (its auto-fit is internal), while the DX original sized each row
+    // to its content. So the row template is measured for each row shape in the options (leading image / avatar /
+    // none, with or without supporting and trailing text), and the tallest shape sets the height. The measurement
+    // uses the real template, type styles and font scale, so large-font settings and the 56 dp song image fit.
+    // Cached per shape; a font-scale change recreates the activity (MainActivity does not handle fontScale).
+    private readonly Dictionary<(AutocompleteLeadingKind Leading, bool HasSupporting, bool HasTrailing), double> _rowHeights = [];
+
+    private void ApplyRowHeight(IReadOnlyList<AutocompleteSuggestion> options)
+    {
+        var height = options
+            .DistinctBy(RowShape)
+            .Select(MeasureRowHeight)
+            .DefaultIfEmpty(0)
+            .Max();
+
+        if (height > 0 && Math.Abs(editor.DropDownItemHeight - height) >= 1)
+            editor.DropDownItemHeight = height;
+    }
+
+    // Matches the template's visibility rules: the supporting and trailing labels show when the text is not null.
+    private static (AutocompleteLeadingKind, bool, bool) RowShape(AutocompleteSuggestion option) =>
+        (option.LeadingKind, option.SupportingText is not null, option.TrailingText is not null);
+
+    // The row's measured height in device-independent units, or 0 when it cannot be measured (no handler yet).
+    private double MeasureRowHeight(AutocompleteSuggestion option)
+    {
+        var shape = RowShape(option);
+        if (_rowHeights.TryGetValue(shape, out var cached))
+            return cached;
+
+        if (editor.Handler?.MauiContext is not { } context || editor.ItemTemplate?.CreateContent() is not View row)
+            return 0;
+
+        // The leading slot has a fixed size, so the image itself is not needed (and not loaded) to measure the row.
+        row.BindingContext = option with { ImageUrl = null };
+        try
+        {
+            Microsoft.Maui.Platform.ElementExtensions.ToHandler(row, context);
+            var width = editor.Width > 0 ? editor.Width : double.PositiveInfinity;
+            var height = Math.Ceiling(((IView)row).Measure(width, double.PositiveInfinity).Height);
+            _rowHeights[shape] = height;
+            return height;
+        }
+        finally
+        {
+            row.DisconnectHandlers();
+        }
     }
 
     // ── Pick (REQ-ACF-01, -11b, -11e, -23, -30; BUG-061) ───────────────────

@@ -38,7 +38,8 @@
          applied in code-behind (ApplyMode), never by triggers. Only the X colour uses a trigger (HasError -> Error).
          The menu shows exactly what the field's search returns (FilterBehavior and SearchBehavior are set in code-behind):
          no "No Results Found" row (empty NoResultsFoundText), no pre-selected row, no auto-appended text.
-         Menu rows have one fixed height (the control has no public auto-fit): 64 fits the two-line row with an avatar. -->
+         Menu rows share one height (the control has no public auto-fit): code-behind measures this row template for the
+         shapes in each result and sets DropDownItemHeight to the tallest (ApplyRowHeight). -->
     <core:SfTextInputLayout x:Name="layout"
                             Style="{StaticResource AutocompleteFieldSfLayout}"
                             Hint="{Binding LabelText, Source={x:Reference self}}"
@@ -62,7 +63,6 @@
                                DropDownBackground="{StaticResource SurfaceContainerBrush}"
                                DropDownStroke="{StaticResource TransparentBrush}"
                                DropDownCornerRadius="4"
-                               DropDownItemHeight="64"
                                DropDownItemTextColor="{StaticResource OnSurface}"
                                SelectedDropDownItemBackground="{StaticResource SurfaceContainerHighestBrush}">
             <!-- MD3 outlined-text-field error-trailing-icon-color = error (REQ-ACF-08) -->
