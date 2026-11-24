@@ -128,3 +128,21 @@ Implementor `20a892f8`. Review: spec ✅, Minor findings only. Merged; parity (P
 **Fix at parity:** the message `Editor` has no maximum height. DX capped it at 10 lines, so add `MaximumHeightRequest` ≈ 240. If the page crashes at launch, `SfComboBox.TextColor` is the first suspect: it is absent from the 35.2.12 XML, although T0.1b accepted it.
 
 **P3 lines:** `builder.Services.AddTransient<FeedbackSfPage>();`, `("Feedback", "feedback-sf", typeof(FeedbackSfPage))`.
+
+## T2.8a / T2.8b — `CrudListViewSf` — Done (2026-11-24)
+
+Implementor commits:
+- `bfb90519`: list body on `SfListView` inside `SfPullToRefresh`, using the T2.0 patterns. `SelectedItems` syncs two ways; tap and long-press go to the VM commands; `LoadMoreOption` follows `HasMoreItems`; the loading skeleton is a stock `Border`.
+- `dc66e1d7`: two nested `SfBottomSheet`s bound through both converters, `FloatingToolbarSf`, the FAB (an `ImageButton` in the `SfIconButton` style), and `IMenuHostSf` hosting `MenuSf`.
+
+Fix round 1, `f3c38368`: the sheets now wrap the whole control, so the overlay covers the search bar and filters. `ContentPadding=0`, and the half ratios are 0.32 and 0.25 (a deviation recorded in design). The re-review marked this ADDRESSED. Merged.
+
+The review found that sheet sequencing is not a regression: the DX menu path that waited for the menu to close was dead code. The public API matches `CrudListView`, except for the ruled `HostedMenu` type. Build had 0 errors and 2057 tests passed.
+
+**T2.9 must check on the device:**
+- the overlay covers the search bar and filter chips;
+- the Cancel and Delete rows fit;
+- a sheet opened from the VM stays open;
+- the load-more indicator and the row ripple show;
+- the P10 Back order works, with the page closing the sheet through the VM;
+- the confirm sheet does not visibly overlap the item-actions sheet.
