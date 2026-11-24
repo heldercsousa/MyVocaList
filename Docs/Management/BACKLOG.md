@@ -40,6 +40,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
 | 2026-11-22 | ↳ Early-version notice in the app inviting feedback and suggestions | 💡 Pending |
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
+| 2026-11-24 | ↳ Research: shared code between the autocomplete field and the CRUD list (inline or full-screen, configurable tap) | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
 | — | **UI library migration — DevExpress → Syncfusion, coexisting page by page** | 🟡 In Progress |

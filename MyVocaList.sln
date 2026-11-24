@@ -2091,6 +2091,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-22-deezer-vs-musicb
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap", "2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap", "{B1D5DC76-CB8A-57DA-AD94-30EBB84CE801}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\findings.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\findings.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2537,6 +2543,7 @@ Global
 		{357FDA73-0F7F-5A1C-A904-36F0818BBF1A} = {7F5E9DB0-20B5-5C11-99A2-46035572E448}
 		{8C9C1BED-BD76-5D80-8086-ED06BDC6FD01} = {FA1234BC-0001-4000-8000-0000000000D5}
 		{9B43FB31-D4BC-53F8-82EB-A0BDAEC80060} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
+		{B1D5DC76-CB8A-57DA-AD94-30EBB84CE801} = {FA1234BC-0001-4000-8000-0000000000AC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
