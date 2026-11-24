@@ -111,6 +111,11 @@ public partial class PersonFormSfPage : ContentPage
             try
             {
                 _viewModel.DismissSameNameSheetCommand.Execute(null);
+
+                // The guard makes SyncSameNameSheetState a no-op for the flag change the dismiss causes, so a drag
+                // down (Collapsed) would leave the sheet open at its collapsed height. Close it explicitly.
+                sameNameSheet.IsOpen = false;
+                sameNameSheet.State = SfSheetState.Hidden;
             }
             finally
             {
