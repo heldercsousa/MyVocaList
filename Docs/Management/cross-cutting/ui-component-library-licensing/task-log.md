@@ -146,3 +146,30 @@ The review found that sheet sequencing is not a regression: the DX menu path tha
 - the load-more indicator and the row ripple show;
 - the P10 Back order works, with the page closing the sheet through the VM;
 - the confirm sheet does not visibly overlap the item-actions sheet.
+
+## T3.3 — `AutocompleteFieldSf` — Done (2026-11-24)
+
+Merged after one fix round. The re-review marked every finding ADDRESSED.
+
+| Commit | Content |
+|---|---|
+| `e29f383f` | `AutocompleteFieldSf`, plus `AutocompleteFilterSf` and its 7 tests |
+| `9cae323d` | The `TapToEditFieldSf` autocomplete hook, restored as in the DX original |
+| `becdd2e5` | Fix round 1: rows sized from the measured row template (no fixed height); search errors logged, with no stale options left showing; 2 new tests; cancellation tests retagged REQ-ACF-26 |
+
+**How it is built.** An `SfAutocomplete` inside an outlined `SfTextInputLayout`, with the same public API as `AutocompleteDXField`. The filter delegates to the field and the shared logic, which is unchanged. Outline and hint colors are set per state in code-behind, because the Core layout ignores the app theme keys; they use tokens only.
+
+**Verification.**
+- Tests: RED, then GREEN; 2066 pass.
+- P13 on the emulator (`artifacts/parity/t3.3/`): suggestions appear after the async search; picking locks the value; the field returns to text state; a tap releases the pick and focuses the field; clear and the error state work. A 56 dp image row is not clipped.
+
+| AC | Tests |
+|---|---|
+| REQ-ACF-26 | cancellation tests |
+| REQ-ACF-31 | no stale options |
+| REQ-UIMIG-01 | logging (no AC covers search-error logging) |
+
+**Notes for Helder.**
+- A Syncfusion trial-license dialog appears in Debug when this page opens. Your license key removes it (REQ-UIMIG-16).
+- Large font scale has not been checked on a device.
+- After a pick, focus jumps to another field. The DX original makes the same `Unfocus()` call; check this on the Song form at parity.
