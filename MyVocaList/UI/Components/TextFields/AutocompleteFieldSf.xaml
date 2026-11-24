@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:core="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:inputs="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
+    x:Class="MyVocaList.UI.Components.TextFields.AutocompleteFieldSf"
+    x:Name="self">
+
+    <ContentView.Resources>
+        <!-- MD3 outlined text field: the setters of the app's SfTextInputLayout style (MaterialStyles.xaml), which
+             targets the Toolkit layout. SfAutocomplete needs the Community-suite layout (Syncfusion.Maui.Core), which
+             does not read the app's SfTextInputLayout* theme keys (emulator, T3.3), so the outline and hint colors per
+             state (enabled / focused / error) are applied in code-behind (ApplyOutline), as OutlinedTextFieldSf does. -->
+        <Style x:Key="AutocompleteFieldSfLayout" TargetType="core:SfTextInputLayout">
+            <Setter Property="ContainerType" Value="Outlined" />
+            <Setter Property="OutlineCornerRadius" Value="4" />
+            <Setter Property="ContainerBackground" Value="{StaticResource TransparentBrush}" />
+            <Setter Property="HelperLabelStyle">
+                <Setter.Value>
+                    <core:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ErrorLabelStyle">
+                <Setter.Value>
+                    <core:LabelStyle TextColor="{StaticResource Error}" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </ContentView.Resources>
+
+    <!-- MD3 exposed dropdown menu (text field + menu of options), built on SfAutocomplete inside an outlined
+         SfTextInputLayout. Lock mechanism B as in AutocompleteDXField: while locked the input is read-only and the X is
+         the trailing view; while editable the X is the built-in clear button. Read-only, icon and menu state are
+         applied in code-behind (ApplyMode), never by triggers. Only the X colour uses a trigger (HasError -> Error).
+         The menu shows exactly what the field's search returns (FilterBehavior and SearchBehavior are set in code-behind):
+         no "No Results Found" row (empty NoResultsFoundText), no pre-selected row, no auto-appended text.
+         Menu rows share one height (the control has no public auto-fit): code-behind measures this row template for the
+         shapes in each result and sets DropDownItemHeight to the tallest (ApplyRowHeight). -->
+    <core:SfTextInputLayout x:Name="layout"
+                            Style="{StaticResource AutocompleteFieldSfLayout}"
+                            Hint="{Binding LabelText, Source={x:Reference self}}"
+                            HasError="{Binding HasError, Source={x:Reference self}}"
+                            ErrorText="{Binding ErrorText, Source={x:Reference self}}"
+                            ShowTrailingView="False"
+                            TrailingViewPosition="Inside">
+
+        <inputs:SfAutocomplete x:Name="editor"
+                               Placeholder="{Binding PlaceholderText, Source={x:Reference self}}"
+                               Text="{Binding Text, Source={x:Reference self}, Mode=TwoWay}"
+                               IsDropDownOpen="{Binding IsDropDownOpen, Source={x:Reference self}, Mode=TwoWay}"
+                               DisplayMemberPath="Headline"
+                               TextMemberPath="Headline"
+                               TextSearchMode="Contains"
+                               NoResultsFoundText=""
+                               IsClearButtonVisible="True"
+                               TextColor="{StaticResource OnSurface}"
+                               PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                               ClearButtonIconColor="{StaticResource OnSurfaceVariant}"
+                               DropDownBackground="{StaticResource SurfaceContainerBrush}"
+                               DropDownStroke="{StaticResource TransparentBrush}"
+                               DropDownCornerRadius="4"
+                               DropDownItemTextColor="{StaticResource OnSurface}"
+                               SelectedDropDownItemBackground="{StaticResource SurfaceContainerHighestBrush}">
+            <!-- MD3 outlined-text-field error-trailing-icon-color = error (REQ-ACF-08) -->
+            <inputs:SfAutocomplete.Triggers>
+                <DataTrigger TargetType="inputs:SfAutocomplete"
+                             Binding="{Binding HasError, Source={x:Reference self}}"
+                             Value="True">
+                    <Setter Property="ClearButtonIconColor" Value="{StaticResource Error}" />
+                </DataTrigger>
+            </inputs:SfAutocomplete.Triggers>
+            <inputs:SfAutocomplete.SelectedDropDownItemTextStyle>
+                <inputs:DropDownTextStyle TextColor="{StaticResource OnSurface}" />
+            </inputs:SfAutocomplete.SelectedDropDownItemTextStyle>
+            <inputs:SfAutocomplete.ItemTemplate>
+                <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                    <!-- MD3 menu item: optional leading image/avatar (col 0), text (col 1), trailing text (col 2).
+                         LeadingKind None + null TrailingText = text only (columns 0 and 2 collapse to zero width). -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,8">
+                        <lists:ListItemLeadingImageSf Grid.Column="0"
+                                                      IsVisible="{Binding HasLeadingImage}"
+                                                      ImageSource="{Binding ImageUrl}"
+                                                      PlaceholderIcon="{Binding PlaceholderIcon}"
+                                                      Margin="0,0,12,0"
+                                                      VerticalOptions="Center" />
+                        <lists:ListItemLeadingAvatarSf Grid.Column="0"
+                                                       IsVisible="{Binding HasLeadingAvatar}"
+                                                       ImageSource="{Binding ImageUrl}"
+                                                       PlaceholderIcon="{Binding PlaceholderIcon}"
+                                                       Margin="0,0,12,0"
+                                                       VerticalOptions="Center" />
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                            <Label Text="{Binding Headline}"
+                                   StyleClass="Body.Large"
+                                   TextColor="{StaticResource OnSurface}"
+                                   MaxLines="1"
+                                   LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding SupportingText}"
+                                   StyleClass="Body.Medium"
+                                   TextColor="{StaticResource OnSurfaceVariant}"
+                                   MaxLines="1"
+                                   LineBreakMode="TailTruncation"
+                                   IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2"
+                               Text="{Binding TrailingText}"
+                               StyleClass="Label.Small"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               Margin="12,0,0,0"
+                               VerticalOptions="Center"
+                               IsVisible="{Binding TrailingText, Converter={StaticResource IsNotNullConverter}}" />
+                    </Grid>
+                </DataTemplate>
+            </inputs:SfAutocomplete.ItemTemplate>
+        </inputs:SfAutocomplete>
+
+        <!-- Lock mechanism B: the X while locked (the input is read-only then). Shown by ApplyMode. -->
+        <core:SfTextInputLayout.TrailingView>
+            <ImageButton x:Name="lockedClearButton"
+                         Source="close_outlined"
+                         Style="{StaticResource SfIconButton}"
+                         SemanticProperties.Description="Clear"
+                         Clicked="OnLockedClearClicked">
+                <ImageButton.Triggers>
+                    <DataTrigger TargetType="ImageButton"
+                                 Binding="{Binding HasError, Source={x:Reference self}}"
+                                 Value="True">
+                        <Setter Property="behaviors:IconTint.Color" Value="{StaticResource Error}" />
+                    </DataTrigger>
+                </ImageButton.Triggers>
+            </ImageButton>
+        </core:SfTextInputLayout.TrailingView>
+    </core:SfTextInputLayout>
+</ContentView>
