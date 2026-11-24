@@ -251,12 +251,12 @@ Design § Decision: List control. On branch `task/spike-sflistview`, a minimal l
 
 ### Task T2.8a: `CrudListViewSf` — list body [SEQUENTIAL — after T2.0 confirmed and T2.1–T2.7]
 
-**Files:** Create `MyVocaList/UI/Components/CrudListViewSf.xaml(.cs)`. **Consumes:** Phase 2 components, T0.4a styles, T2.0 verdict. **Produces:** `CrudListViewSf : ContentView, IMenuHost` with the same BindableProperties and `DataTemplate` slots as `CrudListView` (`MyVocaList/UI/Components/CrudListView.xaml(.cs)`).
+**Files:** Create `MyVocaList/UI/Components/CrudListViewSf.xaml(.cs)`. **Consumes:** Phase 2 components, T0.4a styles, T2.0 verdict. **Produces:** `CrudListViewSf : ContentView, IMenuHostSf` (ruling 2026-11-23: `IMenuHost.HostedMenu` is typed `Menu?`) with the same BindableProperties and `DataTemplate` slots as `CrudListView` (`MyVocaList/UI/Components/CrudListView.xaml(.cs)`).
 - Recipe C: list = T2.0 verdict (`SfListView`, or stock `CollectionView` + a `DataTemplateSelector` choosing the selected/unselected row template + code-behind forwarding of tap and long-press to the VM commands, as `CrudListView.OnItemTap` / `OnItemLongPress`); `ShimmerView` → `SfShimmer` with token colors and no DX shimmer anywhere in the tree (REQ-UIMIG-04); `EmptyStateSf`; background below the last row = the page `Surface` token (REQ-UIMIG-02). Sheets and floating toolbar are stubs bound to nothing until T2.8b.
 
 ### Task T2.8b: `CrudListViewSf` — sheets, toolbar, menu [SEQUENTIAL — after T2.8a]
 
-Same files. Both bottom sheets → `SfBottomSheet` with `State="{Binding …SheetState, Converter={StaticResource DxSheetStateToSf}, Mode=TwoWay}"`; `FloatingToolbarSf`, FAB with `SfIconButton`, `MenuSf` through `IMenuHost`. Recipe C C3–C5.
+Same files. Both bottom sheets → `SfBottomSheet` with `State="{Binding …SheetState, Converter={StaticResource DxSheetStateToSf}, Mode=TwoWay}"`; `FloatingToolbarSf`, FAB with `SfIconButton`, `MenuSf` through `IMenuHostSf`. Recipe C C3–C5.
 
 ### Task T2.9: `VenuesSfPage` [SEQUENTIAL — first consumer; proves `CrudListViewSf` parity; about 2 h]
 
