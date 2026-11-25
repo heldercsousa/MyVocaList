@@ -7,7 +7,7 @@
     xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
-    x:Class="MyVocaList.UI.Components.TextFields.AutocompleteFieldSf"
+    x:Class="MyVocaList.UI.Components.TextFields.AutocompleteField"
     x:Name="self">
 
     <ContentView.Resources>

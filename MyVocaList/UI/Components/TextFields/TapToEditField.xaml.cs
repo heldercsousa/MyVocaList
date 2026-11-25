@@ -7,11 +7,11 @@ namespace MyVocaList.UI.Components.TextFields;
 /// form-pictures change). A defined value shows as text (type style <see cref="TextStyleClass"/>, at most
 /// <see cref="MaxLines"/> lines, a trailing edit icon); a tap opens the wrapped <see cref="Editor"/> with the
 /// cursor in it. The editor state shows while the value is blank, while <see cref="IsEditing"/> or while
-/// <see cref="HasError"/>. Leaving the editor (blur, or a pick of a wrapped <see cref="AutocompleteFieldSf"/>)
+/// <see cref="HasError"/>. Leaving the editor (blur, or a pick of a wrapped <see cref="AutocompleteField"/>)
 /// returns to the text state. Every state decision is delegated to <see cref="TapToEditFieldLogic"/>.
 /// </summary>
 /// <remarks>
-/// The wrapper adds no member to <see cref="AutocompleteFieldSf"/> and does not change it (design.md § 2.5).
+/// The wrapper adds no member to <see cref="AutocompleteField"/> and does not change it (design.md § 2.5).
 /// It reaches the wrapped field only through its public surface: <c>IsLocked</c>, <c>FocusEditor()</c> and
 /// <c>PropertyChanged</c>.
 /// </remarks>
@@ -133,7 +133,7 @@ public partial class TapToEditField : ContentView
         nameof(ReleasesPickOnEdit), typeof(bool), typeof(TapToEditField), true);
 
     /// <summary>
-    /// When <c>true</c> (default), a tap on the text sets a locked wrapped <see cref="AutocompleteFieldSf"/>'s
+    /// When <c>true</c> (default), a tap on the text sets a locked wrapped <see cref="AutocompleteField"/>'s
     /// <c>IsLocked</c> to <c>false</c> and keeps its text (REQ-PIC-26).
     /// </summary>
     public bool ReleasesPickOnEdit
@@ -157,7 +157,7 @@ public partial class TapToEditField : ContentView
     private View? _retryHost;
 
     // The wrapped field, while its PropertyChanged is watched for IsLocked.
-    private AutocompleteFieldSf? _autocomplete;
+    private AutocompleteField? _autocomplete;
 
     // ── Constructor ────────────────────────────────────────────────────────
 
@@ -195,7 +195,7 @@ public partial class TapToEditField : ContentView
     {
         Detach();
 
-        if (Editor is AutocompleteFieldSf field)
+        if (Editor is AutocompleteField field)
         {
             _autocomplete = field;
             field.PropertyChanged += OnAutocompletePropertyChanged;
@@ -315,7 +315,7 @@ public partial class TapToEditField : ContentView
     private void OnTextTapped(object? sender, TappedEventArgs e)
     {
         // (1) Release a picked value; the text stays. IsLocked is TwoWay, so the ViewModel sees it.
-        if (Editor is AutocompleteFieldSf field
+        if (Editor is AutocompleteField field
             && TapToEditFieldLogic.ShouldReleasePick(ReleasesPickOnEdit, field.IsLocked))
         {
             field.IsLocked = false;
@@ -334,7 +334,7 @@ public partial class TapToEditField : ContentView
         if (editor is null || !editorHost.IsVisible)
             return;
 
-        if (editor is AutocompleteFieldSf field)
+        if (editor is AutocompleteField field)
         {
             field.FocusEditor();
             return;
@@ -368,7 +368,7 @@ public partial class TapToEditField : ContentView
     // (select command, unfocus, keyboard hide) completes before its host is hidden.
     private void OnAutocompletePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(AutocompleteFieldSf.IsLocked) || sender is not AutocompleteFieldSf { IsLocked: true })
+        if (e.PropertyName != nameof(AutocompleteField.IsLocked) || sender is not AutocompleteField { IsLocked: true })
             return;
 
         Dispatcher.Dispatch(() =>

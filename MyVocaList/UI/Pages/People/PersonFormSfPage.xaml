@@ -114,7 +114,7 @@
                 <VerticalStackLayout Padding="24" Spacing="16">
 
                     <!-- Full Name with autocomplete suggestions (dedup) -->
-                    <textfields:AutocompleteFieldSf x:Name="nameField"
+                    <textfields:AutocompleteField x:Name="nameField"
                                                     LabelText="Full Name"
                                                     PlaceholderText="First and last name"
                                                     Text="{Binding PersonName, Mode=TwoWay}"

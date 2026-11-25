@@ -25,7 +25,7 @@
                                        TextStyleClass="Headline.Medium"
                                        HasError="{Binding NameHasError}"
                                        IsEditing="{Binding IsNameEditing, Mode=TwoWay}">
-                <textfields:AutocompleteFieldSf x:Name="nameField"
+                <textfields:AutocompleteField x:Name="nameField"
                                                 LabelText="Artist Name"
                                                 PlaceholderText="Enter artist name"
                                                 Text="{Binding ArtistName, Mode=TwoWay}"

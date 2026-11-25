@@ -28,13 +28,13 @@ namespace MyVocaList.UI.Components.TextFields;
 ///   combo box.</item>
 /// </list>
 /// </remarks>
-public partial class AutocompleteFieldSf : ContentView
+public partial class AutocompleteField : ContentView
 {
     // ── LabelText ──────────────────────────────────────────────────────────
 
     /// <summary>Identifies the <see cref="LabelText"/> bindable property.</summary>
     public static readonly BindableProperty LabelTextProperty = BindableProperty.Create(
-        nameof(LabelText), typeof(string), typeof(AutocompleteFieldSf), string.Empty);
+        nameof(LabelText), typeof(string), typeof(AutocompleteField), string.Empty);
 
     /// <summary>The MD3 text-field label, passed to the layout's <c>Hint</c>.</summary>
     public string LabelText
@@ -47,7 +47,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="PlaceholderText"/> bindable property.</summary>
     public static readonly BindableProperty PlaceholderTextProperty = BindableProperty.Create(
-        nameof(PlaceholderText), typeof(string), typeof(AutocompleteFieldSf), string.Empty);
+        nameof(PlaceholderText), typeof(string), typeof(AutocompleteField), string.Empty);
 
     /// <summary>The placeholder shown while the text is empty (REQ-ACF-06).</summary>
     public string PlaceholderText
@@ -60,8 +60,8 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="Text"/> bindable property.</summary>
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
-        nameof(Text), typeof(string), typeof(AutocompleteFieldSf), string.Empty,
-        BindingMode.TwoWay, propertyChanged: (b, _, _) => ((AutocompleteFieldSf)b).OnTextPropertyChanged());
+        nameof(Text), typeof(string), typeof(AutocompleteField), string.Empty,
+        BindingMode.TwoWay, propertyChanged: (b, _, _) => ((AutocompleteField)b).OnTextPropertyChanged());
 
     /// <summary>
     /// The editor text (TwoWay). A change re-applies the mode, so a hydration that sets
@@ -77,8 +77,8 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsLocked"/> bindable property.</summary>
     public static readonly BindableProperty IsLockedProperty = BindableProperty.Create(
-        nameof(IsLocked), typeof(bool), typeof(AutocompleteFieldSf), false,
-        BindingMode.TwoWay, propertyChanged: (b, _, _) => ((AutocompleteFieldSf)b).ApplyMode());
+        nameof(IsLocked), typeof(bool), typeof(AutocompleteField), false,
+        BindingMode.TwoWay, propertyChanged: (b, _, _) => ((AutocompleteField)b).ApplyMode());
 
     /// <summary>
     /// The picked state (TwoWay). Set <c>true</c> by the component on a pick and <c>false</c> on X;
@@ -95,8 +95,8 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsPickLockEnabled"/> bindable property.</summary>
     public static readonly BindableProperty IsPickLockEnabledProperty = BindableProperty.Create(
-        nameof(IsPickLockEnabled), typeof(bool), typeof(AutocompleteFieldSf), true,
-        propertyChanged: (b, _, _) => ((AutocompleteFieldSf)b).ApplyMode());
+        nameof(IsPickLockEnabled), typeof(bool), typeof(AutocompleteField), true,
+        propertyChanged: (b, _, _) => ((AutocompleteField)b).ApplyMode());
 
     /// <summary>
     /// Opt-out of pick-lock (REQ-ACF-29). <c>false</c> → a pick never locks the field and an
@@ -113,8 +113,8 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsReadOnly"/> bindable property.</summary>
     public static readonly BindableProperty IsReadOnlyProperty = BindableProperty.Create(
-        nameof(IsReadOnly), typeof(bool), typeof(AutocompleteFieldSf), false,
-        propertyChanged: (b, _, _) => ((AutocompleteFieldSf)b).ApplyMode());
+        nameof(IsReadOnly), typeof(bool), typeof(AutocompleteField), false,
+        propertyChanged: (b, _, _) => ((AutocompleteField)b).ApplyMode());
 
     /// <summary>
     /// Page-set read-only state: text shown, no typing, no X, no search, no menu, no blur forwarding.
@@ -130,8 +130,8 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="SupportingText"/> bindable property.</summary>
     public static readonly BindableProperty SupportingTextProperty = BindableProperty.Create(
-        nameof(SupportingText), typeof(string), typeof(AutocompleteFieldSf), string.Empty,
-        propertyChanged: (b, _, _) => ((AutocompleteFieldSf)b).ApplySupportingText());
+        nameof(SupportingText), typeof(string), typeof(AutocompleteField), string.Empty,
+        propertyChanged: (b, _, _) => ((AutocompleteField)b).ApplySupportingText());
 
     /// <summary>
     /// MD3 text-field supporting text under the field, in every state; replaced by
@@ -147,7 +147,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsSearchEnabled"/> bindable property.</summary>
     public static readonly BindableProperty IsSearchEnabledProperty = BindableProperty.Create(
-        nameof(IsSearchEnabled), typeof(bool), typeof(AutocompleteFieldSf), true);
+        nameof(IsSearchEnabled), typeof(bool), typeof(AutocompleteField), true);
 
     /// <summary>
     /// Page switch: <c>false</c> → no option requests and the menu stays closed; the rest of the
@@ -163,8 +163,8 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="HasError"/> bindable property.</summary>
     public static readonly BindableProperty HasErrorProperty = BindableProperty.Create(
-        nameof(HasError), typeof(bool), typeof(AutocompleteFieldSf), false,
-        propertyChanged: (b, _, _) => ((AutocompleteFieldSf)b).ApplySupportingText());
+        nameof(HasError), typeof(bool), typeof(AutocompleteField), false,
+        propertyChanged: (b, _, _) => ((AutocompleteField)b).ApplySupportingText());
 
     /// <summary>
     /// The error state, passed to the layout's <c>HasError</c>. Also switches the X colour to <c>Error</c>
@@ -180,7 +180,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="ErrorText"/> bindable property.</summary>
     public static readonly BindableProperty ErrorTextProperty = BindableProperty.Create(
-        nameof(ErrorText), typeof(string), typeof(AutocompleteFieldSf), string.Empty);
+        nameof(ErrorText), typeof(string), typeof(AutocompleteField), string.Empty);
 
     /// <summary>The error message shown under the field while <see cref="HasError"/> (REQ-ACF-12c).</summary>
     public string ErrorText
@@ -193,7 +193,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsDropDownOpen"/> bindable property.</summary>
     public static readonly BindableProperty IsDropDownOpenProperty = BindableProperty.Create(
-        nameof(IsDropDownOpen), typeof(bool), typeof(AutocompleteFieldSf), false, BindingMode.TwoWay);
+        nameof(IsDropDownOpen), typeof(bool), typeof(AutocompleteField), false, BindingMode.TwoWay);
 
     /// <summary>
     /// Whether the menu is open (TwoWay with the Syncfusion editor). Forced <c>false</c> unless the field is
@@ -209,7 +209,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="OptionSource"/> bindable property.</summary>
     public static readonly BindableProperty OptionSourceProperty = BindableProperty.Create(
-        nameof(OptionSource), typeof(IMenuOptionSource), typeof(AutocompleteFieldSf));
+        nameof(OptionSource), typeof(IMenuOptionSource), typeof(AutocompleteField));
 
     /// <summary>
     /// The search behind the menu. Its return value is exactly what the menu shows
@@ -225,7 +225,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="SelectCommand"/> bindable property.</summary>
     public static readonly BindableProperty SelectCommandProperty = BindableProperty.Create(
-        nameof(SelectCommand), typeof(ICommand), typeof(AutocompleteFieldSf));
+        nameof(SelectCommand), typeof(ICommand), typeof(AutocompleteField));
 
     /// <summary>
     /// Runs with the picked <see cref="AutocompleteSuggestion"/> after a pick has locked the field
@@ -241,7 +241,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="ClearCommand"/> bindable property.</summary>
     public static readonly BindableProperty ClearCommandProperty = BindableProperty.Create(
-        nameof(ClearCommand), typeof(ICommand), typeof(AutocompleteFieldSf));
+        nameof(ClearCommand), typeof(ICommand), typeof(AutocompleteField));
 
     /// <summary>Optional; runs after X has emptied (and, when locked, unlocked) the field (REQ-ACF-06, -09).</summary>
     public ICommand ClearCommand
@@ -254,7 +254,7 @@ public partial class AutocompleteFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="BlurWithoutPickCommand"/> bindable property.</summary>
     public static readonly BindableProperty BlurWithoutPickCommandProperty = BindableProperty.Create(
-        nameof(BlurWithoutPickCommand), typeof(ICommand), typeof(AutocompleteFieldSf));
+        nameof(BlurWithoutPickCommand), typeof(ICommand), typeof(AutocompleteField));
 
     /// <summary>Runs when the editable field loses focus with no routed pick (REQ-ACF-11c, -17).</summary>
     public ICommand BlurWithoutPickCommand
@@ -284,7 +284,7 @@ public partial class AutocompleteFieldSf : ContentView
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the field in its default, editable state.</summary>
-    public AutocompleteFieldSf()
+    public AutocompleteField()
     {
         _filter = new AutocompleteFilterSf(SearchAsync, LogSearchFailure);
 
@@ -510,7 +510,7 @@ public partial class AutocompleteFieldSf : ContentView
     // A search that failed with anything but a cancellation: AutocompleteFilterSf shows no options and reports it
     // here, because the control would swallow it (the DX original's faulted search reached GlobalExceptionHandler).
     private static void LogSearchFailure(Exception exception) =>
-        Serilog.Log.ForContext("SourceContext", nameof(AutocompleteFieldSf))
+        Serilog.Log.ForContext("SourceContext", nameof(AutocompleteField))
             .Error(exception, "Autocomplete option search failed");
 
     // ── Menu row height (view-only) ────────────────────────────────────────

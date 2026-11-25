@@ -209,7 +209,7 @@
                                                              HasError="{Binding TitleHasError}"
                                                              IsEditing="{Binding IsTitleEditing, Mode=TwoWay}"
                                                              IsVisible="{Binding IsTitleEditable}">
-                                    <textfields:AutocompleteFieldSf x:Name="titleField"
+                                    <textfields:AutocompleteField x:Name="titleField"
                                                                     LabelText="Title"
                                                                     PlaceholderText="Enter song title"
                                                                     Text="{Binding SongTitle, Mode=TwoWay}"
@@ -267,7 +267,7 @@
                                                              HasError="{Binding ArtistHasError}"
                                                              IsEditing="{Binding IsArtistEditing, Mode=TwoWay}"
                                                              IsVisible="{Binding IsArtistEditable}">
-                                    <textfields:AutocompleteFieldSf x:Name="artistField"
+                                    <textfields:AutocompleteField x:Name="artistField"
                                                                     LabelText="Artist"
                                                                     PlaceholderText="Search artists..."
                                                                     Text="{Binding ArtistSearchText, Mode=TwoWay}"
