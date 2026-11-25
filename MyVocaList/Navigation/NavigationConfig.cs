@@ -15,7 +15,7 @@ public static class NavigationConfig
         [Routes.People] = typeof(PeopleSfPage),
         [Routes.Artists] = typeof(ArtistsSfPage),
         [Routes.Songs] = typeof(SongsSfPage),
-        [Routes.Preferences] = typeof(SettingsSfPage),
+        [Routes.Preferences] = typeof(SettingsPage),
         [Routes.Backup] = typeof(BackupRestorePage),
         [Routes.About] = typeof(AboutPage),
 #if DEBUG

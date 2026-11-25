@@ -1,8 +1,8 @@
 namespace MyVocaList.UI.Pages.Settings;
 
-public partial class SettingsSfPage : ContentPage
+public partial class SettingsPage : ContentPage
 {
-    public SettingsSfPage(SettingsViewModel vm)
+    public SettingsPage(SettingsViewModel vm)
     {
         InitializeComponent();
         BindingContext = vm;
