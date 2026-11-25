@@ -45,6 +45,14 @@ public partial class SearchBarSf : AppBarBase
 
     // ── AppBarBase implementation ──────────────────────────────────────────
 
+    /// <summary>Drops keyboard focus from the search entry (used when a selection starts).</summary>
+    public void ClearSearchFocus()
+    {
+        searchEdit.Unfocus();
+        if (searchEdit.Content is Border { Content: VisualElement entry })
+            entry.Unfocus();
+    }
+
     protected override void UpdateContainerColor()
     {
         var key = IsElevated ? "SurfaceContainer" : "SurfaceContainerLow";

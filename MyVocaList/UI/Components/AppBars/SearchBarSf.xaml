@@ -29,7 +29,7 @@
                    Source="search_outlined"
                    WidthRequest="24"
                    HeightRequest="24"
-                   Margin="16,0,0,0"
+                   Margin="20,0,0,0"
                    VerticalOptions="Center"
                    behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
                    AutomationProperties.IsInAccessibleTree="False" />
@@ -42,7 +42,7 @@
                                             ReturnType="Search"
                                             ShowOutline="False"
                                             VerticalOptions="Center"
-                                            Margin="8,0"
+                                            Margin="-4,0,0,0"
                                             SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
         </Grid>
     </Border>

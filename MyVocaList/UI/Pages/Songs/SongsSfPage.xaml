@@ -46,7 +46,7 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <ImageButton Source="language_outlined"
+                            <ImageButton Source="language_outlined" Padding="15"
                                          Style="{StaticResource SfIconButton}"
                                          Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsSfPage}"
                                          CommandParameter="{Binding .}" />
@@ -67,7 +67,7 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <ImageButton Source="language_outlined"
+                            <ImageButton Source="language_outlined" Padding="15"
                                          Style="{StaticResource SfIconButton}"
                                          Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsSfPage}"
                                          CommandParameter="{Binding .}" />
