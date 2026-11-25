@@ -40,3 +40,5 @@ Files written and re-read: `CrudListViewModelBase.cs` (TriggerSearchDebounce), `
 
 ### Note on the shared commit
 `VenueMapPickerViewModel.cs` carries both this item's tap-source release and item 5's search cancellation. They are committed together (one commit, both task-logs), because the two edits share the same file.
+
+ITF: dispose-the-last-search-cancellation-source — MyVocaList/UI/ViewModels/CrudListViewModelBase.cs — root cause: TriggerSearchDebounce disposed the previous source while its task could still use the token (review finding) — expected 2 line(s).

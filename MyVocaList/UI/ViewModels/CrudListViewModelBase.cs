@@ -344,8 +344,8 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void TriggerSearchDebounce()
     {
-        try { _searchCts?.Cancel(); _searchCts?.Dispose(); }
-        catch { /* ignore disposal races */ }
+        // Cancel only: the old task may still use its token, and its own finally disposes the source.
+        try { _searchCts?.Cancel(); } catch (ObjectDisposedException) { /* already released by its task */ }
 
         var cts = new CancellationTokenSource();
         _searchCts = cts;
@@ -355,7 +355,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         var generation = BeginShimmeredLoad();
 
         // B9: the task is not given the token, so it always runs and its finally releases the last source
-        // (a cancelled-before-start task would skip the finally). Replaced sources are disposed above.
+        // (a cancelled-before-start task would skip the finally). Every source is disposed there.
         _ = Task.Run(async () =>
         {
             try
