@@ -29,7 +29,7 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     IRelayCommand<object> ToggleItemSelectionCommand { get; }
 
     // Item actions bottom sheet (REQ-CLSG-06..08)
-    BottomSheetState ItemActionsSheetState { get; set; }
+    SheetState ItemActionsSheetState { get; set; }
     IAsyncRelayCommand EditItemCommand { get; }
     IRelayCommand DeleteItemCommand { get; }
     IRelayCommand DismissItemActionsCommand { get; }
@@ -47,7 +47,7 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     IRelayCommand DeleteSelectedCommand { get; }
 
     // Confirm bottom sheet
-    BottomSheetState ConfirmSheetState { get; set; }
+    SheetState ConfirmSheetState { get; set; }
     string ConfirmMessage { get; }
     string ConfirmActionText { get; }
     IAsyncRelayCommand ConfirmActionCommand { get; }

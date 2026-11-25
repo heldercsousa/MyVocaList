@@ -77,8 +77,8 @@
          DX-typed VM state through the migration converters (design § Sheet-state bridge); a drag down ends
          in Collapsed, which converts back to Hidden. -->
     <bottomsheet:SfBottomSheet x:Name="confirmSheet"
-                               State="{Binding ConfirmSheetState, Converter={StaticResource DxSheetStateToSf}, Mode=TwoWay}"
-                               IsOpen="{Binding ConfirmSheetState, Converter={StaticResource DxSheetStateToSfIsOpen}, Mode=TwoWay}"
+                               State="{Binding ConfirmSheetState, Converter={StaticResource SheetStateToSf}, Mode=TwoWay}"
+                               IsOpen="{Binding ConfirmSheetState, Converter={StaticResource SheetStateToSfIsOpen}, Mode=TwoWay}"
                                AllowedState="HalfExpanded"
                                HalfExpandedRatio="0.32"
                                ContentPadding="0"
@@ -109,8 +109,8 @@
 
             <!-- Item actions sheet (press-and-hold in selection mode); a close by drag is forwarded in code-behind -->
             <bottomsheet:SfBottomSheet x:Name="itemActionsSheet"
-                                       State="{Binding ItemActionsSheetState, Converter={StaticResource DxSheetStateToSf}, Mode=TwoWay}"
-                                       IsOpen="{Binding ItemActionsSheetState, Converter={StaticResource DxSheetStateToSfIsOpen}, Mode=TwoWay}"
+                                       State="{Binding ItemActionsSheetState, Converter={StaticResource SheetStateToSf}, Mode=TwoWay}"
+                                       IsOpen="{Binding ItemActionsSheetState, Converter={StaticResource SheetStateToSfIsOpen}, Mode=TwoWay}"
                                        AllowedState="HalfExpanded"
                                        HalfExpandedRatio="0.25"
                                        ContentPadding="0"
