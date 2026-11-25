@@ -1,23 +1,23 @@
 namespace MyVocaList.UI.Components.Lists;
 
-public partial class ListItemLeadingMonogramSf : ContentView
+public partial class ListItemLeadingMonogram : ContentView
 {
     public static readonly BindableProperty InitialsProperty = BindableProperty.Create(
         nameof(Initials),
         typeof(string),
-        typeof(ListItemLeadingMonogramSf),
+        typeof(ListItemLeadingMonogram),
         defaultValue: string.Empty);
 
     public static readonly BindableProperty MonogramColorProperty = BindableProperty.Create(
         nameof(MonogramColor),
         typeof(Color),
-        typeof(ListItemLeadingMonogramSf),
+        typeof(ListItemLeadingMonogram),
         defaultValue: Colors.Transparent);
 
     public static readonly BindableProperty InitialsColorProperty = BindableProperty.Create(
         nameof(InitialsColor),
         typeof(Color),
-        typeof(ListItemLeadingMonogramSf),
+        typeof(ListItemLeadingMonogram),
         defaultValue: Colors.Transparent);
 
     public string Initials
@@ -38,7 +38,7 @@ public partial class ListItemLeadingMonogramSf : ContentView
         set => SetValue(InitialsColorProperty, value);
     }
 
-    public ListItemLeadingMonogramSf()
+    public ListItemLeadingMonogram()
     {
         InitializeComponent();
     }

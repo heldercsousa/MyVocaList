@@ -39,7 +39,7 @@
                                 SupportingText="{Binding IdentityLine}"
                                 IsSelected="False">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemLeadingMonogramSf Initials="{Binding Initials}" />
+                        <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
@@ -57,7 +57,7 @@
                                 SupportingText="{Binding IdentityLine}"
                                 IsSelected="True">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemLeadingMonogramSf Initials="{Binding Initials}" />
+                        <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />

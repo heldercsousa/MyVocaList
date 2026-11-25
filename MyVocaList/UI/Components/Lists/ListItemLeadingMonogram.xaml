@@ -2,7 +2,7 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingMonogramSf"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingMonogram"
     x:Name="self">
 
     <!-- Stock Border replaces dx:DXBorder; RoundRectangle 20 on a 40 dp square gives the same circle. -->
