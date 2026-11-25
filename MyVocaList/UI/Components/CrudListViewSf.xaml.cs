@@ -280,6 +280,9 @@ public partial class CrudListViewSf : ContentView, IMenuHostSf
         if (listView == null || _viewModel == null)
             return;
 
+        if (_viewModel.IsSelectionMode)
+            searchBar.ClearSearchFocus();
+
         var mode = _viewModel.IsSelectionMode ? SfSelectionMode.Multiple : SfSelectionMode.None;
         if (listView.SelectionMode != mode)
         {
