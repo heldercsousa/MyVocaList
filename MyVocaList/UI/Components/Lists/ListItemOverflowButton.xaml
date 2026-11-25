@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:menus="clr-namespace:MyVocaList.UI.Components.Menus"
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
-    x:Class="MyVocaList.UI.Components.Lists.ListItemOverflowButtonSf">
+    x:Class="MyVocaList.UI.Components.Lists.ListItemOverflowButton">
 
     <menus:OverflowMenuButton
         IsVisible="{Binding BindingContext.IsSelectionMode, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Converter={StaticResource InverseBoolConverter}}"

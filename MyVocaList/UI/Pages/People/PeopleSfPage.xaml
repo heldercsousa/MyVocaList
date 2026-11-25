@@ -43,7 +43,7 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <lists:ListItemOverflowButtonSf />
+                            <lists:ListItemOverflowButton />
                             <lists:ListItemCheckbox VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
