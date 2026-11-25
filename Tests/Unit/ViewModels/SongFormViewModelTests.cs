@@ -1258,7 +1258,7 @@ public class SongFormViewModelTests
 
     // ── BUG-065/066: dismiss the dropdown on every PROGRAMMATIC ArtistSearchText set ──────
     // Rewritten 2026-08-02 (Helder decision D1) — the removed _suppressNextArtistSearch flag was
-    // proven inert by IL evidence (DevExpress's own AsyncItemsSourceProvider.OnEditorTextChanged
+    // proven inert by IL evidence (the field's own text-changed handling
     // already ignores non-UserInput text changes; the flag was consumed by the user's NEXT real
     // keystroke instead, causing BUG-065(b)/BUG-066). The real mechanism is the two-way bound
     // IsArtistDropDownOpen property (SongFormPage.xaml: AutoCompleteEdit.IsDropDownOpen) — every

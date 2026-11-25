@@ -71,7 +71,7 @@ public class LoadingHoldShimmerTests
         Assert.False(sut.IsInitialLoading);
     }
 
-    // [AC] REQ-DLH-05: pull-to-refresh keeps the DevExpress refresh circle; it does not show the shimmer.
+    // [AC] REQ-DLH-05: pull-to-refresh keeps the refresh circle; it does not show the shimmer.
     [Fact]
     public async Task PullToRefresh_DoesNotShowShimmer()
     {
@@ -88,7 +88,7 @@ public class LoadingHoldShimmerTests
         Assert.False(sut.IsInitialLoading);
     }
 
-    // [AC] REQ-DLH-05: load-more keeps the DevExpress load-more indicator; it does not show the shimmer.
+    // [AC] REQ-DLH-05: load-more keeps the load-more indicator; it does not show the shimmer.
     [Fact]
     public async Task LoadMore_DoesNotShowShimmer()
     {

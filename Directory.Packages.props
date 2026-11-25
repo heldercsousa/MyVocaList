@@ -66,15 +66,6 @@
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.*" />
   </ItemGroup>
   <!-- ================================================================ -->
-  <!-- DevExpress MAUI                                                  -->
-  <!-- ================================================================ -->
-  <ItemGroup>
-    <PackageVersion Include="DevExpress.Maui.CollectionView" Version="25.2.4" />
-    <PackageVersion Include="DevExpress.Maui.Controls" Version="25.2.4" />
-    <PackageVersion Include="DevExpress.Maui.Core" Version="25.2.4" />
-    <PackageVersion Include="DevExpress.Maui.Editors" Version="25.2.4" />
-  </ItemGroup>
-  <!-- ================================================================ -->
   <!-- Syncfusion MAUI (35.2.12 requires Microsoft.Maui.Controls >= 10.0.110) -->
   <!-- ================================================================ -->
   <ItemGroup>

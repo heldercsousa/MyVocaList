@@ -5,7 +5,7 @@ namespace MyVocaList.Tests.Unit.Collections;
 
 /// <summary>
 /// Regression tests for BUG-048: <see cref="ObservableRangeCollection{T}.AddRange"/> must raise
-/// a single <see cref="NotifyCollectionChangedAction.Add"/> event (not Reset) so DXCollectionView
+/// a single <see cref="NotifyCollectionChangedAction.Add"/> event (not Reset) so the collection view
 /// appends new items instead of fully re-rendering and resetting scroll position on "load more".
 /// </summary>
 public class ObservableRangeCollectionTests
