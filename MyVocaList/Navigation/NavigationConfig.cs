@@ -13,7 +13,7 @@ public static class NavigationConfig
     {
         [Routes.Venues] = typeof(VenuesPage),
         [Routes.People] = typeof(PeoplePage),
-        [Routes.Artists] = typeof(ArtistsSfPage),
+        [Routes.Artists] = typeof(ArtistsPage),
         [Routes.Songs] = typeof(SongsPage),
         [Routes.Preferences] = typeof(SettingsPage),
         [Routes.Backup] = typeof(BackupRestorePage),

@@ -10,7 +10,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:views="clr-namespace:MyVocaList.UI.Components"
-    x:Class="MyVocaList.UI.Pages.Artists.ArtistsSfPage"
+    x:Class="MyVocaList.UI.Pages.Artists.ArtistsPage"
     x:Name="page"
     x:DataType="vm:ArtistsViewModel"
     Title="Artists"
