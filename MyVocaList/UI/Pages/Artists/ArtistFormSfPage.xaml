@@ -60,7 +60,7 @@
 
             <!-- Form picture (REQ-PIC-12..16, 35): a 120 dp circle directly below Name. The ViewModel owns
                  which picture is shown, the buttons' state (HasFormImage) and the commands. -->
-            <media:ImagePickerFieldSf ImageSource="{Binding FormImageSource}"
+            <media:ImagePickerField ImageSource="{Binding FormImageSource}"
                                     ThumbnailSource="{Binding FormImageThumbnailSource}"
                                     PlaceholderIcon="account_circle_outlined"
                                     IsCircle="True"

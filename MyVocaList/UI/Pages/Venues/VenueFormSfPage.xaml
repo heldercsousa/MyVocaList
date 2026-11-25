@@ -48,7 +48,7 @@
             </Label>
 
             <!-- Form picture (REQ-VEN-08..11): the ViewModel owns which picture is shown, the buttons' state and the commands. -->
-            <media:ImagePickerFieldSf ImageSource="{Binding FormImageSource}"
+            <media:ImagePickerField ImageSource="{Binding FormImageSource}"
                                       ThumbnailSource="{Binding FormImageThumbnailSource}"
                                       PlaceholderIcon="nightlife_outlined"
                                       HasImage="{Binding HasFormImage}"

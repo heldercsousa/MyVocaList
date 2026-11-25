@@ -10,7 +10,7 @@ namespace MyVocaList.UI.Components.Media;
 /// A tap on the picture runs <see cref="PickCommand"/> (add, or replace when there is a picture).
 /// The component decides nothing about pictures: the ViewModel owns <see cref="HasImage"/> and the commands.
 /// </summary>
-public partial class ImagePickerFieldSf : ContentView
+public partial class ImagePickerField : ContentView
 {
     /// <summary>Corner radius of the song picture's rounded square (REQ-PIC-13).</summary>
     private const double SquareCornerRadius = 12;
@@ -37,7 +37,7 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="ImageSource"/> bindable property.</summary>
     public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create(
-        nameof(ImageSource), typeof(ImageSource), typeof(ImagePickerFieldSf), null);
+        nameof(ImageSource), typeof(ImageSource), typeof(ImagePickerField), null);
 
     /// <summary>The large picture, drawn on top.</summary>
     public ImageSource ImageSource
@@ -50,7 +50,7 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="ThumbnailSource"/> bindable property.</summary>
     public static readonly BindableProperty ThumbnailSourceProperty = BindableProperty.Create(
-        nameof(ThumbnailSource), typeof(ImageSource), typeof(ImagePickerFieldSf), null);
+        nameof(ThumbnailSource), typeof(ImageSource), typeof(ImagePickerField), null);
 
     /// <summary>Drawn under the large picture: shows first, and stays when the large one fails.</summary>
     public ImageSource ThumbnailSource
@@ -66,7 +66,7 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="PlaceholderIcon"/> bindable property.</summary>
     public static readonly BindableProperty PlaceholderIconProperty = BindableProperty.Create(
-        nameof(PlaceholderIcon), typeof(string), typeof(ImagePickerFieldSf), DefaultPlaceholderIcon);
+        nameof(PlaceholderIcon), typeof(string), typeof(ImagePickerField), DefaultPlaceholderIcon);
 
     /// <summary>The icon under both pictures (REQ-PIC-14). Default <c>music_note_outlined</c>.</summary>
     public string PlaceholderIcon
@@ -79,8 +79,8 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsCircle"/> bindable property.</summary>
     public static readonly BindableProperty IsCircleProperty = BindableProperty.Create(
-        nameof(IsCircle), typeof(bool), typeof(ImagePickerFieldSf), false,
-        propertyChanged: (b, _, _) => ((ImagePickerFieldSf)b).ApplyShape());
+        nameof(IsCircle), typeof(bool), typeof(ImagePickerField), false,
+        propertyChanged: (b, _, _) => ((ImagePickerField)b).ApplyShape());
 
     /// <summary><c>true</c>: a circle (artist); <c>false</c>: a 12 dp rounded square (song). REQ-PIC-13.</summary>
     public bool IsCircle
@@ -93,8 +93,8 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="HasImage"/> bindable property.</summary>
     public static readonly BindableProperty HasImageProperty = BindableProperty.Create(
-        nameof(HasImage), typeof(bool), typeof(ImagePickerFieldSf), false,
-        propertyChanged: (b, _, _) => ((ImagePickerFieldSf)b).ApplyState());
+        nameof(HasImage), typeof(bool), typeof(ImagePickerField), false,
+        propertyChanged: (b, _, _) => ((ImagePickerField)b).ApplyState());
 
     /// <summary>Whether the form has a picture: shows the remove button, switches the tap hint and hides the size hint (REQ-IPF-03, REQ-PIC-16).</summary>
     public bool HasImage
@@ -107,8 +107,8 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="HintText"/> bindable property.</summary>
     public static readonly BindableProperty HintTextProperty = BindableProperty.Create(
-        nameof(HintText), typeof(string), typeof(ImagePickerFieldSf), string.Empty,
-        propertyChanged: (b, _, _) => ((ImagePickerFieldSf)b).ApplyState());
+        nameof(HintText), typeof(string), typeof(ImagePickerField), string.Empty,
+        propertyChanged: (b, _, _) => ((ImagePickerField)b).ApplyState());
 
     /// <summary>The size hint, shown only while <see cref="HasImage"/> is <c>false</c> (REQ-PIC-16).</summary>
     public string HintText
@@ -121,7 +121,7 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="PickCommand"/> bindable property.</summary>
     public static readonly BindableProperty PickCommandProperty = BindableProperty.Create(
-        nameof(PickCommand), typeof(ICommand), typeof(ImagePickerFieldSf), null);
+        nameof(PickCommand), typeof(ICommand), typeof(ImagePickerField), null);
 
     /// <summary>Runs on a tap on the picture: adds a picture when there is none, replaces it otherwise (REQ-IPF-02).</summary>
     public ICommand PickCommand
@@ -134,7 +134,7 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="RemoveCommand"/> bindable property.</summary>
     public static readonly BindableProperty RemoveCommandProperty = BindableProperty.Create(
-        nameof(RemoveCommand), typeof(ICommand), typeof(ImagePickerFieldSf), null);
+        nameof(RemoveCommand), typeof(ICommand), typeof(ImagePickerField), null);
 
     /// <summary>Runs on a tap on the corner remove button (REQ-IPF-03, REQ-PIC-20).</summary>
     public ICommand RemoveCommand
@@ -147,8 +147,8 @@ public partial class ImagePickerFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsBusy"/> bindable property.</summary>
     public static readonly BindableProperty IsBusyProperty = BindableProperty.Create(
-        nameof(IsBusy), typeof(bool), typeof(ImagePickerFieldSf), false,
-        propertyChanged: (b, _, _) => ((ImagePickerFieldSf)b).ApplyState());
+        nameof(IsBusy), typeof(bool), typeof(ImagePickerField), false,
+        propertyChanged: (b, _, _) => ((ImagePickerField)b).ApplyState());
 
     /// <summary>While <c>true</c> the picture tap and the remove button are disabled (a picture is being imported; REQ-IPF-04).</summary>
     public bool IsBusy
@@ -160,7 +160,7 @@ public partial class ImagePickerFieldSf : ContentView
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the field with no picture: the placeholder, no remove button and no hint text.</summary>
-    public ImagePickerFieldSf()
+    public ImagePickerField()
     {
         InitializeComponent();
         ApplyShape();

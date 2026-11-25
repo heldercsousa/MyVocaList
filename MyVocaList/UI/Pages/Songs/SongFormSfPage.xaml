@@ -244,7 +244,7 @@
 
                                 <!-- Song picture, directly below Title (REQ-PIC-12..16): 120 dp rounded square, upload,
                                      replace and remove; nothing is stored before Save (REQ-PIC-17). -->
-                                <media:ImagePickerFieldSf ImageSource="{Binding FormImageSource}"
+                                <media:ImagePickerField ImageSource="{Binding FormImageSource}"
                                                           ThumbnailSource="{Binding FormImageThumbnailSource}"
                                                           PlaceholderIcon="music_note_outlined"
                                                           HasImage="{Binding HasFormImage}"
