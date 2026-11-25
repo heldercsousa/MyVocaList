@@ -11,10 +11,10 @@ public static class NavigationConfig
 {
     public static readonly Dictionary<string, Type> PageTypes = new()
     {
-        [Routes.Venues] = typeof(VenuesPage),
-        [Routes.People] = typeof(PeoplePage),
-        [Routes.Artists] = typeof(ArtistsPage),
-        [Routes.Songs] = typeof(SongsPage),
+        [Routes.Venues] = typeof(VenuesSfPage),
+        [Routes.People] = typeof(PeopleSfPage),
+        [Routes.Artists] = typeof(ArtistsSfPage),
+        [Routes.Songs] = typeof(SongsSfPage),
         [Routes.Preferences] = typeof(SettingsSfPage),
         [Routes.Backup] = typeof(BackupRestoreSfPage),
         [Routes.About] = typeof(AboutSfPage),

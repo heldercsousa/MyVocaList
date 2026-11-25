@@ -13,15 +13,6 @@ public static class PreviewRoutes
     // Add one line per Sf page copy, e.g.: ("Venues", "venues-sf", typeof(VenuesSfPage)),
     private static readonly List<(string Title, string Route, Type Page)> _entries = new()
     {
-        ("Venues", "venues-sf", typeof(VenuesSfPage)),
-        ("People", "people-sf", typeof(PeopleSfPage)),
-        ("Songs", "songs-sf", typeof(SongsSfPage)),
-        ("Artists", "artists-sf", typeof(ArtistsSfPage)),
-        ("Feedback", "feedback-sf", typeof(FeedbackSfPage)),
-        ("Venue form", "venue-form-sf", typeof(VenueFormSfPage)),
-        ("Person form", "person-form-sf", typeof(PersonFormSfPage)),
-        ("Artist form", "artist-form-sf", typeof(ArtistFormSfPage)),
-        ("Song form", "song-form-sf", typeof(SongFormSfPage)),
         ("YouTube search", "youtube-search-sf", typeof(YouTubeSearchSfPage)),
     };
 

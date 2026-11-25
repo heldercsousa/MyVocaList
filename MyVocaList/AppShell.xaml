@@ -64,19 +64,19 @@
 
     <!-- Page Routes (hidden from default flyout, navigated via ViewModel) -->
     <FlyoutItem Route="venues" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate venues:VenuesPage}" />
+        <ShellContent ContentTemplate="{DataTemplate venues:VenuesSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="people" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate people:PeoplePage}" />
+        <ShellContent ContentTemplate="{DataTemplate people:PeopleSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="artists" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate artists:ArtistsPage}" />
+        <ShellContent ContentTemplate="{DataTemplate artists:ArtistsSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="songs" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate songs:SongsPage}" />
+        <ShellContent ContentTemplate="{DataTemplate songs:SongsSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
