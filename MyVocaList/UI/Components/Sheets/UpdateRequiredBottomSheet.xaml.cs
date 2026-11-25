@@ -6,11 +6,11 @@ namespace MyVocaList.UI.Components.Sheets;
 /// MD3 modal bottom sheet — hard update block (non-dismissible).
 /// The sheet stays open until the user taps "Update Now" and updates the app.
 /// </summary>
-public partial class UpdateRequiredBottomSheetSf : ContentView
+public partial class UpdateRequiredBottomSheet : ContentView
 {
     private string _storeUrl = string.Empty;
 
-    public UpdateRequiredBottomSheetSf()
+    public UpdateRequiredBottomSheet()
     {
         InitializeComponent();
     }

@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
-    x:Class="MyVocaList.UI.Components.Sheets.UpdateRequiredBottomSheetSf">
+    x:Class="MyVocaList.UI.Components.Sheets.UpdateRequiredBottomSheet">
 
     <!--
         MD3 Modal bottom sheet - hard update block (non-dismissible).
