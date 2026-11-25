@@ -30,7 +30,7 @@ namespace MyVocaList.UI.Collections
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
             OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
 
-            // BUG-048: raise a single Add-action notification (not Reset) so DXCollectionView appends
+            // BUG-048: raise a single Add-action notification (not Reset) so the collection view appends
             // the new items instead of fully re-rendering and resetting scroll position on page load.
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(
                 NotifyCollectionChangedAction.Add, addedItems, startingIndex));

@@ -484,7 +484,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void BeginSelection(TItem item)
     {
-        // Set first so the view switches DX selection to Multiple before the item is added.
+        // Set first so the view switches selection to Multiple before the item is added.
         IsSelectionMode = true;
         RunOnUiThread(() =>
         {

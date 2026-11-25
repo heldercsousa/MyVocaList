@@ -35,7 +35,7 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     IRelayCommand DismissItemActionsCommand { get; }
 
     // Item overflow menu (browse mode, REQ-OVFM-01..08)
-    bool IsItemMenuOpen { get; set; }                     // TwoWay with DXPopup.IsOpen
+    bool IsItemMenuOpen { get; set; }                     // TwoWay with the item menu IsOpen
     IReadOnlyList<ItemMenuAction> ItemMenuActions { get; } // page-specific items, between Edit and Delete
     IReadOnlyList<MenuItemModel> ItemMenuItems { get; }   // Edit, page-specific items, Delete; built once (REQ-OVFM-18)
     ICommand OpenItemMenuCommand { get; }                 // parameter: the list item

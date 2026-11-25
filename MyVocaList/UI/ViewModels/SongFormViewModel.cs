@@ -58,11 +58,9 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private IEnumerable<AutocompleteSuggestion> _artistSuggestions = [];
     [ObservableProperty] private bool _artistHasError;
     [ObservableProperty] private string _artistErrorText = string.Empty;
-    // BUG-065/066: two-way bound to AutoCompleteEdit.IsDropDownOpen (dxe:AutoCompleteEdit, ItemsEditBase
-    // BindableProperty). Every programmatic ArtistSearchText assignment below also sets this false to
-    // force the popup shut (DevExpress's own provider uses the same lever) — replaces the removed
-    // _suppressNextArtistSearch flag, which IL evidence proved never suppressed anything: DevExpress's
-    // AsyncItemsSourceProvider.OnEditorTextChanged already ignores non-UserInput text changes natively.
+    // BUG-065/066: two-way bound to the artist field's IsDropDownOpen. Every programmatic ArtistSearchText
+    // assignment below also sets this false to force the popup shut; the removed _suppressNextArtistSearch
+    // flag never suppressed anything, because the field ignores text changes that are not user input.
     [ObservableProperty] private bool _isArtistDropDownOpen;
 
     // ── Lyrics ────────────────────────────────────────────────────────────
@@ -267,7 +265,7 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
-    /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
+    /// <summary>Invoked by the artist autocomplete field when the user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
     public IAsyncRelayCommand NavigateToYouTubeSearchCommand { get; }
     public IAsyncRelayCommand AddFromPasteCommand { get; }
