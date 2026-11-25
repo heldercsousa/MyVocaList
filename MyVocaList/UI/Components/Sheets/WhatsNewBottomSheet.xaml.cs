@@ -35,11 +35,13 @@ public partial class WhatsNewBottomSheet : ContentView
         container.Children.Clear();
         foreach (var item in items)
         {
-            container.Children.Add(new Label
+            var label = new Label
             {
                 Text = $"• {item}",
                 StyleClass = ["Body.Medium"]
-            });
+            };
+            label.SetDynamicResource(Label.TextColorProperty, "OnSurfaceVariant");
+            container.Children.Add(label);
         }
     }
 
