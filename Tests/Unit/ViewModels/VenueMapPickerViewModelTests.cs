@@ -471,6 +471,20 @@ public class VenueMapPickerViewModelTests
         h.Sut.CancelPendingSearch();
     }
 
+    // [AC] REQ-VEN-26 / B10: a map tap supersedes a pending submit search; the search's token is cancelled.
+    [Fact]
+    public async Task MapTap_CancelsAPendingSubmitSearch()
+    {
+        var h = new Harness();
+        var searchToken = await StartSearchThatNeverEnds(h, "Bar");
+        h.Lookup.Setup(s => s.ReverseAsync(TappedLatitude, TappedLongitude, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PlaceLookupResult(PlaceLookupStatus.Found, MakePlace()));
+
+        await h.Sut.OnMapTappedAsync(TappedLatitude, TappedLongitude);
+
+        Assert.True(searchToken.IsCancellationRequested);
+    }
+
     // Starts a search whose lookup waits until its token is cancelled; returns that token once captured.
     private static async Task<CancellationToken> StartSearchThatNeverEnds(Harness h, string text)
     {
