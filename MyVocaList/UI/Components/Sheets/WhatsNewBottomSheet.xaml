@@ -39,6 +39,7 @@
                         x:Name="HighlightsTitleLabel"
                         Text="What's New"
                         StyleClass="Title.Medium"
+                        TextColor="{StaticResource OnSurface}"
                         Margin="0,0,0,8" />
 
                     <VerticalStackLayout
@@ -50,6 +51,7 @@
                         x:Name="FixesTitleLabel"
                         Text="Bug Fixes"
                         StyleClass="Title.Medium"
+                        TextColor="{StaticResource OnSurface}"
                         Margin="0,0,0,8" />
 
                     <VerticalStackLayout
