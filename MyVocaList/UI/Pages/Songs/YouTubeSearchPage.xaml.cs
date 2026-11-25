@@ -1,11 +1,11 @@
 
 namespace MyVocaList.UI.Pages.Songs;
 
-public partial class YouTubeSearchSfPage : ContentPage
+public partial class YouTubeSearchPage : ContentPage
 {
     private readonly YouTubeSearchViewModel _viewModel;
 
-    public YouTubeSearchSfPage(YouTubeSearchViewModel viewModel)
+    public YouTubeSearchPage(YouTubeSearchViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;

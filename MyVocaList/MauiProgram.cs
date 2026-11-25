@@ -159,7 +159,7 @@ public static class MauiProgram
         builder.Services.AddTransient<PersonFormSfPage>();
         builder.Services.AddTransient<ArtistFormSfPage>();
         builder.Services.AddTransient<SongFormSfPage>();
-        builder.Services.AddTransient<YouTubeSearchSfPage>();
+        builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();
