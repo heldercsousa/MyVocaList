@@ -1,8 +1,8 @@
 namespace MyVocaList.UI.Pages.About;
 
-public partial class AboutSfPage : ContentPage
+public partial class AboutPage : ContentPage
 {
-    public AboutSfPage(AboutViewModel vm)
+    public AboutPage(AboutViewModel vm)
     {
         InitializeComponent();
         BindingContext = vm;

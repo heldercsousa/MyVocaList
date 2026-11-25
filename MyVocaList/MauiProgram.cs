@@ -164,7 +164,7 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsSfPage>();
         builder.Services.AddTransient<AboutViewModel>();
-        builder.Services.AddTransient<AboutSfPage>();
+        builder.Services.AddTransient<AboutPage>();
 
         // Feedback
         builder.Services.AddTransient<IFeedbackService, FeedbackService>();

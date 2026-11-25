@@ -5,7 +5,7 @@
     xmlns:chips="clr-namespace:Syncfusion.Maui.Toolkit.Chips;assembly=Syncfusion.Maui.Toolkit"
     xmlns:svc="clr-namespace:MyVocaList.Services;assembly=MyVocaList.Services"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    x:Class="MyVocaList.UI.Pages.About.AboutSfPage"
+    x:Class="MyVocaList.UI.Pages.About.AboutPage"
     x:DataType="vm:AboutViewModel"
     Title="{Binding Version}"
     BackgroundColor="{StaticResource Surface}"
