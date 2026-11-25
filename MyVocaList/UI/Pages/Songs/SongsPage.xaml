@@ -10,7 +10,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:views="clr-namespace:MyVocaList.UI.Components"
-    x:Class="MyVocaList.UI.Pages.Songs.SongsSfPage"
+    x:Class="MyVocaList.UI.Pages.Songs.SongsPage"
     x:Name="page"
     x:DataType="vm:SongsViewModel"
     Title="Songs"
@@ -48,7 +48,7 @@
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <ImageButton Source="language_outlined" Padding="15"
                                          Style="{StaticResource SfIconButton}"
-                                         Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsSfPage}"
+                                         Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsPage}"
                                          CommandParameter="{Binding .}" />
                             <lists:ListItemCheckbox VerticalOptions="Center" />
                         </HorizontalStackLayout>
@@ -69,7 +69,7 @@
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <ImageButton Source="language_outlined" Padding="15"
                                          Style="{StaticResource SfIconButton}"
-                                         Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsSfPage}"
+                                         Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsPage}"
                                          CommandParameter="{Binding .}" />
                             <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                         </HorizontalStackLayout>

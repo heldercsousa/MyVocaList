@@ -76,7 +76,7 @@
     </FlyoutItem>
 
     <FlyoutItem Route="songs" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate songs:SongsSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate songs:SongsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
