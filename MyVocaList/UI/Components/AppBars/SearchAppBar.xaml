@@ -5,7 +5,7 @@
     xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
-    x:Class="MyVocaList.UI.Components.AppBars.SearchAppBarSf"
+    x:Class="MyVocaList.UI.Components.AppBars.SearchAppBar"
     x:Name="self">
 
     <!-- Container: 64dp height, flat (no pill), color transitions on IsElevated -->

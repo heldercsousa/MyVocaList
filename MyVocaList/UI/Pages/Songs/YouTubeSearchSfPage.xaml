@@ -14,7 +14,7 @@
     SafeAreaEdges="Container">
 
     <Shell.TitleView>
-        <appbars:SearchAppBarSf
+        <appbars:SearchAppBar
             SearchText="{Binding SearchText, Mode=TwoWay}"
             BackCommand="{Binding BackCommand}"
             Action1Icon="search_outlined"

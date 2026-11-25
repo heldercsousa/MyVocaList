@@ -2,12 +2,12 @@ using System.Runtime.CompilerServices;
 
 namespace MyVocaList.UI.Components.AppBars;
 
-public partial class SearchAppBarSf : AppBarBase
+public partial class SearchAppBar : AppBarBase
 {
     // ── SearchText ─────────────────────────────────────────────────────────
 
     public static readonly BindableProperty SearchTextProperty =
-        BindableProperty.Create(nameof(SearchText), typeof(string), typeof(SearchAppBarSf), string.Empty,
+        BindableProperty.Create(nameof(SearchText), typeof(string), typeof(SearchAppBar), string.Empty,
             BindingMode.TwoWay);
 
     public string SearchText
@@ -19,7 +19,7 @@ public partial class SearchAppBarSf : AppBarBase
     // ── Placeholder ────────────────────────────────────────────────────────
 
     public static readonly BindableProperty PlaceholderProperty =
-        BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(SearchAppBarSf), "Search...");
+        BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(SearchAppBar), "Search...");
 
     public string Placeholder
     {
@@ -30,7 +30,7 @@ public partial class SearchAppBarSf : AppBarBase
     // ── BackCommand ────────────────────────────────────────────────────────
 
     public static readonly BindableProperty BackCommandProperty =
-        BindableProperty.Create(nameof(BackCommand), typeof(ICommand), typeof(SearchAppBarSf));
+        BindableProperty.Create(nameof(BackCommand), typeof(ICommand), typeof(SearchAppBar));
 
     public ICommand BackCommand
     {
@@ -40,7 +40,7 @@ public partial class SearchAppBarSf : AppBarBase
 
     // ── Constructor ────────────────────────────────────────────────────────
 
-    public SearchAppBarSf()
+    public SearchAppBar()
     {
         InitializeComponent();
     }
