@@ -10,14 +10,14 @@ namespace MyVocaList.UI.Pages.Venues;
 /// Code-behind of the venue map picker. It only bridges the web map's raw messages and the ViewModel, and sets
 /// the web view's user agent (tile usage policy). It holds no business logic and requests no device location.
 /// </summary>
-public partial class VenueMapPickerSfPage : ContentPage
+public partial class VenueMapPickerPage : ContentPage
 {
     // Same application identity as the other outbound HTTP clients (tile usage policy identifies the app).
     private const string AppUserAgent = "MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)";
 
     private VenueMapPickerViewModel ViewModel => (VenueMapPickerViewModel)BindingContext;
 
-    public VenueMapPickerSfPage(VenueMapPickerViewModel viewModel)
+    public VenueMapPickerPage(VenueMapPickerViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
@@ -51,17 +51,17 @@ public partial class VenueMapPickerSfPage : ContentPage
         }
         catch (JsonException ex)
         {
-            Debug.WriteLine($"VenueMapPickerSfPage: malformed map message ignored: {ex.Message}");
+            Debug.WriteLine($"VenueMapPickerPage: malformed map message ignored: {ex.Message}");
             return;
         }
         catch (KeyNotFoundException ex)
         {
-            Debug.WriteLine($"VenueMapPickerSfPage: incomplete map message ignored: {ex.Message}");
+            Debug.WriteLine($"VenueMapPickerPage: incomplete map message ignored: {ex.Message}");
             return;
         }
         catch (InvalidOperationException ex)
         {
-            Debug.WriteLine($"VenueMapPickerSfPage: map message with wrong value kind ignored: {ex.Message}");
+            Debug.WriteLine($"VenueMapPickerPage: map message with wrong value kind ignored: {ex.Message}");
             return;
         }
 
@@ -77,7 +77,7 @@ public partial class VenueMapPickerSfPage : ContentPage
                 break;
 
             default:
-                Debug.WriteLine($"VenueMapPickerSfPage: unknown map message type '{type}'");
+                Debug.WriteLine($"VenueMapPickerPage: unknown map message type '{type}'");
                 break;
         }
     }

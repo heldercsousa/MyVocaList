@@ -149,7 +149,7 @@ public static class MauiProgram
         builder.Services.AddTransient<VenueMapPickerViewModel>();
 
         // Pages
-        builder.Services.AddTransient<VenueMapPickerSfPage>();
+        builder.Services.AddTransient<VenueMapPickerPage>();
         builder.Services.AddTransient<VenuesSfPage>();
         builder.Services.AddTransient<PeopleSfPage>();
         builder.Services.AddTransient<SongsSfPage>();
