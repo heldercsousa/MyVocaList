@@ -64,7 +64,7 @@
 
     <!-- Page Routes (hidden from default flyout, navigated via ViewModel) -->
     <FlyoutItem Route="venues" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate venues:VenuesPage}" />
+        <ShellContent ContentTemplate="{DataTemplate venues:VenuesSfPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="people" FlyoutItemIsVisible="False">
