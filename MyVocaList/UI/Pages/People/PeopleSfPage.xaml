@@ -44,7 +44,7 @@
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <lists:ListItemOverflowButtonSf />
-                            <lists:ListItemCheckboxSf VerticalOptions="Center" />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
@@ -60,7 +60,7 @@
                         <lists:ListItemLeadingMonogramSf Initials="{Binding Initials}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <lists:ListItemCheckboxSf IsChecked="True" VerticalOptions="Center" />
+                        <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>

@@ -65,7 +65,7 @@
                                          Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
                                          CommandParameter="{Binding .}"
                                          InputTransparent="False" />
-                            <lists:ListItemCheckboxSf VerticalOptions="Center" />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
@@ -88,7 +88,7 @@
                                          Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
                                          CommandParameter="{Binding .}"
                                          InputTransparent="False" />
-                            <lists:ListItemCheckboxSf IsChecked="True" VerticalOptions="Center" />
+                            <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>

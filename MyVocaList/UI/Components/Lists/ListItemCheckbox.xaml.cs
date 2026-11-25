@@ -5,12 +5,12 @@ namespace MyVocaList.UI.Components.Lists;
 /// Renders a 48×48 transparent tap target around a non-interactive <c>SfCheckBox</c>;
 /// the tap is routed to <c>CrudListPageBase</c>'s <c>ToggleItemSelectionCommand</c>.
 /// </summary>
-public partial class ListItemCheckboxSf : ContentView
+public partial class ListItemCheckbox : ContentView
 {
     public static readonly BindableProperty IsCheckedProperty = BindableProperty.Create(
         nameof(IsChecked),
         typeof(bool),
-        typeof(ListItemCheckboxSf),
+        typeof(ListItemCheckbox),
         false);
 
     /// <summary>Checked state of the visual checkbox. Default false.</summary>
@@ -20,7 +20,7 @@ public partial class ListItemCheckboxSf : ContentView
         set => SetValue(IsCheckedProperty, value);
     }
 
-    public ListItemCheckboxSf()
+    public ListItemCheckbox()
     {
         InitializeComponent();
     }

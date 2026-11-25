@@ -6,7 +6,7 @@
     xmlns:sfbuttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:local="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
-    x:Class="MyVocaList.UI.Components.Lists.ListItemCheckboxSf"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemCheckbox"
     x:Name="self">
 
     <!-- 48x48 transparent SfButton tap target hosting a non-interactive SfCheckBox (Content is a DataTemplate, so IsChecked binds via AncestorType); tap routes to ToggleItemSelectionCommand. -->
@@ -25,7 +25,7 @@
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     InputTransparent="True"
-                    IsChecked="{Binding IsChecked, Mode=OneWay, Source={RelativeSource AncestorType={x:Type local:ListItemCheckboxSf}}}"
+                    IsChecked="{Binding IsChecked, Mode=OneWay, Source={RelativeSource AncestorType={x:Type local:ListItemCheckbox}}}"
                     CheckedColor="{StaticResource Primary}"
                     UncheckedColor="{StaticResource OnSurfaceVariant}"
                     TickColor="{StaticResource OnPrimary}" />

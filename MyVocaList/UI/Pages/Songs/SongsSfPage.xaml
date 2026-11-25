@@ -50,7 +50,7 @@
                                          Style="{StaticResource SfIconButton}"
                                          Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsSfPage}"
                                          CommandParameter="{Binding .}" />
-                            <lists:ListItemCheckboxSf VerticalOptions="Center" />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
@@ -71,7 +71,7 @@
                                          Style="{StaticResource SfIconButton}"
                                          Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsSfPage}"
                                          CommandParameter="{Binding .}" />
-                            <lists:ListItemCheckboxSf IsChecked="True" VerticalOptions="Center" />
+                            <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
