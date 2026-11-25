@@ -1,11 +1,11 @@
 namespace MyVocaList.UI.Components.AppBars;
 
-public partial class SmallAppBarSf : AppBarBase
+public partial class SmallAppBar : AppBarBase
 {
     // ── Title ──────────────────────────────────────────────────────────────
 
     public static readonly BindableProperty TitleProperty =
-        BindableProperty.Create(nameof(Title), typeof(string), typeof(SmallAppBarSf), string.Empty);
+        BindableProperty.Create(nameof(Title), typeof(string), typeof(SmallAppBar), string.Empty);
 
     public string Title
     {
@@ -16,8 +16,8 @@ public partial class SmallAppBarSf : AppBarBase
     // ── Subtitle ───────────────────────────────────────────────────────────
 
     public static readonly BindableProperty SubtitleProperty =
-        BindableProperty.Create(nameof(Subtitle), typeof(string), typeof(SmallAppBarSf), string.Empty,
-            propertyChanged: (b, _, _) => ((SmallAppBarSf)b).OnPropertyChanged(nameof(HasSubtitle)));
+        BindableProperty.Create(nameof(Subtitle), typeof(string), typeof(SmallAppBar), string.Empty,
+            propertyChanged: (b, _, _) => ((SmallAppBar)b).OnPropertyChanged(nameof(HasSubtitle)));
 
     public string Subtitle
     {
@@ -30,8 +30,8 @@ public partial class SmallAppBarSf : AppBarBase
     // ── Navigation icon ────────────────────────────────────────────────────
 
     public static readonly BindableProperty NavigationIconProperty =
-        BindableProperty.Create(nameof(NavigationIcon), typeof(string), typeof(SmallAppBarSf), string.Empty,
-            propertyChanged: (b, _, _) => ((SmallAppBarSf)b).OnPropertyChanged(nameof(HasNavigationIcon)));
+        BindableProperty.Create(nameof(NavigationIcon), typeof(string), typeof(SmallAppBar), string.Empty,
+            propertyChanged: (b, _, _) => ((SmallAppBar)b).OnPropertyChanged(nameof(HasNavigationIcon)));
 
     public string NavigationIcon
     {
@@ -40,7 +40,7 @@ public partial class SmallAppBarSf : AppBarBase
     }
 
     public static readonly BindableProperty NavigationCommandProperty =
-        BindableProperty.Create(nameof(NavigationCommand), typeof(ICommand), typeof(SmallAppBarSf));
+        BindableProperty.Create(nameof(NavigationCommand), typeof(ICommand), typeof(SmallAppBar));
 
     public ICommand NavigationCommand
     {
@@ -52,7 +52,7 @@ public partial class SmallAppBarSf : AppBarBase
 
     // ── Constructor ────────────────────────────────────────────────────────
 
-    public SmallAppBarSf()
+    public SmallAppBar()
     {
         InitializeComponent();
     }

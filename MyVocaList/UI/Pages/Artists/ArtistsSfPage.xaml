@@ -18,7 +18,7 @@
     SafeAreaEdges="Container">
 
     <Shell.TitleView>
-        <appbars:SmallAppBarSf
+        <appbars:SmallAppBar
             Title="{Binding AppBarTitle}"
             IsElevated="{Binding IsScrolled}" />
     </Shell.TitleView>
