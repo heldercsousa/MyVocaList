@@ -1,11 +1,12 @@
 ---
 id: BUG-091
 title: AppShell sheet attach fails when page root is SfBottomSheet
-status: 🟡 In Progress
+status: ✅ Done
 severity: Major
 target: 2026-11-25
 parent: ui-component-library-licensing
 goal: WhatsNew/UpdateAvailable/UpdateRequired sheets never show because AttachSheetToCurrentPage requires a Layout root
+closed: 2026-11
 kind: bug
 ---
 
