@@ -487,6 +487,19 @@
         <Setter Property="StrokeThickness" Value="1" />
     </Style>
 
+    <!-- Bottom sheet actions: Sf copies of BottomSheetDestructiveAction / BottomSheetCancelAction (full width, 56dp). -->
+    <Style x:Key="SfBottomSheetDestructiveAction" TargetType="buttons:SfButton" BasedOn="{StaticResource SfTextButton}">
+        <Setter Property="TextColor" Value="{StaticResource Error}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style x:Key="SfBottomSheetCancelAction" TargetType="buttons:SfButton" BasedOn="{StaticResource SfTextButton}">
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+
     <!-- MD3 filled button -->
     <Style x:Key="SfFilledButton" TargetType="buttons:SfButton">
         <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
