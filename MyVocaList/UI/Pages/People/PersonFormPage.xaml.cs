@@ -5,7 +5,7 @@ using SfSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
 namespace MyVocaList.UI.Pages.People;
 
 /// <summary>Syncfusion copy of <see cref="PersonFormPage"/>: same ViewModel, same code-behind behavior.</summary>
-public partial class PersonFormSfPage : ContentPage
+public partial class PersonFormPage : ContentPage
 {
     private readonly PersonFormViewModel _viewModel;
 
@@ -15,7 +15,7 @@ public partial class PersonFormSfPage : ContentPage
     /// <summary>Exposed for compiled bindings inside DataTemplates.</summary>
     public PersonFormViewModel ViewModel => _viewModel;
 
-    public PersonFormSfPage(PersonFormViewModel viewModel)
+    public PersonFormPage(PersonFormViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;

@@ -9,7 +9,7 @@
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
-    x:Class="MyVocaList.UI.Pages.People.PersonFormSfPage"
+    x:Class="MyVocaList.UI.Pages.People.PersonFormPage"
     x:DataType="vm:PersonFormViewModel"
     Title="{Binding PageTitle}"
     BackgroundColor="{StaticResource Surface}"
