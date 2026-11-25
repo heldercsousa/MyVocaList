@@ -1,10 +1,10 @@
 namespace MyVocaList.UI.Pages.Venues;
 
-public partial class VenueFormSfPage : ContentPage
+public partial class VenueFormPage : ContentPage
 {
     private VenueFormViewModel ViewModel => (VenueFormViewModel)BindingContext;
 
-    public VenueFormSfPage(VenueFormViewModel viewModel)
+    public VenueFormPage(VenueFormViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
