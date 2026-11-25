@@ -118,12 +118,6 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
 
-		<!-- DevExpress MAUI Packages -->
-		<PackageReference Include="DevExpress.Maui.Core" />
-		<PackageReference Include="DevExpress.Maui.CollectionView" />
-		<PackageReference Include="DevExpress.Maui.Controls" />
-		<PackageReference Include="DevExpress.Maui.Editors" />
-
 		<!-- Syncfusion MAUI Packages (Syncfusion.Licensing is transitive; referenced because MauiProgram calls it) -->
 		<PackageReference Include="Syncfusion.Maui.Toolkit" />
 		<PackageReference Include="Syncfusion.Maui.Core" />

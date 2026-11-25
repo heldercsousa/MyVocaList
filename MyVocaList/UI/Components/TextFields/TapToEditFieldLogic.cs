@@ -2,7 +2,7 @@ namespace MyVocaList.UI.Components.TextFields;
 
 /// <summary>
 /// Pure decision rules for <c>TapToEditField</c> (design.md § 2.5 of the form-pictures change).
-/// No DevExpress or MAUI types are referenced here, so every rule is unit-tested.
+/// No component-library or MAUI types are referenced here, so every rule is unit-tested.
 /// </summary>
 internal static class TapToEditFieldLogic
 {

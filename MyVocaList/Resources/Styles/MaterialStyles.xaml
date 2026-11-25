@@ -26,16 +26,6 @@
     </Style>
 
     <!-- ================================================================ -->
-    <!-- DEVEXPRESS BUTTON STYLES (MD3-Inspired)                          -->
-    <!-- ================================================================ -->
-
-    <!-- ================================================================ -->
-    <!-- DEVEXPRESS EDITOR STYLES                                         -->
-    <!-- ================================================================ -->
-
-    <!-- AutoCompleteEdit follows the same Outlined form-field convention as TextEdit (REQ-DXAC-12) -->
-    <!-- ComboBoxEdit follows the same Outlined form-field convention as TextEdit and AutoCompleteEdit (selected value readability) -->
-    <!-- ================================================================ -->
     <!-- FLYOUT MENU STYLES                                               -->
     <!-- ================================================================ -->
 
@@ -353,7 +343,7 @@
         </Setter>
     </Style>
 
-    <!-- Same look as the DX FlyoutMenuButton. SfButton cannot tint its own ImageSource (IconTintColorBehavior throws on it), so the
+    <!-- Flyout menu button look. SfButton cannot tint its own ImageSource (IconTintColorBehavior throws on it), so the
          content is a DataTemplate (SfButton.Content) with an Image tinted through IconTint plus a Label. Consumers still set the
          button's ImageSource and Text; the template reads them from the ancestor SfButton. -->
     <Style x:Key="SfFlyoutMenuButton" TargetType="buttons:SfButton">

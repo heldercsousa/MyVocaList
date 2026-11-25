@@ -29,13 +29,13 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     IRelayCommand<object> ToggleItemSelectionCommand { get; }
 
     // Item actions bottom sheet (REQ-CLSG-06..08)
-    BottomSheetState ItemActionsSheetState { get; set; }
+    SheetState ItemActionsSheetState { get; set; }
     IAsyncRelayCommand EditItemCommand { get; }
     IRelayCommand DeleteItemCommand { get; }
     IRelayCommand DismissItemActionsCommand { get; }
 
     // Item overflow menu (browse mode, REQ-OVFM-01..08)
-    bool IsItemMenuOpen { get; set; }                     // TwoWay with DXPopup.IsOpen
+    bool IsItemMenuOpen { get; set; }                     // TwoWay with the item menu IsOpen
     IReadOnlyList<ItemMenuAction> ItemMenuActions { get; } // page-specific items, between Edit and Delete
     IReadOnlyList<MenuItemModel> ItemMenuItems { get; }   // Edit, page-specific items, Delete; built once (REQ-OVFM-18)
     ICommand OpenItemMenuCommand { get; }                 // parameter: the list item
@@ -47,7 +47,7 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     IRelayCommand DeleteSelectedCommand { get; }
 
     // Confirm bottom sheet
-    BottomSheetState ConfirmSheetState { get; set; }
+    SheetState ConfirmSheetState { get; set; }
     string ConfirmMessage { get; }
     string ConfirmActionText { get; }
     IAsyncRelayCommand ConfirmActionCommand { get; }

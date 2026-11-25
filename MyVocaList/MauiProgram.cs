@@ -43,10 +43,6 @@ public static class MauiProgram
             .UseMauiCommunityToolkit()
             .ConfigureSyncfusionCore()
             .ConfigureSyncfusionToolkit()
-            .UseDevExpress(useLocalization: false)
-            .UseDevExpressCollectionView()
-            .UseDevExpressControls()
-            .UseDevExpressEditors()
             .ConfigureFonts(fonts =>
             {
                 // Roboto for Material Design 3

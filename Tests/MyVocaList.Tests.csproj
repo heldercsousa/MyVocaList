@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Maui.Core" />
     <PackageReference Include="Plugin.LocalNotification" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="xunit" />
