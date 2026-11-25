@@ -2,11 +2,11 @@ using SfSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
 
 namespace MyVocaList.UI.Components.Sheets;
 
-public partial class WhatsNewBottomSheetSf : ContentView
+public partial class WhatsNewBottomSheet : ContentView
 {
     private IWhatsNewService? _whatsNewService;
 
-    public WhatsNewBottomSheetSf()
+    public WhatsNewBottomSheet()
     {
         InitializeComponent();
     }

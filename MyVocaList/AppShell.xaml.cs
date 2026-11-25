@@ -7,7 +7,7 @@ namespace MyVocaList;
 public partial class AppShell : Shell
 {
     private readonly IWhatsNewService _whatsNewService;
-    private WhatsNewBottomSheetSf? _whatsNewSheet;
+    private WhatsNewBottomSheet? _whatsNewSheet;
     private UpdateAvailableBottomSheetSf? _updateAvailableSheet;
     private UpdateRequiredBottomSheetSf? _updateRequiredSheet;
 
@@ -60,7 +60,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _whatsNewSheet ??= new WhatsNewBottomSheetSf();
+            _whatsNewSheet ??= new WhatsNewBottomSheet();
             AttachSheetToCurrentPage(_whatsNewSheet);
             _whatsNewSheet.Show(message.Entry, _whatsNewService);
         });
