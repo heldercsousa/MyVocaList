@@ -25,6 +25,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | 2026-11-22 | ↳ Deezer vs MusicBrainz — systematic comparison with pros and cons | 💡 Pending |
 | — | **Cross-cutting** | — |
+| 2026-11-24 | ↳ CRUD list search: load-more and pull-to-refresh can overwrite newer search results (suspected race) | 💡 Pending |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
@@ -40,7 +41,10 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
 | 2026-11-22 | ↳ Early-version notice in the app inviting feedback and suggestions | 💡 Pending |
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
-| 2026-11-24 | ↳ Research: shared code between the autocomplete field and the CRUD list (inline or full-screen, configurable tap) | 🟡 In Progress |
+| 2026-11-24 | ↳ One search delay for all searches (300 ms) | 💡 Pending |
+| 2026-11-24 | ↳ Remove dead search code after confirming nothing uses it | 💡 Pending |
+| 2026-11-24 | ↳ Search error handling: short message for users, full detail for developers only | 💡 Pending |
+| 2026-11-24 | ↳ Timing tests for the autocomplete search | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
 | — | **UI library migration — DevExpress → Syncfusion, coexisting page by page** | 🟡 In Progress |

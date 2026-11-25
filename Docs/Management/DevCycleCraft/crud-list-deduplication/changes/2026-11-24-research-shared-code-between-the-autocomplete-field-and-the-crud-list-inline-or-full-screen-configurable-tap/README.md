@@ -1,12 +1,13 @@
 ---
 id: research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap
 title: "Research: shared code between the autocomplete field and the CRUD list (inline or full-screen, configurable tap)"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication
 goal: Decide whether the autocomplete and the CRUD list should share code, given the Syncfusion migration.
-gate: Helder decides in the follow-up discussion.
+gate: Decided by Helder; follow-ups are registered as their own items.
+closed: 2026-11
 kind: change
 ---
 
@@ -14,7 +15,22 @@ kind: change
 
 Decide whether the autocomplete and the CRUD list should share code, given the Syncfusion migration.
 
-Research only. No code changes. Results: [findings.md](findings.md). The decision is still open; Helder makes it in the follow-up discussion.
+Research only. No code changes. Results: [findings.md](findings.md). Helder decided on 2026-11-24; see [Decision](#decision).
+
+## Decision
+
+Helder's decisions of 2026-11-24, after the follow-up discussion:
+
+1. **No merged component and no shared search helper.** The autocomplete field and the CRUD list stay separate, as the findings recommend (section 9, option D). The configurable tap already exists in the form ViewModels.
+2. **No full-screen search.** It is not wanted for now.
+3. **No code changes now.** Another session is migrating DevExpress to Syncfusion in the same files. Every follow-up waits for the migration to land, and targets the Syncfusion versions.
+4. **Follow-ups registered:**
+   - Suspected races B6, B7 and B8: [BUG-089](../../../../BusinessFeatures/cross-cutting/bugs/2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race/README.md), its own bug, not nested under another item.
+   - Search errors, B5: [search error handling](../2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only/README.md). Users get no verbose errors; full detail is for developers only. Helder and Claude Code agree the approach in a discussion first.
+   - Dead code, B12 and B11, with B1 and B2 in the same file: [remove dead search code](../2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it/README.md), only after confirming nothing uses it.
+   - Timing tests: [timing tests for the autocomplete search](../2026-11-24-timing-tests-for-the-autocomplete-search/README.md).
+   - Search delay, B3: [one search delay for all searches](../2026-11-24-one-search-delay-for-all-searches-300-ms/README.md). Helder allowed 300 ms or 400 ms if it makes sense; 300 ms was chosen because the autocomplete already has a named, tested 300 ms constant.
+5. **Not scheduled:** B4 (possible SQLite on the UI thread; measure first), B9, B10 and B13 stay recorded in the findings only.
 
 ## Request
 

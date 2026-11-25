@@ -2097,6 +2097,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-research-shared-
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\findings.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\findings.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race", "2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race", "{70B0BAD8-E30C-5F30-B258-F594049C2489}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "{BBFD3D31-960F-5EB4-9EC6-441DFC777D87}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "{2E7F8EE0-35A1-5A28-B725-8D53C0FF7B72}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-timing-tests-for-the-autocomplete-search", "2026-11-24-timing-tests-for-the-autocomplete-search", "{E44A45D4-1BC1-5839-87FD-04D13B2D7266}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-one-search-delay-for-all-searches-300-ms", "2026-11-24-one-search-delay-for-all-searches-300-ms", "{1471FFB1-4FDB-532F-967A-18C4FD01E1F5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2544,6 +2569,11 @@ Global
 		{8C9C1BED-BD76-5D80-8086-ED06BDC6FD01} = {FA1234BC-0001-4000-8000-0000000000D5}
 		{9B43FB31-D4BC-53F8-82EB-A0BDAEC80060} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
 		{B1D5DC76-CB8A-57DA-AD94-30EBB84CE801} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{70B0BAD8-E30C-5F30-B258-F594049C2489} = {FA1234BC-0001-4000-8000-000000000039}
+		{BBFD3D31-960F-5EB4-9EC6-441DFC777D87} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{2E7F8EE0-35A1-5A28-B725-8D53C0FF7B72} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{E44A45D4-1BC1-5839-87FD-04D13B2D7266} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{1471FFB1-4FDB-532F-967A-18C4FD01E1F5} = {FA1234BC-0001-4000-8000-0000000000AC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
