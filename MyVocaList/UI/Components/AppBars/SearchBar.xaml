@@ -5,7 +5,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
-    x:Class="MyVocaList.UI.Components.AppBars.SearchBarSf"
+    x:Class="MyVocaList.UI.Components.AppBars.SearchBar"
     x:Name="self">
 
     <!-- MD3 Search bar (standalone/docked): 56dp pill, SurfaceContainerLow;

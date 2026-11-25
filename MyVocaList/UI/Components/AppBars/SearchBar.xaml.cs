@@ -11,12 +11,12 @@ namespace MyVocaList.UI.Components.AppBars;
 /// Name deliberately collides with stock Microsoft.Maui.Controls.SearchBar (MD3-name fidelity;
 /// the stock control is never used in this codebase) — always use the appbars: prefix in XAML.
 /// </remarks>
-public partial class SearchBarSf : AppBarBase
+public partial class SearchBar : AppBarBase
 {
     // ── SearchText ─────────────────────────────────────────────────────────
 
     public static readonly BindableProperty SearchTextProperty =
-        BindableProperty.Create(nameof(SearchText), typeof(string), typeof(SearchBarSf), string.Empty,
+        BindableProperty.Create(nameof(SearchText), typeof(string), typeof(SearchBar), string.Empty,
             BindingMode.TwoWay);
 
     public string SearchText
@@ -28,7 +28,7 @@ public partial class SearchBarSf : AppBarBase
     // ── Placeholder ────────────────────────────────────────────────────────
 
     public static readonly BindableProperty PlaceholderProperty =
-        BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(SearchBarSf), "Search...");
+        BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(SearchBar), "Search...");
 
     public string Placeholder
     {
@@ -38,7 +38,7 @@ public partial class SearchBarSf : AppBarBase
 
     // ── Constructor ────────────────────────────────────────────────────────
 
-    public SearchBarSf()
+    public SearchBar()
     {
         InitializeComponent();
     }

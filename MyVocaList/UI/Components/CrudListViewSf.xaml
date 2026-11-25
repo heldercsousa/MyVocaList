@@ -145,7 +145,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- Row 0: persistent MD3 Search bar (standalone/docked) — REQ-SEARCHBAR-01/09 -->
-                        <appbars:SearchBarSf x:Name="searchBar"
+                        <appbars:SearchBar x:Name="searchBar"
                                              Grid.Row="0"
                                              SearchText="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
                                              Placeholder="{Binding SearchPlaceholder, Source={x:Reference self}}"
