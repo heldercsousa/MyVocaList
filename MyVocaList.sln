@@ -2122,6 +2122,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-one-search-delay
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-minor-findings-autocomplete-and-crud-list-search", "2026-11-25-minor-findings-autocomplete-and-crud-list-search", "{8270C5F5-5D5F-54CC-B4D1-108DEABBC267}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{9C89A657-02DD-5053-A885-274423C3E918}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread", "2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread", "{64439375-4B5C-5EC2-A94F-6162F7EEACF5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-dispose-the-last-search-cancellation-source", "2026-11-25-dispose-the-last-search-cancellation-source", "{6AD19464-A1CD-574C-9558-1452981214CC}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-dispose-the-last-search-cancellation-source\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-dispose-the-last-search-cancellation-source\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-venue-map-picker-search-can-be-cancelled", "2026-11-25-venue-map-picker-search-can-be-cancelled", "{1A0E934D-BD3B-5CD5-B3EF-0088CA839AA4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-venue-map-picker-search-can-be-cancelled\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-venue-map-picker-search-can-be-cancelled\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen", "2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen", "{E806B2DC-E225-5419-81CF-ED66AB36D576}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2574,6 +2601,12 @@ Global
 		{2E7F8EE0-35A1-5A28-B725-8D53C0FF7B72} = {FA1234BC-0001-4000-8000-0000000000AC}
 		{E44A45D4-1BC1-5839-87FD-04D13B2D7266} = {FA1234BC-0001-4000-8000-0000000000AC}
 		{1471FFB1-4FDB-532F-967A-18C4FD01E1F5} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{8270C5F5-5D5F-54CC-B4D1-108DEABBC267} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{9C89A657-02DD-5053-A885-274423C3E918} = {8270C5F5-5D5F-54CC-B4D1-108DEABBC267}
+		{64439375-4B5C-5EC2-A94F-6162F7EEACF5} = {9C89A657-02DD-5053-A885-274423C3E918}
+		{6AD19464-A1CD-574C-9558-1452981214CC} = {9C89A657-02DD-5053-A885-274423C3E918}
+		{1A0E934D-BD3B-5CD5-B3EF-0088CA839AA4} = {9C89A657-02DD-5053-A885-274423C3E918}
+		{E806B2DC-E225-5419-81CF-ED66AB36D576} = {9C89A657-02DD-5053-A885-274423C3E918}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

@@ -1,7 +1,7 @@
 ---
 id: search-error-handling-short-message-for-users-full-detail-for-developers-only
 title: "Search error handling: short message for users, full detail for developers only"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication

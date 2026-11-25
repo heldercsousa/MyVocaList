@@ -1,7 +1,7 @@
 ---
 id: remove-dead-search-code-after-confirming-nothing-uses-it
 title: Remove dead search code after confirming nothing uses it
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication

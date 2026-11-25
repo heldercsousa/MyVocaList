@@ -1,7 +1,7 @@
 ---
 id: BUG-089
 title: "CRUD list search: load-more and pull-to-refresh can overwrite newer search results (suspected race)"
-status: 💡 Pending
+status: 🟡 In Progress
 severity: Major
 target: 2026-11-24
 section: BusinessFeatures

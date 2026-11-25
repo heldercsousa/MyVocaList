@@ -1,7 +1,7 @@
 ---
 id: one-search-delay-for-all-searches-300-ms
 title: One search delay for all searches (300 ms)
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication

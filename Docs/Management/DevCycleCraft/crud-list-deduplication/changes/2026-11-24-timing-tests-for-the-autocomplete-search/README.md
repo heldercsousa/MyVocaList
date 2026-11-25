@@ -1,7 +1,7 @@
 ---
 id: timing-tests-for-the-autocomplete-search
 title: Timing tests for the autocomplete search
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication
