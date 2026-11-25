@@ -12,38 +12,38 @@ namespace MyVocaList.UI.Components.Menus;
 /// <c>Command.CanExecute</c> (REQ-OVFM-24). Selection follows <see cref="MenuItemSelection"/> (REQ-OVFM-19).
 /// Has no dependency on any page or ViewModel type (REQ-OVFM-25).
 /// </summary>
-public partial class MenuSf : ContentView
+public partial class Menu : ContentView
 {
     /// <summary>Items shown in the menu, in order. Rebuilt on every change (also observes <see cref="INotifyCollectionChanged"/>).</summary>
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
         nameof(ItemsSource),
         typeof(IEnumerable<MenuItemModel>),
-        typeof(MenuSf),
+        typeof(Menu),
         null,
         propertyChanged: (bindable, oldValue, newValue) =>
-            ((MenuSf)bindable).OnItemsSourceChanged((IEnumerable<MenuItemModel>?)newValue));
+            ((Menu)bindable).OnItemsSourceChanged((IEnumerable<MenuItemModel>?)newValue));
 
     /// <summary>Open state. TwoWay by default; mirrors the live popup <c>IsOpen</c> in both directions.</summary>
     public static readonly BindableProperty IsOpenProperty = BindableProperty.Create(
         nameof(IsOpen),
         typeof(bool),
-        typeof(MenuSf),
+        typeof(Menu),
         false,
         defaultBindingMode: BindingMode.TwoWay,
-        propertyChanged: (bindable, oldValue, newValue) => ((MenuSf)bindable).OnIsOpenChanged((bool)newValue));
+        propertyChanged: (bindable, oldValue, newValue) => ((Menu)bindable).OnIsOpenChanged((bool)newValue));
 
     /// <summary>The view the popup is anchored to. Set by <see cref="Show"/> or by the host before opening.</summary>
     public static readonly BindableProperty PlacementTargetProperty = BindableProperty.Create(
         nameof(PlacementTarget),
         typeof(View),
-        typeof(MenuSf),
+        typeof(Menu),
         null);
 
     /// <summary>Whether selecting an item closes the menu after its command runs. Default true.</summary>
     public static readonly BindableProperty CloseOnItemSelectedProperty = BindableProperty.Create(
         nameof(CloseOnItemSelected),
         typeof(bool),
-        typeof(MenuSf),
+        typeof(Menu),
         true);
 
     private readonly List<(ICommand Command, EventHandler Handler)> _commandSubscriptions = [];
@@ -56,7 +56,7 @@ public partial class MenuSf : ContentView
 
     private INotifyCollectionChanged? _observedSource;
 
-    public MenuSf()
+    public Menu()
     {
         InitializeComponent();
         popup.ContentTemplate = new DataTemplate(() => itemsHost);

@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:popup="clr-namespace:Syncfusion.Maui.Toolkit.Popup;assembly=Syncfusion.Maui.Toolkit"
-    x:Class="MyVocaList.UI.Components.Menus.MenuSf"
+    x:Class="MyVocaList.UI.Components.Menus.Menu"
     x:Name="self">
 
     <!-- MD3 vertical menu host (Menus - Common), Syncfusion copy of Menu. Wraps one SfPopup; the item buttons are built in

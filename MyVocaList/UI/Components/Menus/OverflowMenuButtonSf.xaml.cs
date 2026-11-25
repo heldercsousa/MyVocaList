@@ -3,8 +3,8 @@ using System.Windows.Input;
 namespace MyVocaList.UI.Components.Menus;
 
 /// <summary>
-/// MD3 overflow icon button (<c>more_vert_outlined</c>, StandardIconButton, 48×48). On tap it resolves a <see cref="MenuSf"/>:
-/// the explicit <see cref="MenuSf"/> property, else the nearest ancestor <see cref="IMenuHostSf"/> (REQ-OVFM-20). It anchors that
+/// MD3 overflow icon button (<c>more_vert_outlined</c>, StandardIconButton, 48×48). On tap it resolves a <see cref="Menu"/>:
+/// the explicit <see cref="Menu"/> property, else the nearest ancestor <see cref="IMenuHost"/> (REQ-OVFM-20). It anchors that
 /// menu to itself, then either runs <see cref="Command"/> (the ViewModel opens the menu through its IsOpen binding) or shows
 /// the menu directly. While the menu is open, the button shows the pressed state layer (REQ-OVFM-22).
 /// Has no dependency on any page, ViewModel or list type (REQ-OVFM-25).
@@ -14,10 +14,10 @@ public partial class OverflowMenuButtonSf : ContentView
     /// <summary>MD3 pressed state-layer opacity applied to On surface variant.</summary>
     private const float PressedStateLayerOpacity = 0.10f;
 
-    /// <summary>The menu this button opens. Null falls back to the nearest <see cref="IMenuHostSf"/> ancestor.</summary>
+    /// <summary>The menu this button opens. Null falls back to the nearest <see cref="IMenuHost"/> ancestor.</summary>
     public static readonly BindableProperty MenuProperty = BindableProperty.Create(
         nameof(Menu),
-        typeof(MenuSf),
+        typeof(Menu),
         typeof(OverflowMenuButtonSf),
         null);
 
@@ -42,17 +42,17 @@ public partial class OverflowMenuButtonSf : ContentView
         typeof(OverflowMenuButtonSf),
         "More options");
 
-    private MenuSf? _pressedMenu;
+    private Menu? _pressedMenu;
 
     public OverflowMenuButtonSf()
     {
         InitializeComponent();
     }
 
-    /// <summary>The menu this button opens. Null falls back to the nearest <see cref="IMenuHostSf"/> ancestor.</summary>
-    public MenuSf? Menu
+    /// <summary>The menu this button opens. Null falls back to the nearest <see cref="IMenuHost"/> ancestor.</summary>
+    public Menu? Menu
     {
-        get => (MenuSf?)GetValue(MenuProperty);
+        get => (Menu?)GetValue(MenuProperty);
         set => SetValue(MenuProperty, value);
     }
 
@@ -79,11 +79,11 @@ public partial class OverflowMenuButtonSf : ContentView
 
     private void OnClicked(object? sender, EventArgs e)
     {
-        var menu = MenuResolution.Resolve(Menu, AncestorsOf(this), host => (host as IMenuHostSf)?.HostedMenu);
+        var menu = MenuResolution.Resolve(Menu, AncestorsOf(this), host => (host as IMenuHost)?.HostedMenu);
         if (menu is null)
         {
             Serilog.Log.ForContext("SourceContext", nameof(OverflowMenuButtonSf))
-                .Warning("No Menu set and no IMenuHostSf ancestor found; overflow menu not opened");
+                .Warning("No Menu set and no IMenuHost ancestor found; overflow menu not opened");
             return;
         }
 
@@ -108,7 +108,7 @@ public partial class OverflowMenuButtonSf : ContentView
         }
     }
 
-    private void BeginPressedState(MenuSf menu)
+    private void BeginPressedState(Menu menu)
     {
         if (ReferenceEquals(_pressedMenu, menu))
         {

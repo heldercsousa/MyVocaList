@@ -8,10 +8,10 @@ namespace MyVocaList.UI.Components;
 /// <summary>
 /// Syncfusion copy of <see cref="CrudListView"/>: the shared structural ContentView for CRUD list pages. Hosts the
 /// loading skeleton, the <c>SfListView</c> inside an <c>SfPullToRefresh</c>, the empty states, the floating toolbar,
-/// the FAB, the two bottom sheets and the shared overflow <see cref="MenuSf"/>. Pages pass entity-specific DataTemplates
+/// the FAB, the two bottom sheets and the shared overflow <see cref="Menu"/>. Pages pass entity-specific DataTemplates
 /// and commands via BindableProperties; shared commands are bound directly via the ICrudListViewModel BindingContext.
 /// </summary>
-public partial class CrudListViewSf : ContentView, IMenuHostSf
+public partial class CrudListViewSf : ContentView, IMenuHost
 {
     private const string SkeletonAnimationName = "CrudListViewSfSkeletonPulse";
     private const uint SkeletonPulseLengthMs = 1400;
@@ -209,11 +209,11 @@ public partial class CrudListViewSf : ContentView, IMenuHostSf
     private bool _syncingSelection;
 
     // -------------------------------------------------------------------------
-    // IMenuHostSf
+    // IMenuHost
     // -------------------------------------------------------------------------
 
     /// <summary>The shared overflow menu this list hosts (REQ-OVFM-20).</summary>
-    public MenuSf? HostedMenu => itemMenu;
+    public Menu? HostedMenu => itemMenu;
 
     // -------------------------------------------------------------------------
     // Constructor

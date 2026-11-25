@@ -5,8 +5,8 @@
     x:Class="MyVocaList.UI.Components.Menus.OverflowMenuButtonSf"
     x:Name="self">
 
-    <!-- MD3 standard icon button (action/trailing role) that opens a MenuSf. The menu is resolved on tap: explicit Menu,
-         else the nearest ancestor IMenuHostSf (REQ-OVFM-20). Pressed state lives in code-behind (REQ-OVFM-22). -->
+    <!-- MD3 standard icon button (action/trailing role) that opens a Menu. The menu is resolved on tap: explicit Menu,
+         else the nearest ancestor IMenuHost (REQ-OVFM-20). Pressed state lives in code-behind (REQ-OVFM-22). -->
     <ImageButton x:Name="button"
                  Style="{StaticResource SfIconButton}"
                  VerticalOptions="Center"
