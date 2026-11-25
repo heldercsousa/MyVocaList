@@ -4,7 +4,7 @@ using SfSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
 namespace MyVocaList.UI.Pages.Songs;
 
 /// <summary>Syncfusion copy of <see cref="SongFormPage"/>: same ViewModel, same code-behind behavior.</summary>
-public partial class SongFormSfPage : ContentPage
+public partial class SongFormPage : ContentPage
 {
     private const string SkeletonAnimationName = "SongFormSfPageSkeletonPulse";
     private const uint SkeletonPulseLengthMs = 1400;
@@ -19,7 +19,7 @@ public partial class SongFormSfPage : ContentPage
     private bool _isSyncingResolutionSheet;
     private bool _isSyncingArtistMatchSheet;
 
-    public SongFormSfPage(SongFormViewModel viewModel)
+    public SongFormPage(SongFormViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;

@@ -12,7 +12,7 @@
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
     xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
-    x:Class="MyVocaList.UI.Pages.Songs.SongFormSfPage"
+    x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
     BackgroundColor="{StaticResource Surface}"
