@@ -7,9 +7,9 @@ namespace MyVocaList;
 public partial class AppShell : Shell
 {
     private readonly IWhatsNewService _whatsNewService;
-    private WhatsNewBottomSheet? _whatsNewSheet;
-    private UpdateAvailableBottomSheet? _updateAvailableSheet;
-    private UpdateRequiredBottomSheet? _updateRequiredSheet;
+    private WhatsNewBottomSheetSf? _whatsNewSheet;
+    private UpdateAvailableBottomSheetSf? _updateAvailableSheet;
+    private UpdateRequiredBottomSheetSf? _updateRequiredSheet;
 
     public AppShell(AppShellViewModel viewModel, IWhatsNewService whatsNewService)
     {
@@ -60,7 +60,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _whatsNewSheet ??= new WhatsNewBottomSheet();
+            _whatsNewSheet ??= new WhatsNewBottomSheetSf();
             AttachSheetToCurrentPage(_whatsNewSheet);
             _whatsNewSheet.Show(message.Entry, _whatsNewService);
         });
@@ -70,7 +70,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _updateAvailableSheet ??= new UpdateAvailableBottomSheet();
+            _updateAvailableSheet ??= new UpdateAvailableBottomSheetSf();
             AttachSheetToCurrentPage(_updateAvailableSheet);
             _updateAvailableSheet.Show(message.Result);
         });
@@ -80,7 +80,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _updateRequiredSheet ??= new UpdateRequiredBottomSheet();
+            _updateRequiredSheet ??= new UpdateRequiredBottomSheetSf();
             AttachSheetToCurrentPage(_updateRequiredSheet);
             _updateRequiredSheet.Show(message.Result);
         });
