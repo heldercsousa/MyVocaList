@@ -28,6 +28,7 @@
             <!-- Category -->
             <inputlayout:SfTextInputLayout
                 Hint="Category"
+                IsHintAlwaysFloated="True"
                 ContainerType="Outlined">
                 <sfinputs:SfComboBox
                     ItemsSource="{Binding Categories}"
