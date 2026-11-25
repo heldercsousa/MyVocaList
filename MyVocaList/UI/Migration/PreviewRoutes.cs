@@ -14,7 +14,6 @@ public static class PreviewRoutes
     private static readonly List<(string Title, string Route, Type Page)> _entries = new()
     {
         ("Feedback", "feedback-sf", typeof(FeedbackSfPage)),
-        ("Song form", "song-form-sf", typeof(SongFormSfPage)),
         ("YouTube search", "youtube-search-sf", typeof(YouTubeSearchSfPage)),
     };
 
