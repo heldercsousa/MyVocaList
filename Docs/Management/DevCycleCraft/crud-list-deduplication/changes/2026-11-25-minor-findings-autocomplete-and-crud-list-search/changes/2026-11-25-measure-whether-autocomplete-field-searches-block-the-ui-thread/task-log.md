@@ -45,6 +45,11 @@ Files written and re-read: `SongFormViewModel.cs` L386-395 and title read; `Arti
 - Conclusion: the main-thread read on this emulator is too short to show as dropped frames either way; the B4 fix rests on the code-path analysis and the threading test. Device/timing confirmation still open.
 - Note: `SongFormSf` is not reachable from the UI; measured the shared-VM DX form instead.
 
-### Round 3: before-state attempt (not completed)
+### Round 3: before-state attempt (superseded: the build did finish, see Round 4)
 - Reverted the offload locally (`git checkout 6bb63dc4^` of the three ViewModels, uncommitted), cleaned obj/bin net10.0-android, plain Android build. The .NET projects built; the Android step then stalled for 25+ minutes with leftover `aapt2`/`MSBuild` helper processes from earlier builds. Stopping the stalled task succeeded; killing the stale helpers and deleting the locked output was denied by the permission gate, so I did not force it.
 - Tree restored to HEAD (offload back in place; `git status` clean). No before-state APK was installed; the before/after comparison remains open. Next step, when the helper processes are cleared: rebuild the before-state, install, type in the song form artist field, capture `Skipped .* frames`, then restore and repeat.
+
+### Round 4: before/after on the emulator (not completed)
+- Before-state (the four offload lines of 6bb63dc4 reverted locally, uncommitted): clean obj/bin net10.0-android, emulator started, `dotnet build` started. The .NET projects compiled; the Android step produced no output for 25+ minutes with ~19 leftover `aapt2`/`MSBuild` helper processes. Stopped per the 15-minute rule; no APK installed, no counts taken.
+- Restored with `git checkout -- .` (tree clean at HEAD 882c8f83). Emulator stopped.
+- After-state: not measured in this round. Counts for both states remain open.
