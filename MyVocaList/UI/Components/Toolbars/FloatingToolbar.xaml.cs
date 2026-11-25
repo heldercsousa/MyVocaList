@@ -9,7 +9,7 @@ namespace MyVocaList.UI.Components.Toolbars;
 /// overlay with <c>VerticalOptions="End" Margin="0,0,0,16" HorizontalOptions="Center"</c>.
 /// Give the list content below it <c>Margin.Bottom=80</c> to prevent overlap.
 /// </remarks>
-public partial class FloatingToolbarSf : ContentView
+public partial class FloatingToolbar : ContentView
 {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -36,7 +36,7 @@ public partial class FloatingToolbarSf : ContentView
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
-    public FloatingToolbarSf()
+    public FloatingToolbar()
     {
         InitializeComponent();
 
@@ -74,8 +74,8 @@ public partial class FloatingToolbarSf : ContentView
     // ══════════════════════════════════════════════════════════════════════════
 
     public static readonly BindableProperty Action1IconProperty =
-        BindableProperty.Create(nameof(Action1Icon), typeof(string), typeof(FloatingToolbarSf), string.Empty,
-            propertyChanged: (b, _, _) => ((FloatingToolbarSf)b).OnPropertyChanged(nameof(HasAction1)));
+        BindableProperty.Create(nameof(Action1Icon), typeof(string), typeof(FloatingToolbar), string.Empty,
+            propertyChanged: (b, _, _) => ((FloatingToolbar)b).OnPropertyChanged(nameof(HasAction1)));
 
     /// <summary>Icon name for slot 1. Slot is hidden when null or empty.</summary>
     public string Action1Icon
@@ -85,7 +85,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action1CommandProperty =
-        BindableProperty.Create(nameof(Action1Command), typeof(ICommand), typeof(FloatingToolbarSf));
+        BindableProperty.Create(nameof(Action1Command), typeof(ICommand), typeof(FloatingToolbar));
 
     public ICommand Action1Command
     {
@@ -94,7 +94,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action1DescriptionProperty =
-        BindableProperty.Create(nameof(Action1Description), typeof(string), typeof(FloatingToolbarSf), string.Empty);
+        BindableProperty.Create(nameof(Action1Description), typeof(string), typeof(FloatingToolbar), string.Empty);
 
     /// <summary>SemanticProperties.Description for TalkBack / accessibility.</summary>
     public string Action1Description
@@ -104,8 +104,8 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action1IsSelectedProperty =
-        BindableProperty.Create(nameof(Action1IsSelected), typeof(bool), typeof(FloatingToolbarSf), false,
-            propertyChanged: (b, _, n) => ((FloatingToolbarSf)b).ApplySelectedState(((FloatingToolbarSf)b).action1Button, (bool)n));
+        BindableProperty.Create(nameof(Action1IsSelected), typeof(bool), typeof(FloatingToolbar), false,
+            propertyChanged: (b, _, n) => ((FloatingToolbar)b).ApplySelectedState(((FloatingToolbar)b).action1Button, (bool)n));
 
     /// <summary>
     /// When true, applies the SurfaceContainer background and OnSurface icon color (MD3 toggle-tonal
@@ -124,8 +124,8 @@ public partial class FloatingToolbarSf : ContentView
     // ══════════════════════════════════════════════════════════════════════════
 
     public static readonly BindableProperty Action2IconProperty =
-        BindableProperty.Create(nameof(Action2Icon), typeof(string), typeof(FloatingToolbarSf), string.Empty,
-            propertyChanged: (b, _, _) => ((FloatingToolbarSf)b).OnPropertyChanged(nameof(HasAction2)));
+        BindableProperty.Create(nameof(Action2Icon), typeof(string), typeof(FloatingToolbar), string.Empty,
+            propertyChanged: (b, _, _) => ((FloatingToolbar)b).OnPropertyChanged(nameof(HasAction2)));
 
     public string Action2Icon
     {
@@ -134,7 +134,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action2CommandProperty =
-        BindableProperty.Create(nameof(Action2Command), typeof(ICommand), typeof(FloatingToolbarSf));
+        BindableProperty.Create(nameof(Action2Command), typeof(ICommand), typeof(FloatingToolbar));
 
     public ICommand Action2Command
     {
@@ -143,7 +143,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action2DescriptionProperty =
-        BindableProperty.Create(nameof(Action2Description), typeof(string), typeof(FloatingToolbarSf), string.Empty);
+        BindableProperty.Create(nameof(Action2Description), typeof(string), typeof(FloatingToolbar), string.Empty);
 
     public string Action2Description
     {
@@ -152,8 +152,8 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action2IsSelectedProperty =
-        BindableProperty.Create(nameof(Action2IsSelected), typeof(bool), typeof(FloatingToolbarSf), false,
-            propertyChanged: (b, _, n) => ((FloatingToolbarSf)b).ApplySelectedState(((FloatingToolbarSf)b).action2Button, (bool)n));
+        BindableProperty.Create(nameof(Action2IsSelected), typeof(bool), typeof(FloatingToolbar), false,
+            propertyChanged: (b, _, n) => ((FloatingToolbar)b).ApplySelectedState(((FloatingToolbar)b).action2Button, (bool)n));
 
     public bool Action2IsSelected
     {
@@ -168,8 +168,8 @@ public partial class FloatingToolbarSf : ContentView
     // ══════════════════════════════════════════════════════════════════════════
 
     public static readonly BindableProperty Action3IconProperty =
-        BindableProperty.Create(nameof(Action3Icon), typeof(string), typeof(FloatingToolbarSf), string.Empty,
-            propertyChanged: (b, _, _) => ((FloatingToolbarSf)b).OnPropertyChanged(nameof(HasAction3)));
+        BindableProperty.Create(nameof(Action3Icon), typeof(string), typeof(FloatingToolbar), string.Empty,
+            propertyChanged: (b, _, _) => ((FloatingToolbar)b).OnPropertyChanged(nameof(HasAction3)));
 
     public string Action3Icon
     {
@@ -178,7 +178,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action3CommandProperty =
-        BindableProperty.Create(nameof(Action3Command), typeof(ICommand), typeof(FloatingToolbarSf));
+        BindableProperty.Create(nameof(Action3Command), typeof(ICommand), typeof(FloatingToolbar));
 
     public ICommand Action3Command
     {
@@ -187,7 +187,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action3DescriptionProperty =
-        BindableProperty.Create(nameof(Action3Description), typeof(string), typeof(FloatingToolbarSf), string.Empty);
+        BindableProperty.Create(nameof(Action3Description), typeof(string), typeof(FloatingToolbar), string.Empty);
 
     public string Action3Description
     {
@@ -196,8 +196,8 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action3IsSelectedProperty =
-        BindableProperty.Create(nameof(Action3IsSelected), typeof(bool), typeof(FloatingToolbarSf), false,
-            propertyChanged: (b, _, n) => ((FloatingToolbarSf)b).ApplySelectedState(((FloatingToolbarSf)b).action3Button, (bool)n));
+        BindableProperty.Create(nameof(Action3IsSelected), typeof(bool), typeof(FloatingToolbar), false,
+            propertyChanged: (b, _, n) => ((FloatingToolbar)b).ApplySelectedState(((FloatingToolbar)b).action3Button, (bool)n));
 
     public bool Action3IsSelected
     {
@@ -212,8 +212,8 @@ public partial class FloatingToolbarSf : ContentView
     // ══════════════════════════════════════════════════════════════════════════
 
     public static readonly BindableProperty Action4IconProperty =
-        BindableProperty.Create(nameof(Action4Icon), typeof(string), typeof(FloatingToolbarSf), string.Empty,
-            propertyChanged: (b, _, _) => ((FloatingToolbarSf)b).OnPropertyChanged(nameof(HasAction4)));
+        BindableProperty.Create(nameof(Action4Icon), typeof(string), typeof(FloatingToolbar), string.Empty,
+            propertyChanged: (b, _, _) => ((FloatingToolbar)b).OnPropertyChanged(nameof(HasAction4)));
 
     public string Action4Icon
     {
@@ -222,7 +222,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action4CommandProperty =
-        BindableProperty.Create(nameof(Action4Command), typeof(ICommand), typeof(FloatingToolbarSf));
+        BindableProperty.Create(nameof(Action4Command), typeof(ICommand), typeof(FloatingToolbar));
 
     public ICommand Action4Command
     {
@@ -231,7 +231,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action4DescriptionProperty =
-        BindableProperty.Create(nameof(Action4Description), typeof(string), typeof(FloatingToolbarSf), string.Empty);
+        BindableProperty.Create(nameof(Action4Description), typeof(string), typeof(FloatingToolbar), string.Empty);
 
     public string Action4Description
     {
@@ -240,8 +240,8 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action4IsSelectedProperty =
-        BindableProperty.Create(nameof(Action4IsSelected), typeof(bool), typeof(FloatingToolbarSf), false,
-            propertyChanged: (b, _, n) => ((FloatingToolbarSf)b).ApplySelectedState(((FloatingToolbarSf)b).action4Button, (bool)n));
+        BindableProperty.Create(nameof(Action4IsSelected), typeof(bool), typeof(FloatingToolbar), false,
+            propertyChanged: (b, _, n) => ((FloatingToolbar)b).ApplySelectedState(((FloatingToolbar)b).action4Button, (bool)n));
 
     public bool Action4IsSelected
     {
@@ -256,8 +256,8 @@ public partial class FloatingToolbarSf : ContentView
     // ══════════════════════════════════════════════════════════════════════════
 
     public static readonly BindableProperty Action5IconProperty =
-        BindableProperty.Create(nameof(Action5Icon), typeof(string), typeof(FloatingToolbarSf), string.Empty,
-            propertyChanged: (b, _, _) => ((FloatingToolbarSf)b).OnPropertyChanged(nameof(HasAction5)));
+        BindableProperty.Create(nameof(Action5Icon), typeof(string), typeof(FloatingToolbar), string.Empty,
+            propertyChanged: (b, _, _) => ((FloatingToolbar)b).OnPropertyChanged(nameof(HasAction5)));
 
     public string Action5Icon
     {
@@ -266,7 +266,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action5CommandProperty =
-        BindableProperty.Create(nameof(Action5Command), typeof(ICommand), typeof(FloatingToolbarSf));
+        BindableProperty.Create(nameof(Action5Command), typeof(ICommand), typeof(FloatingToolbar));
 
     public ICommand Action5Command
     {
@@ -275,7 +275,7 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action5DescriptionProperty =
-        BindableProperty.Create(nameof(Action5Description), typeof(string), typeof(FloatingToolbarSf), string.Empty);
+        BindableProperty.Create(nameof(Action5Description), typeof(string), typeof(FloatingToolbar), string.Empty);
 
     public string Action5Description
     {
@@ -284,8 +284,8 @@ public partial class FloatingToolbarSf : ContentView
     }
 
     public static readonly BindableProperty Action5IsSelectedProperty =
-        BindableProperty.Create(nameof(Action5IsSelected), typeof(bool), typeof(FloatingToolbarSf), false,
-            propertyChanged: (b, _, n) => ((FloatingToolbarSf)b).ApplySelectedState(((FloatingToolbarSf)b).action5Button, (bool)n));
+        BindableProperty.Create(nameof(Action5IsSelected), typeof(bool), typeof(FloatingToolbar), false,
+            propertyChanged: (b, _, n) => ((FloatingToolbar)b).ApplySelectedState(((FloatingToolbar)b).action5Button, (bool)n));
 
     public bool Action5IsSelected
     {

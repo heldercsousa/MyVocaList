@@ -223,7 +223,7 @@
                                                    VerticalOptions="End"
                                                    Margin="0,0,0,16"
                                                    Spacing="8">
-                                <toolbars:FloatingToolbarSf
+                                <toolbars:FloatingToolbar
                                     VerticalOptions="Center"
                                     IsVisible="{Binding IsSelectionMode}"
                                     Action1Icon="done_all_outlined"
