@@ -146,19 +146,19 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 
 Each deletion briefing records the I-4 grep gate first. Paths are under `MyVocaList/` unless noted; each `X` means `X.xaml` + `X.xaml.cs`.
 
-- [ ] **T5.1a Delete the 4 Phase-1 DX pages** [SEQUENTIAL]
+- [x] **T5.1a Delete the 4 Phase-1 DX pages** [SEQUENTIAL]
   - **Produces:** nothing (deletions) · **Consumes:** T1.5–T1.8 cut-overs · **Risk:** Low
   - **Files owned (deleted):** `UI/Pages/About/AboutPage`, `UI/Pages/BackupRestore/BackupRestorePage`, `UI/Pages/Settings/SettingsPage`, `UI/Pages/Venues/VenueMapPickerPage`; their DI lines in `MauiProgram.cs`
   - **Demo:** builds; tests pass; every Phase-1 route opens its Sf page · **Review lane:** Elevated
-- [ ] **T5.1b Delete the 5 Phase-2 DX pages** [SEQUENTIAL]
+- [x] **T5.1b Delete the 5 Phase-2 DX pages** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** T2.14–T2.18 · **Risk:** Low
   - **Files owned (deleted):** `UI/Pages/Venues/VenuesPage`, `UI/Pages/People/PeoplePage`, `UI/Pages/Songs/SongsPage`, `UI/Pages/Artists/ArtistsPage`, `UI/Pages/Songs/YouTubeSearchPage`; their DI lines
   - **Demo:** as T5.1a for the list routes · **Review lane:** Elevated
-- [ ] **T5.1c Delete the 5 Phase-3 DX pages** [SEQUENTIAL]
+- [x] **T5.1c Delete the 5 Phase-3 DX pages** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** T3.9–T3.13 · **Risk:** Low
   - **Files owned (deleted):** `UI/Pages/Venues/VenueFormPage`, `UI/Pages/People/PersonFormPage`, `UI/Pages/Artists/ArtistFormPage`, `UI/Pages/Songs/SongFormPage`, `UI/Pages/Feedback/FeedbackPage`; their DI lines
   - **Demo:** as T5.1a for the form routes · **Review lane:** Elevated
-- [ ] **T5.1d Delete DX components and unused components** [SEQUENTIAL]
+- [x] **T5.1d Delete DX components and unused components** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** T5.1a–c, T4.2 · **Risk:** Medium (a missed consumer breaks the build)
   - **Files owned (deleted):** `UI/Components/CrudListView`; `Lists/ListItemCheckbox`, `Lists/ListItemLeadingAvatar`, `Lists/ListItemLeadingImage`, `Lists/ListItemLeadingMonogram`, `Lists/ListItemOverflowButton`, `Lists/ListItemLeadingIcon`; `States/EmptyState`; `Toolbars/FloatingToolbar`; `Menus/Menu`, `Menus/OverflowMenuButton`; `AppBars/SearchBar`, `AppBars/SmallAppBar`, `AppBars/SearchAppBar`; `Media/ImagePickerField`; `TextFields/AutocompleteDXField`, `TextFields/TapToEditField`; `Sheets/ConfirmSheet`, `Sheets/WhatsNewBottomSheet`, `Sheets/UpdateAvailableBottomSheet`, `Sheets/UpdateRequiredBottomSheet` (all under `UI/Components/`). Kept: `ListItem`, `AppBarBase.cs`, `IMenuHost.cs`, `MenuItemSelection.cs`, `MenuItemShape.cs`, `MenuResolution.cs`, `AutocompleteDXFieldLogic.cs`, `TapToEditFieldLogic.cs`, `CurrentSingerCard`, `SnackbarComponent.cs`
   - **Demo:** builds; tests pass · **Review lane:** Elevated
