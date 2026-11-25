@@ -114,10 +114,10 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 - [x] **T2.11 `SongsSfPage`** [P, wave after T2.9] — Consumes: `CrudListViewSf`, app bars, `SongsViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongsSfPage.xaml(.cs)` · Risk: Medium · Demo: list states match DX · Lane: Standard · Copy merged 2026-11-25 (registered; parity PASS 2026-11-25, polish merged)
 - [x] **T2.12 `ArtistsSfPage`** [P, wave after T2.9] — Consumes: `CrudListViewSf`, app bars, `ArtistsViewModel` · Files: `MyVocaList/UI/Pages/Artists/ArtistsSfPage.xaml(.cs)` · Risk: Medium · Demo: list states match DX · Lane: Standard · Copy merged 2026-11-25 (registered; parity PASS 2026-11-25, polish merged)
 - [~] **T2.13 `YouTubeSearchSfPage`** [P, wave after T2.9] — Consumes: `SearchAppBarSf`, T2.0 list verdict, `YouTubeSearchViewModel` · Files: `MyVocaList/UI/Pages/Songs/YouTubeSearchSfPage.xaml(.cs)` · Risk: Medium (filter chips) · Demo: search + chips match DX · Lane: Standard — Copy merged 2026-11-26 (registered youtube-search-sf; parity pending)
-- [ ] **T2.14 Cut over Venues** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: flyout and PushAsync open the Sf page
-- [ ] **T2.15 Cut over People** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `people` flyout item and PushAsync open the Sf page
-- [ ] **T2.16 Cut over Songs** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `songs` flyout item and PushAsync open the Sf page
-- [ ] **T2.17 Cut over Artists** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `artists` flyout item and PushAsync open the Sf page
+- [x] **T2.14 Cut over Venues** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: flyout and PushAsync open the Sf page
+- [x] **T2.15 Cut over People** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `people` flyout item and PushAsync open the Sf page
+- [x] **T2.16 Cut over Songs** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `songs` flyout item and PushAsync open the Sf page
+- [x] **T2.17 Cut over Artists** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `artists` flyout item and PushAsync open the Sf page
 - [ ] **T2.18 Cut over YouTubeSearch** [SEQUENTIAL] — Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the song form opens the Sf search
 
 ## Phase 3 — Forms [after Phase 2 copies; key set]
@@ -130,11 +130,11 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 - [x] **T3.6 `ArtistFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `ArtistFormViewModel` · Files: `MyVocaList/UI/Pages/Artists/ArtistFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
 - [x] **T3.7 `SongFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `SongFormViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard · Copy merged 2026-11-24 (review C1 fixed by sheet-button styles move; parity pending)
 - [~] **T3.8 `FeedbackSfPage`** [SEQUENTIAL] — Recipe P · Consumes: T0.1b `SfComboBox` verdict, `FeedbackViewModel` · Files: `MyVocaList/UI/Pages/Feedback/FeedbackSfPage.xaml(.cs)` · Risk: Medium · Demo: send feedback works; P12 matches · Lane: Standard
-- [ ] **T3.9 Cut over VenueForm** [SEQUENTIAL] — Recipe X · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the list opens the Sf form
-- [ ] **T3.10 Cut over PersonForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the singers list opens the Sf page
-- [ ] **T3.11 Cut over ArtistForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the artists list opens the Sf page
-- [ ] **T3.12 Cut over SongForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the songs list opens the Sf page
-- [ ] **T3.13 Cut over Feedback** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the Preferences page's feedback action opens the Sf page
+- [x] **T3.9 Cut over VenueForm** [SEQUENTIAL] — Recipe X · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the list opens the Sf form
+- [x] **T3.10 Cut over PersonForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the singers list opens the Sf page
+- [x] **T3.11 Cut over ArtistForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the artists list opens the Sf page
+- [x] **T3.12 Cut over SongForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the songs list opens the Sf page
+- [x] **T3.13 Cut over Feedback** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the Preferences page's feedback action opens the Sf page
 
 ## Phase 4 — Shell [after Phase 3 cut-overs]
 
