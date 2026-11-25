@@ -1,7 +1,3 @@
-#if DEBUG
-using MyVocaList.UI.Migration;
-#endif
-
 namespace MyVocaList.Navigation;
 
 /// <summary>
@@ -18,11 +14,6 @@ public static class NavigationConfig
         [Routes.Preferences] = typeof(SettingsPage),
         [Routes.Backup] = typeof(BackupRestorePage),
         [Routes.About] = typeof(AboutPage),
-#if DEBUG
-        // Satisfies the NavigationConfigTests guard (every menu route has a PageTypes entry). The flyout item itself
-        // navigates by Shell route (see BuildMenuGroups) because SyncfusionPreviewPage is not DI-registered.
-        [PreviewRoutes.PreviewRoute] = typeof(SyncfusionPreviewPage),
-#endif
     };
 
     public static List<MenuGroup> BuildMenuGroups(ICommand navigateCommand) =>
@@ -39,14 +30,6 @@ public static class NavigationConfig
             new MenuItemDescription("Preferences",    "settings_outlined",             Routes.Preferences, navigateCommand),
             new MenuItemDescription("Backup & Restore","cloud_sync_outlined",          Routes.Backup,      navigateCommand),
             new MenuItemDescription("About",          "info_outlined",                 Routes.About,       navigateCommand),
-#if DEBUG
-            // Debug-only: navigates by Shell route (page is not DI-registered, so the PageTypes/PushAsync path does not apply).
-            new MenuItemDescription("Syncfusion preview", "contrast_outlined", PreviewRoutes.PreviewRoute, new Command(async () =>
-            {
-                Shell.Current.FlyoutIsPresented = false;
-                await Shell.Current.GoToAsync(PreviewRoutes.PreviewRoute);
-            })),
-#endif
             new MenuItemDescription("Exit",           "logout_outlined",               Routes.Exit,        navigateCommand)
         ])
     ];

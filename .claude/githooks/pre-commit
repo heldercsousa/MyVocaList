@@ -42,21 +42,6 @@ else
   echo "pre-commit: build + tests green."
 fi
 
-# --- DevExpress guard (UI component library migration) ---
-# While DevExpress and Syncfusion coexist: no DevExpress reference in an Sf copy
-# (*Sf.* / *SfPage.*), no new DevExpress line anywhere, no license key literal.
-# Deterministic check over the staged diff, so safe to block on.
-# Spec: Docs/Management/cross-cutting/ui-component-library-licensing/ (REQ-UIMIG-11/12/17).
-if printf '%s
-' "$STAGED" | grep -Eq '\.(cs|xaml|csproj|props)$'; then
-  if ! python .claude/scripts/migration/check_dx.py --staged; then
-    echo ""
-    echo "pre-commit: BLOCKED by the DevExpress guard (see above)."
-    exit 1
-  fi
-  echo "pre-commit: DevExpress guard passed."
-fi
-
 # Migration script tests, when the scripts themselves change.
 if printf '%s
 ' "$STAGED" | grep -Eq '^\.claude/scripts/migration/'; then

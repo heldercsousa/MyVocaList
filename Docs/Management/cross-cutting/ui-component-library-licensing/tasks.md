@@ -190,7 +190,7 @@ Each deletion briefing records the I-4 grep gate first. Paths are under `MyVocaL
   - **Produces:** forms and sheets under their original names · **Consumes:** T5.5b · **Risk:** Medium
   - **Files owned:** each renamed pair, `MauiProgram.cs`, `AppShell.xaml.cs`
   - **Demo:** every form route opens; sheets open at startup checks · **Review lane:** Standard
-- [ ] **T5.6 Remove preview infrastructure and the migration folder; close the item** [SEQUENTIAL]
+- [x] **T5.6 Remove preview infrastructure and the migration folder; close the item** [SEQUENTIAL]
   - **Produces:** no preview code; item closed · **Consumes:** T5.5c · **Risk:** Low
   - **Files owned:** `UI/Migration/**` (deleted), `AppShell.xaml.cs`, `Navigation/NavigationConfig.cs`, `MyVocaList.csproj`, `.claude/githooks/pre-commit` (`--staged` block), `.claude/library/constraints-reference.md` § DevExpress / UI (Helder reviews)
   - **Demo:** Release build has no preview code; the backlog row shows ✅ · **Review lane:** Standard
