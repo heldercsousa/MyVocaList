@@ -178,15 +178,15 @@ Each deletion briefing records the I-4 grep gate first. Paths are under `MyVocaL
   - **Produces:** a DevExpress-free solution · **Consumes:** T5.3, REQ-UIMIG-13 authorization (granted 2026-11-22) · **Risk:** High (packages)
   - **Files owned:** `GlobalUsings.cs`, `Resources/Styles/MaterialStyles.xaml`, `MyVocaList.csproj`, `Directory.Packages.props` (repo root), `Tests/MyVocaList.Tests.csproj`, `Docs/DevEnv/devenv-setup.md` § 2; Tester: the authorized test-comment and `using` lines
   - **Demo:** `python .claude/scripts/migration/check_dx.py --release` exits 0 · **Review lane:** Elevated
-- [ ] **T5.5a Drop the `Sf` suffix — components** [SEQUENTIAL — one commit per rename; exception logged once]
+- [x] **T5.5a Drop the `Sf` suffix — components** [SEQUENTIAL — one commit per rename; exception logged once]
   - **Produces:** components under their original names · **Consumes:** T5.4 · **Risk:** Medium (many references)
   - **Files owned:** each renamed pair plus its consumers and registration lines (list in `plan.md` § Phase 5)
   - **Demo:** builds and tests pass after each commit · **Review lane:** Standard
-- [ ] **T5.5b Drop the `Sf` suffix — pages** [SEQUENTIAL — one commit per rename]
+- [x] **T5.5b Drop the `Sf` suffix — pages** [SEQUENTIAL — one commit per rename]
   - **Produces:** pages under their original names · **Consumes:** T5.5a · **Risk:** Medium
   - **Files owned:** each renamed page pair, `MauiProgram.cs`, `AppShell.xaml(.cs)`, `NavigationConfig.cs`
   - **Demo:** every route in `Routes.cs` and `AppShell.xaml` opens its page · **Review lane:** Standard
-- [ ] **T5.5c Drop the `Sf` suffix — forms and sheets** [SEQUENTIAL — one commit per rename]
+- [x] **T5.5c Drop the `Sf` suffix — forms and sheets** [SEQUENTIAL — one commit per rename]
   - **Produces:** forms and sheets under their original names · **Consumes:** T5.5b · **Risk:** Medium
   - **Files owned:** each renamed pair, `MauiProgram.cs`, `AppShell.xaml.cs`
   - **Demo:** every form route opens; sheets open at startup checks · **Review lane:** Standard
