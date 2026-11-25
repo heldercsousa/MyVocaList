@@ -2,7 +2,7 @@ using SfBottomSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
 
 namespace MyVocaList.UI.Pages.Venues;
 
-public partial class VenuesSfPage : CrudListPageBase
+public partial class VenuesPage : CrudListPageBase
 {
     private readonly VenuesViewModel _viewModel;
 
@@ -11,7 +11,7 @@ public partial class VenuesSfPage : CrudListPageBase
 
     protected override ICrudListViewModel ListViewModel => _viewModel;
 
-    public VenuesSfPage(VenuesViewModel viewModel)
+    public VenuesPage(VenuesViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;

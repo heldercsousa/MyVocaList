@@ -10,7 +10,7 @@ public static class PreviewRoutes
 {
     public const string PreviewRoute = "syncfusion-preview";
 
-    // Add one line per Sf page copy, e.g.: ("Venues", "venues-sf", typeof(VenuesSfPage)),
+    // Add one line per Sf page copy, e.g.: ("Venues", "venues-sf", typeof(VenuesPage)),
     private static readonly List<(string Title, string Route, Type Page)> _entries = new()
     {
     };

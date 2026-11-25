@@ -11,7 +11,7 @@ public static class NavigationConfig
 {
     public static readonly Dictionary<string, Type> PageTypes = new()
     {
-        [Routes.Venues] = typeof(VenuesSfPage),
+        [Routes.Venues] = typeof(VenuesPage),
         [Routes.People] = typeof(PeopleSfPage),
         [Routes.Artists] = typeof(ArtistsSfPage),
         [Routes.Songs] = typeof(SongsSfPage),

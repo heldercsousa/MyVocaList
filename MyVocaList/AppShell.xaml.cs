@@ -41,7 +41,7 @@ public partial class AppShell : Shell
     // is not called (e.g. certain MAUI/platform back-button routing edge cases).
     protected override bool OnBackButtonPressed()
     {
-        if (Navigation.NavigationStack.Count == 0 && CurrentPage is VenuesSfPage venuesPage)
+        if (Navigation.NavigationStack.Count == 0 && CurrentPage is VenuesPage venuesPage)
         {
             venuesPage.ShowExitConfirmation();
             return true;
@@ -52,7 +52,7 @@ public partial class AppShell : Shell
 
     private void OnExitRequested()
     {
-        if (CurrentPage is VenuesSfPage venuesPage)
+        if (CurrentPage is VenuesPage venuesPage)
             venuesPage.ShowExitConfirmation();
     }
 

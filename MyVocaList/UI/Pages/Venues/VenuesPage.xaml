@@ -10,7 +10,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:views="clr-namespace:MyVocaList.UI.Components"
-    x:Class="MyVocaList.UI.Pages.Venues.VenuesSfPage"
+    x:Class="MyVocaList.UI.Pages.Venues.VenuesPage"
     x:Name="page"
     x:DataType="vm:VenuesViewModel"
     Title="Venues"
