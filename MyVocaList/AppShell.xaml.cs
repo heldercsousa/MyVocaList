@@ -26,7 +26,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.VenueForm, typeof(VenueFormSfPage));
         Routing.RegisterRoute(Routes.VenueMapPicker, typeof(VenueMapPickerSfPage));
         Routing.RegisterRoute(Routes.PersonForm, typeof(PersonFormSfPage));
-        Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormPage));
+        Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormSfPage));
         Routing.RegisterRoute(Routes.SongForm, typeof(SongFormPage));
         Routing.RegisterRoute(Routes.Feedback, typeof(FeedbackPage));
         Routing.RegisterRoute(Routes.YouTubeSearch, typeof(YouTubeSearchPage));
