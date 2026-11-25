@@ -6,7 +6,7 @@
     xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
     xmlns:sfinputs="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    x:Class="MyVocaList.UI.Pages.Feedback.FeedbackSfPage"
+    x:Class="MyVocaList.UI.Pages.Feedback.FeedbackPage"
     x:DataType="vm:FeedbackViewModel"
     Title="Send Feedback"
     BackgroundColor="{StaticResource Surface}"

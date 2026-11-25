@@ -1,8 +1,8 @@
 namespace MyVocaList.UI.Pages.Feedback;
 
-public partial class FeedbackSfPage : ContentPage
+public partial class FeedbackPage : ContentPage
 {
-    public FeedbackSfPage(FeedbackViewModel vm)
+    public FeedbackPage(FeedbackViewModel vm)
     {
         InitializeComponent();
         BindingContext = vm;
