@@ -153,11 +153,7 @@ public static class MauiProgram
         builder.Services.AddTransient<VenueMapPickerViewModel>();
 
         // Pages
-        builder.Services.AddTransient<VenueFormPage>();
-        builder.Services.AddTransient<VenueMapPickerPage>();
         builder.Services.AddTransient<VenueMapPickerSfPage>();
-        builder.Services.AddTransient<PersonFormPage>();
-        builder.Services.AddTransient<VenuesPage>();
         builder.Services.AddTransient<VenuesSfPage>();
         builder.Services.AddTransient<PeopleSfPage>();
         builder.Services.AddTransient<SongsSfPage>();
@@ -167,26 +163,16 @@ public static class MauiProgram
         builder.Services.AddTransient<PersonFormSfPage>();
         builder.Services.AddTransient<ArtistFormSfPage>();
         builder.Services.AddTransient<SongFormSfPage>();
-        builder.Services.AddTransient<PeoplePage>();
-        builder.Services.AddTransient<ArtistsPage>();
-        builder.Services.AddTransient<ArtistFormPage>();
-        builder.Services.AddTransient<SongsPage>();
-        builder.Services.AddTransient<SongFormPage>();
-        builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<YouTubeSearchSfPage>();
-        builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<BackupRestoreSfPage>();
         builder.Services.AddTransient<SettingsViewModel>();
-        builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<SettingsSfPage>();
         builder.Services.AddTransient<AboutViewModel>();
-        builder.Services.AddTransient<AboutPage>();
         builder.Services.AddTransient<AboutSfPage>();
 
         // Feedback
         builder.Services.AddTransient<IFeedbackService, FeedbackService>();
         builder.Services.AddTransient<FeedbackViewModel>();
-        builder.Services.AddTransient<FeedbackPage>();
         builder.Services.AddHttpClient("feedback");
         builder.Services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
         // IAppInfo is registered once, above with the other MAUI-platform services (REQ-UOW-21).

@@ -163,11 +163,6 @@
 		<ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
 	</ItemGroup>
 
-	<!-- Exclude DevExpress Samples from Release builds -->
-	<ItemGroup Condition="'$(Configuration)' == 'Release'">
-		<None Include="UI\Pages\Samples\**\*.cs" />
-		<None Include="UI\Pages\Samples\**\*.xaml" />
-	</ItemGroup>
 	<!-- Debug-only Syncfusion preview page (T0.6a): XAML dropped from Release; its .cs is #if DEBUG -->
 	<ItemGroup>
 		<MauiXaml Remove="UI\Migration\SyncfusionPreviewPage.xaml" Condition="'$(Configuration)' == 'Release'" />
@@ -180,11 +175,6 @@
 		<EmbeddedResource Include="appsettings.template.json" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<!-- Frozen custom autocomplete (D-AC1, 2026-07-19) - kept as reference for guideline (1), excluded from build. -->
-		<Compile Remove="UI\Components\AutocompleteField\**\*.cs" />
-		<MauiXaml Remove="UI\Components\AutocompleteField\**\*.xaml" />
-	</ItemGroup>
 
 	<!-- Build identity (spec: Docs/Management/DevCycleCraft/app-versioning/changes/2026-11-09-build-identity-*).
 	     Build timestamp is read by the About page via AssemblyMetadataAttribute. -->

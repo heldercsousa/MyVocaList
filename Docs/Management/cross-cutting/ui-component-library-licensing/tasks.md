@@ -162,7 +162,7 @@ Each deletion briefing records the I-4 grep gate first. Paths are under `MyVocaL
   - **Produces:** nothing · **Consumes:** T5.1a–c, T4.2 · **Risk:** Medium (a missed consumer breaks the build)
   - **Files owned (deleted):** `UI/Components/CrudListView`; `Lists/ListItemCheckbox`, `Lists/ListItemLeadingAvatar`, `Lists/ListItemLeadingImage`, `Lists/ListItemLeadingMonogram`, `Lists/ListItemOverflowButton`, `Lists/ListItemLeadingIcon`; `States/EmptyState`; `Toolbars/FloatingToolbar`; `Menus/Menu`, `Menus/OverflowMenuButton`; `AppBars/SearchBar`, `AppBars/SmallAppBar`, `AppBars/SearchAppBar`; `Media/ImagePickerField`; `TextFields/AutocompleteDXField`, `TextFields/TapToEditField`; `Sheets/ConfirmSheet`, `Sheets/WhatsNewBottomSheet`, `Sheets/UpdateAvailableBottomSheet`, `Sheets/UpdateRequiredBottomSheet` (all under `UI/Components/`). Kept: `ListItem`, `AppBarBase.cs`, `IMenuHost.cs`, `MenuItemSelection.cs`, `MenuItemShape.cs`, `MenuResolution.cs`, `AutocompleteDXFieldLogic.cs`, `TapToEditFieldLogic.cs`, `CurrentSingerCard`, `SnackbarComponent.cs`
   - **Demo:** builds; tests pass · **Review lane:** Elevated
-- [ ] **T5.1e Delete the frozen AutocompleteField folder and stale csproj entries** [SEQUENTIAL]
+- [x] **T5.1e Delete the frozen AutocompleteField folder and stale csproj entries** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** nothing · **Risk:** Low
   - **Files owned:** `UI/Components/AutocompleteField/**` (deleted); `MyVocaList.csproj` (L159-163 Samples exclusion, L172-176 AutocompleteField exclusions)
   - **Demo:** Debug and Release builds pass · **Review lane:** Standard
