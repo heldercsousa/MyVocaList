@@ -1779,6 +1779,63 @@ public class SongFormViewModelTests
         Assert.NotSame(uiContext, readContext);
     }
 
+    // [AC] REQ-ACREATE-13 (BUG-051): on the live artist option path, a superseded slower query cannot replace the newer one.
+    // The field cancels the superseded query (AutocompleteFilterSf); the older read then completes late and is ignored.
+    [Fact]
+    public async Task ArtistOptionSearch_OutOfOrderCompletion_LatestQueryWins()
+    {
+        var older = new TaskCompletionSource<IEnumerable<ArtistListItem>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var newer = new TaskCompletionSource<IEnumerable<ArtistListItem>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var artistService = new Mock<IArtistService>();
+        // Both reads honour their token, as the real service does: a cancelled read ends without its answer.
+        artistService.Setup(s => s.SearchArtistsByNameAsync("que", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns<string, int, CancellationToken>((_, _, ct) => UntilCancelled(older.Task, ct));
+        artistService.Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns<string, int, CancellationToken>((_, _, ct) => UntilCancelled(newer.Task, ct));
+        var sut = CreateSut(artistService: artistService);
+        using var olderCts = new CancellationTokenSource();
+        using var newerCts = new CancellationTokenSource();
+
+        var t1 = sut.ArtistOptionSource.SearchAsync("que", olderCts.Token);
+        var t2 = sut.ArtistOptionSource.SearchAsync("queen", newerCts.Token);
+        olderCts.Cancel(); // the field supersedes the older query
+
+        newer.SetResult([new ArtistListItem(2, "Queen", string.Empty, 3)]); // newer completes first
+        var shown = await t2;
+        older.SetResult([new ArtistListItem(9, "Querido", string.Empty, 1)]); // older completes late
+
+        Assert.Equal("Queen", Assert.Single(shown).Headline);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t1).WaitAsync(TimeSpan.FromSeconds(5));
+    }
+
+    private static async Task<IEnumerable<ArtistListItem>> UntilCancelled(Task<IEnumerable<ArtistListItem>> answer, CancellationToken ct)
+    {
+        await Task.WhenAny(answer, Task.Delay(Timeout.Infinite, ct));
+        ct.ThrowIfCancellationRequested();
+        return await answer;
+    }
+
+    // [AC] B1: the artist option search honours cancellation; the token reaches the service read.
+    [Fact]
+    public async Task SearchArtistsCoreAsync_CancelledToken_CancelsTheServiceRead()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns<string, int, CancellationToken>(async (_, _, ct) =>
+            {
+                await Task.Delay(Timeout.Infinite, ct);
+                return [];
+            });
+        var sut = CreateSut(artistService: artistService);
+        using var cts = new CancellationTokenSource();
+
+        var search = sut.SearchArtistsCoreAsync("queen", cts.Token);
+        cts.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => search).WaitAsync(TimeSpan.FromSeconds(5));
+    }
+
     // ── BUG-052: edit-mode hydration must show the locked artist without searching ─────────
 
     // [AC] REQ-ACREATE-14 (BUG-052): hydration shows locked artist and fires no search

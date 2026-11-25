@@ -36,3 +36,7 @@
 ### Build notes
 Build: see Android build in commit | Tests: 252 passed (filtered) | Commit SHA: see git log
 Files written and re-read: `SongFormViewModel.cs` L380-400 (search core), L440-456 (blur handler); `YouTubeSearchViewModel.cs` L51-60.
+
+### Round 2 (coordinator request): B1 cancellation and the live out-of-order path
+- `SearchArtistsCoreAsync_CancelledToken_CancelsTheServiceRead` (B1). Red: with the token replaced by `CancellationToken.None` in the service read, the test FAILED (TimeoutException: service read never cancelled). Restored.
+- `ArtistOptionSearch_OutOfOrderCompletion_LatestQueryWins` (REQ-ACREATE-13 on the live `ArtistOptionSource` path, replacing the removed BUG-051 test). The superseded read honours its token; the newer answer is shown, the late older answer is dropped (cancelled). Green (SongForm suite passes). Red not separately demonstrated for this test.
