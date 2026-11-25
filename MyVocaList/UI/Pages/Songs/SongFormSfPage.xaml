@@ -27,7 +27,7 @@
         Shown when the resolution engine returns a non-NoMatch result.
         Lists exact/fuzzy candidates; user chooses Open existing, Save as new song, or Cancel.
         SfBottomSheet hosts the page body in Content and the panel in BottomSheetContent. Two sheets share the page, so the
-        artist-match sheet is nested inside this sheet's Content (precedent: CrudListViewSf). The ViewModel never opens both
+        artist-match sheet is nested inside this sheet's Content (precedent: CrudListView). The ViewModel never opens both
         at once. The open/close state of both is driven from code-behind (IsOpen + State).
     -->
     <bottomsheet:SfBottomSheet x:Name="resolutionSheet"

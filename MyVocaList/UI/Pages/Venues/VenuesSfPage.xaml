@@ -18,7 +18,7 @@
     SafeAreaEdges="Container">
 
     <pages:CrudListPageBase.Resources>
-        <!-- Exit sheet actions: same look as the CrudListViewSf sheet actions (full width, 56dp). -->
+        <!-- Exit sheet actions: same look as the CrudListView sheet actions (full width, 56dp). -->
         <Style x:Key="SfExitSheetDestructiveAction" TargetType="buttons:SfButton" BasedOn="{StaticResource SfTextButton}">
             <Setter Property="TextColor" Value="{StaticResource Error}" />
             <Setter Property="HorizontalOptions" Value="Fill" />
@@ -67,7 +67,7 @@
             </VerticalStackLayout>
         </bottomsheet:SfBottomSheet.BottomSheetContent>
         <bottomsheet:SfBottomSheet.Content>
-            <views:CrudListViewSf
+            <views:CrudListView
                 ItemsSource="{Binding Venues}"
                 SelectedItemsSource="{Binding SelectedVenuesRaw}"
                 IsEmptyNoItems="{Binding IsEmptyNoVenues}"
@@ -79,7 +79,7 @@
                 FabCommand="{Binding AddVenueCommand}"
                 FabDescription="Add venue">
 
-                <views:CrudListViewSf.ItemTemplate>
+                <views:CrudListView.ItemTemplate>
                     <DataTemplate x:DataType="dto:VenueListItemDto">
                         <lists:ListItem Headline="{Binding Name}"
                                         SupportingText="{Binding AddressSummary}"
@@ -95,9 +95,9 @@
                             </lists:ListItem.TrailingContent>
                         </lists:ListItem>
                     </DataTemplate>
-                </views:CrudListViewSf.ItemTemplate>
+                </views:CrudListView.ItemTemplate>
 
-                <views:CrudListViewSf.SelectedItemTemplate>
+                <views:CrudListView.SelectedItemTemplate>
                     <DataTemplate x:DataType="dto:VenueListItemDto">
                         <lists:ListItem Headline="{Binding Name}"
                                         SupportingText="{Binding AddressSummary}"
@@ -110,9 +110,9 @@
                             </lists:ListItem.TrailingContent>
                         </lists:ListItem>
                     </DataTemplate>
-                </views:CrudListViewSf.SelectedItemTemplate>
+                </views:CrudListView.SelectedItemTemplate>
 
-            </views:CrudListViewSf>
+            </views:CrudListView>
         </bottomsheet:SfBottomSheet.Content>
     </bottomsheet:SfBottomSheet>
 

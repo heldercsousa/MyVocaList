@@ -24,7 +24,7 @@
             IsElevated="{Binding IsScrolled}" />
     </Shell.TitleView>
 
-    <views:CrudListViewSf
+    <views:CrudListView
         ItemsSource="{Binding Songs}"
         SelectedItemsSource="{Binding SelectedSongsRaw}"
         IsEmptyNoItems="{Binding IsEmptyNoSongs}"
@@ -36,7 +36,7 @@
         FabCommand="{Binding PrimaryFabCommand}"
         FabDescription="Add song">
 
-        <views:CrudListViewSf.ItemTemplate>
+        <views:CrudListView.ItemTemplate>
             <DataTemplate x:DataType="dto:SongListItemDto">
                 <lists:ListItem Headline="{Binding Title}"
                                 SupportingText="{Binding SupportingText}"
@@ -55,9 +55,9 @@
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
-        </views:CrudListViewSf.ItemTemplate>
+        </views:CrudListView.ItemTemplate>
 
-        <views:CrudListViewSf.SelectedItemTemplate>
+        <views:CrudListView.SelectedItemTemplate>
             <DataTemplate x:DataType="dto:SongListItemDto">
                 <lists:ListItem Headline="{Binding Title}"
                                 SupportingText="{Binding SupportingText}"
@@ -76,8 +76,8 @@
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
-        </views:CrudListViewSf.SelectedItemTemplate>
+        </views:CrudListView.SelectedItemTemplate>
 
-    </views:CrudListViewSf>
+    </views:CrudListView>
 
 </pages:CrudListPageBase>

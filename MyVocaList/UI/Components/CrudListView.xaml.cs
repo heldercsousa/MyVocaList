@@ -11,7 +11,7 @@ namespace MyVocaList.UI.Components;
 /// the FAB, the two bottom sheets and the shared overflow <see cref="Menu"/>. Pages pass entity-specific DataTemplates
 /// and commands via BindableProperties; shared commands are bound directly via the ICrudListViewModel BindingContext.
 /// </summary>
-public partial class CrudListViewSf : ContentView, IMenuHost
+public partial class CrudListView : ContentView, IMenuHost
 {
     private const string SkeletonAnimationName = "CrudListViewSfSkeletonPulse";
     private const uint SkeletonPulseLengthMs = 1400;
@@ -25,30 +25,30 @@ public partial class CrudListViewSf : ContentView, IMenuHost
     /// <summary>Entity collection bound to SfListView.ItemsSource.</summary>
     public static readonly BindableProperty ItemsSourceProperty =
         BindableProperty.Create(nameof(ItemsSource), typeof(System.Collections.IList),
-            typeof(CrudListViewSf), null);
+            typeof(CrudListView), null);
 
     /// <summary>
     /// Selected-items collection. SfListView.SelectedItems is get-only, so it is mirrored both ways in code-behind.
     /// </summary>
     public static readonly BindableProperty SelectedItemsSourceProperty =
         BindableProperty.Create(nameof(SelectedItemsSource), typeof(System.Collections.IList),
-            typeof(CrudListViewSf), null,
-            propertyChanged: (b, _, n) => ((CrudListViewSf)b).OnSelectedItemsSourceChanged(n as System.Collections.IList));
+            typeof(CrudListView), null,
+            propertyChanged: (b, _, n) => ((CrudListView)b).OnSelectedItemsSourceChanged(n as System.Collections.IList));
 
     /// <summary>DataTemplate for unselected rows.</summary>
     public static readonly BindableProperty ItemTemplateProperty =
         BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate),
-            typeof(CrudListViewSf), null);
+            typeof(CrudListView), null);
 
     /// <summary>DataTemplate for selected rows.</summary>
     public static readonly BindableProperty SelectedItemTemplateProperty =
         BindableProperty.Create(nameof(SelectedItemTemplate), typeof(DataTemplate),
-            typeof(CrudListViewSf), null);
+            typeof(CrudListView), null);
 
     /// <summary>Placeholder text for the internal persistent SearchBar.</summary>
     public static readonly BindableProperty SearchPlaceholderProperty =
         BindableProperty.Create(nameof(SearchPlaceholder), typeof(string),
-            typeof(CrudListViewSf), string.Empty);
+            typeof(CrudListView), string.Empty);
 
     /// <summary>
     /// Search query text, propagated TwoWay to the internal SearchBar. Pages bind this to the
@@ -56,7 +56,7 @@ public partial class CrudListViewSf : ContentView, IMenuHost
     /// </summary>
     public static readonly BindableProperty SearchTextProperty =
         BindableProperty.Create(nameof(SearchText), typeof(string),
-            typeof(CrudListViewSf), string.Empty, BindingMode.TwoWay);
+            typeof(CrudListView), string.Empty, BindingMode.TwoWay);
 
     /// <summary>
     /// liftOnScroll elevation for the internal SearchBar (SurfaceContainerLow → SurfaceContainer).
@@ -64,17 +64,17 @@ public partial class CrudListViewSf : ContentView, IMenuHost
     /// </summary>
     public static readonly BindableProperty IsSearchBarElevatedProperty =
         BindableProperty.Create(nameof(IsSearchBarElevated), typeof(bool),
-            typeof(CrudListViewSf), false);
+            typeof(CrudListView), false);
 
     /// <summary>Icon name for the "no items" EmptyState illustration.</summary>
     public static readonly BindableProperty EmptyNoItemsIllustrationProperty =
         BindableProperty.Create(nameof(EmptyNoItemsIllustration), typeof(string),
-            typeof(CrudListViewSf), string.Empty);
+            typeof(CrudListView), string.Empty);
 
     /// <summary>Headline for the "no items" EmptyState (e.g. "No venue registered").</summary>
     public static readonly BindableProperty EmptyNoItemsHeadlineProperty =
         BindableProperty.Create(nameof(EmptyNoItemsHeadline), typeof(string),
-            typeof(CrudListViewSf), string.Empty);
+            typeof(CrudListView), string.Empty);
 
     /// <summary>
     /// Whether the "no items" empty state is visible. Bound to the entity-specific VM bool property
@@ -82,22 +82,22 @@ public partial class CrudListViewSf : ContentView, IMenuHost
     /// </summary>
     public static readonly BindableProperty IsEmptyNoItemsProperty =
         BindableProperty.Create(nameof(IsEmptyNoItems), typeof(bool),
-            typeof(CrudListViewSf), false);
+            typeof(CrudListView), false);
 
     /// <summary>Command for the FAB (e.g. AddVenueCommand).</summary>
     public static readonly BindableProperty FabCommandProperty =
         BindableProperty.Create(nameof(FabCommand), typeof(System.Windows.Input.ICommand),
-            typeof(CrudListViewSf), null);
+            typeof(CrudListView), null);
 
     /// <summary>SemanticProperties.Description for the FAB.</summary>
     public static readonly BindableProperty FabDescriptionProperty =
         BindableProperty.Create(nameof(FabDescription), typeof(string),
-            typeof(CrudListViewSf), string.Empty);
+            typeof(CrudListView), string.Empty);
 
     /// <summary>Icon name for the FAB. Defaults to "add_outlined".</summary>
     public static readonly BindableProperty FabIconProperty =
         BindableProperty.Create(nameof(FabIcon), typeof(string),
-            typeof(CrudListViewSf), "add_outlined");
+            typeof(CrudListView), "add_outlined");
 
     /// <summary>
     /// Optional view shown above the list (e.g. a filter chip group).
@@ -105,8 +105,8 @@ public partial class CrudListViewSf : ContentView, IMenuHost
     /// </summary>
     public static readonly BindableProperty FilterContentProperty =
         BindableProperty.Create(nameof(FilterContent), typeof(View),
-            typeof(CrudListViewSf), null,
-            propertyChanged: (b, _, n) => ((CrudListViewSf)b).OnFilterContentChanged(n as View));
+            typeof(CrudListView), null,
+            propertyChanged: (b, _, n) => ((CrudListView)b).OnFilterContentChanged(n as View));
 
     // -------------------------------------------------------------------------
     // CLR wrappers
@@ -219,7 +219,7 @@ public partial class CrudListViewSf : ContentView, IMenuHost
     // Constructor
     // -------------------------------------------------------------------------
 
-    public CrudListViewSf()
+    public CrudListView()
     {
         InitializeComponent();
         ((Syncfusion.Maui.Core.IParallaxView)listView).Scrolling += OnListViewScrolling;

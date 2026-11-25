@@ -21,7 +21,7 @@
             IsElevated="{Binding IsScrolled}" />
     </Shell.TitleView>
 
-    <views:CrudListViewSf
+    <views:CrudListView
         ItemsSource="{Binding Persons}"
         SelectedItemsSource="{Binding SelectedPersonsRaw}"
         IsEmptyNoItems="{Binding IsEmptyNoPersons}"
@@ -33,7 +33,7 @@
         FabCommand="{Binding AddPersonCommand}"
         FabDescription="Add person">
 
-        <views:CrudListViewSf.ItemTemplate>
+        <views:CrudListView.ItemTemplate>
             <DataTemplate x:DataType="models:PersonListItemDto">
                 <lists:ListItem Headline="{Binding FullName}"
                                 SupportingText="{Binding IdentityLine}"
@@ -49,9 +49,9 @@
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
-        </views:CrudListViewSf.ItemTemplate>
+        </views:CrudListView.ItemTemplate>
 
-        <views:CrudListViewSf.SelectedItemTemplate>
+        <views:CrudListView.SelectedItemTemplate>
             <DataTemplate x:DataType="models:PersonListItemDto">
                 <lists:ListItem Headline="{Binding FullName}"
                                 SupportingText="{Binding IdentityLine}"
@@ -64,8 +64,8 @@
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
-        </views:CrudListViewSf.SelectedItemTemplate>
+        </views:CrudListView.SelectedItemTemplate>
 
-    </views:CrudListViewSf>
+    </views:CrudListView>
 
 </pages:CrudListPageBase>

@@ -23,7 +23,7 @@
             IsElevated="{Binding IsScrolled}" />
     </Shell.TitleView>
 
-    <views:CrudListViewSf
+    <views:CrudListView
         ItemsSource="{Binding Artists}"
         SelectedItemsSource="{Binding SelectedArtistsRaw}"
         IsEmptyNoItems="{Binding IsEmptyNoArtists}"
@@ -35,7 +35,7 @@
         FabCommand="{Binding AddArtistCommand}"
         FabDescription="Add artist">
 
-        <views:CrudListViewSf.FilterContent>
+        <views:CrudListView.FilterContent>
             <chips:SfChipGroup ChipType="Filter"
                                SelectionChanged="OnRoleFilterSelectionChanged"
                                ChipTextColor="{StaticResource OnSurfaceVariant}"
@@ -47,9 +47,9 @@
                     </x:Array>
                 </chips:SfChipGroup.ItemsSource>
             </chips:SfChipGroup>
-        </views:CrudListViewSf.FilterContent>
+        </views:CrudListView.FilterContent>
 
-        <views:CrudListViewSf.ItemTemplate>
+        <views:CrudListView.ItemTemplate>
             <DataTemplate x:DataType="domain:ArtistListItem">
                 <lists:ListItem Headline="{Binding Name}"
                                 SupportingText="{Binding CatalogCountText}"
@@ -70,9 +70,9 @@
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
-        </views:CrudListViewSf.ItemTemplate>
+        </views:CrudListView.ItemTemplate>
 
-        <views:CrudListViewSf.SelectedItemTemplate>
+        <views:CrudListView.SelectedItemTemplate>
             <DataTemplate x:DataType="domain:ArtistListItem">
                 <lists:ListItem Headline="{Binding Name}"
                                 SupportingText="{Binding CatalogCountText}"
@@ -93,8 +93,8 @@
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
-        </views:CrudListViewSf.SelectedItemTemplate>
+        </views:CrudListView.SelectedItemTemplate>
 
-    </views:CrudListViewSf>
+    </views:CrudListView>
 
 </pages:CrudListPageBase>

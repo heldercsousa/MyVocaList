@@ -11,7 +11,7 @@
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
     xmlns:menus="clr-namespace:MyVocaList.UI.Components.Menus"
     xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
-    x:Class="MyVocaList.UI.Components.CrudListViewSf"
+    x:Class="MyVocaList.UI.Components.CrudListView"
     x:Name="self">
 
     <ContentView.Resources>
