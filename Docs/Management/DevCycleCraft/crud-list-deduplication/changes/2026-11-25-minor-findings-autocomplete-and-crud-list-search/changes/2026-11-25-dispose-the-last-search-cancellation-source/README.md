@@ -1,12 +1,13 @@
 ---
 id: dispose-the-last-search-cancellation-source
 title: Dispose the last search cancellation source
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-25
 section: DevCycleCraft
 parent: minor-findings-autocomplete-and-crud-list-search
 goal: Every search cancellation source is disposed when it is replaced and when its owner goes away.
 gate: Tests pass.
+closed: 2026-11
 kind: change
 ---
 

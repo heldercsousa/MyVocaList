@@ -1,12 +1,13 @@
 ---
 id: remove-dead-search-code-after-confirming-nothing-uses-it
 title: Remove dead search code after confirming nothing uses it
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication
 goal: Search code that nothing on screen uses is removed, after a check confirms it has no real consumers.
 gate: Starts after the DX to Syncfusion migration lands, to avoid conflicts with it.
+closed: 2026-11
 kind: change
 ---
 

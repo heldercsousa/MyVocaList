@@ -1,12 +1,13 @@
 ---
 id: measure-whether-autocomplete-field-searches-block-the-ui-thread
 title: Measure whether autocomplete field searches block the UI thread
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-25
 section: DevCycleCraft
 parent: minor-findings-autocomplete-and-crud-list-search
 goal: Field searches are measured on device; they are moved off the UI thread only if they block it.
 gate: Measured on device first.
+closed: 2026-11
 kind: change
 ---
 

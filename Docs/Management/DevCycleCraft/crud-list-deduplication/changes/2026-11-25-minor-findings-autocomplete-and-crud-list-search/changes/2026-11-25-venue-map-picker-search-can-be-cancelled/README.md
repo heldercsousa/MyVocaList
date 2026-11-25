@@ -1,12 +1,13 @@
 ---
 id: venue-map-picker-search-can-be-cancelled
 title: Venue map picker search can be cancelled
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-25
 section: DevCycleCraft
 parent: minor-findings-autocomplete-and-crud-list-search
 goal: A venue map search is cancelled by a newer map tap or search and when the page is left.
 gate: Tests pass.
+closed: 2026-11
 kind: change
 ---
 

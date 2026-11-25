@@ -1,12 +1,13 @@
 ---
 id: timing-tests-for-the-autocomplete-search
 title: Timing tests for the autocomplete search
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication
 goal: The autocomplete's wait-then-search logic has behaviour tests, so later changes to it have a safety net.
 gate: Starts after the DX to Syncfusion migration lands, to avoid conflicts with it.
+closed: 2026-11
 kind: change
 ---
 

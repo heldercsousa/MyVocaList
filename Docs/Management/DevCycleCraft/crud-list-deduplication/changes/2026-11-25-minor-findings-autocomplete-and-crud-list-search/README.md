@@ -1,12 +1,13 @@
 ---
 id: minor-findings-autocomplete-and-crud-list-search
 title: "Minor findings: autocomplete and CRUD list search"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-25
 section: DevCycleCraft
 parent: crud-list-deduplication
 goal: The four minor search findings of the code-sharing research are each fixed or ruled out.
 gate: Every child item is done.
+closed: 2026-11
 kind: change
 ---
 

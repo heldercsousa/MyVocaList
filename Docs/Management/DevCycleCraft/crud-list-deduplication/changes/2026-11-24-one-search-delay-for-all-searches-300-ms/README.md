@@ -1,12 +1,13 @@
 ---
 id: one-search-delay-for-all-searches-300-ms
 title: One search delay for all searches (300 ms)
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication
 goal: Every search in the app waits the same 300 ms after typing, taken from one shared constant instead of separate literals.
 gate: Starts after the DX to Syncfusion migration lands, to avoid conflicts with it.
+closed: 2026-11
 kind: change
 ---
 

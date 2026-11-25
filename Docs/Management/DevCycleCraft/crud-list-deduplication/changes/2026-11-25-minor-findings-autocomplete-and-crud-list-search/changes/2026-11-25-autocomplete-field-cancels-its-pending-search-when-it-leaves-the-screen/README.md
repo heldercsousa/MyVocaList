@@ -1,12 +1,13 @@
 ---
 id: autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen
 title: Autocomplete field cancels its pending search when it leaves the screen
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-25
 section: DevCycleCraft
 parent: minor-findings-autocomplete-and-crud-list-search
 goal: A pending autocomplete search is cancelled when the field is unloaded.
 gate: Tests pass, or the Syncfusion field is shown not to have the defect.
+closed: 2026-11
 kind: change
 ---
 

@@ -1,12 +1,13 @@
 ---
 id: search-error-handling-short-message-for-users-full-detail-for-developers-only
 title: "Search error handling: short message for users, full detail for developers only"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-24
 section: DevCycleCraft
 parent: crud-list-deduplication
 goal: Search failures in the autocomplete fields and CRUD lists are logged with full detail and never fail silently; users see only a short, plain message.
 gate: Helder and Claude Code agree the approach in a discussion. Starts after the DX to Syncfusion migration lands, to avoid conflicts with it.
+closed: 2026-11
 kind: change
 ---
 

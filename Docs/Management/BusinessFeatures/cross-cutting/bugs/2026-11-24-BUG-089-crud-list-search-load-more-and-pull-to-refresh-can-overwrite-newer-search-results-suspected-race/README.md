@@ -1,13 +1,14 @@
 ---
 id: BUG-089
 title: "CRUD list search: load-more and pull-to-refresh can overwrite newer search results (suspected race)"
-status: 🟡 In Progress
+status: ✅ Fixed
 severity: Major
 target: 2026-11-24
 section: BusinessFeatures
 parent: cross-cutting
 goal: A list search always shows the rows for the latest query; an older load-more page or refresh never replaces or joins them.
 gate: Confirm with a failing test first. Starts after the DX to Syncfusion migration lands, to avoid conflicts with it.
+closed: 2026-11
 kind: bug
 ---
 

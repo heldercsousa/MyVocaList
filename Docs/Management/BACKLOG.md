@@ -25,7 +25,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | 2026-11-22 | ↳ Deezer vs MusicBrainz — systematic comparison with pros and cons | 💡 Pending |
 | — | **Cross-cutting** | — |
-| 2026-11-24 | ↳ CRUD list search: load-more and pull-to-refresh can overwrite newer search results (suspected race) | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
@@ -41,15 +40,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
 | 2026-11-22 | ↳ Early-version notice in the app inviting feedback and suggestions | 💡 Pending |
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
-| 2026-11-24 | ↳ One search delay for all searches (300 ms) | 🟡 In Progress |
-| 2026-11-24 | ↳ Remove dead search code after confirming nothing uses it | 🟡 In Progress |
-| 2026-11-24 | ↳ Search error handling: short message for users, full detail for developers only | 🟡 In Progress |
-| 2026-11-24 | ↳ Timing tests for the autocomplete search | 🟡 In Progress |
-| 2026-11-25 | ↳ Minor findings: autocomplete and CRUD list search | 🟡 In Progress |
-| 2026-11-25 | ↳↳ Autocomplete field cancels its pending search when it leaves the screen | 🟡 In Progress |
-| 2026-11-25 | ↳↳ Dispose the last search cancellation source | 🟡 In Progress |
-| 2026-11-25 | ↳↳ Measure whether autocomplete field searches block the UI thread | 🟡 In Progress |
-| 2026-11-25 | ↳↳ Venue map picker search can be cancelled | 🟡 In Progress |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
 | — | **UI library migration — DevExpress → Syncfusion, coexisting page by page** | 🟡 In Progress |
