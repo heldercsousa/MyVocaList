@@ -26,6 +26,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-22 | ↳ Deezer vs MusicBrainz — systematic comparison with pros and cons | 💡 Pending |
 | — | **Cross-cutting** | — |
 | 2026-11-24 | ↳ CRUD list search: load-more and pull-to-refresh can overwrite newer search results (suspected race) | 🟡 In Progress |
+| 2026-11-25 | ↳ Person migration fails on upgrade: CK_Persons_EmailOrBirthday check constraint failed on existing rows | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
