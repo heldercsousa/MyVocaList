@@ -39,3 +39,10 @@ E2E: emulator not run in this session. Manual check needed: 300 ms must not make
 ### Build notes
 Build: see commit (Android build run before commit) | Tests: 57 passed (filtered), full suite runs in pre-commit hook | Commit SHA: see git log
 Files written and re-read: `CrudListViewModelBase.cs` (line 359 and using block), `SearchConstants.cs` (L36-40), item README decision note.
+
+### Round 2 (coordinator request): emulator check at 300 ms
+- Emulator: Pixel 5 API 36 AVD started (`emulator-5554`); debug build deployed from this worktree (clean obj/bin for net10.0-android first). App opened on the Artists Sf list (catalog list).
+- Fast typing "queen" (0.2 s between keys) in the Artists search: the list settled to "No results found" within the screenshot delay. Shimmer was NOT captured in a screenshot (`screencap` latency is about 1 s, longer than the 300 ms shimmer), so the flash itself is not visually confirmed.
+- Proxy measurement (`adb logcat -c` then `-d`, `Choreographer: Skipped N frames`): idle 0 skipped frames; during fast typing 0 skipped frames. The only skips seen were at app launch (32-71 frames, before any typing).
+- Limit: the Songs `SongFormSf` page is not reachable from the UI (the Sf pages live only on the Debug preview route), so the artist-field check used the DX song form, which shares `SongFormViewModel`.
+- Verdict: no visible or logged jank from the 300 ms delay on the emulator. Helder to confirm the shimmer does not flash on device.

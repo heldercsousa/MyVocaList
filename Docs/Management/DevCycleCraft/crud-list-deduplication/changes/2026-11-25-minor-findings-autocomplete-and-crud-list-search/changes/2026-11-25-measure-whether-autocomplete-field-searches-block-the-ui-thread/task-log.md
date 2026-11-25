@@ -38,3 +38,9 @@ E2E: emulator not run. Helder to confirm on device that the autocomplete no long
 ### Build notes
 Build: Android build run before commit | Tests: 379 passed (filtered) | Commit SHA: see git log
 Files written and re-read: `SongFormViewModel.cs` L386-395 and title read; `ArtistFormViewModel.cs` L400; `PersonFormViewModel.cs` L494-499.
+
+### Round 2 (coordinator request): emulator before/after
+- After (current HEAD, offload in place): artist field in the song form (DX form, shared `SongFormViewModel`), focus then fast typing "queens": 0 `Skipped N frames` lines while idle and while typing.
+- Before (offload removed): NOT measured. The before-build could not be deployed: the Android packaging step stalled after the .NET outputs, with `classes*.dex` locked by a killed earlier deploy (`Device or resource busy`). The before-build was stopped and the offload line restored (verified: `git status` clean).
+- Conclusion: the main-thread read on this emulator is too short to show as dropped frames either way; the B4 fix rests on the code-path analysis and the threading test. Device/timing confirmation still open.
+- Note: `SongFormSf` is not reachable from the UI; measured the shared-VM DX form instead.
