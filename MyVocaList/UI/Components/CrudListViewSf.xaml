@@ -242,7 +242,7 @@
 
                         </Grid>
 
-                        <!-- Overflow item menu (browse mode, shared MD3 Menu), anchored per row by OverflowMenuButtonSf via
+                        <!-- Overflow item menu (browse mode, shared MD3 Menu), anchored per row by OverflowMenuButton via
                              IMenuHost.HostedMenu. State driven by ICrudListViewModel.IsItemMenuOpen (TwoWay); Android Back closes the
                              SfPopup by itself and the close is written back. Items: ItemMenuItems (Edit, page actions, Delete). -->
                         <menus:Menu x:Name="itemMenu"

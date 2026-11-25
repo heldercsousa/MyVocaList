@@ -6,7 +6,7 @@
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     x:Class="MyVocaList.UI.Components.Lists.ListItemOverflowButtonSf">
 
-    <menus:OverflowMenuButtonSf
+    <menus:OverflowMenuButton
         IsVisible="{Binding BindingContext.IsSelectionMode, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Converter={StaticResource InverseBoolConverter}}"
         Command="{Binding BindingContext.OpenItemMenuCommand, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"
         CommandParameter="{Binding .}" />

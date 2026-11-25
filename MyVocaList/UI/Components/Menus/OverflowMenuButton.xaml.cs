@@ -9,7 +9,7 @@ namespace MyVocaList.UI.Components.Menus;
 /// the menu directly. While the menu is open, the button shows the pressed state layer (REQ-OVFM-22).
 /// Has no dependency on any page, ViewModel or list type (REQ-OVFM-25).
 /// </summary>
-public partial class OverflowMenuButtonSf : ContentView
+public partial class OverflowMenuButton : ContentView
 {
     /// <summary>MD3 pressed state-layer opacity applied to On surface variant.</summary>
     private const float PressedStateLayerOpacity = 0.10f;
@@ -18,33 +18,33 @@ public partial class OverflowMenuButtonSf : ContentView
     public static readonly BindableProperty MenuProperty = BindableProperty.Create(
         nameof(Menu),
         typeof(Menu),
-        typeof(OverflowMenuButtonSf),
+        typeof(OverflowMenuButton),
         null);
 
     /// <summary>Runs on tap instead of showing the menu directly. The ViewModel is then responsible for opening the menu.</summary>
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
         nameof(Command),
         typeof(ICommand),
-        typeof(OverflowMenuButtonSf),
+        typeof(OverflowMenuButton),
         null);
 
     /// <summary>Parameter passed to <see cref="Command"/>. Falls back to the BindingContext when null.</summary>
     public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
         nameof(CommandParameter),
         typeof(object),
-        typeof(OverflowMenuButtonSf),
+        typeof(OverflowMenuButton),
         null);
 
     /// <summary>Accessibility description of the button.</summary>
     public static readonly BindableProperty DescriptionProperty = BindableProperty.Create(
         nameof(Description),
         typeof(string),
-        typeof(OverflowMenuButtonSf),
+        typeof(OverflowMenuButton),
         "More options");
 
     private Menu? _pressedMenu;
 
-    public OverflowMenuButtonSf()
+    public OverflowMenuButton()
     {
         InitializeComponent();
     }
@@ -82,7 +82,7 @@ public partial class OverflowMenuButtonSf : ContentView
         var menu = MenuResolution.Resolve(Menu, AncestorsOf(this), host => (host as IMenuHost)?.HostedMenu);
         if (menu is null)
         {
-            Serilog.Log.ForContext("SourceContext", nameof(OverflowMenuButtonSf))
+            Serilog.Log.ForContext("SourceContext", nameof(OverflowMenuButton))
                 .Warning("No Menu set and no IMenuHost ancestor found; overflow menu not opened");
             return;
         }
