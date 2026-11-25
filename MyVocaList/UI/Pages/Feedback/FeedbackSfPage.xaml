@@ -30,6 +30,9 @@
                 Hint="Category"
                 IsHintAlwaysFloated="True"
                 ContainerType="Outlined">
+                <inputlayout:SfTextInputLayout.HintLabelStyle>
+                    <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                </inputlayout:SfTextInputLayout.HintLabelStyle>
                 <sfinputs:SfComboBox
                     ItemsSource="{Binding Categories}"
                     SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
@@ -51,10 +54,12 @@
             <!-- Message -->
             <inputlayout:SfTextInputLayout
                 Hint="Message"
-                ContainerType="Outlined"
-                ShowCharCount="True"
-                CharMaxLength="1000">
+                ContainerType="Outlined">
+                <inputlayout:SfTextInputLayout.HintLabelStyle>
+                    <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                </inputlayout:SfTextInputLayout.HintLabelStyle>
                 <Editor
+                    x:Name="messageEditor"
                     Text="{Binding Message, Mode=TwoWay}"
                     Placeholder="Describe the issue or feature request..."
                     PlaceholderColor="{StaticResource OnSurfaceVariant}"
@@ -64,10 +69,20 @@
                     MaxLength="1000" />
             </inputlayout:SfTextInputLayout>
 
+            <!-- Character counter: SfTextInputLayout does not count a stock Editor, so mirror the text length -->
+            <Label
+                Text="{Binding Source={x:Reference messageEditor}, x:DataType=Editor, Path=Text.Length, StringFormat='{0} / 1000', FallbackValue='0 / 1000'}"
+                StyleClass="Body.Small"
+                TextColor="{StaticResource OnSurfaceVariant}"
+                HorizontalOptions="End" />
+
             <!-- Email (optional) -->
             <inputlayout:SfTextInputLayout
                 Hint="Contact email (optional)"
                 ContainerType="Outlined">
+                <inputlayout:SfTextInputLayout.HintLabelStyle>
+                    <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                </inputlayout:SfTextInputLayout.HintLabelStyle>
                 <Entry
                     Text="{Binding Email, Mode=TwoWay}"
                     Placeholder="your@email.com"

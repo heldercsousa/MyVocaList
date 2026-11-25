@@ -13,7 +13,6 @@ public static class PreviewRoutes
     // Add one line per Sf page copy, e.g.: ("Venues", "venues-sf", typeof(VenuesSfPage)),
     private static readonly List<(string Title, string Route, Type Page)> _entries = new()
     {
-        ("YouTube search", "youtube-search-sf", typeof(YouTubeSearchSfPage)),
     };
 
     /// <summary>Preview entries shown on the Syncfusion preview page.</summary>
