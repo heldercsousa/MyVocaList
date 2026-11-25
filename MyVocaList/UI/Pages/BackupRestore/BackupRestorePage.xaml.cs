@@ -1,8 +1,8 @@
 namespace MyVocaList.UI.Pages.BackupRestore;
 
-public partial class BackupRestoreSfPage : ContentPage
+public partial class BackupRestorePage : ContentPage
 {
-    public BackupRestoreSfPage(BackupRestoreViewModel vm)
+    public BackupRestorePage(BackupRestoreViewModel vm)
     {
         InitializeComponent();
         BindingContext = vm;

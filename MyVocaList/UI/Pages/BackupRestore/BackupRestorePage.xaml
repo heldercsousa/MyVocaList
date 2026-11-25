@@ -5,7 +5,7 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:entity="clr-namespace:MyVocaList.Domain.Entity;assembly=MyVocaList.Domain"
-    x:Class="MyVocaList.UI.Pages.BackupRestore.BackupRestoreSfPage"
+    x:Class="MyVocaList.UI.Pages.BackupRestore.BackupRestorePage"
     x:DataType="vm:BackupRestoreViewModel"
     Title="Backup &amp; Restore"
     BackgroundColor="{StaticResource Surface}"

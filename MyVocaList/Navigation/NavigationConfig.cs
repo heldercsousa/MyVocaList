@@ -16,7 +16,7 @@ public static class NavigationConfig
         [Routes.Artists] = typeof(ArtistsSfPage),
         [Routes.Songs] = typeof(SongsSfPage),
         [Routes.Preferences] = typeof(SettingsSfPage),
-        [Routes.Backup] = typeof(BackupRestoreSfPage),
+        [Routes.Backup] = typeof(BackupRestorePage),
         [Routes.About] = typeof(AboutPage),
 #if DEBUG
         // Satisfies the NavigationConfigTests guard (every menu route has a PageTypes entry). The flyout item itself

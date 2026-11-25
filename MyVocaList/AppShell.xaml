@@ -84,7 +84,7 @@
     </FlyoutItem>
 
     <FlyoutItem Route="backup" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestoreSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestorePage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="settings" FlyoutItemIsVisible="False">
