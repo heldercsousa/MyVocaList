@@ -50,3 +50,9 @@ Files written and re-read: `CrudListViewModelBase.cs` (line 359 and using block)
 ### Round 3: shimmer continuity under fast typing (REQ-DLH-05)
 - Test `CrudListStaleLoadTests.TypingFasterThanTheDebounce_KeepsTheShimmerOnUntilTheLastSearchApplies`: keystrokes 20 ms apart; `IsInitialLoading` changes exactly `[true, false]` (on at the first keystroke, off when the last search's rows apply). No off/on between keystrokes. Passed 4/4 runs (3 repeats). No flicker found; behaviour unchanged.
 - Caveat: real-time keystroke spacing (20 ms, well under 300 ms). Under extreme CPU load a gap over 300 ms would start a search early and the assertion could fail; not observed.
+
+### Emulator visual check of the placeholder (orchestrator, 2026-11-25)
+- Build: HEAD 145e8a4f (the APK deployed to Drive). Pixel 5 API 36 emulator, Venues list.
+- Screen recorded while typing "adegab" one key at a time (`adb input` gives about 1.2 s per key on this emulator), frames read at 8 per second.
+- Result: once the first key lands, the loading placeholder shows and stays on through every keystroke. It never flashes back to rows between keys. This matches the unit test `TypingFasterThanTheDebounce_KeepsTheShimmerOnUntilTheLastSearchApplies`.
+- Open, not resolved: in the 10-second recording no results appeared after the last key, and later attempts to repeat the search were spoiled by driving errors (taps and keys landed on other pages; the search box once showed "aqeda"). Whether results take that long on the emulator, or a search sometimes doesn't apply, needs a check on a real phone: type "adega" on Venues and see that the "Adega ..." rows appear within about a second.
