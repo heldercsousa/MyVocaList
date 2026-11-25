@@ -7,9 +7,9 @@ namespace MyVocaList;
 public partial class AppShell : Shell
 {
     private readonly IWhatsNewService _whatsNewService;
-    private WhatsNewBottomSheet? _whatsNewSheet;
-    private UpdateAvailableBottomSheet? _updateAvailableSheet;
-    private UpdateRequiredBottomSheet? _updateRequiredSheet;
+    private WhatsNewBottomSheetSf? _whatsNewSheet;
+    private UpdateAvailableBottomSheetSf? _updateAvailableSheet;
+    private UpdateRequiredBottomSheetSf? _updateRequiredSheet;
 
     public AppShell(AppShellViewModel viewModel, IWhatsNewService whatsNewService)
     {
@@ -41,7 +41,7 @@ public partial class AppShell : Shell
     // is not called (e.g. certain MAUI/platform back-button routing edge cases).
     protected override bool OnBackButtonPressed()
     {
-        if (Navigation.NavigationStack.Count == 0 && CurrentPage is VenuesPage venuesPage)
+        if (Navigation.NavigationStack.Count == 0 && CurrentPage is VenuesSfPage venuesPage)
         {
             venuesPage.ShowExitConfirmation();
             return true;
@@ -52,7 +52,7 @@ public partial class AppShell : Shell
 
     private void OnExitRequested()
     {
-        if (CurrentPage is VenuesPage venuesPage)
+        if (CurrentPage is VenuesSfPage venuesPage)
             venuesPage.ShowExitConfirmation();
     }
 
@@ -60,7 +60,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _whatsNewSheet ??= new WhatsNewBottomSheet();
+            _whatsNewSheet ??= new WhatsNewBottomSheetSf();
             AttachSheetToCurrentPage(_whatsNewSheet);
             _whatsNewSheet.Show(message.Entry, _whatsNewService);
         });
@@ -70,7 +70,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _updateAvailableSheet ??= new UpdateAvailableBottomSheet();
+            _updateAvailableSheet ??= new UpdateAvailableBottomSheetSf();
             AttachSheetToCurrentPage(_updateAvailableSheet);
             _updateAvailableSheet.Show(message.Result);
         });
@@ -80,7 +80,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _updateRequiredSheet ??= new UpdateRequiredBottomSheet();
+            _updateRequiredSheet ??= new UpdateRequiredBottomSheetSf();
             AttachSheetToCurrentPage(_updateRequiredSheet);
             _updateRequiredSheet.Show(message.Result);
         });
