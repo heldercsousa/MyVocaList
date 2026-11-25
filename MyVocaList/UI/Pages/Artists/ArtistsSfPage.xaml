@@ -37,7 +37,7 @@
 
         <views:CrudListViewSf.FilterContent>
             <chips:SfChipGroup ChipType="Filter"
-                               SelectedItems="{Binding SelectedRoleFilters, Mode=TwoWay}"
+                               SelectionChanged="OnRoleFilterSelectionChanged"
                                Margin="16,4,16,4">
                 <chips:SfChipGroup.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
