@@ -444,4 +444,47 @@ public class VenueMapPickerViewModelTests
         Assert.Null(h.Preferences.LastPlace);
         h.Navigation.Verify(n => n.GoBackAsync(), Times.Never);
     }
+
+    // Regression: BUG-089-family minor finding B10 — leaving the page cancels a pending venue map search.
+    [Fact]
+    public async Task CancelPendingSearch_WhenThePageIsLeft_CancelsTheSearchToken()
+    {
+        var h = new Harness();
+        var searchToken = await StartSearchThatNeverEnds(h, "Bar");
+
+        h.Sut.CancelPendingSearch();
+
+        Assert.True(searchToken.IsCancellationRequested);
+    }
+
+    // Regression: B10 — a newer search cancels the previous one, so only the latest answer can apply.
+    [Fact]
+    public async Task SearchCommand_SecondSearch_CancelsTheFirst()
+    {
+        var h = new Harness();
+        var firstToken = await StartSearchThatNeverEnds(h, "Bar");
+
+        var secondToken = await StartSearchThatNeverEnds(h, "Cafe");
+
+        Assert.True(firstToken.IsCancellationRequested);
+        Assert.False(secondToken.IsCancellationRequested);
+        h.Sut.CancelPendingSearch();
+    }
+
+    // Starts a search whose lookup waits until its token is cancelled; returns that token once captured.
+    private static async Task<CancellationToken> StartSearchThatNeverEnds(Harness h, string text)
+    {
+        var captured = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+        h.Lookup.Setup(s => s.SearchAsync(text, It.IsAny<CancellationToken>()))
+            .Returns<string, CancellationToken>(async (_, ct) =>
+            {
+                captured.TrySetResult(ct);
+                await Task.Delay(Timeout.Infinite, ct);
+                return new PlaceSearchResult(PlaceLookupStatus.Found, []);
+            });
+        h.Sut.SearchText = text;
+
+        _ = h.Sut.SearchCommand.ExecuteAsync(null);
+        return await captured.Task.WaitAsync(TimeSpan.FromSeconds(5));
+    }
 }

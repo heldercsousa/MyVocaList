@@ -112,6 +112,7 @@ public partial class VenueMapPickerSfPage : ContentPage
         mapView.RawMessageReceived -= OnRawMessageReceived;
         mapView.HandlerChanged -= OnMapHandlerChanged;
         ViewModel.ViewRequested -= OnViewRequested;
+        ViewModel.CancelPendingSearch(); // B10: leaving the page cancels a pending map search
         Unloaded -= OnUnloaded;
     }
 }

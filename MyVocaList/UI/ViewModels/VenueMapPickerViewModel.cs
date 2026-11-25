@@ -46,6 +46,9 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
     // Cancels the lookup of the previous tap (or of a selected result) when a newer one supersedes it.
     private CancellationTokenSource? _tapCts;
 
+    // B10: the latest submit search. Cancelled by a newer search, a newer map tap, or leaving the page.
+    private CancellationTokenSource? _searchCts;
+
     public VenueMapPickerViewModel(
         IPlaceLookupService placeLookup,
         IMapPickerPreferences preferences,
@@ -141,10 +144,16 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
         if (text.Length < MinSearchLength)
             return;
 
+        CancelPendingSearch();
+        var cts = new CancellationTokenSource();
+        _searchCts = cts;
         IsSearching = true;
         try
         {
-            var result = await _placeLookup.SearchAsync(text);
+            var result = await _placeLookup.SearchAsync(text, cts.Token);
+            if (cts.IsCancellationRequested)
+                return;
+
             var places = result.Places;
             await RunOnUiThreadAsync(() =>
             {
@@ -162,10 +171,29 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
                 return Task.CompletedTask;
             });
         }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            // Superseded by a newer search, a map tap, or leaving the page: its answer is dropped (B10).
+        }
         finally
         {
-            IsSearching = false;
+            // Only the latest search owns the busy flag; a cancelled one was already released by CancelPendingSearch.
+            if (ReferenceEquals(_searchCts, cts))
+            {
+                _searchCts = null;
+                IsSearching = false;
+            }
+
+            cts.Dispose();
         }
+    }
+
+    /// <summary>Cancels the pending submit search, if any. Called on a newer search, a newer map tap, and when the page is left.</summary>
+    public void CancelPendingSearch()
+    {
+        _searchCts?.Cancel();
+        _searchCts = null;
+        IsSearching = false;
     }
 
     /// <summary>Selecting a result centres the map on it; no reverse lookup is sent (REQ-VEN-25).</summary>
@@ -189,10 +217,23 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
     public async Task OnMapTappedAsync(double latitude, double longitude)
     {
         CancelPendingTap();
+        CancelPendingSearch(); // B10: a newer map tap cancels a pending submit search
         var cts = new CancellationTokenSource();
         _tapCts = cts;
-        var ct = cts.Token;
+        try
+        {
+            await LookUpTapAsync(latitude, longitude, cts.Token);
+        }
+        finally
+        {
+            // B9: the last source is released when its tap ends (a newer tap cancels it and it ends here too).
+            if (ReferenceEquals(_tapCts, cts)) _tapCts = null;
+            cts.Dispose();
+        }
+    }
 
+    private async Task LookUpTapAsync(double latitude, double longitude, CancellationToken ct)
+    {
         Results.ClearRange();
         HasResults = false;
         HasNoResults = false;

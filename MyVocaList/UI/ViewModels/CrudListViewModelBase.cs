@@ -347,12 +347,15 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         try { _searchCts?.Cancel(); _searchCts?.Dispose(); }
         catch { /* ignore disposal races */ }
 
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
+        var cts = new CancellationTokenSource();
+        _searchCts = cts;
+        var token = cts.Token;
 
         // REQ-DLH-05: the shimmer shows from the keystroke until the newest search applies its rows.
         var generation = BeginShimmeredLoad();
 
+        // B9: the task is not given the token, so it always runs and its finally releases the last source
+        // (a cancelled-before-start task would skip the finally). Replaced sources are disposed above.
         _ = Task.Run(async () =>
         {
             try
@@ -362,7 +365,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
                 await LoadFirstPageAsync(token, generation);
             }
             catch (OperationCanceledException) { }
-        }, token);
+            finally
+            {
+                if (ReferenceEquals(_searchCts, cts)) _searchCts = null;
+                cts.Dispose();
+            }
+        });
     }
 
     private void RequestDelete(IList<TItem> items)
