@@ -2106,6 +2106,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "{BBFD3D31-960F-5EB4-9EC6-441DFC777D87}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "{2E7F8EE0-35A1-5A28-B725-8D53C0FF7B72}"

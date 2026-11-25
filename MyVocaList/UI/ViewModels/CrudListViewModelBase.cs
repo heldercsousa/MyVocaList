@@ -365,6 +365,11 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
                 await LoadFirstPageAsync(token, generation);
             }
             catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                // B5: the full detail goes to the log only; the current rows stay. The base has no user-message mechanism.
+                _logger.LogError(ex, "CRUD list search failed");
+            }
             finally
             {
                 if (ReferenceEquals(_searchCts, cts)) _searchCts = null;

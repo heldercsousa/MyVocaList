@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using MyVocaList.UI.Collections;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -75,6 +76,32 @@ public class CrudListStaleLoadTests
         Assert.Equal(["new-1"], sut.ItemsList);
     }
 
+    // [AC] B5 (search error handling): a failed debounced search logs the full detail, keeps the current rows,
+    // and throws nothing unobserved. No raw exception text is shown; the CRUD list has no message mechanism.
+    [Fact]
+    public async Task Search_FetchThrows_LogsTheFailureAndKeepsTheCurrentRows()
+    {
+        var logger = new Mock<ILogger>();
+        var sut = new GatedCrudListViewModel(logger.Object);
+        sut.PageFetch = (query, _) => query is null
+            ? Task.FromResult<(IEnumerable<string>, int)>((["old-1"], 1))
+            : throw new InvalidOperationException("db went away");
+        await sut.InitializeAsync();
+
+        sut.SearchText = "boom";
+        await WaitUntil(() => logger.Invocations.Any(i => i.Method.Name == nameof(ILogger.Log) && (LogLevel)i.Arguments[0] == LogLevel.Error));
+        await WaitUntil(() => !sut.IsInitialLoading);
+
+        logger.Verify(l => l.Log(
+            LogLevel.Error,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            It.Is<Exception>(e => e is InvalidOperationException),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        Assert.Equal(["old-1"], sut.ItemsList);
+        Assert.False(sut.IsInitialLoading);
+    }
+
     private static async Task WaitFor(Task task)
     {
         var completed = await Task.WhenAny(task, Task.Delay(TestTimeout));
@@ -91,8 +118,8 @@ public class CrudListStaleLoadTests
 
     private sealed class GatedCrudListViewModel : CrudListViewModelBase<string>
     {
-        public GatedCrudListViewModel()
-            : base(Mock.Of<ILogger>())
+        public GatedCrudListViewModel(ILogger? logger = null)
+            : base(logger ?? Mock.Of<ILogger>())
         {
         }
 
