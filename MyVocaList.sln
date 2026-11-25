@@ -2154,6 +2154,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-BUG-090-person-m
 		Docs\Management\BusinessFeatures\persons\bugs\2026-11-25-BUG-090-person-migration-fails-on-upgrade-ck-persons-emailorbirthday-check-constraint-failed-on-existing-rows\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-25-BUG-090-person-migration-fails-on-upgrade-ck-persons-emailorbirthday-check-constraint-failed-on-existing-rows\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{0B3E0B59-524E-54F4-9328-F76E7847780B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet", "2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet", "{FE9A6B4F-22F8-5A79-AE33-037335CF024D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\ui-component-library-licensing\bugs\2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet\README.md = Docs\Management\cross-cutting\ui-component-library-licensing\bugs\2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2613,6 +2620,8 @@ Global
 		{1A0E934D-BD3B-5CD5-B3EF-0088CA839AA4} = {9C89A657-02DD-5053-A885-274423C3E918}
 		{E806B2DC-E225-5419-81CF-ED66AB36D576} = {9C89A657-02DD-5053-A885-274423C3E918}
 		{70F0ABAF-4076-5A0F-9C29-2BA079568EA4} = {FA1234BC-0001-4000-8000-000000000034}
+		{0B3E0B59-524E-54F4-9328-F76E7847780B} = {CB86F9BF-7F5F-51C3-B9F9-1A2E81A3D4A4}
+		{FE9A6B4F-22F8-5A79-AE33-037335CF024D} = {0B3E0B59-524E-54F4-9328-F76E7847780B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
