@@ -44,19 +44,6 @@
             </Setter>
         </Style>
 
-        <!-- Bottom sheet actions: Sf copies of BottomSheetDestructiveAction / BottomSheetCancelAction (full width, 56dp). -->
-        <Style x:Key="SfBottomSheetDestructiveAction" TargetType="buttons:SfButton" BasedOn="{StaticResource SfTextButton}">
-            <Setter Property="TextColor" Value="{StaticResource Error}" />
-            <Setter Property="HorizontalOptions" Value="Fill" />
-            <Setter Property="HeightRequest" Value="56" />
-            <Setter Property="CornerRadius" Value="0" />
-        </Style>
-        <Style x:Key="SfBottomSheetCancelAction" TargetType="buttons:SfButton" BasedOn="{StaticResource SfTextButton}">
-            <Setter Property="HorizontalOptions" Value="Fill" />
-            <Setter Property="HeightRequest" Value="56" />
-            <Setter Property="CornerRadius" Value="0" />
-        </Style>
-
         <!-- Sf copy of BottomSheetMenuItem (list layout, bodyLarge): leading icon tinted OnSurfaceVariant, OnSurface label.
              Content is a DataTemplate reading ImageSource/Text from the ancestor SfButton (as SfFlyoutMenuButton). -->
         <Style x:Key="SfBottomSheetMenuItem" TargetType="buttons:SfButton">
