@@ -52,7 +52,7 @@
                         Headline="{Binding Title}"
                         SupportingText="{Binding ChannelName}">
                         <lists:ListItem.LeadingContent>
-                            <lists:ListItemLeadingImageSf
+                            <lists:ListItemLeadingImage
                                 ImageSource="{Binding ThumbnailUrl}"
                                 Aspect="AspectFill" />
                         </lists:ListItem.LeadingContent>

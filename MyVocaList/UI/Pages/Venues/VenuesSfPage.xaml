@@ -85,7 +85,7 @@
                                         SupportingText="{Binding AddressSummary}"
                                         IsSelected="False">
                             <lists:ListItem.LeadingContent>
-                                <lists:ListItemLeadingImageSf ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" PlaceholderIcon="nightlife_outlined" Margin="0,8" />
+                                <lists:ListItemLeadingImage ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" PlaceholderIcon="nightlife_outlined" Margin="0,8" />
                             </lists:ListItem.LeadingContent>
                             <lists:ListItem.TrailingContent>
                                 <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
@@ -103,7 +103,7 @@
                                         SupportingText="{Binding AddressSummary}"
                                         IsSelected="True">
                             <lists:ListItem.LeadingContent>
-                                <lists:ListItemLeadingImageSf ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" PlaceholderIcon="nightlife_outlined" Margin="0,8" />
+                                <lists:ListItemLeadingImage ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" PlaceholderIcon="nightlife_outlined" Margin="0,8" />
                             </lists:ListItem.LeadingContent>
                             <lists:ListItem.TrailingContent>
                                 <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />

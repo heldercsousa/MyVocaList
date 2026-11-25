@@ -81,7 +81,7 @@
                     <!-- MD3 menu item: optional leading image/avatar (col 0), text (col 1), trailing text (col 2).
                          LeadingKind None + null TrailingText = text only (columns 0 and 2 collapse to zero width). -->
                     <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,8">
-                        <lists:ListItemLeadingImageSf Grid.Column="0"
+                        <lists:ListItemLeadingImage Grid.Column="0"
                                                       IsVisible="{Binding HasLeadingImage}"
                                                       ImageSource="{Binding ImageUrl}"
                                                       PlaceholderIcon="{Binding PlaceholderIcon}"

@@ -1,24 +1,24 @@
 namespace MyVocaList.UI.Components.Lists;
 
-public partial class ListItemLeadingImageSf : ContentView
+public partial class ListItemLeadingImage : ContentView
 {
     public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create(
         nameof(ImageSource),
         typeof(ImageSource),
-        typeof(ListItemLeadingImageSf),
+        typeof(ListItemLeadingImage),
         defaultValue: null);
 
     public static readonly BindableProperty AspectProperty = BindableProperty.Create(
         nameof(Aspect),
         typeof(Aspect),
-        typeof(ListItemLeadingImageSf),
+        typeof(ListItemLeadingImage),
         defaultValue: Aspect.AspectFill);
 
     /// <summary>Icon name shown under the image (grey container). Null: no icon and no container background.</summary>
     public static readonly BindableProperty PlaceholderIconProperty = BindableProperty.Create(
         nameof(PlaceholderIcon),
         typeof(string),
-        typeof(ListItemLeadingImageSf),
+        typeof(ListItemLeadingImage),
         defaultValue: null);
 
     public string PlaceholderIcon
@@ -39,7 +39,7 @@ public partial class ListItemLeadingImageSf : ContentView
         set => SetValue(AspectProperty, value);
     }
 
-    public ListItemLeadingImageSf()
+    public ListItemLeadingImage()
     {
         InitializeComponent();
     }

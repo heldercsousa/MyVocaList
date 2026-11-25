@@ -6,7 +6,7 @@ namespace MyVocaList.UI.Components.Media;
 /// The form picture field (REQ-IPF-01..04; supersedes the size and button set of REQ-PIC-13/15 and REQ-VEN-07..09):
 /// a centred square picture (a circle when <see cref="IsCircle"/>) with a round remove icon button over its top-end
 /// corner, and the size hint. The side is computed from the field's own allocated width. The picture layers the
-/// placeholder icon under <see cref="ThumbnailSource"/> under <see cref="ImageSource"/>, like <c>ListItemLeadingImageSf</c>.
+/// placeholder icon under <see cref="ThumbnailSource"/> under <see cref="ImageSource"/>, like <c>ListItemLeadingImage</c>.
 /// A tap on the picture runs <see cref="PickCommand"/> (add, or replace when there is a picture).
 /// The component decides nothing about pictures: the ViewModel owns <see cref="HasImage"/> and the commands.
 /// </summary>
