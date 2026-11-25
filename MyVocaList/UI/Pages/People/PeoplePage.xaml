@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:CrudListPageBase
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:views="clr-namespace:MyVocaList.UI.Components"
+    x:Class="MyVocaList.UI.Pages.People.PeoplePage"
+    x:Name="page"
+    x:DataType="vm:PersonsViewModel"
+    Title="Singers"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
+
+    <Shell.TitleView>
+        <appbars:SmallAppBar
+            Title="{Binding AppBarTitle}"
+            IsElevated="{Binding IsScrolled}" />
+    </Shell.TitleView>
+
+    <views:CrudListView
+        ItemsSource="{Binding Persons}"
+        SelectedItemsSource="{Binding SelectedPersonsRaw}"
+        IsEmptyNoItems="{Binding IsEmptyNoPersons}"
+        SearchText="{Binding SearchText, Mode=TwoWay}"
+        IsSearchBarElevated="{Binding IsScrolled}"
+        SearchPlaceholder="Search people..."
+        EmptyNoItemsIllustration="person_outlined"
+        EmptyNoItemsHeadline="No person registered"
+        FabCommand="{Binding AddPersonCommand}"
+        FabDescription="Add person">
+
+        <views:CrudListView.ItemTemplate>
+            <DataTemplate x:DataType="models:PersonListItemDto">
+                <lists:ListItem Headline="{Binding FullName}"
+                                SupportingText="{Binding IdentityLine}"
+                                IsSelected="False">
+                    <lists:ListItem.LeadingContent>
+                        <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
+                    </lists:ListItem.LeadingContent>
+                    <lists:ListItem.TrailingContent>
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <lists:ListItemOverflowButton />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </lists:ListItem.TrailingContent>
+                </lists:ListItem>
+            </DataTemplate>
+        </views:CrudListView.ItemTemplate>
+
+        <views:CrudListView.SelectedItemTemplate>
+            <DataTemplate x:DataType="models:PersonListItemDto">
+                <lists:ListItem Headline="{Binding FullName}"
+                                SupportingText="{Binding IdentityLine}"
+                                IsSelected="True">
+                    <lists:ListItem.LeadingContent>
+                        <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
+                    </lists:ListItem.LeadingContent>
+                    <lists:ListItem.TrailingContent>
+                        <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
+                    </lists:ListItem.TrailingContent>
+                </lists:ListItem>
+            </DataTemplate>
+        </views:CrudListView.SelectedItemTemplate>
+
+    </views:CrudListView>
+
+</pages:CrudListPageBase>

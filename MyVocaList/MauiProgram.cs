@@ -149,22 +149,22 @@ public static class MauiProgram
         builder.Services.AddTransient<VenueMapPickerViewModel>();
 
         // Pages
-        builder.Services.AddTransient<VenueMapPickerSfPage>();
-        builder.Services.AddTransient<VenuesSfPage>();
-        builder.Services.AddTransient<PeopleSfPage>();
-        builder.Services.AddTransient<SongsSfPage>();
-        builder.Services.AddTransient<ArtistsSfPage>();
-        builder.Services.AddTransient<FeedbackSfPage>();
-        builder.Services.AddTransient<VenueFormSfPage>();
-        builder.Services.AddTransient<PersonFormSfPage>();
-        builder.Services.AddTransient<ArtistFormSfPage>();
-        builder.Services.AddTransient<SongFormSfPage>();
-        builder.Services.AddTransient<YouTubeSearchSfPage>();
-        builder.Services.AddTransient<BackupRestoreSfPage>();
+        builder.Services.AddTransient<VenueMapPickerPage>();
+        builder.Services.AddTransient<VenuesPage>();
+        builder.Services.AddTransient<PeoplePage>();
+        builder.Services.AddTransient<SongsPage>();
+        builder.Services.AddTransient<ArtistsPage>();
+        builder.Services.AddTransient<FeedbackPage>();
+        builder.Services.AddTransient<VenueFormPage>();
+        builder.Services.AddTransient<PersonFormPage>();
+        builder.Services.AddTransient<ArtistFormPage>();
+        builder.Services.AddTransient<SongFormPage>();
+        builder.Services.AddTransient<YouTubeSearchPage>();
+        builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
-        builder.Services.AddTransient<SettingsSfPage>();
+        builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<AboutViewModel>();
-        builder.Services.AddTransient<AboutSfPage>();
+        builder.Services.AddTransient<AboutPage>();
 
         // Feedback
         builder.Services.AddTransient<IFeedbackService, FeedbackService>();

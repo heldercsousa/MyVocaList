@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
+    x:Class="MyVocaList.UI.Components.Media.ImagePickerField"
+    x:Name="self">
+
+    <!-- Form picture field (REQ-IPF-01..04, supersedes REQ-PIC-13/15 and REQ-VEN-07..09): a centred square picture
+         (a circle when IsCircle), the corner remove button and the size hint. The side is computed from the
+         allocated width in code-behind (OnSizeAllocated / ApplySide) and applied to the host, the frame and both
+         image layers. Button and hint visibility, enabled state, semantic hint and the frame shape are applied in
+         code-behind (ApplyState / ApplyShape), never by triggers. -->
+    <VerticalStackLayout Spacing="12">
+
+        <!-- The picture host: holds the frame and the remove button overlaid on its top-end corner. Its size is set in code. -->
+        <Grid x:Name="pictureHost"
+              HorizontalOptions="Center"
+              VerticalOptions="Start">
+
+            <!-- The picture: RoundRectangle 12 (song) or Ellipse (artist), set in code from IsCircle.
+                 Layering copies ListItemLeadingImage: the placeholder sits under the thumbnail, the thumbnail
+                 under the large picture. A loaded picture covers what is under it; a missing or failed one
+                 leaves it visible (REQ-PIC-14). A tap runs PickCommand (REQ-IPF-02). -->
+            <Border x:Name="pictureFrame"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Stroke="Transparent"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                    SemanticProperties.Description="Picture"
+                    SemanticProperties.Hint="Double tap to choose a picture">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPictureTapped" />
+                </Border.GestureRecognizers>
+
+                <Grid>
+                    <Image Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
+                           behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                           WidthRequest="48"
+                           HeightRequest="48"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+
+                    <Image x:Name="thumbnailImage"
+                           Source="{Binding ThumbnailSource, Source={x:Reference self}}"
+                           Aspect="AspectFill" />
+
+                    <Image x:Name="largeImage"
+                           Source="{Binding ImageSource, Source={x:Reference self}}"
+                           Aspect="AspectFill" />
+                </Grid>
+            </Border>
+
+            <!-- The remove button (REQ-IPF-03): a round tonal icon button over the top-end corner of the picture.
+                 Visible only with a form picture (ApplyState); disabled while busy (REQ-IPF-04). Style reuses
+                 SfIconButton; the tonal background, the 40 dp size, the icon colour and the centring
+                 (Padding 0, explicit 24 dp icon, vertical content centring) are local overrides. Icon is the
+                 trash can (delete_outlined), not the close icon (device check fix 1). -->
+            <ImageButton x:Name="removeButton"
+                         Source="delete_outlined"
+                         Style="{StaticResource SfIconButton}"
+                         WidthRequest="40"
+                         HeightRequest="40"
+                         CornerRadius="20"
+                         Padding="8"
+                         BackgroundColor="{StaticResource SecondaryContainer}"
+                         behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}"
+                         HorizontalOptions="End"
+                         VerticalOptions="Start"
+                         Margin="4"
+                         IsVisible="False"
+                         SemanticProperties.Description="Remove picture"
+                         Command="{Binding RemoveCommand, Source={x:Reference self}}" />
+        </Grid>
+
+        <!-- The size hint (REQ-PIC-16): only while there is no picture and the text is not empty. -->
+        <Label x:Name="hintLabel"
+               Text="{Binding HintText, Source={x:Reference self}}"
+               StyleClass="Body.Small"
+               TextColor="{StaticResource OnSurfaceVariant}"
+               HorizontalTextAlignment="Center"
+               HorizontalOptions="Center"
+               IsVisible="False" />
+    </VerticalStackLayout>
+</ContentView>

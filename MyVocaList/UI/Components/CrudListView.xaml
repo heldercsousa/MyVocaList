@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sflv="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
+    xmlns:pulltorefresh="clr-namespace:Syncfusion.Maui.Toolkit.PullToRefresh;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
+    xmlns:menus="clr-namespace:MyVocaList.UI.Components.Menus"
+    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    x:Class="MyVocaList.UI.Components.CrudListView"
+    x:Name="self">
+
+    <ContentView.Resources>
+        <!-- MD3 FAB (medium, 56x56, CornerRadius 16 = ShapeKeyTokens.CornerLarge), same look as the DX Fab style:
+             Primary container, OnPrimary icon, PrimaryContainer while pressed. Stock ImageButton (SfIconButton base)
+             because an SfButton cannot tint SVG icons. Positioning is the caller's responsibility. -->
+        <Style x:Key="SfFab" TargetType="ImageButton" BasedOn="{StaticResource SfIconButton}">
+            <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+            <Setter Property="behaviors:IconTint.Color" Value="{StaticResource OnPrimary}" />
+            <Setter Property="WidthRequest" Value="56" />
+            <Setter Property="HeightRequest" Value="56" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="{StaticResource PrimaryContainer}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Disabled">
+                            <VisualState.Setters>
+                                <Setter Property="Opacity" Value="0.38" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+
+        <!-- Sf copy of BottomSheetMenuItem (list layout, bodyLarge): leading icon tinted OnSurfaceVariant, OnSurface label.
+             Content is a DataTemplate reading ImageSource/Text from the ancestor SfButton (as SfFlyoutMenuButton). -->
+        <Style x:Key="SfBottomSheetMenuItem" TargetType="buttons:SfButton">
+            <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+            <Setter Property="HorizontalOptions" Value="Fill" />
+            <Setter Property="HeightRequest" Value="56" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Content">
+                <Setter.Value>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="16" VerticalOptions="Center" HorizontalOptions="Start">
+                            <Image WidthRequest="24" HeightRequest="24" VerticalOptions="Center"
+                                   Source="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=ImageSource}"
+                                   behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}" />
+                            <Label VerticalOptions="Center" FontSize="16"
+                                   TextColor="{StaticResource OnSurface}"
+                                   Text="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=Text}" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </ContentView.Resources>
+
+    <!-- Confirm sheet (outer) > item actions sheet (inner) > whole layout (search, filters, list, toolbar, FAB).
+         SfBottomSheet hosts the body in Content and the panel in BottomSheetContent, so the sheets wrap the
+         whole control: the modal overlay covers the search and filter rows, and HalfExpandedRatio is measured
+         against the full control height. Ratios: the DX ratios (against the window) rescaled to the control
+         height so the action rows fit with the 30dp grabber area. State and IsOpen are both bound to the
+         DX-typed VM state through the migration converters (design § Sheet-state bridge); a drag down ends
+         in Collapsed, which converts back to Hidden. -->
+    <bottomsheet:SfBottomSheet x:Name="confirmSheet"
+                               State="{Binding ConfirmSheetState, Converter={StaticResource SheetStateToSf}, Mode=TwoWay}"
+                               IsOpen="{Binding ConfirmSheetState, Converter={StaticResource SheetStateToSfIsOpen}, Mode=TwoWay}"
+                               AllowedState="HalfExpanded"
+                               HalfExpandedRatio="0.32"
+                               ContentPadding="0"
+                               IsModal="True"
+                               ShowGrabber="True"
+                               CornerRadius="28,28,0,0">
+        <bottomsheet:SfBottomSheet.Background>
+            <SolidColorBrush Color="{StaticResource Surface}" />
+        </bottomsheet:SfBottomSheet.Background>
+        <bottomsheet:SfBottomSheet.BottomSheetContent>
+            <VerticalStackLayout>
+                <Label Text="{Binding ConfirmMessage}"
+                       StyleClass="Title.Medium"
+                       TextColor="{StaticResource OnSurface}"
+                       HorizontalTextAlignment="Center"
+                       Margin="24,20" />
+                <BoxView Style="{StaticResource Divider}" />
+                <buttons:SfButton Text="{Binding ConfirmActionText}"
+                                  Style="{StaticResource SfBottomSheetDestructiveAction}"
+                                  Command="{Binding ConfirmActionCommand}" />
+                <BoxView Style="{StaticResource Divider}" />
+                <buttons:SfButton Text="Cancel"
+                                  Style="{StaticResource SfBottomSheetCancelAction}"
+                                  Command="{Binding DismissConfirmCommand}" />
+            </VerticalStackLayout>
+        </bottomsheet:SfBottomSheet.BottomSheetContent>
+        <bottomsheet:SfBottomSheet.Content>
+
+            <!-- Item actions sheet (press-and-hold in selection mode); a close by drag is forwarded in code-behind -->
+            <bottomsheet:SfBottomSheet x:Name="itemActionsSheet"
+                                       State="{Binding ItemActionsSheetState, Converter={StaticResource SheetStateToSf}, Mode=TwoWay}"
+                                       IsOpen="{Binding ItemActionsSheetState, Converter={StaticResource SheetStateToSfIsOpen}, Mode=TwoWay}"
+                                       AllowedState="HalfExpanded"
+                                       HalfExpandedRatio="0.25"
+                                       ContentPadding="0"
+                                       IsModal="True"
+                                       ShowGrabber="True"
+                                       CornerRadius="28,28,0,0"
+                                       StateChanged="OnItemActionsSheetStateChanged">
+                <bottomsheet:SfBottomSheet.Background>
+                    <SolidColorBrush Color="{StaticResource Surface}" />
+                </bottomsheet:SfBottomSheet.Background>
+                <bottomsheet:SfBottomSheet.BottomSheetContent>
+                    <VerticalStackLayout Padding="0,8">
+                        <buttons:SfButton Style="{StaticResource SfBottomSheetMenuItem}"
+                                          ImageSource="edit_outlined"
+                                          Text="Edit"
+                                          Command="{Binding EditItemCommand}" />
+                        <buttons:SfButton Style="{StaticResource SfBottomSheetMenuItem}"
+                                          ImageSource="delete_outlined"
+                                          Text="Delete"
+                                          Command="{Binding DeleteItemCommand}" />
+                    </VerticalStackLayout>
+                </bottomsheet:SfBottomSheet.BottomSheetContent>
+                <bottomsheet:SfBottomSheet.Content>
+
+                    <!-- Root Grid (inside both sheets): Row 0 (Auto) = persistent SearchBar; Row 1 (Auto) = optional
+                         FilterContent slot; Row 2 (*) = list + overlays -->
+                    <Grid x:Name="rootGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition x:Name="filterRow" Height="0" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0: persistent MD3 Search bar (standalone/docked) — REQ-SEARCHBAR-01/09 -->
+                        <appbars:SearchBar x:Name="searchBar"
+                                             Grid.Row="0"
+                                             SearchText="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                                             Placeholder="{Binding SearchPlaceholder, Source={x:Reference self}}"
+                                             IsElevated="{Binding IsSearchBarElevated, Source={x:Reference self}}" />
+
+                        <!-- Row 1: FilterContent slot — Content + visibility assigned in code-behind OnFilterContentChanged.
+                             A ContentView host (not ContentPresenter): ContentPresenter only renders inside a ControlTemplate. -->
+                        <ContentView x:Name="filterContentHost"
+                                     Grid.Row="1"
+                                     IsVisible="False" />
+
+                        <!-- Row 2: list area (list, skeleton, empty states, toolbar + FAB) -->
+                        <Grid x:Name="listArea" Grid.Row="2">
+
+                            <!-- Pull-to-refresh (Toolkit) hosting the SfListView (T2.0 verdict). Selection mode, SelectedItems sync,
+                                 LoadMoreOption and the gestures are driven from code-behind (SelectedItems is get-only; the XAML
+                                 Tap/LongPress commands pass event args, not the item). -->
+                            <pulltorefresh:SfPullToRefresh x:Name="pullToRefresh"
+                                                           IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                                                           RefreshCommand="{Binding RefreshCommand}"
+                                                           ProgressColor="{StaticResource Primary}"
+                                                           ProgressBackground="{StaticResource SurfaceContainerHighBrush}">
+                                <pulltorefresh:SfPullToRefresh.PullableContent>
+                                    <sflv:SfListView x:Name="listView"
+                                                     ItemsSource="{Binding ItemsSource, Source={x:Reference self}}"
+                                                     ItemTemplate="{Binding ItemTemplate, Source={x:Reference self}}"
+                                                     SelectedItemTemplate="{Binding SelectedItemTemplate, Source={x:Reference self}}"
+                                                     AutoFitMode="DynamicHeight"
+                                                     SelectionMode="None"
+                                                     SelectionGesture="Tap"
+                                                     SelectionBackground="Transparent"
+                                                     ShowItemSeparator="False"
+                                                     LoadMoreOption="None"
+                                                     LoadMoreCommand="{Binding LoadMoreCommand}"
+                                                     BackgroundColor="{StaticResource Surface}"
+                                                     Margin="0,0,0,88"
+                                                     ItemTapped="OnItemTapped"
+                                                     ItemLongPress="OnItemLongPress"
+                                                     SelectionChanged="OnListViewSelectionChanged" />
+                                </pulltorefresh:SfPullToRefresh.PullableContent>
+                            </pulltorefresh:SfPullToRefresh>
+
+                            <!-- Loading skeleton: stock Border bones (SfShimmer CustomView renders white; the DX skeleton is custom-shaped,
+                                 so the design § Control mapping fallback applies). Opaque Surface overlay while IsInitialLoading;
+                                 the opacity pulse runs in code-behind. -->
+                            <Grid x:Name="skeletonHost"
+                                  BackgroundColor="{StaticResource Surface}"
+                                  IsVisible="{Binding IsInitialLoading}">
+                                <VerticalStackLayout x:Name="skeletonBones" Spacing="0" VerticalOptions="Start">
+                                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                                    <Border StrokeThickness="0" HeightRequest="56" Margin="0,1" BackgroundColor="{StaticResource SurfaceContainerHighest}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <!-- Empty state: no items of this entity type registered -->
+                            <states:EmptyState
+                                Illustration="{Binding EmptyNoItemsIllustration, Source={x:Reference self}}"
+                                Headline="{Binding EmptyNoItemsHeadline, Source={x:Reference self}}"
+                                IsVisible="{Binding IsEmptyNoItems, Source={x:Reference self}}"
+                                Margin="32,32,32,88" />
+
+                            <!-- Empty state: search returned no results — bound directly via ICrudListViewModel BindingContext -->
+                            <states:EmptyState
+                                Illustration="search_outlined"
+                                Headline="No results found"
+                                IsVisible="{Binding IsEmptyNoResults}"
+                                Margin="32,32,32,88" />
+
+                            <!-- Toolbar + FAB: centered row, 16dp from bottom -->
+                            <HorizontalStackLayout HorizontalOptions="Center"
+                                                   VerticalOptions="End"
+                                                   Margin="0,0,0,16"
+                                                   Spacing="8">
+                                <toolbars:FloatingToolbar
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding IsSelectionMode}"
+                                    Action1Icon="done_all_outlined"
+                                    Action1Command="{Binding SelectAllCommand}"
+                                    Action1Description="Select all"
+                                    Action1IsSelected="{Binding IsAllSelected}"
+                                    Action2Icon="delete_outlined"
+                                    Action2Command="{Binding DeleteSelectedCommand}"
+                                    Action2Description="Delete selected" />
+                                <ImageButton Style="{StaticResource SfFab}"
+                                             Source="{Binding FabIcon, Source={x:Reference self}}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="{Binding FabDescription, Source={x:Reference self}}"
+                                             Command="{Binding FabCommand, Source={x:Reference self}}" />
+                            </HorizontalStackLayout>
+
+                        </Grid>
+
+                        <!-- Overflow item menu (browse mode, shared MD3 Menu), anchored per row by OverflowMenuButton via
+                             IMenuHost.HostedMenu. State driven by ICrudListViewModel.IsItemMenuOpen (TwoWay); Android Back closes the
+                             SfPopup by itself and the close is written back. Items: ItemMenuItems (Edit, page actions, Delete). -->
+                        <menus:Menu x:Name="itemMenu"
+                                      IsOpen="{Binding IsItemMenuOpen, Mode=TwoWay}"
+                                      ItemsSource="{Binding ItemMenuItems}" />
+
+                    </Grid>
+
+                </bottomsheet:SfBottomSheet.Content>
+            </bottomsheet:SfBottomSheet>
+
+        </bottomsheet:SfBottomSheet.Content>
+    </bottomsheet:SfBottomSheet>
+
+</ContentView>

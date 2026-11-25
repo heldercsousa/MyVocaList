@@ -11,13 +11,13 @@ public static class NavigationConfig
 {
     public static readonly Dictionary<string, Type> PageTypes = new()
     {
-        [Routes.Venues] = typeof(VenuesSfPage),
-        [Routes.People] = typeof(PeopleSfPage),
-        [Routes.Artists] = typeof(ArtistsSfPage),
-        [Routes.Songs] = typeof(SongsSfPage),
-        [Routes.Preferences] = typeof(SettingsSfPage),
-        [Routes.Backup] = typeof(BackupRestoreSfPage),
-        [Routes.About] = typeof(AboutSfPage),
+        [Routes.Venues] = typeof(VenuesPage),
+        [Routes.People] = typeof(PeoplePage),
+        [Routes.Artists] = typeof(ArtistsPage),
+        [Routes.Songs] = typeof(SongsPage),
+        [Routes.Preferences] = typeof(SettingsPage),
+        [Routes.Backup] = typeof(BackupRestorePage),
+        [Routes.About] = typeof(AboutPage),
 #if DEBUG
         // Satisfies the NavigationConfigTests guard (every menu route has a PageTypes entry). The flyout item itself
         // navigates by Shell route (see BuildMenuGroups) because SyncfusionPreviewPage is not DI-registered.

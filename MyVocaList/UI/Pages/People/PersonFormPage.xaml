@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:sfinputs="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+    xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
+    x:Class="MyVocaList.UI.Pages.People.PersonFormPage"
+    x:DataType="vm:PersonFormViewModel"
+    Title="{Binding PageTitle}"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="All">
+
+    <!-- ── Same-name BottomSheet (BUG-088, REQ-DUP-09) ─────────────────────── -->
+    <!--
+        Soft warning: other singers have the same name. Each row's Open button opens that singer in edit mode.
+        "Save as new" (labelled "Save anyway" in edit mode) saves the form; it is hidden for a name-only form,
+        which shows a hint instead (REQ-DUP-13a). Cancel, the scrim, Back or a drag down save nothing
+        (DismissSameNameSheetCommand). SfBottomSheet hosts the page body in Content and the panel in
+        BottomSheetContent; the open/close state is driven from code-behind (IsOpen + State).
+    -->
+    <bottomsheet:SfBottomSheet x:Name="sameNameSheet"
+                               AllowedState="All"
+                               HalfExpandedRatio="0.5"
+                               ContentPadding="0"
+                               IsModal="True"
+                               ShowGrabber="True"
+                               CornerRadius="28,28,0,0"
+                               StateChanged="OnSameNameSheetStateChanged">
+        <bottomsheet:SfBottomSheet.Background>
+            <SolidColorBrush Color="{StaticResource Surface}" />
+        </bottomsheet:SfBottomSheet.Background>
+
+        <bottomsheet:SfBottomSheet.BottomSheetContent>
+            <Grid RowDefinitions="*,Auto">
+
+                <ScrollView Grid.Row="0">
+                    <VerticalStackLayout Padding="0,0,0,8">
+
+                        <Label Text="{Binding SameNameSheetTitle}"
+                               Style="{StaticResource BottomSheetTitle}"
+                               Margin="24,20,24,8" />
+
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Same-name singers: name and display identifier; Open button opens the singer in edit mode -->
+                        <VerticalStackLayout Spacing="0"
+                                             BindableLayout.ItemsSource="{Binding SameNameMatches}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="24,12">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Headline}"
+                                                   StyleClass="Body.Large"
+                                                   TextColor="{StaticResource OnSurface}" />
+                                            <Label Text="{Binding SupportingText}"
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                                        </VerticalStackLayout>
+                                        <buttons:SfButton Grid.Column="1"
+                                                          Text="Open"
+                                                          Style="{StaticResource SfOutlinedButton}"
+                                                          Padding="16,0"
+                                                          VerticalOptions="Center"
+                                                          Clicked="OnSameNameOpenClicked" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <!-- Rows beyond the list cap (REQ-DUP-09): "…and M more. Find them in the Singers list." -->
+                        <Label Text="{Binding SameNameMoreText}"
+                               IsVisible="{Binding HasMoreSameName}"
+                               StyleClass="Body.Medium"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               Margin="24,8,24,0" />
+
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Save the form: insert (Save as new) or edit (Save anyway). Hidden for a name-only form (REQ-DUP-13a) -->
+                        <VerticalStackLayout Padding="24,12" Spacing="8">
+                            <buttons:SfButton Text="{Binding SameNameSaveButtonText}"
+                                              Style="{StaticResource SfFilledButton}"
+                                              HorizontalOptions="Fill"
+                                              IsVisible="{Binding CanSaveAsNewFromSheet}"
+                                              Command="{Binding SaveAsNewCommand}" />
+
+                            <Label Text="To save a new singer with this name, enter an email or a birthday."
+                                   IsVisible="{Binding CanSaveAsNewFromSheet, Converter={StaticResource InverseBoolConverter}}"
+                                   StyleClass="Body.Medium"
+                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
+                    <BoxView Style="{StaticResource Divider}" />
+
+                    <buttons:SfButton Text="Cancel"
+                                      Style="{StaticResource SfBottomSheetCancelAction}"
+                                      Command="{Binding DismissSameNameSheetCommand}" />
+                </VerticalStackLayout>
+
+            </Grid>
+        </bottomsheet:SfBottomSheet.BottomSheetContent>
+
+        <bottomsheet:SfBottomSheet.Content>
+            <ScrollView>
+                <VerticalStackLayout Padding="24" Spacing="16">
+
+                    <!-- Full Name with autocomplete suggestions (dedup) -->
+                    <textfields:AutocompleteField x:Name="nameField"
+                                                    LabelText="Full Name"
+                                                    PlaceholderText="First and last name"
+                                                    Text="{Binding PersonName, Mode=TwoWay}"
+                                                    HasError="{Binding NameHasError}"
+                                                    ErrorText="{Binding NameErrorText}"
+                                                    OptionSource="{Binding NameOptionSource}"
+                                                    IsDropDownOpen="{Binding IsNameDropDownOpen, Mode=TwoWay}"
+                                                    SelectCommand="{Binding SuggestionSelectedCommand}"
+                                                    IsPickLockEnabled="False"
+                                                    BlurWithoutPickCommand="{Binding ValidateNameCommand}" />
+
+                    <!-- Character counter -->
+                    <Label Text="{Binding CharacterCounterText}"
+                           IsVisible="{Binding ShowCharacterCounter}"
+                           StyleClass="Body.Small"
+                           HorizontalOptions="End">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding IsCharacterCounterError}"
+                                         Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource Error}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding IsCharacterCounterWarning}"
+                                         Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <!-- Birthday (optional): day and month dropdowns, no year -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                        <inputlayout:SfTextInputLayout Grid.Column="0"
+                                                       Hint="Birth month"
+                                                       IsHintAlwaysFloated="True"
+                                                       ContainerType="Outlined"
+                                                       HasError="{Binding BirthdayErrorOnMonth}"
+                                                       ErrorText="{Binding BirthdayErrorText}">
+                            <inputlayout:SfTextInputLayout.HintLabelStyle>
+                                <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                            </inputlayout:SfTextInputLayout.HintLabelStyle>
+                            <sfinputs:SfComboBox ItemsSource="{Binding Months}"
+                                                 DisplayMemberPath="Name"
+                                                 TextMemberPath="Name"
+                                                 SelectedItem="{Binding SelectedBirthMonth, Mode=TwoWay}"
+                                                 IsEditable="False"
+                                                 IsClearButtonVisible="True"
+                                                 ShowBorder="False"
+                                                 TextColor="{StaticResource OnSurface}"
+                                                 Background="{StaticResource Surface}"
+                                                 DropDownBackground="{StaticResource SurfaceContainer}"
+                                                 DropDownItemTextColor="{StaticResource OnSurface}"
+                                                 DropDownIconColor="{StaticResource OnSurfaceVariant}"
+                                                 SelectedDropDownItemBackground="{StaticResource PrimaryContainer}">
+                                <sfinputs:SfComboBox.SelectedDropDownItemTextStyle>
+                                    <sfinputs:DropDownTextStyle TextColor="{StaticResource OnPrimaryContainer}" />
+                                </sfinputs:SfComboBox.SelectedDropDownItemTextStyle>
+                            </sfinputs:SfComboBox>
+                        </inputlayout:SfTextInputLayout>
+
+                        <inputlayout:SfTextInputLayout Grid.Column="1"
+                                                       Hint="Birth day"
+                                                       IsHintAlwaysFloated="True"
+                                                       ContainerType="Outlined"
+                                                       HasError="{Binding BirthdayErrorOnDay}"
+                                                       ErrorText="{Binding BirthdayErrorText}">
+                            <inputlayout:SfTextInputLayout.HintLabelStyle>
+                                <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                            </inputlayout:SfTextInputLayout.HintLabelStyle>
+                            <sfinputs:SfComboBox ItemsSource="{Binding Days}"
+                                                 SelectedItem="{Binding SelectedBirthDay, Mode=TwoWay}"
+                                                 IsEditable="False"
+                                                 IsClearButtonVisible="True"
+                                                 ShowBorder="False"
+                                                 TextColor="{StaticResource OnSurface}"
+                                                 Background="{StaticResource Surface}"
+                                                 DropDownBackground="{StaticResource SurfaceContainer}"
+                                                 DropDownItemTextColor="{StaticResource OnSurface}"
+                                                 DropDownIconColor="{StaticResource OnSurfaceVariant}"
+                                                 SelectedDropDownItemBackground="{StaticResource PrimaryContainer}">
+                                <sfinputs:SfComboBox.SelectedDropDownItemTextStyle>
+                                    <sfinputs:DropDownTextStyle TextColor="{StaticResource OnPrimaryContainer}" />
+                                </sfinputs:SfComboBox.SelectedDropDownItemTextStyle>
+                            </sfinputs:SfComboBox>
+                        </inputlayout:SfTextInputLayout>
+                    </Grid>
+
+                    <!-- Email (optional) -->
+                    <inputlayout:SfTextInputLayout Hint="Email (optional)"
+                                                   ContainerType="Outlined"
+                                                   HasError="{Binding EmailHasError}"
+                                                   ErrorText="{Binding EmailErrorText}">
+                        <inputlayout:SfTextInputLayout.HintLabelStyle>
+                            <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                        </inputlayout:SfTextInputLayout.HintLabelStyle>
+                        <Entry x:Name="emailEdit"
+                               Text="{Binding PersonEmail, Mode=TwoWay}"
+                               Placeholder="singer@example.com"
+                               PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                               TextColor="{StaticResource OnSurface}"
+                               Keyboard="Email"
+                               Unfocused="OnEmailUnfocused" />
+                    </inputlayout:SfTextInputLayout>
+
+                    <!-- Action buttons -->
+                    <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
+                        <buttons:SfButton Text="Cancel"
+                                          Style="{StaticResource SfOutlinedButton}"
+                                          Padding="24,0"
+                                          Command="{Binding CancelCommand}" />
+                        <buttons:SfButton Text="Save"
+                                          Style="{StaticResource SfFilledButton}"
+                                          Padding="24,0"
+                                          Command="{Binding SaveCommand}" />
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </bottomsheet:SfBottomSheet.Content>
+
+    </bottomsheet:SfBottomSheet>
+
+</ContentPage>

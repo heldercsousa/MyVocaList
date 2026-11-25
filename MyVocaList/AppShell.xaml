@@ -64,35 +64,35 @@
 
     <!-- Page Routes (hidden from default flyout, navigated via ViewModel) -->
     <FlyoutItem Route="venues" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate venues:VenuesSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate venues:VenuesPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="people" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate people:PeopleSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate people:PeoplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="artists" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate artists:ArtistsSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate artists:ArtistsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="songs" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate songs:SongsSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate songs:SongsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="backup" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestoreSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestorePage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="settings" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="about" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate about:AboutSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
     </FlyoutItem>
 
 </Shell>

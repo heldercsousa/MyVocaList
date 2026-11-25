@@ -7,9 +7,9 @@ namespace MyVocaList;
 public partial class AppShell : Shell
 {
     private readonly IWhatsNewService _whatsNewService;
-    private WhatsNewBottomSheetSf? _whatsNewSheet;
-    private UpdateAvailableBottomSheetSf? _updateAvailableSheet;
-    private UpdateRequiredBottomSheetSf? _updateRequiredSheet;
+    private WhatsNewBottomSheet? _whatsNewSheet;
+    private UpdateAvailableBottomSheet? _updateAvailableSheet;
+    private UpdateRequiredBottomSheet? _updateRequiredSheet;
 
     public AppShell(AppShellViewModel viewModel, IWhatsNewService whatsNewService)
     {
@@ -23,13 +23,13 @@ public partial class AppShell : Shell
         WeakReferenceMessenger.Default.Register<ShowUpdateAvailableMessage>(this, OnShowUpdateAvailable);
         WeakReferenceMessenger.Default.Register<ShowUpdateRequiredMessage>(this, OnShowUpdateRequired);
 
-        Routing.RegisterRoute(Routes.VenueForm, typeof(VenueFormSfPage));
-        Routing.RegisterRoute(Routes.VenueMapPicker, typeof(VenueMapPickerSfPage));
-        Routing.RegisterRoute(Routes.PersonForm, typeof(PersonFormSfPage));
-        Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormSfPage));
-        Routing.RegisterRoute(Routes.SongForm, typeof(SongFormSfPage));
-        Routing.RegisterRoute(Routes.Feedback, typeof(FeedbackSfPage));
-        Routing.RegisterRoute(Routes.YouTubeSearch, typeof(YouTubeSearchSfPage));
+        Routing.RegisterRoute(Routes.VenueForm, typeof(VenueFormPage));
+        Routing.RegisterRoute(Routes.VenueMapPicker, typeof(VenueMapPickerPage));
+        Routing.RegisterRoute(Routes.PersonForm, typeof(PersonFormPage));
+        Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormPage));
+        Routing.RegisterRoute(Routes.SongForm, typeof(SongFormPage));
+        Routing.RegisterRoute(Routes.Feedback, typeof(FeedbackPage));
+        Routing.RegisterRoute(Routes.YouTubeSearch, typeof(YouTubeSearchPage));
 #if DEBUG
         MyVocaList.UI.Migration.PreviewRoutes.Register();
 #endif
@@ -41,7 +41,7 @@ public partial class AppShell : Shell
     // is not called (e.g. certain MAUI/platform back-button routing edge cases).
     protected override bool OnBackButtonPressed()
     {
-        if (Navigation.NavigationStack.Count == 0 && CurrentPage is VenuesSfPage venuesPage)
+        if (Navigation.NavigationStack.Count == 0 && CurrentPage is VenuesPage venuesPage)
         {
             venuesPage.ShowExitConfirmation();
             return true;
@@ -52,7 +52,7 @@ public partial class AppShell : Shell
 
     private void OnExitRequested()
     {
-        if (CurrentPage is VenuesSfPage venuesPage)
+        if (CurrentPage is VenuesPage venuesPage)
             venuesPage.ShowExitConfirmation();
     }
 
@@ -60,7 +60,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _whatsNewSheet ??= new WhatsNewBottomSheetSf();
+            _whatsNewSheet ??= new WhatsNewBottomSheet();
             AttachSheetToCurrentPage(_whatsNewSheet);
             _whatsNewSheet.Show(message.Entry, _whatsNewService);
         });
@@ -70,7 +70,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _updateAvailableSheet ??= new UpdateAvailableBottomSheetSf();
+            _updateAvailableSheet ??= new UpdateAvailableBottomSheet();
             AttachSheetToCurrentPage(_updateAvailableSheet);
             _updateAvailableSheet.Show(message.Result);
         });
@@ -80,7 +80,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _updateRequiredSheet ??= new UpdateRequiredBottomSheetSf();
+            _updateRequiredSheet ??= new UpdateRequiredBottomSheet();
             AttachSheetToCurrentPage(_updateRequiredSheet);
             _updateRequiredSheet.Show(message.Result);
         });
