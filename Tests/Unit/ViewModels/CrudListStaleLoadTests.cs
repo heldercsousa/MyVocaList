@@ -102,6 +102,35 @@ public class CrudListStaleLoadTests
         Assert.False(sut.IsInitialLoading);
     }
 
+    // [AC] REQ-DLH-05: the shimmer shows from the first keystroke until the newest search applies its rows. Keystrokes
+    // closer than the 300 ms debounce keep it on: it is not switched off and on between keystrokes.
+    [Fact]
+    public async Task TypingFasterThanTheDebounce_KeepsTheShimmerOnUntilTheLastSearchApplies()
+    {
+        var sut = new GatedCrudListViewModel();
+        sut.PageFetch = (query, _) => Task.FromResult<(IEnumerable<string>, int)>(
+            query is null ? (["old-1"], 1) : ([query + "-1"], 1));
+        await sut.InitializeAsync();
+
+        var shimmerChanges = new List<bool>();
+        sut.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ICrudListViewModel.IsInitialLoading))
+                shimmerChanges.Add(sut.IsInitialLoading);
+        };
+
+        sut.SearchText = "a";
+        await Task.Delay(20);
+        sut.SearchText = "ab";
+        await Task.Delay(20);
+        sut.SearchText = "abc";
+
+        await WaitUntil(() => sut.ItemsList.Contains("abc-1"));
+
+        Assert.Equal([true, false], shimmerChanges);
+        Assert.False(sut.IsInitialLoading);
+    }
+
     private static async Task WaitFor(Task task)
     {
         var completed = await Task.WhenAny(task, Task.Delay(TestTimeout));

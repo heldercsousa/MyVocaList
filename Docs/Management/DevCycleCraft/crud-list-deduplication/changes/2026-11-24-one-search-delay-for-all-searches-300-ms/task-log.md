@@ -46,3 +46,7 @@ Files written and re-read: `CrudListViewModelBase.cs` (line 359 and using block)
 - Proxy measurement (`adb logcat -c` then `-d`, `Choreographer: Skipped N frames`): idle 0 skipped frames; during fast typing 0 skipped frames. The only skips seen were at app launch (32-71 frames, before any typing).
 - Limit: the Songs `SongFormSf` page is not reachable from the UI (the Sf pages live only on the Debug preview route), so the artist-field check used the DX song form, which shares `SongFormViewModel`.
 - Verdict: no visible or logged jank from the 300 ms delay on the emulator. Helder to confirm the shimmer does not flash on device.
+
+### Round 3: shimmer continuity under fast typing (REQ-DLH-05)
+- Test `CrudListStaleLoadTests.TypingFasterThanTheDebounce_KeepsTheShimmerOnUntilTheLastSearchApplies`: keystrokes 20 ms apart; `IsInitialLoading` changes exactly `[true, false]` (on at the first keystroke, off when the last search's rows apply). No off/on between keystrokes. Passed 4/4 runs (3 repeats). No flicker found; behaviour unchanged.
+- Caveat: real-time keystroke spacing (20 ms, well under 300 ms). Under extreme CPU load a gap over 300 ms would start a search early and the assertion could fail; not observed.
