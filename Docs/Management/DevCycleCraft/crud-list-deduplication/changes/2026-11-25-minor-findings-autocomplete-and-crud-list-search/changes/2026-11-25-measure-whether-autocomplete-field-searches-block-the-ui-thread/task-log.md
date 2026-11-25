@@ -53,3 +53,17 @@ Files written and re-read: `SongFormViewModel.cs` L386-395 and title read; `Arti
 - Before-state (the four offload lines of 6bb63dc4 reverted locally, uncommitted): clean obj/bin net10.0-android, emulator started, `dotnet build` started. The .NET projects compiled; the Android step produced no output for 25+ minutes with ~19 leftover `aapt2`/`MSBuild` helper processes. Stopped per the 15-minute rule; no APK installed, no counts taken.
 - Restored with `git checkout -- .` (tree clean at HEAD 882c8f83). Emulator stopped.
 - After-state: not measured in this round. Counts for both states remain open.
+
+### Round 5: before/after measured on the emulator (orchestrator, 2026-11-25)
+- Setup: Pixel 5 API 36 emulator. Before = HEAD 882c8f83 with the offload reverted in a separate scratch worktree (clean `obj`, no stall: built in 5m24s). After = clean HEAD, rebuilt (the APK left in this worktree's `bin` by round 4 dated from the reverted build and was not used). Same steps for every run: launch, Songs, Add song, tap Artist, `dumpsys gfxinfo reset`, type "beatlesroc" 3 times at 150 ms per key with deletes, read `gfxinfo`. Typing landing in the Artist field was confirmed with a UI dump.
+- Logcat `Skipped .* frames`: none in any run.
+- `gfxinfo` frame times (p90 / p99, ms):
+
+| Run | Before (read on UI thread) | After (read offloaded) |
+|---|---|---|
+| 1 | 69 / 250 | 36 / 150 |
+| 2 | 48 / 450 | 34 / 38 |
+| 3 | n/a | 61 / 700 (first run after a relaunch; an install had failed, so this was the after APK) |
+
+- Janky-frame share was 95–98 % in every run: the emulator's software rendering, not the read.
+- Conclusion: the after runs are mostly faster at p90 (34–36 ms against 48–69 ms), but the spread is wide (one after run reached 61 / 700). The emulator suggests the offload helps and shows no regression; it does not prove it. Device confirmation on a real phone stays with Helder.
