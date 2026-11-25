@@ -36,8 +36,14 @@ No code changes until the DevExpress to Syncfusion migration lands: another sess
 
 ## Approach
 
-> **Spec updated 2026-11-25** (Claude's proposal, pending Helder's review):
+> **Spec updated 2026-11-25** (decided; see Decision below):
 > - **Autocomplete fields (Sf):** nothing new for the user. `AutocompleteFilterSf` already catches a failed search, shows no options, and logs the full exception through Serilog (`LogSearchFailure`). No change.
 > - **CRUD list search:** the debounced search catches every exception except cancellation, logs the full detail with `ILogger.LogError(exception, ...)`, and keeps the current rows. The shimmer ends through the existing `finally`.
 > - **User message:** none. The CRUD list base has no user-message mechanism (no toast, snackbar or error property), so the failure is log-only. A short message needs a UI mechanism that does not exist yet; raising it is a separate decision.
 > - No raw exception text reaches the UI in any path.
+
+## Decision (2026-11-25)
+
+Log-only is the chosen approach. Helder's direction allows a short plain message *at most*, so no message meets it, and full detail goes only to the log. A visible message would need a new UI mechanism (toast or error state) in the CRUD list, which is new behaviour: register it as its own item if Helder wants it.
+
+Decided by Claude Code on 2026-11-25 under Helder's autonomy grant of the same day ("proceed with every needed step"); Helder may revisit it.

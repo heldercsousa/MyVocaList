@@ -27,3 +27,9 @@ The autocomplete's wait-then-search logic has no behaviour tests. The pick count
 - These tests are the precondition for any later refactor of the search routine, including a shared helper.
 
 No code changes until the DevExpress to Syncfusion migration lands: another session is migrating the same files, and a change now would conflict with it. Fix the Syncfusion versions (`CrudListViewSf`, `AutocompleteFieldSf`), not the DevExpress originals that the migration deletes.
+
+## Decision (2026-11-25)
+
+The internal test-only constructor added to the governed `AutocompleteFieldSf` is accepted: it changes no runtime behaviour, and its consumer map and risk table are in the task-log. The pick routing and non-empty result path need a XAML host and stay untested.
+
+Decided by Claude Code on 2026-11-25 under Helder's autonomy grant of the same day ("proceed with every needed step"); Helder may revisit it.
