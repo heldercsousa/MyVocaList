@@ -222,6 +222,7 @@ public partial class CrudListViewSf : ContentView, IMenuHostSf
     public CrudListViewSf()
     {
         InitializeComponent();
+        ((Syncfusion.Maui.Core.IParallaxView)listView).Scrolling += OnListViewScrolling;
         BindingContextChanged += OnBindingContextChanged;
     }
 
@@ -430,7 +431,12 @@ public partial class CrudListViewSf : ContentView, IMenuHostSf
     // SfListView event handlers
     // -------------------------------------------------------------------------
 
-    private void OnListViewScrolling(object sender, ScrolledEventArgs e)
+    /// <summary>
+    /// Scroll offset → IsScrolled (liftOnScroll). SfListView has no public Scrolling event: it implements
+    /// <c>IParallaxView.Scrolling</c> explicitly, so the handler is attached in the constructor through that interface
+    /// (a XAML <c>Scrolling=</c> attribute fails at runtime with XamlParseException).
+    /// </summary>
+    private void OnListViewScrolling(object sender, Syncfusion.Maui.Core.ParallaxScrollingEventArgs e)
     {
         if (_viewModel != null)
             _viewModel.IsScrolled = e.ScrollY > 0;

@@ -124,11 +124,11 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 
 - [x] **T3.1 `ImagePickerFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Media/ImagePickerFieldSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean · Lane: Standard
 - [x] **T3.2 `TapToEditFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.4a, `TapToEditFieldLogic` · Files: `MyVocaList/UI/Components/TextFields/TapToEditFieldSf.xaml(.cs)` · Risk: Low · Demo: builds; check script clean · Lane: Standard
-- [~] **T3.3 `AutocompleteFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.1b verdict, `AutocompleteDXFieldLogic`, suggestion services · Files: `MyVocaList/UI/Components/TextFields/AutocompleteFieldSf.xaml(.cs)` · Risk: High (async suggestions) · Demo: builds; check script clean · Lane: Elevated
-- [ ] **T3.4 `VenueFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `VenueFormViewModel` · Files: `MyVocaList/UI/Pages/Venues/VenueFormSfPage.xaml(.cs)` · Risk: Medium · Demo: P12 (+ P13) match DX · Lane: Standard
-- [ ] **T3.5 `PersonFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `PersonFormViewModel` · Files: `MyVocaList/UI/Pages/People/PersonFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
-- [ ] **T3.6 `ArtistFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `ArtistFormViewModel` · Files: `MyVocaList/UI/Pages/Artists/ArtistFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
-- [ ] **T3.7 `SongFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `SongFormViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
+- [x] **T3.3 `AutocompleteFieldSf`** [P, wave 3a] — Recipe C · Consumes: T0.1b verdict, `AutocompleteDXFieldLogic`, suggestion services · Files: `MyVocaList/UI/Components/TextFields/AutocompleteFieldSf.xaml(.cs)` · Risk: High (async suggestions) · Demo: builds; check script clean · Lane: Elevated
+- [~] **T3.4 `VenueFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `VenueFormViewModel` · Files: `MyVocaList/UI/Pages/Venues/VenueFormSfPage.xaml(.cs)` · Risk: Medium · Demo: P12 (+ P13) match DX · Lane: Standard
+- [~] **T3.5 `PersonFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `PersonFormViewModel` · Files: `MyVocaList/UI/Pages/People/PersonFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
+- [~] **T3.6 `ArtistFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `ArtistFormViewModel` · Files: `MyVocaList/UI/Pages/Artists/ArtistFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
+- [~] **T3.7 `SongFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `SongFormViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
 - [~] **T3.8 `FeedbackSfPage`** [SEQUENTIAL] — Recipe P · Consumes: T0.1b `SfComboBox` verdict, `FeedbackViewModel` · Files: `MyVocaList/UI/Pages/Feedback/FeedbackSfPage.xaml(.cs)` · Risk: Medium · Demo: send feedback works; P12 matches · Lane: Standard
 - [ ] **T3.9 Cut over VenueForm** [SEQUENTIAL] — Recipe X · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the list opens the Sf form
 - [ ] **T3.10 Cut over PersonForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the singers list opens the Sf page
@@ -138,7 +138,7 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 
 ## Phase 4 — Shell [after Phase 3 cut-overs]
 
-- [ ] **T4.1a `WhatsNewBottomSheetSf`, `UpdateAvailableBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/WhatsNewBottomSheetSf.xaml(.cs)`, `…/UpdateAvailableBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: each opens from the preview page · Lane: Standard
+- [~] **T4.1a `WhatsNewBottomSheetSf`, `UpdateAvailableBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/WhatsNewBottomSheetSf.xaml(.cs)`, `…/UpdateAvailableBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: each opens from the preview page · Lane: Standard
 - [ ] **T4.1b `UpdateRequiredBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/UpdateRequiredBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: opens from the preview page · Lane: Standard
 - [ ] **T4.2 AppShell on Syncfusion (in place)** [SEQUENTIAL] — Consumes: T4.1a, T4.1b, `SfFlyoutMenuButton` · Files: `MyVocaList/AppShell.xaml`, `MyVocaList/AppShell.xaml.cs` · Risk: High (every navigation) · Demo: flyout and sheets match DX; P10, P14 · Lane: Elevated
 

@@ -7,12 +7,13 @@ namespace MyVocaList.UI.Components.TextFields;
 /// form-pictures change). A defined value shows as text (type style <see cref="TextStyleClass"/>, at most
 /// <see cref="MaxLines"/> lines, a trailing edit icon); a tap opens the wrapped <see cref="Editor"/> with the
 /// cursor in it. The editor state shows while the value is blank, while <see cref="IsEditing"/> or while
-/// <see cref="HasError"/>. Leaving the editor (blur, or a pick of a wrapped autocomplete)
+/// <see cref="HasError"/>. Leaving the editor (blur, or a pick of a wrapped <see cref="AutocompleteFieldSf"/>)
 /// returns to the text state. Every state decision is delegated to <see cref="TapToEditFieldLogic"/>.
 /// </summary>
 /// <remarks>
-/// Deviation from the DX original: no wrapped autocomplete is recognised yet (AutocompleteFieldSf is T3.3);
-/// <see cref="ReleasesPickOnEdit"/> is kept for API parity and takes effect once T3.3 wires the pick/IsLocked hook.
+/// The wrapper adds no member to <see cref="AutocompleteFieldSf"/> and does not change it (design.md § 2.5).
+/// It reaches the wrapped field only through its public surface: <c>IsLocked</c>, <c>FocusEditor()</c> and
+/// <c>PropertyChanged</c>.
 /// </remarks>
 [ContentProperty(nameof(Editor))]
 public partial class TapToEditFieldSf : ContentView
@@ -132,7 +133,7 @@ public partial class TapToEditFieldSf : ContentView
         nameof(ReleasesPickOnEdit), typeof(bool), typeof(TapToEditFieldSf), true);
 
     /// <summary>
-    /// When <c>true</c> (default), a tap on the text sets a locked wrapped autocomplete's
+    /// When <c>true</c> (default), a tap on the text sets a locked wrapped <see cref="AutocompleteFieldSf"/>'s
     /// <c>IsLocked</c> to <c>false</c> and keeps its text (REQ-PIC-26).
     /// </summary>
     public bool ReleasesPickOnEdit
@@ -154,6 +155,9 @@ public partial class TapToEditFieldSf : ContentView
 
     // The editor whose Loaded/HandlerChanged is watched until its inner editor can be found.
     private View? _retryHost;
+
+    // The wrapped field, while its PropertyChanged is watched for IsLocked.
+    private AutocompleteFieldSf? _autocomplete;
 
     // ── Constructor ────────────────────────────────────────────────────────
 
@@ -191,6 +195,12 @@ public partial class TapToEditFieldSf : ContentView
     {
         Detach();
 
+        if (Editor is AutocompleteFieldSf field)
+        {
+            _autocomplete = field;
+            field.PropertyChanged += OnAutocompletePropertyChanged;
+        }
+
         AttachInnerEditor();
     }
 
@@ -224,6 +234,12 @@ public partial class TapToEditFieldSf : ContentView
             _innerEditor.Focused -= OnInnerEditorFocused;
             _innerEditor.Unfocused -= OnInnerEditorUnfocused;
             _innerEditor = null;
+        }
+
+        if (_autocomplete is not null)
+        {
+            _autocomplete.PropertyChanged -= OnAutocompletePropertyChanged;
+            _autocomplete = null;
         }
     }
 
@@ -298,10 +314,17 @@ public partial class TapToEditFieldSf : ContentView
 
     private void OnTextTapped(object? sender, TappedEventArgs e)
     {
-        // (1) Show the editor.
+        // (1) Release a picked value; the text stays. IsLocked is TwoWay, so the ViewModel sees it.
+        if (Editor is AutocompleteFieldSf field
+            && TapToEditFieldLogic.ShouldReleasePick(ReleasesPickOnEdit, field.IsLocked))
+        {
+            field.IsLocked = false;
+        }
+
+        // (2) Show the editor.
         IsEditing = true;
 
-        // (2) Focus it once the host is visible and layout has run.
+        // (3) Focus it once the host is visible and layout has run.
         Dispatcher.Dispatch(FocusWrappedEditor);
     }
 
@@ -310,6 +333,12 @@ public partial class TapToEditFieldSf : ContentView
         var editor = Editor;
         if (editor is null || !editorHost.IsVisible)
             return;
+
+        if (editor is AutocompleteFieldSf field)
+        {
+            field.FocusEditor();
+            return;
+        }
 
         (_innerEditor ?? FindInnerEditor(editor))?.Focus();
     }
@@ -331,6 +360,20 @@ public partial class TapToEditFieldSf : ContentView
                 return;
 
             if (TapToEditFieldLogic.ShouldEndEditingAfterBlur(blurred.IsFocused))
+                IsEditing = false;
+        });
+    }
+
+    // A pick locks the wrapped field: back to the text state. Dispatched so the field's own pick handling
+    // (select command, unfocus, keyboard hide) completes before its host is hidden.
+    private void OnAutocompletePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(AutocompleteFieldSf.IsLocked) || sender is not AutocompleteFieldSf { IsLocked: true })
+            return;
+
+        Dispatcher.Dispatch(() =>
+        {
+            if (ReferenceEquals(sender, _autocomplete) && _autocomplete.IsLocked)
                 IsEditing = false;
         });
     }
