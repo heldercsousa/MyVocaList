@@ -2111,6 +2111,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "{2E7F8EE0-35A1-5A28-B725-8D53C0FF7B72}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-timing-tests-for-the-autocomplete-search", "2026-11-24-timing-tests-for-the-autocomplete-search", "{E44A45D4-1BC1-5839-87FD-04D13B2D7266}"

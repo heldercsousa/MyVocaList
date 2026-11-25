@@ -31,7 +31,6 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly IImageStore _imageStore;
     private readonly IPhotoPicker _photoPicker;
     private readonly ISongLyricsService _songLyricsService;
-    private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
     // ── Query properties ──────────────────────────────────────────────────
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
@@ -55,7 +54,6 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private int? _selectedArtistId;
     [ObservableProperty] private string? _selectedArtistName;
     [ObservableProperty] private bool _isArtistLocked;
-    [ObservableProperty] private IEnumerable<AutocompleteSuggestion> _artistSuggestions = [];
     [ObservableProperty] private bool _artistHasError;
     [ObservableProperty] private string _artistErrorText = string.Empty;
     // BUG-065/066: two-way bound to AutoCompleteEdit.IsDropDownOpen (dxe:AutoCompleteEdit, ItemsEditBase
@@ -244,7 +242,6 @@ public partial class SongFormViewModel : ViewModelBase
         // caused a duplicate "GoToAsync("..")" that overshot the nav stack root.
         SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
-        SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
         ArtistBlurredWithoutSelectionCommand = new RelayCommand(OnArtistBlurredWithoutSelection);
         NavigateToYouTubeSearchCommand = new AsyncRelayCommand(NavigateToYouTubeSearchAsync,
@@ -265,7 +262,6 @@ public partial class SongFormViewModel : ViewModelBase
     // ── Commands ──────────────────────────────────────────────────────────
     public IAsyncRelayCommand SaveCommand { get; }
     public IAsyncRelayCommand CancelCommand { get; }
-    public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
     /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
@@ -381,32 +377,20 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Artist autocomplete ───────────────────────────────────────────────
 
-    private Task SearchArtistsAsync(string term) => SearchArtistsCoreAsync(term);
-
     /// <summary>
-    /// BUG-056: runs the artist search and RETURNS the current query's mapped suggestions so the
-    /// page's <c>AutoCompleteEdit</c> provider receives them directly (no read-before-dispatch gap
-    /// against <see cref="ArtistSuggestions"/>). The observable <see cref="ArtistSuggestions"/> is
-    /// still updated for the latest query only (BUG-051 generation guard) so other observers see
-    /// latest-query-wins, but the returned list is always this call's own results.
+    /// Runs the artist search for the option source and returns this call's own mapped suggestions. Superseded
+    /// queries are cancelled through <paramref name="ct"/> (BUG-089-family finding B1). No observable state is kept:
+    /// the menu shows exactly what the returned list holds (BUG-056).
     /// </summary>
-    public async Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistsCoreAsync(string term)
+    public async Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistsCoreAsync(string term, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(term))
-        {
-            RunOnUiThread(() => ArtistSuggestions = []);
             return [];
-        }
-        var gen = Interlocked.Increment(ref _searchGeneration); // BUG-051: guards against a slower earlier query clobbering a newer one
-        var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
-        var mapped = results
+
+        var results = await _artistService.SearchArtistsByNameAsync(term, SearchConstants.MaxSearchResults, ct);
+        return results
             .Select(ToArtistOption)
             .ToList();
-        // Only the latest query updates the shared observable state; the provider for THIS query
-        // still receives its own results below (DX cancels stale provider requests via its token).
-        if (gen == _searchGeneration)
-            RunOnUiThread(() => ArtistSuggestions = mapped);
-        return mapped;
     }
 
     /// <summary>REQ-ART-09/10: a leading avatar, the real catalog count, no trailing text. REQ-PIC-39: thumbnail source.</summary>
@@ -452,7 +436,6 @@ public partial class SongFormViewModel : ViewModelBase
         ArtistSearchText = name;
         IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic assignment
         IsArtistLocked = true;
-        ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
     }
@@ -464,17 +447,13 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private void OnArtistBlurredWithoutSelection()
     {
+        // No artist selected: keep the typed text as it is (REQ-SFT-17).
         if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
-        {
-            ArtistSuggestions = [];
-        }
-        else
-        {
-            // User typed-then-blurred without choosing a new suggestion — restore prior selection
-            ArtistSearchText = SelectedArtistName ?? string.Empty;
-            IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic restore
-            ArtistSuggestions = [];
-        }
+            return;
+
+        // User typed-then-blurred without choosing a new suggestion — restore prior selection
+        ArtistSearchText = SelectedArtistName ?? string.Empty;
+        IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic restore
     }
 
     /// <summary>
@@ -504,7 +483,6 @@ public partial class SongFormViewModel : ViewModelBase
         {
             _isClearingArtist = false;
         }
-        ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
         SelectedExternalId = string.Empty;   // REQ-SFT-14: the pending identity belongs to the pair
@@ -520,7 +498,7 @@ public partial class SongFormViewModel : ViewModelBase
     // ── Title-first search and picks (Task 5.2) ───────────────────────────
 
     private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistOptionsAsync(string query, CancellationToken ct) =>
-        await SearchArtistsCoreAsync(query);
+        await SearchArtistsCoreAsync(query, ct);
 
     private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleAsync(string query, CancellationToken ct)
     {
@@ -616,7 +594,6 @@ public partial class SongFormViewModel : ViewModelBase
         _pickedArtistName = ArtistSearchText;        // REQ-PIC-28
         IsArtistDropDownOpen = false;
         IsArtistLocked = true;
-        ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
     }

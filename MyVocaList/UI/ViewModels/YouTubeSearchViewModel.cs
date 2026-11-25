@@ -53,9 +53,8 @@ public sealed partial class YouTubeSearchViewModel : ViewModelBase, IDisposable
     {
         if (string.IsNullOrWhiteSpace(SearchText)) return;
 
-        _cts.Cancel();
-        _cts.Dispose();
-        _cts = new CancellationTokenSource();
+        // B11: AllowConcurrentExecutions = false means a search never overlaps the previous one, so no per-search
+        // cancel is needed here; the page's Dispose cancels the source for an in-flight search.
         var ct = _cts.Token;
 
         IsLoading = true;

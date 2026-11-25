@@ -431,7 +431,6 @@ public class SongFormViewModelTests
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto(localArtistId: 7, localArtistName: "Radiohead")));
 
         Assert.False(sut.IsArtistDropDownOpen);
-        Assert.Empty(sut.ArtistSuggestions);
     }
 
     // [AC] REQ-SFT-14: X on Artist after a remote pick clears the pending identity and keeps Title (Q21).
@@ -1740,35 +1739,6 @@ public class SongFormViewModelTests
 
         songService.Verify(
             s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    // ── BUG-051: stale-search race ──────────────────────────────────────────
-
-    // [AC] REQ-ACREATE-13 (BUG-051): latest query wins over a slower earlier one
-    [Fact]
-    public async Task SearchArtistsAsync_OutOfOrderCompletion_LatestQueryWins()
-    {
-        var older = new TaskCompletionSource<IEnumerable<ArtistListItem>>();
-        var newer = new TaskCompletionSource<IEnumerable<ArtistListItem>>();
-        var artistService = new Mock<IArtistService>();
-        artistService
-            .SetupSequence(s => s.SearchArtistsByNameAsync(
-                It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns(older.Task)
-            .Returns(newer.Task);
-
-        var sut = CreateSut(artistService: artistService);
-
-        var t1 = sut.SearchArtistsCommand.ExecuteAsync("que");   // older request (issued first)
-        var t2 = sut.SearchArtistsCommand.ExecuteAsync("queen"); // newer request (issued second)
-
-        newer.SetResult([new ArtistListItem(2, "Queen", string.Empty, 3)]);   // newer completes first
-        await t2;
-        older.SetResult([new ArtistListItem(9, "Querido", string.Empty, 1)]); // older completes late
-        await t1;
-
-        var suggestion = Assert.Single(sut.ArtistSuggestions);
-        Assert.Equal("Queen", suggestion.Headline); // older must NOT clobber
     }
 
     // ── BUG-052: edit-mode hydration must show the locked artist without searching ─────────
