@@ -198,3 +198,51 @@ https://lrclib.net/docs.md — **V**
 | Lyrics for mechanical karaoke | LRCLIB copy | Not needed: the video carries them |
 | Lyrics for Bandokê | LRCLIB copy | Plain lyrics on a screen, no sync (Helder). Source to decide: user-supplied is the lowest risk; the LRCLIB copy stays a pre-MVP risk |
 | Automatic lyric sync | Post-MVP, long term | Post-MVP; band's own recording only |
+
+## 6. Update 2026-11-25 — no YouTube API key: compliance check and recommendation
+
+Helder decided not to use a YouTube Data API key. Nothing here is a decision. Terms evidence is the 2026-11-22 re-check in §5 (Deezer Terms dated 27 October 2026; YouTube Developer Policies); not re-fetched today.
+
+### 6.1 What breaks the terms today
+| Where | What | Rule | Status |
+|---|---|---|---|
+| `Services/YouTubeSearchService.cs` (used by `SongFormViewModel` / `SongFormPage.xaml`) | Calls `youtube/v3/search` and `videos` with a user key | Needs a key; 100 `search.list`/day per project; audit for more | **Without a key the feature cannot work.** It must be removed or replaced (decision for Helder) |
+| Song form | YouTube results (thumbnails from `img.youtube.com`) shown on the same screen as a Deezer-sourced title/artist | Deezer §III.2: no combining Content with audiovisual images | **Breaks Deezer §III.2** — the clearest illegal mix |
+| Local song rows | Deezer titles and artist names saved in SQLite | Deezer §III.4: no local copy of Content incl. metadata | **Breaks §III.4** (already flagged in §5) |
+| Stored video id next to a Deezer track id | Gemini's plan "videoId linked to the Deezer track id" | §III.2 (combining) + §III.4 (Deezer id is Content) | **Do not build** |
+| Gemini claim "the 30-day refresh does not apply to the bare videoId" | — | YouTube §III.E.4 lists no exemption for ids | **Wrong** for API-obtained ids; moot without a key |
+| Any future paid tier with Deezer | — | Deezer §III.1 non-commercial only | Blocks the paid phase |
+
+YouTube side, without a key: playing via the official IFrame player (Referer = app id, no overlays, branding visible, no audio extraction) and storing an id the user pasted from a youtube.com link are compliant (§2). Scraping, InnerTube or YoutubeExplode are **not** (§2).
+
+### 6.2 Workaround that removes the YouTube+Deezer mix
+Replace Deezer, not YouTube: the mix disappears only when no Deezer Content is on a screen, in a row or in a link with YouTube. Splitting Deezer and YouTube onto separate pages leaves residual risk (§III.2 has no scope, §5). So:
+1. **Catalog = MusicBrainz (CC0)** + the user's own entries. Store recording/work MBID + title + artist locally — allowed.
+2. **YouTube without a key:** a "Search on YouTube" button opens `youtube.com/results?search_query=<title> <artist> karaoke` (YouTube app/browser); the user shares or pastes the link back (Android share target / iOS share extension or clipboard paste); the app extracts the 11-char id and stores it against the local song id. Playback in the IFrame player WebView.
+3. Show title/thumbnail of a linked video through the player/oEmbed at runtime; never store YouTube titles or images.
+4. Remove `YouTubeSearchService`, the key settings and the in-form results list. The in-app search wish (Karaoke VS benchmark) is not reachable without a key: that is the trade-off Helder accepts by dropping the key.
+
+### 6.3 MusicBrainz (+ Cover Art Archive) vs Deezer
+| Criterion | MusicBrainz + CAA | Deezer |
+|---|---|---|
+| License / storage | Core data CC0: store forever, commercial OK **V** | Non-commercial; no local copy of Content **V** |
+| Combining with YouTube | No restriction on CC0 data **I** | §III.2 ban **V** |
+| Access | No key; User-Agent with contact required; 1 req/s per client **V** | No key today, but new developer access closed since 2025-10 **V** |
+| API cost | Free non-commercial; a published app planning a paid tier counts as commercial → plan (Bronze from $100/month) **V/I**; avoidable by shipping/self-hosting a subset from the CC0 dumps **I** | Free (non-commercial only) |
+| Search quality | Good for exact title+artist (Lucene search); weaker fuzzy/typo tolerance; many duplicate releases; Brazilian popular coverage uneven **I** | Very good consumer search, typo-tolerant **I** |
+| Duplicate titles | **Works** group versions of one composition **V** — a real win | No work concept |
+| Artwork | Cover Art Archive by release MBID; not all releases have art; images are per-image licensed (not CC0) → display by URL only **I** | Covers + artist pictures; not storable **V** |
+| Artist pictures | None in MusicBrainz **I** | Yes |
+| Audio previews | **None** | 30-s previews (Widget only, §III.3) |
+| Popularity / charts | None; ListenBrainz top recordings per artist, licence NOT FOUND, no regional chart **V** | `/chart`, regional by IP **V** |
+| Genres / tags | CC BY-NC-SA (not CC0) → attribution + non-commercial **V** | Album genres |
+| Attribution | Not required for CC0 core; courteous credit + required for tags **V** | Visible Deezer logo **V** |
+
+What MusicBrainz lacks for MyVocaList: previews, artist photos, charts/"popular now", reliable artwork, consumer-grade fuzzy search, and commercially usable genres. None of these is required for the queue, the Bandokê repertoire or the YouTube link — they mattered only for the post-MVP browse ideas (1.1–1.5).
+
+### 6.4 Recommendation (for Helder to decide)
+1. **YouTube-only + MusicBrainz**, no Deezer, no YouTube key: catalog from MusicBrainz works/recordings (local CC0 rows), video via search-out + share-back + IFrame player.
+2. Remove the key-based YouTube results list and its service; migrate existing Deezer rows to source-neutral local rows (keep the user's own data; re-match to MBIDs where possible; history stays in place per the never-recreate rule).
+3. Start on the free MusicBrainz API (1 req/s, debounced search, User-Agent) during the free phase; before any paid tier, either buy a MetaBrainz plan or ship a CC0 subset.
+4. Accept losing previews/charts/artist photos; cover art by CAA URL only, where present.
+5. Spec first: a `changes/` item for "YouTube without a key" and an update of the Deezer vs MusicBrainz comparison item, before any code.
