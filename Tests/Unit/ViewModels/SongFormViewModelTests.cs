@@ -9,6 +9,7 @@ using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
+[Collection(DispatcherProviderCollection.Name)]
 public class SongFormViewModelTests
 {
     private static SongKaraokeUrlDto MakeDto(string videoId = "abc123", int songId = 42) =>
@@ -263,6 +264,7 @@ public class SongFormViewModelTests
     [Fact]
     public async Task TitleOptionSource_SetsNoteThroughUiThreadHelper()
     {
+        var previousProvider = Microsoft.Maui.Dispatching.DispatcherProvider.Current;
         var provider = new CountingDispatcherProvider();
         Microsoft.Maui.Dispatching.DispatcherProvider.SetCurrent(provider);
         var previous = Microsoft.Maui.Controls.Application.Current;
@@ -281,6 +283,7 @@ public class SongFormViewModelTests
         finally
         {
             Microsoft.Maui.Controls.Application.Current = previous;
+            Microsoft.Maui.Dispatching.DispatcherProvider.SetCurrent(previousProvider);
         }
     }
 

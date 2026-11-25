@@ -11,13 +11,20 @@ namespace MyVocaList.Tests.Unit.Components;
 /// OneWay <c>Suggestions="{Binding Suggestions}"</c> page binding, which removes that binding.
 /// Every later ViewModel result assignment then never reached the control.
 /// </summary>
-public class AutocompleteSuggestionsPropagationTests
+[Collection(DispatcherProviderCollection.Name)]
+public class AutocompleteSuggestionsPropagationTests : IDisposable
 {
+    private readonly Microsoft.Maui.Dispatching.IDispatcherProvider? _previousProvider =
+        Microsoft.Maui.Dispatching.DispatcherProvider.Current;
+
     public AutocompleteSuggestionsPropagationTests()
     {
         // Binding updates require a dispatcher; install a synchronous one for the test thread.
         Microsoft.Maui.Dispatching.DispatcherProvider.SetCurrent(new SyncDispatcherProvider());
     }
+
+    // Restores the provider that was current before this class installed its own (the static outlives the test).
+    public void Dispose() => Microsoft.Maui.Dispatching.DispatcherProvider.SetCurrent(_previousProvider);
 
     private sealed class SyncDispatcherProvider : Microsoft.Maui.Dispatching.IDispatcherProvider
     {
