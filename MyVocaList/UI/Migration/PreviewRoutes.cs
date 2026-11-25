@@ -14,6 +14,14 @@ public static class PreviewRoutes
     private static readonly List<(string Title, string Route, Type Page)> _entries = new()
     {
         ("Venues", "venues-sf", typeof(VenuesSfPage)),
+        ("People", "people-sf", typeof(PeopleSfPage)),
+        ("Songs", "songs-sf", typeof(SongsSfPage)),
+        ("Artists", "artists-sf", typeof(ArtistsSfPage)),
+        ("Feedback", "feedback-sf", typeof(FeedbackSfPage)),
+        ("Venue form", "venue-form-sf", typeof(VenueFormSfPage)),
+        ("Person form", "person-form-sf", typeof(PersonFormSfPage)),
+        ("Artist form", "artist-form-sf", typeof(ArtistFormSfPage)),
+        ("Song form", "song-form-sf", typeof(SongFormSfPage)),
     };
 
     /// <summary>Preview entries shown on the Syncfusion preview page.</summary>
