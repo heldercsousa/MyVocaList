@@ -44,3 +44,7 @@ Files written and re-read: `SongFormViewModel.cs` L386-395 and title read; `Arti
 - Before (offload removed): NOT measured. The before-build could not be deployed: the Android packaging step stalled after the .NET outputs, with `classes*.dex` locked by a killed earlier deploy (`Device or resource busy`). The before-build was stopped and the offload line restored (verified: `git status` clean).
 - Conclusion: the main-thread read on this emulator is too short to show as dropped frames either way; the B4 fix rests on the code-path analysis and the threading test. Device/timing confirmation still open.
 - Note: `SongFormSf` is not reachable from the UI; measured the shared-VM DX form instead.
+
+### Round 3: before-state attempt (not completed)
+- Reverted the offload locally (`git checkout 6bb63dc4^` of the three ViewModels, uncommitted), cleaned obj/bin net10.0-android, plain Android build. The .NET projects built; the Android step then stalled for 25+ minutes with leftover `aapt2`/`MSBuild` helper processes from earlier builds. Stopping the stalled task succeeded; killing the stale helpers and deleting the locked output was denied by the permission gate, so I did not force it.
+- Tree restored to HEAD (offload back in place; `git status` clean). No before-state APK was installed; the before/after comparison remains open. Next step, when the helper processes are cleared: rebuild the before-state, install, type in the song form artist field, capture `Skipped .* frames`, then restore and repeat.
