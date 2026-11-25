@@ -22,6 +22,7 @@ public static class PreviewRoutes
         ("Person form", "person-form-sf", typeof(PersonFormSfPage)),
         ("Artist form", "artist-form-sf", typeof(ArtistFormSfPage)),
         ("Song form", "song-form-sf", typeof(SongFormSfPage)),
+        ("YouTube search", "youtube-search-sf", typeof(YouTubeSearchSfPage)),
     };
 
     /// <summary>Preview entries shown on the Syncfusion preview page.</summary>
