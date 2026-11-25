@@ -139,7 +139,7 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 ## Phase 4 — Shell [after Phase 3 cut-overs]
 
 - [x] **T4.1a `WhatsNewBottomSheetSf`, `UpdateAvailableBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/WhatsNewBottomSheetSf.xaml(.cs)`, `…/UpdateAvailableBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: each opens from the preview page · Lane: Standard · Done 2026-11-24 (AllowDismiss dropped: Sf default dismiss)
-- [ ] **T4.1b `UpdateRequiredBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/UpdateRequiredBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: opens from the preview page · Lane: Standard
+- [x] **T4.1b `UpdateRequiredBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/UpdateRequiredBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: opens from the preview page · Lane: Standard
 - [ ] **T4.2 AppShell on Syncfusion (in place)** [SEQUENTIAL] — Consumes: T4.1a, T4.1b, `SfFlyoutMenuButton` · Files: `MyVocaList/AppShell.xaml`, `MyVocaList/AppShell.xaml.cs` · Risk: High (every navigation) · Demo: flyout and sheets match DX; P10, P14 · Lane: Elevated
 
 ## Phase 5 — Removal [**Helder approves the start explicitly; hard to reverse**]
