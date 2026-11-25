@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
-    x:Class="MyVocaList.UI.Components.Sheets.UpdateAvailableBottomSheetSf">
+    x:Class="MyVocaList.UI.Components.Sheets.UpdateAvailableBottomSheet">
 
     <!-- MD3 Modal bottom sheet - soft update nudge (dismissible). Show via code-behind Show(UpdateCheckResult). -->
     <bottomsheet:SfBottomSheet x:Name="Sheet"

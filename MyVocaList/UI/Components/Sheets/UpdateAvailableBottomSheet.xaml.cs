@@ -6,11 +6,11 @@ namespace MyVocaList.UI.Components.Sheets;
 /// MD3 modal bottom sheet — soft update nudge (dismissible).
 /// Users can dismiss it and continue using the app.
 /// </summary>
-public partial class UpdateAvailableBottomSheetSf : ContentView
+public partial class UpdateAvailableBottomSheet : ContentView
 {
     private string _storeUrl = string.Empty;
 
-    public UpdateAvailableBottomSheetSf()
+    public UpdateAvailableBottomSheet()
     {
         InitializeComponent();
     }

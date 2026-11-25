@@ -8,7 +8,7 @@ public partial class AppShell : Shell
 {
     private readonly IWhatsNewService _whatsNewService;
     private WhatsNewBottomSheet? _whatsNewSheet;
-    private UpdateAvailableBottomSheetSf? _updateAvailableSheet;
+    private UpdateAvailableBottomSheet? _updateAvailableSheet;
     private UpdateRequiredBottomSheetSf? _updateRequiredSheet;
 
     public AppShell(AppShellViewModel viewModel, IWhatsNewService whatsNewService)
@@ -70,7 +70,7 @@ public partial class AppShell : Shell
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            _updateAvailableSheet ??= new UpdateAvailableBottomSheetSf();
+            _updateAvailableSheet ??= new UpdateAvailableBottomSheet();
             AttachSheetToCurrentPage(_updateAvailableSheet);
             _updateAvailableSheet.Show(message.Result);
         });
