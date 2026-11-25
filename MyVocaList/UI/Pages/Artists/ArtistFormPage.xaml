@@ -7,7 +7,7 @@
     xmlns:readModels="clr-namespace:MyVocaList.Domain.ReadModels;assembly=MyVocaList.Domain"
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
-    x:Class="MyVocaList.UI.Pages.Artists.ArtistFormSfPage"
+    x:Class="MyVocaList.UI.Pages.Artists.ArtistFormPage"
     x:DataType="vm:ArtistFormViewModel"
     Title="{Binding PageTitle}"
     BackgroundColor="{StaticResource Surface}"

@@ -1,10 +1,10 @@
 namespace MyVocaList.UI.Pages.Artists;
 
-public partial class ArtistFormSfPage : ContentPage
+public partial class ArtistFormPage : ContentPage
 {
     private readonly ArtistFormViewModel _viewModel;
 
-    public ArtistFormSfPage(ArtistFormViewModel viewModel)
+    public ArtistFormPage(ArtistFormViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;
