@@ -1,17 +1,17 @@
 namespace MyVocaList.UI.Components.Lists;
 
-public partial class ListItemLeadingAvatarSf : ContentView
+public partial class ListItemLeadingAvatar : ContentView
 {
     public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create(
         nameof(ImageSource),
         typeof(ImageSource),
-        typeof(ListItemLeadingAvatarSf),
+        typeof(ListItemLeadingAvatar),
         defaultValue: null);
 
     public static readonly BindableProperty PlaceholderIconProperty = BindableProperty.Create(
         nameof(PlaceholderIcon),
         typeof(string),
-        typeof(ListItemLeadingAvatarSf),
+        typeof(ListItemLeadingAvatar),
         defaultValue: "account_circle_outlined");
 
     public ImageSource ImageSource
@@ -26,7 +26,7 @@ public partial class ListItemLeadingAvatarSf : ContentView
         set => SetValue(PlaceholderIconProperty, value);
     }
 
-    public ListItemLeadingAvatarSf()
+    public ListItemLeadingAvatar()
     {
         InitializeComponent();
     }

@@ -87,7 +87,7 @@
                                                       PlaceholderIcon="{Binding PlaceholderIcon}"
                                                       Margin="0,0,12,0"
                                                       VerticalOptions="Center" />
-                        <lists:ListItemLeadingAvatarSf Grid.Column="0"
+                        <lists:ListItemLeadingAvatar Grid.Column="0"
                                                        IsVisible="{Binding HasLeadingAvatar}"
                                                        ImageSource="{Binding ImageUrl}"
                                                        PlaceholderIcon="{Binding PlaceholderIcon}"

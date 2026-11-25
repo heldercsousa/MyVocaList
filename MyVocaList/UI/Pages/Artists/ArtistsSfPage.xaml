@@ -55,7 +55,7 @@
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="False">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemLeadingAvatarSf ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" />
+                        <lists:ListItemLeadingAvatar ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
@@ -78,7 +78,7 @@
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="True">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemLeadingAvatarSf ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" />
+                        <lists:ListItemLeadingAvatar ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">

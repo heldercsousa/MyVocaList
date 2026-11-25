@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
-    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingAvatarSf"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingAvatar"
     x:Name="self">
 
     <!-- Stock Border clips its children to the rounded shape. -->
