@@ -2115,6 +2115,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-timing-tests-for-the-autocomplete-search", "2026-11-24-timing-tests-for-the-autocomplete-search", "{E44A45D4-1BC1-5839-87FD-04D13B2D7266}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-one-search-delay-for-all-searches-300-ms", "2026-11-24-one-search-delay-for-all-searches-300-ms", "{1471FFB1-4FDB-532F-967A-18C4FD01E1F5}"

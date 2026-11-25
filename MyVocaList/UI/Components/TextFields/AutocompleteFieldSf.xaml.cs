@@ -284,9 +284,19 @@ public partial class AutocompleteFieldSf : ContentView
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the field in its default, editable state.</summary>
-    public AutocompleteFieldSf()
+    public AutocompleteFieldSf() : this(skipXamlInitForTests: false)
+    {
+    }
+
+    /// <summary>
+    /// Test seam (same pattern as the DX original's <c>skipXamlInitForTests</c>): <c>true</c> skips the XAML load,
+    /// which needs app resources, so the search routine can be driven in unit tests. Not a usable UI in that mode.
+    /// </summary>
+    internal AutocompleteFieldSf(bool skipXamlInitForTests)
     {
         _filter = new AutocompleteFilterSf(SearchAsync, LogSearchFailure);
+        if (skipXamlInitForTests)
+            return;
 
         InitializeComponent();
 
