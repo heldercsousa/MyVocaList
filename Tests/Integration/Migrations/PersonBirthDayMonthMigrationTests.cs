@@ -109,6 +109,22 @@ public class PersonBirthDayMonthMigrationTests : IAsyncDisposable
         await Assert.ThrowsAsync<SqliteException>(act);
     }
 
+    [Fact]
+    public async Task Migration_PersonsWithoutEmailOrBirthday_MigrateToLatestWithDataPreserved()
+    {
+        // [AC] REQ-DUP-14: legacy rows with neither email nor a valid birthday must not abort the upgrade (BUG-090)
+        var db = await MigratedToPreviousAsync();
+        await db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO People (Id, FullName, Email, BirthdayDayMonth, Participations, Absences) VALUES (1, 'No Contact', NULL, NULL, 0, 0)");
+        await db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO People (Id, FullName, Email, BirthdayDayMonth, Participations, Absences) VALUES (2, 'Bad Birthday', NULL, 'ab/cd', 0, 0)");
+        await SeedPersonAsync(db, 3, "15/03");
+
+        await db.GetService<IMigrator>().MigrateAsync();
+
+        Assert.Equal(["1|-|-", "2|-|-", "3|15|3"], await ConvertedRowsAsync(db));
+    }
+
     public async ValueTask DisposeAsync()
     {
         var paths = _contexts.Select(c => c.Database.GetDbConnection().DataSource).ToList();
