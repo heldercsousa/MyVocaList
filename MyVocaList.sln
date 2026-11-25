@@ -2122,6 +2122,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-one-search-delay-for-all-searches-300-ms", "2026-11-24-one-search-delay-for-all-searches-300-ms", "{1471FFB1-4FDB-532F-967A-18C4FD01E1F5}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-minor-findings-autocomplete-and-crud-list-search", "2026-11-25-minor-findings-autocomplete-and-crud-list-search", "{8270C5F5-5D5F-54CC-B4D1-108DEABBC267}"

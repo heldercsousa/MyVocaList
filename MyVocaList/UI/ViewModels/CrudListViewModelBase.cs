@@ -1,3 +1,4 @@
+using MyVocaList.Domain.Constants;
 using MyVocaList.UI.Collections;
 using MyVocaList.UI.Services;
 
@@ -356,7 +357,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         {
             try
             {
-                await Task.Delay(400, token);
+                await Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds, token);
                 if (token.IsCancellationRequested) return;
                 await LoadFirstPageAsync(token, generation);
             }

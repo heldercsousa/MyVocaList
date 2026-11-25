@@ -24,6 +24,8 @@ Helder allowed either 300 ms or 400 ms as the single delay, only if it makes sen
 - The searches run on local SQLite with full-text indexes, so a shorter wait does not overload anything.
 - One constant means one place to change it, for every search.
 
+> **Spec updated 2026-11-25:** every search waits `SearchConstants.AutocompleteDebounceMilliseconds` (300 ms) after the last keystroke, including the CRUD list (`CrudListViewModelBase.TriggerSearchDebounce`, previously a literal 400). The constant keeps its name because the DX field still references it; the name is a candidate for a rename after the DX removal. <!-- impl decision: the DX original still references the constant, so no rename in this change -->
+
 ## What to do
 
 - Replace the 400 ms literal with the shared constant.
