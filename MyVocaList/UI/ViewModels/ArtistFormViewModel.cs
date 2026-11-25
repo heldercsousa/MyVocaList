@@ -397,7 +397,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         if (IsEditMode)
             return [];
 
-        var local = await _artistSuggestions.SearchNameLocalAsync(query, ct);
+        var local = await Task.Run(() => _artistSuggestions.SearchNameLocalAsync(query, ct), ct); // B4: local SQLite read off the UI thread
         var remote = await _artistSuggestions.SearchNameRemoteAsync(query, ct);
 
         ct.ThrowIfCancellationRequested();   // stale query: never touch the note

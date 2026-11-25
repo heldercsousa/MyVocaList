@@ -387,7 +387,8 @@ public partial class SongFormViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(term))
             return [];
 
-        var results = await _artistService.SearchArtistsByNameAsync(term, SearchConstants.MaxSearchResults, ct);
+        // B4 (SQLITE-WORKAROUND): Microsoft.Data.Sqlite completes the read on the calling thread; offload it like CrudListViewModelBase.
+        var results = await Task.Run(() => _artistService.SearchArtistsByNameAsync(term, SearchConstants.MaxSearchResults, ct), ct);
         return results
             .Select(ToArtistOption)
             .ToList();
@@ -502,7 +503,7 @@ public partial class SongFormViewModel : ViewModelBase
 
     private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleAsync(string query, CancellationToken ct)
     {
-        var local = await _songSuggestions.SearchTitleLocalAsync(query, ct);
+        var local = await Task.Run(() => _songSuggestions.SearchTitleLocalAsync(query, ct), ct); // B4: local SQLite read off the UI thread
         var shownIds = local.Where(d => d.LocalId.HasValue).Select(d => d.LocalId!.Value).ToList();
         var remote = await _songSuggestions.SearchTitleRemoteAsync(query, shownIds, ct);
 

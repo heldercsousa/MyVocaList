@@ -2137,6 +2137,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread", "2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread", "{64439375-4B5C-5EC2-A94F-6162F7EEACF5}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-dispose-the-last-search-cancellation-source", "2026-11-25-dispose-the-last-search-cancellation-source", "{6AD19464-A1CD-574C-9558-1452981214CC}"

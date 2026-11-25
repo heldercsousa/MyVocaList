@@ -1741,6 +1741,44 @@ public class SongFormViewModelTests
             s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    // ── B4: autocomplete option reads run off the UI thread (SQLITE-WORKAROUND) ─────────
+
+    // [AC] B4: the artist option search reads SQLite off the UI thread, like CrudListViewModelBase does.
+    [Fact]
+    public async Task ArtistOptionSearch_ReadsArtistsOffTheUiThread()
+    {
+        var read = false;
+        SynchronizationContext? readContext = null;
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Callback(() =>
+            {
+                read = true;
+                readContext = SynchronizationContext.Current; // null on a pool thread
+            })
+            .ReturnsAsync([]);
+        var sut = CreateSut(artistService: artistService);
+        var uiContext = new SynchronizationContext();
+
+        var original = SynchronizationContext.Current;
+        SynchronizationContext.SetSynchronizationContext(uiContext);
+        Task search;
+        try
+        {
+            search = sut.ArtistOptionSource.SearchAsync("queen", CancellationToken.None);
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(original);
+        }
+
+        await search;
+
+        Assert.True(read);
+        Assert.NotSame(uiContext, readContext);
+    }
+
     // ── BUG-052: edit-mode hydration must show the locked artist without searching ─────────
 
     // [AC] REQ-ACREATE-14 (BUG-052): hydration shows locked artist and fires no search
