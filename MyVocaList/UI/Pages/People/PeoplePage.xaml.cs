@@ -1,6 +1,6 @@
 namespace MyVocaList.UI.Pages.People;
 
-public partial class PeopleSfPage : CrudListPageBase
+public partial class PeoplePage : CrudListPageBase
 {
     private readonly PersonsViewModel _viewModel;
 
@@ -9,7 +9,7 @@ public partial class PeopleSfPage : CrudListPageBase
 
     protected override ICrudListViewModel ListViewModel => _viewModel;
 
-    public PeopleSfPage(PersonsViewModel viewModel)
+    public PeoplePage(PersonsViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;

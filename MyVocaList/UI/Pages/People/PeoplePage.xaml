@@ -8,7 +8,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:views="clr-namespace:MyVocaList.UI.Components"
-    x:Class="MyVocaList.UI.Pages.People.PeopleSfPage"
+    x:Class="MyVocaList.UI.Pages.People.PeoplePage"
     x:Name="page"
     x:DataType="vm:PersonsViewModel"
     Title="Singers"

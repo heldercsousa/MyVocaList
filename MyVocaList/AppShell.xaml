@@ -68,7 +68,7 @@
     </FlyoutItem>
 
     <FlyoutItem Route="people" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate people:PeopleSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate people:PeoplePage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="artists" FlyoutItemIsVisible="False">
