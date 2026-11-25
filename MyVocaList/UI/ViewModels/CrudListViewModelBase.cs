@@ -13,6 +13,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private volatile bool _isLoading;
     // Bumped (on the UI thread) by every load that shows the shimmer; only the newest one may end it (REQ-DLH-05).
     private int _loadGeneration;
+    private int _queryGeneration; // BUG-089: bumped by every first-page load (search, reload, refresh)
     private readonly ILogger _logger;
 
     /// <summary>True once a load has applied its rows, i.e. the first load completed. Set on the UI thread.</summary>
@@ -177,6 +178,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private async Task LoadFirstPageAsync(CancellationToken cancellationToken, int? shimmerGeneration = null)
     {
         var applied = false;
+        // BUG-089: every first-page load (search, reload, refresh) starts a new query generation. A load-more or a
+        // refresh that started under an older generation must not change the rows.
+        var queryGeneration = Interlocked.Increment(ref _queryGeneration);
         try
         {
             _currentPage = 1;
@@ -206,13 +210,16 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             await hold;
 
             // A superseded shimmered load (a newer search or reload started) applies nothing: the newest load owns the rows and the shimmer.
-            if (cancellationToken.IsCancellationRequested || IsSuperseded(shimmerGeneration)) return;
+            if (cancellationToken.IsCancellationRequested || IsSuperseded(shimmerGeneration) || IsStaleQuery(queryGeneration)) return;
 
             _totalCount = totalCount;
             var hasMore = totalCount > list.Count;
 
             RunOnUiThread(() =>
             {
+                // BUG-089 B8: re-check on the UI thread, where the rows are applied; a newer load may have started since the check above.
+                if (IsSuperseded(shimmerGeneration) || IsStaleQuery(queryGeneration)) return;
+
                 Items.ReplaceRange(list);
                 HasMoreItems = hasMore;
                 if (SelectedItems.Count > 0)
@@ -259,6 +266,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private bool IsSuperseded(int? shimmerGeneration) =>
         shimmerGeneration.HasValue && shimmerGeneration.Value != CurrentLoadGeneration;
 
+    // BUG-089: true once a newer first-page load has started after the given query generation.
+    private bool IsStaleQuery(int queryGeneration) => Volatile.Read(ref _queryGeneration) != queryGeneration;
+
     protected async Task RefreshAsync()
     {
         RunOnUiThread(() => IsRefreshing = true);
@@ -284,14 +294,24 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         {
             loadingPage = _currentPage + 1;
 
+            // BUG-089: the page belongs to the query captured here; a newer first-page load makes it stale.
+            var queryGeneration = Volatile.Read(ref _queryGeneration);
+            var query = _currentSearchQuery;
+
             // SQLITE-WORKAROUND: same offload as LoadFirstPageAsync — SQLite query + lazy
             // projection enumeration must not run on the UI thread.
             var (list, totalCount) = await Task.Run(async () =>
             {
                 var (itemsEnumerable, total) = await FetchMoreAsync(
-                    loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
+                    loadingPage, AppPagination.DefaultPageSize, query);
                 return (itemsEnumerable.ToList(), total);
             });
+
+            if (IsStaleQuery(queryGeneration))
+            {
+                RunOnUiThread(() => IsRefreshing = false);
+                return;
+            }
 
             _totalCount = totalCount;
             var hasMore = (list.Count + Items.Count) < _totalCount;
@@ -299,6 +319,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
             RunOnUiThread(() =>
             {
+                if (IsStaleQuery(queryGeneration)) // BUG-089: re-check on the UI thread, where the rows are appended
+                {
+                    IsRefreshing = false;
+                    return;
+                }
+
                 Items.AddRange(list);
                 HasMoreItems = hasMore;
                 IsRefreshing = false;

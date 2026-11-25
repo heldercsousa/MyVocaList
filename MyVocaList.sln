@@ -2100,6 +2100,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race", "2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race", "{70B0BAD8-E30C-5F30-B258-F594049C2489}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\README.md
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\task-log.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "{BBFD3D31-960F-5EB4-9EC6-441DFC777D87}"
