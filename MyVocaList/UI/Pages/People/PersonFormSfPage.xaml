@@ -149,6 +149,7 @@
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
                         <inputlayout:SfTextInputLayout Grid.Column="0"
                                                        Hint="Birth month"
+                                                       IsHintAlwaysFloated="True"
                                                        ContainerType="Outlined"
                                                        HasError="{Binding BirthdayErrorOnMonth}"
                                                        ErrorText="{Binding BirthdayErrorText}">
@@ -176,6 +177,7 @@
 
                         <inputlayout:SfTextInputLayout Grid.Column="1"
                                                        Hint="Birth day"
+                                                       IsHintAlwaysFloated="True"
                                                        ContainerType="Outlined"
                                                        HasError="{Binding BirthdayErrorOnDay}"
                                                        ErrorText="{Binding BirthdayErrorText}">
