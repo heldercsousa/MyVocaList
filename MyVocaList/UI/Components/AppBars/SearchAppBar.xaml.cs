@@ -63,7 +63,7 @@ public partial class SearchAppBar : AppBarBase
             InnerEntry?.Focus();
     }
 
-    // OutlinedTextFieldSf is a ContentView (Border > Entry) and does not forward Focus/Unfocus to its Entry.
+    // OutlinedTextField is a ContentView (Border > Entry) and does not forward Focus/Unfocus to its Entry.
     private Entry? InnerEntry => (searchEdit.Content as Border)?.Content as Entry;
 
     // ── Leading button: always dismisses search ────────────────────────────

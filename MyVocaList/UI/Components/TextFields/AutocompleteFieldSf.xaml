@@ -14,7 +14,7 @@
         <!-- MD3 outlined text field: the setters of the app's SfTextInputLayout style (MaterialStyles.xaml), which
              targets the Toolkit layout. SfAutocomplete needs the Community-suite layout (Syncfusion.Maui.Core), which
              does not read the app's SfTextInputLayout* theme keys (emulator, T3.3), so the outline and hint colors per
-             state (enabled / focused / error) are applied in code-behind (ApplyOutline), as OutlinedTextFieldSf does. -->
+             state (enabled / focused / error) are applied in code-behind (ApplyOutline), as OutlinedTextField does. -->
         <Style x:Key="AutocompleteFieldSfLayout" TargetType="core:SfTextInputLayout">
             <Setter Property="ContainerType" Value="Outlined" />
             <Setter Property="OutlineCornerRadius" Value="4" />

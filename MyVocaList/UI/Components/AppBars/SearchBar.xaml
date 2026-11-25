@@ -21,7 +21,7 @@
         </Border.StrokeShape>
 
         <!-- Leading search_outlined icon is non-interactive (plain Image, no button).
-             Search input: OutlinedTextFieldSf (SfTextInputLayout fails here, design § Control mapping),
+             Search input: OutlinedTextField (SfTextInputLayout fails here, design § Control mapping),
              trailing auto clear icon = ClearButtonVisibility WhileEditing.
              No back arrow, no BackCommand, no auto-focus (REQ-SEARCHBAR-03). -->
         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="0" VerticalOptions="Center">
@@ -33,7 +33,7 @@
                    VerticalOptions="Center"
                    behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
                    AutomationProperties.IsInAccessibleTree="False" />
-            <textfields:OutlinedTextFieldSf x:Name="searchEdit"
+            <textfields:OutlinedTextField x:Name="searchEdit"
                                             Grid.Column="1"
                                             Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
                                             Placeholder="{Binding Placeholder, Source={x:Reference self}}"

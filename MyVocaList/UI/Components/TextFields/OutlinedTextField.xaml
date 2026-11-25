@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MyVocaList.UI.Components.TextFields"
-    x:Class="MyVocaList.UI.Components.TextFields.OutlinedTextFieldSf"
+    x:Class="MyVocaList.UI.Components.TextFields.OutlinedTextField"
     x:Name="self">
 
     <!-- MD3 outlined text field (stock MAUI). Outline 1dp, Primary 2dp when focused, corner radius 4.

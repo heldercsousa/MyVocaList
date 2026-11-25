@@ -6,40 +6,40 @@ namespace MyVocaList.UI.Components.TextFields;
 /// MD3 outlined text field built from stock MAUI (<see cref="Border"/> around an <see cref="Entry"/>).
 /// Used where <c>SfTextInputLayout</c> fails (search bar).
 /// </summary>
-public partial class OutlinedTextFieldSf : ContentView
+public partial class OutlinedTextField : ContentView
 {
     private const double RestingStrokeThickness = 1;
     private const double FocusedStrokeThickness = 2;
 
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
-        nameof(Text), typeof(string), typeof(OutlinedTextFieldSf), string.Empty, BindingMode.TwoWay);
+        nameof(Text), typeof(string), typeof(OutlinedTextField), string.Empty, BindingMode.TwoWay);
 
     public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(
-        nameof(Placeholder), typeof(string), typeof(OutlinedTextFieldSf), string.Empty);
+        nameof(Placeholder), typeof(string), typeof(OutlinedTextField), string.Empty);
 
     public static readonly BindableProperty IsPasswordProperty = BindableProperty.Create(
-        nameof(IsPassword), typeof(bool), typeof(OutlinedTextFieldSf), false);
+        nameof(IsPassword), typeof(bool), typeof(OutlinedTextField), false);
 
     public static readonly BindableProperty KeyboardProperty = BindableProperty.Create(
-        nameof(Keyboard), typeof(Keyboard), typeof(OutlinedTextFieldSf), Keyboard.Default);
+        nameof(Keyboard), typeof(Keyboard), typeof(OutlinedTextField), Keyboard.Default);
 
     public static readonly BindableProperty ReturnCommandProperty = BindableProperty.Create(
-        nameof(ReturnCommand), typeof(ICommand), typeof(OutlinedTextFieldSf), null);
+        nameof(ReturnCommand), typeof(ICommand), typeof(OutlinedTextField), null);
 
     public static readonly BindableProperty ClearButtonVisibilityProperty = BindableProperty.Create(
-        nameof(ClearButtonVisibility), typeof(ClearButtonVisibility), typeof(OutlinedTextFieldSf),
+        nameof(ClearButtonVisibility), typeof(ClearButtonVisibility), typeof(OutlinedTextField),
         ClearButtonVisibility.Never);
 
     /// <summary>Backs <see cref="ShowOutline"/>.</summary>
     public static readonly BindableProperty ShowOutlineProperty = BindableProperty.Create(
-        nameof(ShowOutline), typeof(bool), typeof(OutlinedTextFieldSf), true,
-        propertyChanged: static (b, _, _) => ((OutlinedTextFieldSf)b).ApplyOutline(isFocused: false));
+        nameof(ShowOutline), typeof(bool), typeof(OutlinedTextField), true,
+        propertyChanged: static (b, _, _) => ((OutlinedTextField)b).ApplyOutline(isFocused: false));
 
     /// <summary>Backs <see cref="ReturnType"/>.</summary>
     public static readonly BindableProperty ReturnTypeProperty = BindableProperty.Create(
-        nameof(ReturnType), typeof(ReturnType), typeof(OutlinedTextFieldSf), ReturnType.Default);
+        nameof(ReturnType), typeof(ReturnType), typeof(OutlinedTextField), ReturnType.Default);
 
-    public OutlinedTextFieldSf()
+    public OutlinedTextField()
     {
         InitializeComponent();
     }
@@ -127,7 +127,7 @@ public partial class OutlinedTextFieldSf : ContentView
 }
 
 /// <summary>
-/// Entry used only inside <see cref="OutlinedTextFieldSf"/>. The subclass lets a handler mapping strip the native
+/// Entry used only inside <see cref="OutlinedTextField"/>. The subclass lets a handler mapping strip the native
 /// Android underline for this control alone, leaving every other <see cref="Entry"/> in the app untouched.
 /// </summary>
 public sealed class OutlinedTextFieldSfEntry : Entry

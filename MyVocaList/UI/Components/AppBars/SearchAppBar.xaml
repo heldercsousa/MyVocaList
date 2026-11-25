@@ -27,8 +27,8 @@
                      SemanticProperties.Description="Back"
                      Clicked="OnLeadingButtonClicked" />
 
-        <!-- Search input: borderless OutlinedTextFieldSf on app bar bg (SfTextInputLayout fails here, design § Control mapping) -->
-        <textfields:OutlinedTextFieldSf Grid.Column="1"
+        <!-- Search input: borderless OutlinedTextField on app bar bg (SfTextInputLayout fails here, design § Control mapping) -->
+        <textfields:OutlinedTextField Grid.Column="1"
                                         x:Name="searchEdit"
                                         Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
                                         Placeholder="{Binding Placeholder, Source={x:Reference self}}"
