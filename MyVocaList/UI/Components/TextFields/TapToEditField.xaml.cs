@@ -16,14 +16,14 @@ namespace MyVocaList.UI.Components.TextFields;
 /// <c>PropertyChanged</c>.
 /// </remarks>
 [ContentProperty(nameof(Editor))]
-public partial class TapToEditFieldSf : ContentView
+public partial class TapToEditField : ContentView
 {
     // ── Editor (content property) ──────────────────────────────────────────
 
     /// <summary>Identifies the <see cref="Editor"/> bindable property.</summary>
     public static readonly BindableProperty EditorProperty = BindableProperty.Create(
-        nameof(Editor), typeof(View), typeof(TapToEditFieldSf), null,
-        propertyChanged: (b, o, n) => ((TapToEditFieldSf)b).OnEditorChanged((View?)o, (View?)n));
+        nameof(Editor), typeof(View), typeof(TapToEditField), null,
+        propertyChanged: (b, o, n) => ((TapToEditField)b).OnEditorChanged((View?)o, (View?)n));
 
     /// <summary>The wrapped editor, shown in the editor state (the XAML content of the wrapper).</summary>
     public View Editor
@@ -36,8 +36,8 @@ public partial class TapToEditFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="Text"/> bindable property.</summary>
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
-        nameof(Text), typeof(string), typeof(TapToEditFieldSf), string.Empty,
-        propertyChanged: (b, _, _) => ((TapToEditFieldSf)b).ApplyState());
+        nameof(Text), typeof(string), typeof(TapToEditField), string.Empty,
+        propertyChanged: (b, _, _) => ((TapToEditField)b).ApplyState());
 
     /// <summary>The value shown in the text state; bind it to the same value as the editor.</summary>
     public string Text
@@ -53,8 +53,8 @@ public partial class TapToEditFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="TextStyleClass"/> bindable property.</summary>
     public static readonly BindableProperty TextStyleClassProperty = BindableProperty.Create(
-        nameof(TextStyleClass), typeof(string), typeof(TapToEditFieldSf), DefaultTextStyleClass,
-        propertyChanged: (b, _, _) => ((TapToEditFieldSf)b).ApplyTextStyle());
+        nameof(TextStyleClass), typeof(string), typeof(TapToEditField), DefaultTextStyleClass,
+        propertyChanged: (b, _, _) => ((TapToEditField)b).ApplyTextStyle());
 
     /// <summary>
     /// The type style class of the text (a <c>Label</c> class of <c>MaterialStyles.xaml</c>, e.g.
@@ -73,7 +73,7 @@ public partial class TapToEditFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="MaxLines"/> bindable property.</summary>
     public static readonly BindableProperty MaxLinesProperty = BindableProperty.Create(
-        nameof(MaxLines), typeof(int), typeof(TapToEditFieldSf), DefaultMaxLines);
+        nameof(MaxLines), typeof(int), typeof(TapToEditField), DefaultMaxLines);
 
     /// <summary>Lines of text before the ellipsis. Default 3.</summary>
     public int MaxLines
@@ -86,7 +86,7 @@ public partial class TapToEditFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsEditIconVisible"/> bindable property.</summary>
     public static readonly BindableProperty IsEditIconVisibleProperty = BindableProperty.Create(
-        nameof(IsEditIconVisible), typeof(bool), typeof(TapToEditFieldSf), true);
+        nameof(IsEditIconVisible), typeof(bool), typeof(TapToEditField), true);
 
     /// <summary>Whether the trailing <c>edit_outlined</c> icon marks the text as editable. Default <c>true</c>.</summary>
     public bool IsEditIconVisible
@@ -99,8 +99,8 @@ public partial class TapToEditFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="HasError"/> bindable property.</summary>
     public static readonly BindableProperty HasErrorProperty = BindableProperty.Create(
-        nameof(HasError), typeof(bool), typeof(TapToEditFieldSf), false,
-        propertyChanged: (b, _, _) => ((TapToEditFieldSf)b).ApplyState());
+        nameof(HasError), typeof(bool), typeof(TapToEditField), false,
+        propertyChanged: (b, _, _) => ((TapToEditField)b).ApplyState());
 
     /// <summary>While <c>true</c> the editor stays visible, so its error shows (REQ-PIC-24).</summary>
     public bool HasError
@@ -113,8 +113,8 @@ public partial class TapToEditFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="IsEditing"/> bindable property.</summary>
     public static readonly BindableProperty IsEditingProperty = BindableProperty.Create(
-        nameof(IsEditing), typeof(bool), typeof(TapToEditFieldSf), false, BindingMode.TwoWay,
-        propertyChanged: (b, _, _) => ((TapToEditFieldSf)b).ApplyState());
+        nameof(IsEditing), typeof(bool), typeof(TapToEditField), false, BindingMode.TwoWay,
+        propertyChanged: (b, _, _) => ((TapToEditField)b).ApplyState());
 
     /// <summary>
     /// The editor state requested by a tap (TwoWay). Set <c>true</c> by a tap on the text and when the inner
@@ -130,7 +130,7 @@ public partial class TapToEditFieldSf : ContentView
 
     /// <summary>Identifies the <see cref="ReleasesPickOnEdit"/> bindable property.</summary>
     public static readonly BindableProperty ReleasesPickOnEditProperty = BindableProperty.Create(
-        nameof(ReleasesPickOnEdit), typeof(bool), typeof(TapToEditFieldSf), true);
+        nameof(ReleasesPickOnEdit), typeof(bool), typeof(TapToEditField), true);
 
     /// <summary>
     /// When <c>true</c> (default), a tap on the text sets a locked wrapped <see cref="AutocompleteFieldSf"/>'s
@@ -162,7 +162,7 @@ public partial class TapToEditFieldSf : ContentView
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the wrapper with no editor; the editor state shows until a value is set.</summary>
-    public TapToEditFieldSf()
+    public TapToEditField()
     {
         InitializeComponent();
         ApplyTextStyle();

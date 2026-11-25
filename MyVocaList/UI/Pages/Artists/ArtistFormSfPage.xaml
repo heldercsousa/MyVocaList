@@ -20,7 +20,7 @@
                  a local pick opens that artist, a Deezer pick fills Name in the picked state. Edit mode:
                  plain editable text (IsSearchEnabled false). A defined Name reads as Headline Medium text
                  and a tap opens the editor (REQ-PIC-23..26). Blur validation runs ValidateName. -->
-            <textfields:TapToEditFieldSf x:Name="nameTapToEdit"
+            <textfields:TapToEditField x:Name="nameTapToEdit"
                                        Text="{Binding ArtistName}"
                                        TextStyleClass="Headline.Medium"
                                        HasError="{Binding NameHasError}"
@@ -38,7 +38,7 @@
                                                 SelectCommand="{Binding SelectNameCommand}"
                                                 ClearCommand="{Binding ClearNameCommand}"
                                                 BlurWithoutPickCommand="{Binding ValidateNameCommand}" />
-            </textfields:TapToEditFieldSf>
+            </textfields:TapToEditField>
 
             <Label Text="{Binding CharacterCounterText}"
                    IsVisible="{Binding ShowCharacterCounter}"

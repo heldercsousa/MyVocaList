@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
-    x:Class="MyVocaList.UI.Components.TextFields.TapToEditFieldSf"
+    x:Class="MyVocaList.UI.Components.TextFields.TapToEditField"
     x:Name="self">
 
     <!-- Tap-to-edit wrapper (REQ-PIC-23..26, 30): EITHER the text presentation OR the wrapped editor shows,

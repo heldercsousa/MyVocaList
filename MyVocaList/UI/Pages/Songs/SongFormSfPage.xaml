@@ -203,7 +203,7 @@
                                 <Label Text="{Binding SongTitle}"
                                        StyleClass="Headline.Medium"
                                        IsVisible="{Binding IsTitleFrozen}" />
-                                <textfields:TapToEditFieldSf x:Name="titleTapField"
+                                <textfields:TapToEditField x:Name="titleTapField"
                                                              Text="{Binding SongTitle}"
                                                              TextStyleClass="Headline.Medium"
                                                              HasError="{Binding TitleHasError}"
@@ -222,7 +222,7 @@
                                                                     SelectCommand="{Binding SelectTitleCommand}"
                                                                     ClearCommand="{Binding ClearTitleCommand}"
                                                                     BlurWithoutPickCommand="{Binding ValidateTitleCommand}" />
-                                </textfields:TapToEditFieldSf>
+                                </textfields:TapToEditField>
 
                                 <Label Text="{Binding CharacterCounterText}"
                                        IsVisible="{Binding ShowCharacterCounter}"
@@ -261,7 +261,7 @@
                                 <Label Text="{Binding ArtistSearchText}"
                                        StyleClass="Title.Large"
                                        IsVisible="{Binding IsArtistFrozen}" />
-                                <textfields:TapToEditFieldSf x:Name="artistTapField"
+                                <textfields:TapToEditField x:Name="artistTapField"
                                                              Text="{Binding ArtistSearchText}"
                                                              TextStyleClass="Title.Large"
                                                              HasError="{Binding ArtistHasError}"
@@ -278,7 +278,7 @@
                                                                     SelectCommand="{Binding SelectArtistCommand}"
                                                                     ClearCommand="{Binding ClearArtistCommand}"
                                                                     BlurWithoutPickCommand="{Binding ArtistBlurredWithoutSelectionCommand}" />
-                                </textfields:TapToEditFieldSf>
+                                </textfields:TapToEditField>
 
                                 <!-- Lyrics: multiline Editor (design § Control mapping: MultilineEdit -> SfTextInputLayout + Editor).
                                      The DX original shows no character counter, so none is added. -->
