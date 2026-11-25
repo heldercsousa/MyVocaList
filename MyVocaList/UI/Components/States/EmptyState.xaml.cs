@@ -5,19 +5,19 @@ namespace MyVocaList.UI.Components.States;
 /// Set <see cref="Illustration"/>, <see cref="Headline"/>, and optionally <see cref="SupportingText"/>.
 /// Control visibility via <c>IsVisible</c> on this component.
 /// </summary>
-public partial class EmptyStateSf : ContentView
+public partial class EmptyState : ContentView
 {
     public static readonly BindableProperty IllustrationProperty =
-        BindableProperty.Create(nameof(Illustration), typeof(string), typeof(EmptyStateSf), string.Empty);
+        BindableProperty.Create(nameof(Illustration), typeof(string), typeof(EmptyState), string.Empty);
 
     public static readonly BindableProperty HeadlineProperty =
-        BindableProperty.Create(nameof(Headline), typeof(string), typeof(EmptyStateSf), string.Empty);
+        BindableProperty.Create(nameof(Headline), typeof(string), typeof(EmptyState), string.Empty);
 
     public static readonly BindableProperty SupportingTextProperty =
-        BindableProperty.Create(nameof(SupportingText), typeof(string), typeof(EmptyStateSf), string.Empty,
+        BindableProperty.Create(nameof(SupportingText), typeof(string), typeof(EmptyState), string.Empty,
             propertyChanged: (b, _, n) =>
             {
-                var c = (EmptyStateSf)b;
+                var c = (EmptyState)b;
                 c.supportingLabel.IsVisible = !string.IsNullOrEmpty((string)n);
             });
 
@@ -42,7 +42,7 @@ public partial class EmptyStateSf : ContentView
         set => SetValue(SupportingTextProperty, value);
     }
 
-    public EmptyStateSf()
+    public EmptyState()
     {
         InitializeComponent();
     }

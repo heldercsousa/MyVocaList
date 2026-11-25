@@ -205,14 +205,14 @@
                             </Grid>
 
                             <!-- Empty state: no items of this entity type registered -->
-                            <states:EmptyStateSf
+                            <states:EmptyState
                                 Illustration="{Binding EmptyNoItemsIllustration, Source={x:Reference self}}"
                                 Headline="{Binding EmptyNoItemsHeadline, Source={x:Reference self}}"
                                 IsVisible="{Binding IsEmptyNoItems, Source={x:Reference self}}"
                                 Margin="32,32,32,88" />
 
                             <!-- Empty state: search returned no results — bound directly via ICrudListViewModel BindingContext -->
-                            <states:EmptyStateSf
+                            <states:EmptyState
                                 Illustration="search_outlined"
                                 Headline="No results found"
                                 IsVisible="{Binding IsEmptyNoResults}"

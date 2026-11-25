@@ -33,7 +33,7 @@
             <Border StrokeThickness="0" HeightRequest="56" Margin="16,8" BackgroundColor="{StaticResource SurfaceVariant}" />
         </VerticalStackLayout>
 
-        <states:EmptyStateSf
+        <states:EmptyState
             Illustration="search_outlined"
             Headline="{Binding EmptyStateMessage}"
             IsVisible="{Binding IsShowEmptyState}" />
