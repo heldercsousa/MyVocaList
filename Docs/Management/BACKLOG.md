@@ -26,7 +26,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-22 | ↳ Deezer vs MusicBrainz — systematic comparison with pros and cons | 💡 Pending |
 | — | **Cross-cutting** | — |
 | 2026-11-24 | ↳ CRUD list search: load-more and pull-to-refresh can overwrite newer search results (suspected race) | 🟡 In Progress |
-| 2026-11-25 | ↳ Person migration fails on upgrade: CK_Persons_EmailOrBirthday check constraint failed on existing rows | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
@@ -53,5 +52,4 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-25 | ↳↳ Venue map picker search can be cancelled | 🟡 In Progress |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
-| 2026-11-25 | ↳ AppShell sheet attach fails when page root is SfBottomSheet | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->
