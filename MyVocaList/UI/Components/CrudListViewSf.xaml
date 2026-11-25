@@ -195,7 +195,6 @@
                                                      LoadMoreCommand="{Binding LoadMoreCommand}"
                                                      BackgroundColor="{StaticResource Surface}"
                                                      Margin="0,0,0,88"
-                                                     Scrolling="OnListViewScrolling"
                                                      ItemTapped="OnItemTapped"
                                                      ItemLongPress="OnItemLongPress"
                                                      SelectionChanged="OnListViewSelectionChanged" />
