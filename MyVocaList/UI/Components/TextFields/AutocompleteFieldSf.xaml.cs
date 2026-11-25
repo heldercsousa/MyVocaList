@@ -295,6 +295,7 @@ public partial class AutocompleteFieldSf : ContentView
     internal AutocompleteFieldSf(bool skipXamlInitForTests)
     {
         _filter = new AutocompleteFilterSf(SearchAsync, LogSearchFailure);
+        Unloaded += OnUnloaded;
         if (skipXamlInitForTests)
             return;
 
@@ -465,6 +466,9 @@ public partial class AutocompleteFieldSf : ContentView
     }
 
     // ── Own search (REQ-ACF-31 amended, T12): run by AutocompleteFilterSf on each user keystroke ──
+
+    // B13: leaving the screen cancels a pending search, so it cannot open the menu on a page that is no longer shown.
+    internal void OnUnloaded(object? sender, EventArgs e) => _filter.Cancel();
 
     // Started by the control's text-changed handler, on the UI thread. Every await below captures the UI
     // synchronization context (no ConfigureAwait(false)), so the checks after each await run on the UI thread.

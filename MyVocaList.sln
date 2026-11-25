@@ -2152,6 +2152,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen", "2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen", "{E806B2DC-E225-5419-81CF-ED66AB36D576}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\task-log.md
 	EndProjectSection
 EndProject
 Global
