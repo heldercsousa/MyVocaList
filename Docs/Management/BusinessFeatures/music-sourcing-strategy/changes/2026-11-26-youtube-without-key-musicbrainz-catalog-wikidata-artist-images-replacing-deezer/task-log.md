@@ -81,3 +81,23 @@ The plan's `SearchTitleRemoteAsync_ProviderThrows_ReturnsOfflineStatusAndLocalRe
 Tests: 2048 passed, 0 failed. Android build: see commit report. Not emulator-checked (deploy left to Helder).
 ### Design concern
 Remaining "deezer" text in `.cs` outside Tests/Docs: `Services/ILyricsProvider.cs`, `ISongLyricsService.cs`, `MusicProviderException.cs` (comments), and stored-data compatibility; not in T2b file list, left for review.
+
+---
+## Task: T3 Migration, clear Deezer provenance in place (REQ-MSRC-01)
+**Plan:** `plan.md` (this folder)
+**Status:** To Review
+**Started:** 2026-11-26
+**Completed:** 2026-11-26
+
+### Changed files:
+- `Infra/Migrations/20261126212504_ClearDeezerProvenance.cs` + `.Designer.cs` (generated; snapshot unchanged, no model change). `Up`: UPDATE Songs/Artists SET ExternalProvider/ExternalId/ImageUrl = NULL WHERE lower(ExternalProvider) = 'deezer'; `Down` no-op (not reversible by design)
+- `Tests/Integration/Migrations/ClearDeezerProvenanceTests.cs` (3 tests, real SQLite)
+- `Services/ILyricsProvider.cs`, `Services/ISongLyricsService.cs`, `Services/MusicProviderException.cs` (comment-only Deezer mentions removed)
+
+### AC traceability
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-MSRC-01 | in-place UPDATE, rows never recreated | `Migrate_DeezerSong_KeepsIdTitleLyricsAndClearsProvenance`, `Migrate_KeepsKaraokeUrlsAndHistoryRows`, `Migrate_DbWithoutDeezerRows_NoChange` |
+
+### Build notes
+Red run first: 3/3 failed (migration not found). After: 2051 passed, 0 failed. UPDATE only (no table rebuild), so the FTS5 triggers are untouched. MigrationsLock is a runtime clear before MigrateAsync, unaffected. Android build result in commit report.
