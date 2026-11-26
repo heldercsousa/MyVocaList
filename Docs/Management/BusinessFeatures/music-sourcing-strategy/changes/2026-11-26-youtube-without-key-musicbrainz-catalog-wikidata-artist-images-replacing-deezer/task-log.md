@@ -171,3 +171,24 @@ Red run first: compile failure (`YouTubeLinkRules` missing). After: 2055 passed,
 ### Build notes
 8 new tests pass. Android build: 0 errors. Play entry point is a button on each saved link in the song form (`SongsViewModel` untouched). Tests were written together with the types, so no separate red run.
 Full suite: 2063 passed, 0 failed. E2E: emulator-5554 package service was dead (DEAD_OBJECT) so install/launch could not be verified; restart denied by the permission classifier. Requires manual verification (play button on a saved link in Song form).
+
+---
+## Task: T7 — Artist profile: photo + credit, description, discography (REQ-MSRC-08, -09, -10)
+**Plan:** `plan.md` (this folder)
+**Status:** To Review
+**Started:** 2026-11-26
+**Completed:** 2026-11-26
+
+### Changed files:
+- New: `Domain/ServicesInterfaces/IArtistProfileService.cs`, `Services/ArtistProfileService.cs`, `Contracts/DTOs/ArtistProfileDto.cs` (+ `ReleaseGroupDto`), `Tests/Unit/Services/ArtistProfileServiceTests.cs`
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (typed client + interface), `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`, `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml`, `Tests/Unit/ViewModels/ArtistFormViewModelTests.cs`, `Tests/Unit/ViewModels/ArtistFormViewModelImageTests.cs` (ctor arg only)
+
+### AC traceability
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-MSRC-08 | `ArtistProfileService` (MB -> Wikidata P18 -> Commons, licence required), form profile block | `GetAsync_FullChain_*`, `_NoWikidataRelation_*`, `_NoP18_*`, `_MissingLicense_*`, `LoadProfileAsync_NoProfile_ShowsInitialsPlaceholder` |
+| REQ-MSRC-09 | description pt->en, release groups | `GetAsync_FullChain_*`, `LoadProfileAsync_FullProfile_*` |
+| REQ-MSRC-10 | `GetAsync` returns null on failure; VM snackbar | `GetAsync_NetworkFailure_ReturnsNull`, `LoadProfileAsync_ProfileFails_ShowsNonBlockingMessage` |
+
+### Build notes
+Red: compile failure first (types missing). Then 8 new tests pass; full suite 2071 passed, 0 failed. Android build: 0 errors. Profile loads in edit mode only, for rows with `ExternalProvider = MusicBrainz` (add-mode pick has no profile yet). Registered in `ServiceCollectionExtensions` as planned (not MauiProgram). Not emulator-checked (no emulator work requested).

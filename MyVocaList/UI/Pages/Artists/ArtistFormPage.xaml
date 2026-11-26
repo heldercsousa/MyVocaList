@@ -7,6 +7,7 @@
     xmlns:readModels="clr-namespace:MyVocaList.Domain.ReadModels;assembly=MyVocaList.Domain"
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
+    xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs;assembly=MyVocaList.Contracts"
     x:Class="MyVocaList.UI.Pages.Artists.ArtistFormPage"
     x:DataType="vm:ArtistFormViewModel"
     Title="{Binding PageTitle}"
@@ -69,6 +70,35 @@
                                     PickCommand="{Binding PickImageCommand}"
                                     RemoveCommand="{Binding RemoveImageCommand}"
                                     IsBusy="{Binding IsImageBusy}" />
+
+            <!-- Artist profile (REQ-MSRC-08/09): Wikidata/Commons photo + credit, description, MusicBrainz discography.
+                 Loaded at runtime for MusicBrainz-linked artists in edit mode; never stored. -->
+            <VerticalStackLayout IsVisible="{Binding HasProfile}" Spacing="8">
+                <Image Source="{Binding ProfileImageUrl}"
+                       IsVisible="{Binding HasProfileImage}"
+                       HeightRequest="160"
+                       Aspect="AspectFit"
+                       SemanticProperties.Description="Artist photo" />
+                <Label Text="{Binding ProfileImageCredit}"
+                       IsVisible="{Binding HasProfileImage}"
+                       StyleClass="Body.Small" />
+                <Label Text="{Binding ProfileDescription}"
+                       IsVisible="{Binding HasProfileDescription}"
+                       StyleClass="Body.Medium" />
+                <VerticalStackLayout IsVisible="{Binding HasDiscography}" Spacing="2">
+                    <Label Text="Discography" StyleClass="Title.Small" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Discography}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="dto:ReleaseGroupDto">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Label Text="{Binding Title}" StyleClass="Body.Medium" />
+                                    <Label Text="{Binding FirstReleaseYear}" StyleClass="Body.Small" />
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
 
             <!-- Duplicate suggestions from local catalog -->
             <VerticalStackLayout IsVisible="{Binding HasDuplicateSuggestions}" Spacing="4">

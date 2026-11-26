@@ -41,7 +41,7 @@ public class ArtistFormViewModelImageTests
         var sut = new ArtistFormViewModel(
             _serviceMock.Object, _snackMock.Object, new Mock<ILogger<ArtistFormViewModel>>().Object,
             new Mock<IMessenger>().Object, _navigationMock.Object, _suggestionsMock.Object,
-            _imageStoreMock.Object, _photoPickerMock.Object);
+            _imageStoreMock.Object, _photoPickerMock.Object, new Mock<IArtistProfileService>().Object);
         if (artistId.HasValue)
             sut.ArtistId = artistId;
         sut.CompleteHydration();

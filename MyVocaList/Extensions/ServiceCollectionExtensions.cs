@@ -55,6 +55,14 @@ public static class ServiceCollectionExtensions
         // above and injecting an unconfigured HttpClient (no BaseAddress/User-Agent) (BUG-082).
         services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<MusicBrainzProvider>());
 
+        // Artist profile (REQ-MSRC-08..10): MusicBrainz + Wikidata + Commons; same User-Agent and shared limiter, typed client (BUG-082).
+        services.AddHttpClient<ArtistProfileService>(client =>
+        {
+            var version = typeof(ArtistProfileService).Assembly.GetName().Version?.ToString(2) ?? "1.0";
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(MusicBrainzProvider.BuildUserAgent(version, contact));
+        });
+        services.AddScoped<IArtistProfileService>(sp => sp.GetRequiredService<ArtistProfileService>());
+
         // Place lookup (venue map picker, REQ-VEN-25..28, 34). Same typed-client rule as MusicBrainz above (BUG-082):
         // the provider is resolved through its typed HttpClient, never AddScoped<IGeocodingProvider, NominatimGeocodingProvider>().
         services.AddHttpClient<NominatimGeocodingProvider>(client =>
