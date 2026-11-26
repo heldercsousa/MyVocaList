@@ -493,6 +493,36 @@ public class ArtistFormViewModelImageTests
             Times.Once);
     }
 
+    [Fact]
+    // [AC] REQ-MSRC-03: saving from a MusicBrainz pick stores ExternalProvider and the MBID on the new artist.
+    public async Task Save_AfterMusicBrainzPick_PassesProviderAndMbidToCreate()
+    {
+        var sut = CreateSut();
+        CreateSucceeds();
+        await sut.SelectNameCommand.ExecuteAsync(Pick(new ArtistSuggestionDto(null, "Queen", "mbid-queen", "MusicBrainz", true)));
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        _serviceMock.Verify(
+            s => s.CreateArtistAsync("Queen", "mbid-queen", "MusicBrainz", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-MSRC-03: clearing a picked Name drops the identity, so a typed name is saved without a provider.
+    public async Task Save_AfterPickThenClear_CreatesWithoutProvider()
+    {
+        var sut = CreateSut();
+        CreateSucceeds();
+        await sut.SelectNameCommand.ExecuteAsync(Pick(new ArtistSuggestionDto(null, "Queen", "mbid-queen", "MusicBrainz", true)));
+        sut.ClearNameCommand.Execute(null);
+        sut.ArtistName = "Typed";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        _serviceMock.Verify(
+            s => s.CreateArtistAsync("Typed", null, null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     // ── Name as tap-to-edit text (REQ-PIC-37) ──────────────────────────────────
 
     [Fact]

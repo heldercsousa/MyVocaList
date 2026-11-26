@@ -68,6 +68,8 @@ public partial class ArtistFormViewModel : ViewModelBase
     // Name still equals it. An exact (ordinal) comparison that decides which pending value applies; it is
     // not search or de-duplication.
     private string? _pickedName;
+    private string? _pickedExternalId;
+    private string? _pickedExternalProvider;
 
     [ObservableProperty] private bool _isImageBusy;
 
@@ -306,7 +308,7 @@ public partial class ArtistFormViewModel : ViewModelBase
             else
             {
                 var imageReference = FormImageReference;   // read before the Name could change
-                var (success, message, artist) = await _artistService.CreateArtistAsync(name);
+                var (success, message, artist) = await _artistService.CreateArtistAsync(name, _pickedExternalId, _pickedExternalProvider);
                 if (!success)
                 {
                     ApplyAsyncFailure(message);
@@ -365,6 +367,8 @@ public partial class ArtistFormViewModel : ViewModelBase
         _uploadedImageReference = imageReference;
         _pendingImageUrl = null;
         _pickedName = null;
+        _pickedExternalId = null;
+        _pickedExternalProvider = null;
         _storedImageReference = null;
         _imageRemoved = false;
         ArtistId = artistId;
@@ -478,7 +482,7 @@ public partial class ArtistFormViewModel : ViewModelBase
 
     /// <summary>
     /// Local pick opens that artist's edit form, replacing the add form (REQ-SFT-48). MusicBrainz pick fills
-    /// and locks Name only; the provider id is not stored (REQ-SFT-49).
+    /// and locks Name and keeps the provider identity, stored on Save (REQ-MSRC-03).
     /// </summary>
     [RelayCommand]
     private Task SelectName(AutocompleteSuggestion? option)
@@ -492,6 +496,8 @@ public partial class ArtistFormViewModel : ViewModelBase
             // a pick after "Remove picture" sets a picture again (REQ-PIC-20).
             _pendingImageUrl = dto.ImageUrl;
             _pickedName = dto.Name;
+            _pickedExternalId = dto.ExternalId;
+            _pickedExternalProvider = dto.ExternalProvider;
             _imageRemoved = false;
             ArtistName = dto.Name;
             IsNameLocked = true;
@@ -509,6 +515,8 @@ public partial class ArtistFormViewModel : ViewModelBase
     {
         _pendingImageUrl = null;
         _pickedName = null;
+        _pickedExternalId = null;
+        _pickedExternalProvider = null;
         ArtistName = string.Empty;
         IsNameLocked = false;
         NameSupportingText = string.Empty;
