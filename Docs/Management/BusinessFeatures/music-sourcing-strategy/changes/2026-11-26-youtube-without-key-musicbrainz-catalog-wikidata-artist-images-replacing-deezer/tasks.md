@@ -9,4 +9,4 @@ Plan: `plan.md`. DRY Onion, all serial (shared files — see plan § File owners
 - [x] T4 Remove YouTube Data API, key settings, search page; search-out button (REQ-MSRC-04, -05) — depends T2b
 - [x] T5 YouTube link rules + Android share target (REQ-MSRC-06) — depends T4
 - [~] T6 IFrame player page (REQ-MSRC-07) — depends T5; halt for the on-device check
-- [ ] T7 Artist profile: Wikidata photo + credit, description, discography (REQ-MSRC-08, -09) — depends T2b, T6 (shared DI file)
+- [x] T7 Artist profile: Wikidata photo + credit, description, discography (REQ-MSRC-08, -09) — depends T2b, T6 (shared DI file)
