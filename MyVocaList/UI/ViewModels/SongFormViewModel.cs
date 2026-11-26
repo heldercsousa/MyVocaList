@@ -1333,6 +1333,10 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private Task PlayUrl(SongKaraokeUrlDto? dto) =>
+        dto is null ? Task.CompletedTask : _navigationService.GoToAsync($"{Routes.YouTubePlayer}?v={dto.VideoId}");
+
+    [RelayCommand]
     private async Task LaunchYouTubeSearch()
     {
         var title = SongTitle?.Trim() ?? string.Empty;

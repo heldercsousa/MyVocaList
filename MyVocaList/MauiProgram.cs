@@ -147,9 +147,11 @@ public static class MauiProgram
         builder.Services.AddTransient<SongsViewModel>();
         builder.Services.AddTransient<SongFormViewModel>();
         builder.Services.AddTransient<VenueMapPickerViewModel>();
+        builder.Services.AddTransient<YouTubePlayerViewModel>();
 
         // Pages
         builder.Services.AddTransient<VenueMapPickerPage>();
+        builder.Services.AddTransient<YouTubePlayerPage>();
         builder.Services.AddTransient<VenuesPage>();
         builder.Services.AddTransient<PeoplePage>();
         builder.Services.AddTransient<SongsPage>();

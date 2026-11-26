@@ -151,3 +151,23 @@ Red run first: compile failure (rule type missing, old `SettingsViewModel` const
 
 ### Build notes
 Red run first: compile failure (`YouTubeLinkRules` missing). After: 2055 passed, 0 failed (one unrelated flaky `PersonIdentityIndexTests` failure seen once, passed on rerun). Android build result in the commit report. Not emulator-checked (share from YouTube app still to verify).
+
+---
+## Task: T6 — IFrame player page (REQ-MSRC-07)
+**Plan:** `plan.md` (this folder)
+**Status:** To Review (halt for Helder's on-device check)
+**Started:** 2026-11-26
+**Completed:** 2026-11-26
+
+### Changed files:
+- New: `Services/YouTubePlayerHtmlBuilder.cs`, `MyVocaList/UI/ViewModels/YouTubePlayerViewModel.cs`, `MyVocaList/UI/Pages/Songs/YouTubePlayerPage.xaml(.cs)`, `Tests/Unit/Services/YouTubePlayerHtmlBuilderTests.cs`, `Tests/Unit/ViewModels/YouTubePlayerViewModelTests.cs`
+- `MyVocaList/Navigation/Routes.cs` (`YouTubePlayer`), `MyVocaList/AppShell.xaml.cs` (route), `MyVocaList/MauiProgram.cs` (page + VM transient; the plan named `ServiceCollectionExtensions`, but pages/VMs are registered here), `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (`PlayUrlCommand`), `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (play button per saved link)
+
+### AC traceability
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-MSRC-07 | `YouTubePlayerHtmlBuilder.Build`, `YouTubePlayerPage` (BaseUrl = `https://` + package id), `StopCommand` on disappearing | `Build_ContainsVideoIdAndPlaysInline`, `Build_InvalidId_ThrowsArgumentException`, `Stop_ClearsSource`, `SettingVideoId_*` |
+
+### Build notes
+8 new tests pass. Android build: 0 errors. Play entry point is a button on each saved link in the song form (`SongsViewModel` untouched). Tests were written together with the types, so no separate red run.
+Full suite: 2063 passed, 0 failed. E2E: emulator-5554 package service was dead (DEAD_OBJECT) so install/launch could not be verified; restart denied by the permission classifier. Requires manual verification (play button on a saved link in Song form).

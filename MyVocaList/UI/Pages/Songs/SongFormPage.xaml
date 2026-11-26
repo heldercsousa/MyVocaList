@@ -334,12 +334,18 @@
                                                            TextColor="{StaticResource OnSurfaceVariant}"
                                                            IsVisible="{Binding Label, Converter={StaticResource IsNotNullConverter}}" />
                                                 </VerticalStackLayout>
-                                                <buttons:SfButton Grid.Column="1"
-                                                                  Text="✕"
-                                                                  Style="{StaticResource SfOutlinedButton}"
-                                                                  VerticalOptions="Center"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=RemoveUrlCommand}"
-                                                                  CommandParameter="{Binding .}" />
+                                                <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                                    <buttons:SfButton Text="▶"
+                                                                      Style="{StaticResource SfOutlinedButton}"
+                                                                      VerticalOptions="Center"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=PlayUrlCommand}"
+                                                                      CommandParameter="{Binding .}" />
+                                                    <buttons:SfButton Text="✕"
+                                                                      Style="{StaticResource SfOutlinedButton}"
+                                                                      VerticalOptions="Center"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=RemoveUrlCommand}"
+                                                                      CommandParameter="{Binding .}" />
+                                                </HorizontalStackLayout>
                                             </Grid>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
