@@ -37,7 +37,7 @@ Origin: Helder, 2026-11-25/26 — no YouTube Data API key; "Aprovo uso do MusicB
 - Rows are **edited in place**; ids, singer performance history and queue references never change (memory rule: song rows carry history).
 - Existing `ExternalProvider = "Deezer"` rows: clear `ExternalProvider`/`ExternalId` and any stored Deezer image URL; keep title and artist name as the user's own local data (they become user-owned rows, not Deezer copies). Lyrics fields are untouched.
 - Optional re-match: on first open (or a manual "Link to MusicBrainz" action), look up the MBID by title + artist; on a confident single match set `ExternalProvider = "MusicBrainz"` + MBID, else leave the row unlinked. Never merge or delete rows automatically.
-- One EF migration (sequential-only file); idempotent; reversible.
+- One EF migration (sequential-only file); idempotent. *(In-place note 2026-11-26, plan review: "reversible" dropped — restoring Deezer values would mean keeping a copy of Deezer Content, which §III.4 forbids; `Down` is a no-op. The optional re-match and REQ-03 work grouping are deferred to a follow-up; this change stores recording/artist MBIDs only.)*
 
 ## Out of scope
 Lyrics source (Bandokê lyrics decision stays in `findings.md` §5); charts/"popular now"; Fanart.tv (until its terms are read); audio previews.
