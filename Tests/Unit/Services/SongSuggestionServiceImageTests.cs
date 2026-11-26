@@ -24,8 +24,8 @@ public class SongSuggestionServiceImageTests
 
     public SongSuggestionServiceImageTests()
     {
-        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("MusicBrainz");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns("Deezer");
+        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         _songRepoMock
@@ -153,10 +153,10 @@ public class SongSuggestionServiceImageTests
             "https://dz/cover.jpg", "https://dz/artist.jpg", "Pablo Honey"));
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(
-                "Deezer", It.Is<IReadOnlyCollection<string>>(ids => ids.Contains("dz-1")), It.IsAny<CancellationToken>()))
+                "MusicBrainz", It.Is<IReadOnlyCollection<string>>(ids => ids.Contains("dz-1")), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit>
             {
-                Hit(7, "Creep", "Radiohead", 3, "https://stored/song.jpg", "https://stored/artist.jpg", "Deezer", "dz-1"),
+                Hit(7, "Creep", "Radiohead", 3, "https://stored/song.jpg", "https://stored/artist.jpg", "MusicBrainz", "dz-1"),
             });
         var sut = CreateSut();
 

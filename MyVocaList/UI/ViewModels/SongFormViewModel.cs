@@ -179,19 +179,19 @@ public partial class SongFormViewModel : ViewModelBase
 
     /// <summary>Add mode: a Save now would store the pick's external identity (REQ-PIC-27, REQ-SLD-14).</summary>
     private bool HoldsDeezerPick =>
-        !IsEditMode && SongIdentityRules.IsDeezerSong(SelectedProvider, SelectedExternalId)
+        !IsEditMode && SongIdentityRules.IsRemoteSong(SelectedProvider, SelectedExternalId)
         && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
 
     /// <summary>REQ-SLD-12/14: the Artist is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: the pick is held.</summary>
-    public bool IsArtistFrozen => IsEditMode ? (!_storedSongLoaded || _storedIsDeezerSong) : HoldsDeezerPick;
+    public bool IsArtistFrozen => IsEditMode ? (!_storedSongLoaded || _storedIsRemoteSong) : HoldsDeezerPick;
     public bool IsArtistEditable => !IsArtistFrozen;   // for the page, no converter needed
 
     /// <summary>REQ-SLD-36: the Title of a stored Deezer song is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: editable (C37).</summary>
-    public bool IsTitleFrozen => IsEditMode && (!_storedSongLoaded || _storedIsDeezerSong);
+    public bool IsTitleFrozen => IsEditMode && (!_storedSongLoaded || _storedIsRemoteSong);
     public bool IsTitleEditable => !IsTitleFrozen;   // for the page, no converter needed
 
     private bool _storedSongLoaded;     // false until LoadSongForEditAsync has set the stored song (or found none)
-    private bool _storedIsDeezerSong;   // set in LoadSongForEditAsync from the loaded entity
+    private bool _storedIsRemoteSong;   // set in LoadSongForEditAsync from the loaded entity
     private int _storedArtistId;        // set in LoadSongForEditAsync
     private string _storedTitle = string.Empty;   // REQ-SLD-38: the title as loaded; a frozen Title is saved with it
 
@@ -321,7 +321,7 @@ public partial class SongFormViewModel : ViewModelBase
     partial void OnSongIdChanged(int? value)
     {
         _storedSongLoaded = false;          // a new song id: the stored song of the previous id no longer counts
-        _storedIsDeezerSong = false;
+        _storedIsRemoteSong = false;
         IsSongLoading = value.HasValue;     // REQ-SLD-32: edit mode shows the placeholder until the load ends
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(IsTitleSearchEnabled));
@@ -785,7 +785,7 @@ public partial class SongFormViewModel : ViewModelBase
     public void InitializeArtistField()
     {
         // REQ-SLD-30: the stored artist of a Deezer song is loaded from the entity; catalog query values must not replace it.
-        if (IsEditMode && _storedIsDeezerSong)
+        if (IsEditMode && _storedIsRemoteSong)
             return;
 
         if (ArtistId > 0)
@@ -865,7 +865,7 @@ public partial class SongFormViewModel : ViewModelBase
         SelectedProvider = song.ExternalProvider ?? string.Empty;
 
         // REQ-SLD-12/30: the frozen state and the stored artist come from the loaded entity, not from the pick fields.
-        _storedIsDeezerSong = SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId);
+        _storedIsRemoteSong = SongIdentityRules.IsRemoteSong(song.ExternalProvider, song.ExternalId);
         _storedArtistId = song.ArtistId;
         _storedTitle = song.Title ?? string.Empty;   // REQ-SLD-38: the title a frozen Title is saved with
         _storedSongLoaded = true;   // set before the UI block below, whose NotifyArtistFrozenChanged raises the change

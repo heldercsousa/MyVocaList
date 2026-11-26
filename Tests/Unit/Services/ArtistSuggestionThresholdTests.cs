@@ -26,8 +26,8 @@ public class ArtistSuggestionThresholdTests
 
     public ArtistSuggestionThresholdTests()
     {
-        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("MusicBrainz");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns("Deezer");
+        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         _repoMock

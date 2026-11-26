@@ -8,7 +8,7 @@ public interface IArtistSuggestionService
     /// characters returns empty (REQ-SFT-03/47).</summary>
     Task<IReadOnlyList<ArtistSuggestionDto>> SearchNameLocalAsync(string query, CancellationToken ct = default);
 
-    /// <summary>Deezer artist-name search with an explicit status (REQ-SFT-06/08/09/48/53). Names the database
+    /// <summary>Remote artist-name search with an explicit status (REQ-SFT-06/08/09/48/53). Names the database
     /// collation matches to a stored artist are dropped. Below 3 trimmed characters returns empty with <c>Ok</c>.
     /// Caller cancellation is rethrown (stale query); provider failure never throws.</summary>
     Task<ArtistRemoteSearchResult> SearchNameRemoteAsync(string query, CancellationToken ct = default);

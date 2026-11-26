@@ -22,7 +22,7 @@ public class SongSuggestionThresholdTests
 
     public SongSuggestionThresholdTests()
     {
-        _deezerMock.SetupGet(p => p.ProviderName).Returns("Deezer");
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
         _networkStatusMock.SetupGet(n => n.HasInternetAccess).Returns(true);
     }
 

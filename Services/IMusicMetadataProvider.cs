@@ -4,7 +4,7 @@ namespace MyVocaList.Services;
 
 public interface IMusicMetadataProvider
 {
-    /// <summary>Gets the name of this provider (e.g. "MusicBrainz", "Deezer").</summary>
+    /// <summary>Gets the name of this provider (e.g. "MusicBrainz").</summary>
     string ProviderName { get; }
 
     /// <summary>Searches for artists matching the given term.</summary>

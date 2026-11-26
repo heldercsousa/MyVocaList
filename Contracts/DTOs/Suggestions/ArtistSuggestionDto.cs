@@ -7,10 +7,10 @@ namespace MyVocaList.Contracts.DTOs.Suggestions;
 /// <param name="LocalId">Local Artist id; non-null => local record.</param>
 /// <param name="Name">Display/artist name.</param>
 /// <param name="ExternalId">External provider id (remote rows; also local rows that carry one).</param>
-/// <param name="ExternalProvider">Provider name (e.g. "Deezer").</param>
+/// <param name="ExternalProvider">Provider name (e.g. "MusicBrainz").</param>
 /// <param name="IsRemote">True when sourced from a music metadata provider.</param>
 /// <param name="ImageUrl">
-/// The artist picture: the Deezer image URL for remote rows (REQ-ART-24); the stored image reference
+/// The artist picture: the remote image URL for remote rows (REQ-ART-24); the stored image reference
 /// (image URL or local reference) for local rows (REQ-PIC-34, replaces REQ-ART-24's null); null when none.
 /// </param>
 public sealed record ArtistSuggestionDto(

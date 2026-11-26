@@ -43,13 +43,25 @@ public class SongSuggestionTitleSearchRealStackTests
         public bool HasInternetAccess => true;
     }
 
+    // The stubbed payload keeps its old shape, but the services now consult the MusicBrainz provider name (REQ-MSRC-02).
+    private sealed class CatalogNamedProvider(IMusicMetadataProvider inner) : IMusicMetadataProvider
+    {
+        public string ProviderName => MyVocaList.Domain.Constants.ProviderNames.MusicBrainz;
+
+        public Task<IEnumerable<MyVocaList.Contracts.DTOs.MusicSearchResultDto>> SearchArtistsAsync(string term, CancellationToken ct = default)
+            => inner.SearchArtistsAsync(term, ct);
+
+        public Task<IEnumerable<MyVocaList.Contracts.DTOs.MusicSearchResultDto>> SearchSongsAsync(string term, string? artistHint = null, CancellationToken ct = default)
+            => inner.SearchSongsAsync(term, artistHint, ct);
+    }
+
     private static UnitOfWorkTestHost CreateHost() => UnitOfWorkTestHost.Create(services =>
     {
         services.RemoveAll<IMusicMetadataProvider>();   // drop the production (real-network) Deezer registration
         services.AddSingleton<INetworkStatus, OnlineNetwork>();
-        services.AddScoped<IMusicMetadataProvider>(_ => new DeezerProvider(
+        services.AddScoped<IMusicMetadataProvider>(_ => new CatalogNamedProvider(new DeezerProvider(
             new HttpClient(new StubHandler()) { BaseAddress = new Uri("https://api.deezer.com/") },
-            NullLogger<DeezerProvider>.Instance));
+            NullLogger<DeezerProvider>.Instance)));
     });
 
     // [AC] REQ-SFT-03/06: a title not stored locally still surfaces Deezer options through the real stack.

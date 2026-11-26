@@ -90,7 +90,7 @@ public interface ISongService
     Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default);
 
     /// <summary>
-    /// Lookup on open (REQ-SLD-19..24): for a Deezer song with blank lyrics and no recorded origin, looks the lyrics up
+    /// Lookup on open (REQ-SLD-19..24): for a music-database song with blank lyrics and no recorded origin, looks the lyrics up
     /// with the stored title and artist name and stores a match (origin LyricsSource) or a definite no-match
     /// (origin NoneFound). Returns the lyrics now stored on the song, or null.
     /// </summary>
