@@ -1,3 +1,4 @@
+using MyVocaList.Domain.Rules;
 using MyVocaList.UI.Collections;
 using MyVocaList.UI.Services;
 
@@ -181,9 +182,7 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>, IQ
             return;
         }
 
-        var query = $"karaoke {song.Title} {song.OriginalArtistName}";
-        var encodedQuery = Uri.EscapeDataString(query);
-        var youtubeUri = new Uri($"https://www.youtube.com/results?search_query={encodedQuery}");
+        var youtubeUri = new Uri(YouTubeSearchLinkRules.BuildResultsUrl(song.Title, song.OriginalArtistName));
 
         if (!await Launcher.TryOpenAsync(youtubeUri))
             await Browser.OpenAsync(youtubeUri, BrowserLaunchMode.SystemPreferred);

@@ -21,7 +21,7 @@ public class SongFormViewModelTests
         Mock<ISnackbarComponent>? snackbar = null,
         Mock<ISongService>? songService = null,
         Mock<IArtistService>? artistService = null,
-        IMessenger? messenger = null)
+        ISharedLinkInbox? inbox = null)
     {
         return new SongFormViewModel(
             (artistService ?? new Mock<IArtistService>()).Object,
@@ -29,7 +29,7 @@ public class SongFormViewModelTests
             (snackbar ?? new Mock<ISnackbarComponent>()).Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
-            messenger ?? new Mock<IMessenger>().Object,
+            inbox ?? new Mock<ISharedLinkInbox>().Object,
             _navigationMock.Object,
             _suggestionsMock.Object,
             TestImageStore.PassThrough().Object,
@@ -1387,6 +1387,58 @@ public class SongFormViewModelTests
 
         Assert.True(sut.HasPasteUrlError);
         Assert.Empty(sut.KaraokeUrls);
+    }
+
+    // [AC] REQ-MSRC-06: an invalid link is rejected with a message and nothing is stored
+    [Fact]
+    public async Task PasteInvalidLink_ShowsErrorAndStoresNothing()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.AddUrlAsync(42, It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "Not a valid YouTube URL.", (SongKaraokeUrlDto?)null));
+
+        var sut = CreateSut(urlService: urlService);
+        sut.SongId = 42;
+        sut.PasteUrlInput = "https://vimeo.com/123";
+
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        Assert.True(sut.HasPasteUrlError);
+        Assert.Equal("Not a valid YouTube URL.", sut.PasteUrlError);
+        Assert.Empty(sut.KaraokeUrls);
+    }
+
+    // [AC] REQ-MSRC-06: a link shared while no form was open attaches when the song form appears
+    [Fact]
+    public async Task OnAppearing_PendingSharedLink_AttachesToSong()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        var dto = MakeDto("dQw4w9WgXcQ", 42);
+        urlService.Setup(s => s.AddUrlAsync(42, "https://youtu.be/dQw4w9WgXcQ", It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, string.Empty, (SongKaraokeUrlDto?)dto));
+        var inbox = new Mock<ISharedLinkInbox>();
+        inbox.Setup(i => i.TakePending()).Returns("https://youtu.be/dQw4w9WgXcQ");
+
+        var sut = CreateSut(urlService: urlService, inbox: inbox.Object);
+        sut.SongId = 42;
+
+        await sut.ApplyPendingSharedLinkAsync();
+
+        urlService.Verify(s => s.AddUrlAsync(42, "https://youtu.be/dQw4w9WgXcQ", It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Single(sut.KaraokeUrls);
+    }
+
+    // [AC] REQ-MSRC-06: nothing pending -> nothing attached
+    [Fact]
+    public async Task ApplyPendingSharedLink_NothingPending_DoesNothing()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        var sut = CreateSut(urlService: urlService);
+        sut.SongId = 42;
+
+        await sut.ApplyPendingSharedLinkAsync();
+
+        urlService.Verify(s => s.AddUrlAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // [AC] BUG-009 AC-4 — remove pending URL in new-song mode (no DB call)

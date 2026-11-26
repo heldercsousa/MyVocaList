@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Domain.Constants;
@@ -23,7 +22,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongFormViewModel> _logger;
     private readonly ISongKaraokeUrlService _karaokeUrlService;
-    private readonly IMessenger _messenger;
+    private readonly ISharedLinkInbox _sharedLinkInbox;
     private readonly INavigationService _navigationService;
     private readonly ISongSuggestionService _songSuggestions;
     private readonly IImageStore _imageStore;
@@ -210,7 +209,7 @@ public partial class SongFormViewModel : ViewModelBase
         ISnackbarComponent snackbarService,
         ILogger<SongFormViewModel> logger,
         ISongKaraokeUrlService karaokeUrlService,
-        IMessenger messenger,
+        ISharedLinkInbox sharedLinkInbox,
         INavigationService navigationService,
         ISongSuggestionService songSuggestions,
         IImageStore imageStore,
@@ -223,7 +222,7 @@ public partial class SongFormViewModel : ViewModelBase
         _snackbarService = snackbarService;
         _logger = logger;
         _karaokeUrlService = karaokeUrlService;
-        _messenger = messenger;
+        _sharedLinkInbox = sharedLinkInbox;
         _navigationService = navigationService;
         _songSuggestions = songSuggestions;
         _imageStore = imageStore;
@@ -1255,6 +1254,35 @@ public partial class SongFormViewModel : ViewModelBase
             PasteUrlError = message;
             HasPasteUrlError = true;
         }
+    }
+
+    /// <summary>
+    /// REQ-MSRC-06: attaches a link shared into the app (Android share target) to the song this form is editing.
+    /// Called when the form appears and whenever the inbox raises <c>LinkReceived</c> while the form is open.
+    /// </summary>
+    public async Task ApplyPendingSharedLinkAsync()
+    {
+        var shared = _sharedLinkInbox.TakePending();
+        if (string.IsNullOrWhiteSpace(shared)) return;
+
+        PasteUrlInput = shared;
+        await AddFromPasteAsync();
+    }
+
+    /// <summary>Starts reacting to links shared while this form is open (call from OnAppearing).</summary>
+    public void StartListeningForSharedLinks()
+    {
+        _sharedLinkInbox.LinkReceived -= OnSharedLinkReceived;
+        _sharedLinkInbox.LinkReceived += OnSharedLinkReceived;
+    }
+
+    /// <summary>Stops reacting to shared links (call from OnDisappearing) so later links stay pending.</summary>
+    public void StopListeningForSharedLinks() => _sharedLinkInbox.LinkReceived -= OnSharedLinkReceived;
+
+    private async void OnSharedLinkReceived(object? sender, EventArgs e)
+    {
+        try { await ApplyPendingSharedLinkAsync(); }
+        catch (Exception ex) { _logger.LogError(ex, "Attaching a shared YouTube link failed"); }
     }
 
     /// <summary>BUG-009: holds a URL in memory until the song is saved.</summary>

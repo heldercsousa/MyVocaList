@@ -51,7 +51,7 @@ public class SongFormViewModelPictureTests
             _snackbarMock.Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             _urlServiceMock.Object,
-            new Mock<IMessenger>().Object,
+            new Mock<ISharedLinkInbox>().Object,
             _navigationMock.Object,
             _suggestionsMock.Object,
             _imageStoreMock.Object,

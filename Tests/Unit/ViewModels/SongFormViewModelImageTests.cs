@@ -27,7 +27,7 @@ public class SongFormViewModelImageTests
             new Mock<ISnackbarComponent>().Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             new Mock<ISongKaraokeUrlService>().Object,
-            new Mock<IMessenger>().Object,
+            new Mock<ISharedLinkInbox>().Object,
             _navigationMock.Object,
             _suggestionsMock.Object,
             TestImageStore.PassThrough().Object,

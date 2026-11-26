@@ -129,3 +129,25 @@ Red run first: compile failure (rule type missing, old `SettingsViewModel` const
 ### Design concern
 - Plan named the test `LaunchYouTubeSearch_BuildsResultsUrlWithKaraokeSuffix` over a "launcher abstraction"; none exists (static `Launcher`), so the URL is built by a pure rule and tested there.
 - Out of T4's file list, left as is: `SongsViewModel.LaunchYouTubeSearchAsync` still builds `karaoke <title> <artist>` itself (should use the rule); `SongFormViewModel` keeps an unused `IMessenger` dependency; `Resources/Raw/releases.json` mentions YouTube (release notes text).
+
+---
+## Task: T5 — YouTube link rules + Android share target (REQ-MSRC-06)
+**Plan:** `plan.md` (this folder)
+**Status:** To Review
+**Started:** 2026-11-26
+**Completed:** 2026-11-26
+
+### Changed files:
+- New: `Domain/Rules/YouTubeLinkRules.cs`, `Domain/ServicesInterfaces/ISharedLinkInbox.cs` (adds `Receive`/`HasListener` beyond the plan so the activity can hand text in), `MyVocaList/UI/Services/SharedLinkInbox.cs`, `Tests/Unit/Domain/YouTubeLinkRulesTests.cs`
+- `Services/SongKaraokeUrlService.cs` (`ExtractVideoId` delegates to the rule; old regex removed), `MyVocaList/Platforms/Android/MainActivity.cs` (ACTION_SEND text/plain filter, `OnCreate`/`OnNewIntent` forward `EXTRA_TEXT`), `MyVocaList/MauiProgram.cs` (singleton registration), `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (start/stop listening, apply pending)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`: unused `IMessenger` replaced by `ISharedLinkInbox` (same ctor slot); `ApplyPendingSharedLinkAsync`, `Start/StopListeningForSharedLinks`
+- T4 leftover: `MyVocaList/UI/ViewModels/SongsViewModel.cs` uses `YouTubeSearchLinkRules.BuildResultsUrl`
+- Tests: `SongFormViewModelTests.cs` (+3), `AppServicesRegistrationTests.cs`, and the `IMessenger` mock swapped for `ISharedLinkInbox` in every `SongFormViewModel` construction
+
+### AC traceability
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-MSRC-06 | `YouTubeLinkRules.TryExtractVideoId`, `SharedLinkInbox`, `SongFormViewModel.ApplyPendingSharedLinkAsync` | `TryExtractVideoId_*` (8), `PasteInvalidLink_ShowsErrorAndStoresNothing`, `OnAppearing_PendingSharedLink_AttachesToSong`, `ApplyPendingSharedLink_NothingPending_DoesNothing` |
+
+### Build notes
+Red run first: compile failure (`YouTubeLinkRules` missing). After: 2055 passed, 0 failed (one unrelated flaky `PersonIdentityIndexTests` failure seen once, passed on rerun). Android build result in the commit report. Not emulator-checked (share from YouTube app still to verify).

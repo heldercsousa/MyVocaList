@@ -109,6 +109,7 @@ public static class MauiProgram
             DeviceInfo.Current.Platform == DevicePlatform.iOS ? "ios" : "android",
             sp.GetRequiredService<ILogger<VersionCheckService>>()));
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
+        builder.Services.AddSingleton<MyVocaList.Domain.ServicesInterfaces.ISharedLinkInbox, MyVocaList.UI.Services.SharedLinkInbox>(); // REQ-MSRC-06
         builder.Services.AddSingleton<ISecureStorageWrapper, SecureStorageWrapper>();
         builder.Services.AddSingleton<INavigationService, MyVocaList.UI.Services.NavigationService>();
         // REQ-SFT-53: device network state for the offline check. Kept here (not in AddAppServices) so the
