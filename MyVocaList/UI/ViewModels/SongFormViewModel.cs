@@ -90,7 +90,7 @@ public partial class SongFormViewModel : ViewModelBase
     // ── Title-first search (Task 5.2, REQ-SFT-04..14, 16, 53) ─────────────
     private const string OfflineNote = "You're offline — showing songs from your library only.";
 
-    /// <summary>Title field option source: local rows, then promoted, then Deezer (REQ-SFT-04/05).</summary>
+    /// <summary>Title field option source: local rows, then promoted, then MusicBrainz (REQ-SFT-04/05).</summary>
     public IMenuOptionSource TitleOptionSource { get; }
 
     /// <summary>Artist field option source: local artists only, no remote call (REQ-SFT-16).</summary>
@@ -103,12 +103,12 @@ public partial class SongFormViewModel : ViewModelBase
     private CancellationTokenSource? _openLyricsLookupCts;   // REQ-SLD-19/23: the lookup on open of this form, if one was started
     private string? _pickFilledLyrics;                   // REQ-LYR-11/12: the Lyrics text the last lookup wrote
     private LyricsLookupResult? _pickLyricsLookup;       // REQ-SLD-26: the outcome of the pick lookup of the held pick
-    private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
-    private string? _pendingArtistImageUrl;  // REQ-ART-11: Deezer artist picture held between a pick and Save
+    private string? _pendingImageUrl;        // REQ-ART-11: MusicBrainz cover held between a pick and Save
+    private string? _pendingArtistImageUrl;  // REQ-ART-11: MusicBrainz artist picture held between a pick and Save
     private const string SongPlaceholderIcon = "music_note_outlined";
     private const string ArtistPlaceholderIcon = "account_circle_outlined";
     private const string LibrarySourceText = "Library";
-    private const string DeezerSourceText = "Deezer";
+    private const string RemoteSourceText = ProviderNames.MusicBrainz;
 
     // ── Form picture (REQ-PIC-17..22) ─────────────────────────────────────
     private const string ImageHint = "Square picture (1:1), 512 x 512 px or larger. Other shapes are cropped to the centre.";
@@ -123,14 +123,14 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isTitleEditing;    // TwoWay with the Title TapToEditField (REQ-PIC-25/26)
     [ObservableProperty] private bool _isArtistEditing;   // TwoWay with the Artist TapToEditField (REQ-PIC-25/26)
 
-    // REQ-PIC-27/28: what the last Deezer pick wrote, so a release by a tap keeps a pending value only while
+    // REQ-PIC-27/28: what the last MusicBrainz pick wrote, so a release by a tap keeps a pending value only while
     // the text is unchanged. Exact (ordinal) comparisons that choose which pending value Save sends; they are
     // not search or de-duplication.
     private string? _pickedTitle;
     private string? _pickedArtistName;
     private bool _isClearingArtist;   // ClearArtist unlocks the field itself: not a release by a tap
 
-    /// <summary>The form picture's reference (REQ-PIC-18, 20): upload, else stored (edit) or pending Deezer cover (add).</summary>
+    /// <summary>The form picture's reference (REQ-PIC-18, 20): upload, else stored (edit) or pending MusicBrainz cover (add).</summary>
     private string? FormImageReference =>
         _imageRemoved ? null : _uploadedImageReference ?? (IsEditMode ? _storedImageReference : _pendingImageUrl);
 
@@ -178,15 +178,15 @@ public partial class SongFormViewModel : ViewModelBase
     public string PageTitle => IsEditMode ? "Edit Song" : "New Song";
 
     /// <summary>Add mode: a Save now would store the pick's external identity (REQ-PIC-27, REQ-SLD-14).</summary>
-    private bool HoldsDeezerPick =>
+    private bool HoldsRemotePick =>
         !IsEditMode && SongIdentityRules.IsRemoteSong(SelectedProvider, SelectedExternalId)
         && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
 
-    /// <summary>REQ-SLD-12/14: the Artist is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: the pick is held.</summary>
-    public bool IsArtistFrozen => IsEditMode ? (!_storedSongLoaded || _storedIsRemoteSong) : HoldsDeezerPick;
+    /// <summary>REQ-SLD-12/14: the Artist is plain text. Edit mode: frozen until the stored song has loaded, then while it is a MusicBrainz song. Add mode: the pick is held.</summary>
+    public bool IsArtistFrozen => IsEditMode ? (!_storedSongLoaded || _storedIsRemoteSong) : HoldsRemotePick;
     public bool IsArtistEditable => !IsArtistFrozen;   // for the page, no converter needed
 
-    /// <summary>REQ-SLD-36: the Title of a stored Deezer song is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: editable (C37).</summary>
+    /// <summary>REQ-SLD-36: the Title of a stored MusicBrainz song is plain text. Edit mode: frozen until the stored song has loaded, then while it is a MusicBrainz song. Add mode: editable (C37).</summary>
     public bool IsTitleFrozen => IsEditMode && (!_storedSongLoaded || _storedIsRemoteSong);
     public bool IsTitleEditable => !IsTitleFrozen;   // for the page, no converter needed
 
@@ -346,7 +346,7 @@ public partial class SongFormViewModel : ViewModelBase
         // REQ-SLD-39 (closes C25): in add mode a Title text that differs from the picked title releases the pick for
         // good. The Title text, the pending song image and the pick lyrics outcome (REQ-SLD-26) stay.
         if (!IsEditMode && _pickedTitle is not null && !string.Equals(value, _pickedTitle, StringComparison.Ordinal))
-            ReleaseDeezerPickOnTitleChange();
+            ReleaseRemotePickOnTitleChange();
         NotifyArtistFrozenChanged();   // REQ-SLD-14: a Title text change away from the picked title releases the artist
 
         if (_isHydrating)
@@ -544,7 +544,7 @@ public partial class SongFormViewModel : ViewModelBase
 
     private AutocompleteSuggestion ToTitleOption(SongSuggestionDto dto)
     {
-        // REQ-ART-07 (Version part removed, REQ-RMV-01): artist · album; album only on Deezer rows, never when it repeats the title.
+        // REQ-ART-07 (Version part removed, REQ-RMV-01): artist · album; album only on MusicBrainz rows, never when it repeats the title.
         var parts = new List<string>();
         if (!string.IsNullOrWhiteSpace(dto.ArtistName))
             parts.Add(dto.ArtistName);
@@ -558,7 +558,7 @@ public partial class SongFormViewModel : ViewModelBase
             LeadingKind = AutocompleteLeadingKind.Image,
             ImageUrl = _imageStore.ResolveDisplaySource(dto.RowImageUrl, ImageSize.Thumbnail),   // REQ-PIC-39
             PlaceholderIcon = SongPlaceholderIcon,
-            TrailingText = dto.IsRemote ? DeezerSourceText : LibrarySourceText   // REQ-ART-08
+            TrailingText = dto.IsRemote ? RemoteSourceText : LibrarySourceText   // REQ-ART-08
         };
     }
 
@@ -579,7 +579,7 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     /// <summary>REQ-SLD-39: a Title text change releases the pick: the identity and the picked title go, the Title text stays.</summary>
-    private void ReleaseDeezerPickOnTitleChange()
+    private void ReleaseRemotePickOnTitleChange()
     {
         SelectedExternalId = string.Empty;
         SelectedProvider = string.Empty;
@@ -619,12 +619,12 @@ public partial class SongFormViewModel : ViewModelBase
         ArtistErrorText = string.Empty;
     }
 
-    // ── Lyrics lookup on a Deezer pick (REQ-LYR-01…04, 09…13) ───────────
+    // ── Lyrics lookup on a MusicBrainz pick (REQ-LYR-01…04, 09…13) ───────────
 
     partial void OnIsLyricsLoadingChanged(bool value) => OnPropertyChanged(nameof(LyricsPlaceholder));
 
     /// <summary>
-    /// Starts the lyrics lookup for a Deezer pick. Cancels a running lookup first; drops pick-filled lyrics
+    /// Starts the lyrics lookup for a MusicBrainz pick. Cancels a running lookup first; drops pick-filled lyrics
     /// the user did not touch (a new pick replaces them, REQ-LYR-12); starts nothing when Lyrics holds text
     /// (REQ-LYR-04). The pick does not await the lookup.
     /// </summary>
@@ -784,7 +784,7 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     public void InitializeArtistField()
     {
-        // REQ-SLD-30: the stored artist of a Deezer song is loaded from the entity; catalog query values must not replace it.
+        // REQ-SLD-30: the stored artist of a MusicBrainz song is loaded from the entity; catalog query values must not replace it.
         if (IsEditMode && _storedIsRemoteSong)
             return;
 
@@ -911,7 +911,7 @@ public partial class SongFormViewModel : ViewModelBase
             return Task.CompletedTask;
         });
 
-        // REQ-SLD-19: a Deezer song without lyrics or recorded origin looks for them on open; the form stays usable.
+        // REQ-SLD-19: a MusicBrainz song without lyrics or recorded origin looks for them on open; the form stays usable.
         if (_openLyricsLookupCts is null
             && LyricsOriginRules.NeedsLookupOnOpen(song.ExternalProvider, song.ExternalId, song.Lyrics, song.LyricsOrigin))
             StartLyricsLookupOnOpen(songId);
@@ -1008,7 +1008,7 @@ public partial class SongFormViewModel : ViewModelBase
     {
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
-        // REQ-SLD-38: a frozen Title (plain text of a stored Deezer song) is saved as it was loaded.
+        // REQ-SLD-38: a frozen Title (plain text of a stored MusicBrainz song) is saved as it was loaded.
         var title = IsTitleFrozen ? _storedTitle.Trim() : (SongTitle?.Trim() ?? string.Empty);
 
         // Safety net: re-run the Title validator on every call, regardless of dirty state — an
@@ -1046,17 +1046,17 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private SongFormSaveRequest BuildSaveRequest(string title)
     {
-        // REQ-SLD-30: a frozen (Deezer) song in edit mode sends the stored artist id, never artist text or a decision.
+        // REQ-SLD-30: a frozen (MusicBrainz) song in edit mode sends the stored artist id, never artist text or a decision.
         var frozenEdit = IsEditMode && IsArtistFrozen;
         var artistId = frozenEdit
             ? (int?)_storedArtistId
             : SelectedArtistId is { } id && id != 0 ? id : (int?)null;
 
-        // REQ-PIC-27 / REQ-SLD-14: the Deezer identity travels as a pair, and only while HoldsDeezerPick
+        // REQ-PIC-27 / REQ-SLD-14: the MusicBrainz identity travels as a pair, and only while HoldsRemotePick
         // (one source of truth with the frozen state of the screen).
-        var holdsIdentity = HoldsDeezerPick;
+        var holdsIdentity = HoldsRemotePick;
 
-        // REQ-PIC-28: the Deezer artist picture travels only while the Artist text is the picked name.
+        // REQ-PIC-28: the MusicBrainz artist picture travels only while the Artist text is the picked name.
         var artistImage = !IsEditMode && string.Equals(ArtistSearchText, _pickedArtistName, StringComparison.Ordinal)
             ? _pendingArtistImageUrl
             : null;
@@ -1075,7 +1075,7 @@ public partial class SongFormViewModel : ViewModelBase
             _songDecision,
             // REQ-PIC-21: the form picture; edit mode stores it only when uploaded or removed (ImageChanged).
             ImageUrl: FormImageReference,
-            // REQ-ART-16: the Deezer artist picture exists in add mode only (edit mode has no Deezer pick).
+            // REQ-ART-16: the MusicBrainz artist picture exists in add mode only (edit mode has no MusicBrainz pick).
             ArtistImageUrl: artistImage,
             ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved),
             // REQ-SLD-26: the outcome of the held pick's lookup; the Service decides the origin from it.

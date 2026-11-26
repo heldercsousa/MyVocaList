@@ -55,3 +55,29 @@ Red run first: 3 of 6 new tests failed for the right reason (provider name still
 
 ### Design concern
 The plan's `SearchTitleRemoteAsync_ProviderThrows_ReturnsOfflineStatusAndLocalResults` and `..._RapidCalls_DebouncedToOneProviderCall` do not match the code: a provider failure maps to `Unavailable` (Offline is only for no network), local results come from a separate call, and the debounce lives in the autocomplete field, not the service. Tests assert the real behaviour (`Unavailable`; debounce constant = 300).
+
+---
+## Task: T2b DI + UI, remove Deezer (REQ-MSRC-01, -02, -03, -10)
+**Plan:** `plan.md` (this folder)
+**Status:** To Review
+**Started:** 2026-11-26
+**Completed:** 2026-11-26
+
+### Changed files:
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (MusicBrainzProvider typed client + singleton `MusicBrainzRateLimiter`; `AddAppServices(IConfiguration? = null)`; one warning when `UserAgent:Contact` is missing)
+- `MyVocaList/MauiProgram.cs` (passes `config`), `MyVocaList/appsettings.template.json` (empty `UserAgent:Contact`; real value only in the gitignored `appsettings.json`)
+- `Contracts/DTOs/List/ArtistListItemDto.cs`, `Domain/ReadModels/ArtistListItem.cs` ("DZ" removed; "MusicBrainz"/"musicbrainz" => "MB")
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `ArtistFormViewModel.cs` (Deezer names/labels -> Remote/MusicBrainz), `SongFormPage.xaml`, `ArtistFormPage.xaml` (comments only)
+- Deleted: `Services/DeezerProvider.cs`, `Tests/Unit/Services/DeezerProvider*Tests.cs` (4 files)
+- Tests: new `Tests/Unit/DependencyInjection/MusicBrainzRegistrationTests.cs`; `SongSuggestionTitleSearchRealStackTests` now uses real `MusicBrainzProvider` over a MusicBrainz payload (rename wrapper removed); label expectations updated in `SongFormViewModelTests`, `SongFormViewModelImageTests`, `ArtistFormViewModelTests`
+
+### AC traceability
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-MSRC-01/02 | DI registers only MusicBrainz; badge MB | `AddAppServices_ResolvesMusicBrainzAsMetadataProvider`, `ArtistListItemDto_ProviderBadge` |
+| REQ-MSRC-10 | contact from config, one warning | `AddAppServices_MissingContact_LogsOneWarning`, `AddAppServices_ConfiguredContact_NoWarning` |
+
+### Build notes
+Tests: 2048 passed, 0 failed. Android build: see commit report. Not emulator-checked (deploy left to Helder).
+### Design concern
+Remaining "deezer" text in `.cs` outside Tests/Docs: `Services/ILyricsProvider.cs`, `ISongLyricsService.cs`, `MusicProviderException.cs` (comments), and stored-data compatibility; not in T2b file list, left for review.

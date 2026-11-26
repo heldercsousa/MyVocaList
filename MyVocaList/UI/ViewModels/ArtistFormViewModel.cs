@@ -40,7 +40,7 @@ public partial class ArtistFormViewModel : ViewModelBase
     // Offline wording stays local (artists); the unavailable note is SearchNotes.Unavailable (UI/Constants), shared with the Song form.
     private const string OfflineNote = "You're offline — showing artists from your library only.";
 
-    /// <summary>Name field option source: local artists ("In your library"), then Deezer ("Deezer") (REQ-SFT-47).</summary>
+    /// <summary>Name field option source: local artists ("In your library"), then MusicBrainz ("MusicBrainz") (REQ-SFT-47).</summary>
     public IMenuOptionSource NameOptionSource { get; }
 
     [ObservableProperty] private string _nameSupportingText = string.Empty;
@@ -59,10 +59,10 @@ public partial class ArtistFormViewModel : ViewModelBase
 
     private string? _uploadedImageReference;   // REQ-PIC-35 (1): the picture uploaded in this form
     private string? _storedImageReference;     // REQ-PIC-35 (2), edit mode: the artist's stored picture
-    private string? _pendingImageUrl;          // REQ-PIC-35 (2), add mode: the picture of the picked Deezer artist
+    private string? _pendingImageUrl;          // REQ-PIC-35 (2), add mode: the picture of the picked MusicBrainz artist
     private bool _imageRemoved;                // REQ-PIC-20: "Remove picture" until a later pick or upload
 
-    // REQ-PIC-37: the Name the last Deezer pick wrote. The Deezer picture belongs to the form only while
+    // REQ-PIC-37: the Name the last MusicBrainz pick wrote. The MusicBrainz picture belongs to the form only while
     // Name still equals it. An exact (ordinal) comparison that decides which pending value applies; it is
     // not search or de-duplication.
     private string? _pickedName;
@@ -71,7 +71,7 @@ public partial class ArtistFormViewModel : ViewModelBase
 
     /// <summary>
     /// The form picture's reference (REQ-PIC-35, 20, 37): the upload; else the stored picture (edit mode) or
-    /// the picked Deezer artist's picture while Name is unchanged (add mode); null after "Remove picture".
+    /// the picked MusicBrainz artist's picture while Name is unchanged (add mode); null after "Remove picture".
     /// </summary>
     private string? FormImageReference =>
         _imageRemoved ? null : _uploadedImageReference ?? (IsEditMode ? _storedImageReference : PickedImageReference);
@@ -197,7 +197,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         // so the counter never reports an error the validator would not.
         UpdateCharacterCounter(value?.Trim().Length ?? 0);
 
-        // REQ-PIC-37: the picked Deezer picture follows whether Name still equals the picked name.
+        // REQ-PIC-37: the picked MusicBrainz picture follows whether Name still equals the picked name.
         if (_pendingImageUrl is not null)
             NotifyFormImageChanged();
 
@@ -414,7 +414,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         }
 
         return local.Select(dto => ToNameOption(dto, "In your library"))
-                    .Concat(remote.Remote.Select(dto => ToNameOption(dto, "Deezer")))
+                    .Concat(remote.Remote.Select(dto => ToNameOption(dto, "MusicBrainz")))
                     .ToList();
     }
 
@@ -428,7 +428,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         };
 
     /// <summary>
-    /// Local pick opens that artist's edit form, replacing the add form (REQ-SFT-48). Deezer pick fills
+    /// Local pick opens that artist's edit form, replacing the add form (REQ-SFT-48). MusicBrainz pick fills
     /// and locks Name only; the provider id is not stored (REQ-SFT-49).
     /// </summary>
     [RelayCommand]
@@ -454,7 +454,7 @@ public partial class ArtistFormViewModel : ViewModelBase
             $"../{Routes.ArtistForm}?artistId={dto.LocalId.Value}&artistName={Uri.EscapeDataString(dto.Name)}");
     }
 
-    /// <summary>X on Name: empties and unlocks it, drops the note (REQ-SFT-06/49) and the Deezer picture, not an upload (REQ-PIC-35).</summary>
+    /// <summary>X on Name: empties and unlocks it, drops the note (REQ-SFT-06/49) and the MusicBrainz picture, not an upload (REQ-PIC-35).</summary>
     [RelayCommand]
     private void ClearName()
     {

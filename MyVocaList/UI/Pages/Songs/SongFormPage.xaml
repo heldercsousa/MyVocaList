@@ -196,9 +196,9 @@
 
                                 <!-- Title is the first field (REQ-SFT-01). A defined Title shows as Headline Medium text; a tap
                                      opens the editor with the text kept and releases a picked Title (REQ-PIC-23..27). Add mode:
-                                     the search box over local songs and Deezer (REQ-SFT-02). Edit mode: plain editable text for
+                                     the search box over local songs and MusicBrainz (REQ-SFT-02). Edit mode: plain editable text for
                                      every song (IsSearchEnabled false, REQ-SFT-27, REQ-PIC-29). Blur validation runs
-                                     ValidateTitle (the VM's first check). A stored Deezer song shows its Title as plain text
+                                     ValidateTitle (the VM's first check). A stored MusicBrainz song shows its Title as plain text
                                      (REQ-SLD-36): the Label below, in the same text style; the tap-to-edit field is hidden. -->
                                 <Label Text="{Binding SongTitle}"
                                        StyleClass="Headline.Medium"
@@ -253,7 +253,7 @@
                                                           RemoveCommand="{Binding RemoveImageCommand}"
                                                           IsBusy="{Binding IsImageBusy}" />
 
-                                <!-- Artist (REQ-SFT-01): a Deezer song shows the artist as plain text that cannot be edited
+                                <!-- Artist (REQ-SFT-01): a MusicBrainz song shows the artist as plain text that cannot be edited
                                      (REQ-SLD-12); a local-only song keeps the tap-to-edit field (REQ-SLD-13). A defined Artist shows as
                                      Title Large text; a tap opens the editor with the text kept and releases the picked artist, in
                                      add and edit mode, so the artist of a stored song can be changed (REQ-PIC-23..28, 31). A pick

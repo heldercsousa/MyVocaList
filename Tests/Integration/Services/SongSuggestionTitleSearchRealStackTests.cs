@@ -14,19 +14,19 @@ namespace MyVocaList.Tests.Integration.Services;
 
 /// <summary>
 /// Device symptom (SFT 5.5): typing "commando" in the New Song Title field showed no menu and no note.
-/// Reproduces the remote title search end to end: real <see cref="DeezerProvider"/> over a fake HTTP
-/// handler serving the real Deezer payload shape, real SQLite temp-file repositories, real
+/// Reproduces the remote title search end to end: real <see cref="MusicBrainzProvider"/> over a fake HTTP
+/// handler serving the real MusicBrainz payload shape, real SQLite temp-file repositories, real
 /// <see cref="SongSuggestionService"/> via the production composition.
 /// </summary>
 public class SongSuggestionTitleSearchRealStackTests
 {
     // Real payload shape: unicode escape, title_version, extra unknown fields, top results not by the typed artist.
     private const string Payload = """
-        {"data":[
-         {"id":137258750,"readable":true,"title":"Commando","title_short":"Commando","title_version":"","isrc":"FR9W11622142","link":"https://www.deezer.com/track/137258750","duration":195,"rank":704927,"explicit_lyrics":true,"explicit_content_lyrics":1,"explicit_content_cover":1,"preview":"https://cdnt-preview.dzcdn.net/x.mp3?hdnea=abc","md5_image":"e953","artist":{"id":5288900,"name":"Niska","link":"l","picture":"p","type":"artist"},"album":{"id":14720756,"title":"Commando","cover":"c","md5_image":"m","type":"album"},"type":"track"},
-         {"id":2,"readable":true,"title":"Comando (Ao Vivo)","title_short":"Comando","title_version":"(Ao Vivo)","artist":{"id":9,"name":"Banda X","type":"artist"},"album":{"id":1,"title":"A","type":"album"},"type":"track"},
-         {"id":3,"readable":true,"title":"Chasse à l'homme","title_short":"Chasse à l'homme","title_version":"","artist":{"id":10,"name":"Zaz","type":"artist"},"type":"track"}
-        ],"total":212,"next":"https://api.deezer.com/search/track?q=Commandi&index=25"}
+        {"recordings":[
+         {"id":"11111111-1111-1111-1111-111111111111","title":"Commando","length":195000,"artist-credit":[{"name":"Niska","artist":{"id":"a1111111-1111-1111-1111-111111111111","name":"Niska"}}],"releases":[{"title":"Commando"}]},
+         {"id":"22222222-2222-2222-2222-222222222222","title":"Comando","length":180000,"artist-credit":[{"name":"Banda X","artist":{"id":"a2222222-2222-2222-2222-222222222222","name":"Banda X"}}],"releases":[{"title":"A"}]},
+         {"id":"33333333-3333-3333-3333-333333333333","title":"Chasse à l'homme","artist-credit":[{"name":"Zaz","artist":{"id":"a3333333-3333-3333-3333-333333333333","name":"Zaz"}}]}
+        ]}
         """;
 
     private sealed class StubHandler : HttpMessageHandler
@@ -43,30 +43,19 @@ public class SongSuggestionTitleSearchRealStackTests
         public bool HasInternetAccess => true;
     }
 
-    // The stubbed payload keeps its old shape, but the services now consult the MusicBrainz provider name (REQ-MSRC-02).
-    private sealed class CatalogNamedProvider(IMusicMetadataProvider inner) : IMusicMetadataProvider
-    {
-        public string ProviderName => MyVocaList.Domain.Constants.ProviderNames.MusicBrainz;
-
-        public Task<IEnumerable<MyVocaList.Contracts.DTOs.MusicSearchResultDto>> SearchArtistsAsync(string term, CancellationToken ct = default)
-            => inner.SearchArtistsAsync(term, ct);
-
-        public Task<IEnumerable<MyVocaList.Contracts.DTOs.MusicSearchResultDto>> SearchSongsAsync(string term, string? artistHint = null, CancellationToken ct = default)
-            => inner.SearchSongsAsync(term, artistHint, ct);
-    }
-
     private static UnitOfWorkTestHost CreateHost() => UnitOfWorkTestHost.Create(services =>
     {
-        services.RemoveAll<IMusicMetadataProvider>();   // drop the production (real-network) Deezer registration
+        services.RemoveAll<IMusicMetadataProvider>();   // drop the production (real-network) MusicBrainz registration
         services.AddSingleton<INetworkStatus, OnlineNetwork>();
-        services.AddScoped<IMusicMetadataProvider>(_ => new CatalogNamedProvider(new DeezerProvider(
-            new HttpClient(new StubHandler()) { BaseAddress = new Uri("https://api.deezer.com/") },
-            NullLogger<DeezerProvider>.Instance)));
+        services.AddScoped<IMusicMetadataProvider>(_ => new MusicBrainzProvider(
+            new HttpClient(new StubHandler()) { BaseAddress = new Uri("https://musicbrainz.org/ws/2/") },
+            new MusicBrainzRateLimiter(),
+            NullLogger<MusicBrainzProvider>.Instance));
     });
 
-    // [AC] REQ-SFT-03/06: a title not stored locally still surfaces Deezer options through the real stack.
+    // [AC] REQ-SFT-03/06: a title not stored locally still surfaces MusicBrainz options through the real stack.
     [Fact]
-    public async Task SearchTitleRemoteAsync_EmptyLibrary_ReturnsDeezerOptionsWithOkStatus()
+    public async Task SearchTitleRemoteAsync_EmptyLibrary_ReturnsMusicBrainzOptionsWithOkStatus()
     {
         await using var host = CreateHost();
         var sut = host.Resolve<ISongSuggestionService>();
@@ -76,14 +65,14 @@ public class SongSuggestionTitleSearchRealStackTests
         Assert.Equal(RemoteSearchStatus.Ok, result.Status);
         Assert.Equal(3, result.Remote.Count);
         Assert.Contains(result.Remote, r => r.Title == "Commando" && r.ArtistName == "Niska");
-        // [AC] REQ-RMV-08: the labelled Deezer row ("Ao Vivo" by another artist) is its own group, not collapsed.
+        // [AC] REQ-RMV-08: a same-title row by another artist is its own group, not collapsed.
         Assert.Contains(result.Remote, r => r.Title == "Comando" && r.ArtistName == "Banda X");
         Assert.Contains(result.Remote, r => r.Title == "Chasse à l'homme");
     }
 
     // [AC] REQ-SFT-03/06: same, with a populated library (dedupe lookups run against real rows).
     [Fact]
-    public async Task SearchTitleRemoteAsync_PopulatedLibrary_ReturnsDeezerOptions()
+    public async Task SearchTitleRemoteAsync_PopulatedLibrary_ReturnsMusicBrainzOptions()
     {
         await using var host = CreateHost();
         var (ok, msg, artist) = await host.Resolve<IArtistService>().CreateArtistAsync("Ramones");
@@ -99,9 +88,9 @@ public class SongSuggestionTitleSearchRealStackTests
     }
 
     // [AC] REQ-SFT-03/06: the Title field's option source (SongFormViewModel.TitleOptionSource) yields
-    // Deezer options through the real service stack, and sets no unavailable/offline note.
+    // MusicBrainz options through the real service stack, and sets no unavailable/offline note.
     [Fact]
-    public async Task TitleOptionSource_RealStack_YieldsDeezerOptionsAndNoNote()
+    public async Task TitleOptionSource_RealStack_YieldsMusicBrainzOptionsAndNoNote()
     {
         await using var host = CreateHost();
         var vm = new SongFormViewModel(

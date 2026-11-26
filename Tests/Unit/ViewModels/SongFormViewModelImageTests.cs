@@ -213,14 +213,14 @@ public class SongFormViewModelImageTests
     }
 
     [Fact]
-    public async Task TitleOption_RemoteRow_TrailingTextIsDeezerAndNoSourceWordInSupportingText()
+    public async Task TitleOption_RemoteRow_TrailingTextIsMusicBrainzAndNoSourceWordInSupportingText()
     {
         // [AC] REQ-ART-08: the Deezer option names its source as trailing text.
         SetupSearch([], [], [RemoteDto("Creep", "Radiohead")]);
 
         var option = await SingleTitleOption(CreateSut());
 
-        Assert.Equal("Deezer", option.TrailingText);
+        Assert.Equal("MusicBrainz", option.TrailingText);
         Assert.DoesNotContain("Deezer", option.SupportingText);
     }
 

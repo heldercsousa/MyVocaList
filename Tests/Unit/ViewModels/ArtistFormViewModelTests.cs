@@ -306,7 +306,7 @@ public class ArtistFormViewModelTests
 
         Assert.Collection(options,
             o => { Assert.Equal("Metallica", o.Headline); Assert.Equal("In your library", o.SupportingText); },
-            o => { Assert.Equal("Metallica Tribute", o.Headline); Assert.Equal("Deezer", o.SupportingText); });
+            o => { Assert.Equal("Metallica Tribute", o.Headline); Assert.Equal("MusicBrainz", o.SupportingText); });
     }
 
     // ── Local pick opens the artist ────────────────────────────────────────────

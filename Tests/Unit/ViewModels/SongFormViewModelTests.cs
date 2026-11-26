@@ -125,7 +125,7 @@ public class SongFormViewModelTests
 
     // [AC] REQ-ART-07/08 (REQ-RMV-01): a remote option shows the artist only; the source "Deezer" is the trailing text.
     [Fact]
-    public async Task TitleOptionSource_RemoteHit_SupportingTextIsArtistAndDeezer()
+    public async Task TitleOptionSource_RemoteHit_SupportingTextIsArtistAndMusicBrainz()
     {
         SetupSearch([], [], [RemoteDto("Creep", "Radiohead")]);
         var sut = CreateAddFormSut();
@@ -135,7 +135,7 @@ public class SongFormViewModelTests
         var option = Assert.Single(options);
         Assert.Equal("Creep", option.Headline);
         Assert.Equal("Radiohead", option.SupportingText);
-        Assert.Equal("Deezer", option.TrailingText);
+        Assert.Equal("MusicBrainz", option.TrailingText);
     }
 
     // [AC] REQ-SFT-05: one row per song; local first, then promoted (local rows), then remote.

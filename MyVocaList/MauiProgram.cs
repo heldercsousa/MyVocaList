@@ -93,7 +93,7 @@ public static class MauiProgram
 
         // Repositories, HTTP metadata providers, and business services
         // (extracted to a testable extension — see BUG-021 DI regression tests)
-        builder.Services.AddAppServices();
+        builder.Services.AddAppServices(config);
 
         // MAUI-platform services
         builder.Services.AddSingleton<IPreferences>(_ => Preferences.Default);
