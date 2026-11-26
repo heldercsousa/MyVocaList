@@ -246,3 +246,19 @@ What MusicBrainz lacks for MyVocaList: previews, artist photos, charts/"popular 
 3. Start on the free MusicBrainz API (1 req/s, debounced search, User-Agent) during the free phase; before any paid tier, either buy a MetaBrainz plan or ship a CC0 subset.
 4. Accept losing previews/charts/artist photos; cover art by CAA URL only, where present.
 5. Spec first: a `changes/` item for "YouTube without a key" and an update of the Deezer vs MusicBrainz comparison item, before any code.
+
+## 7. Update 2026-11-26 — artist photos, bio and discography by MBID
+
+Helder approved MusicBrainz ("Aprovo uso do MusicBrain") and considers losing automatic artist photos a real loss. Sources checked 2026-11-26.
+
+| Source | Terms | Fit |
+|---|---|---|
+| **Wikidata** | Structured data "released into the public domain under Creative Commons Zero" **V** — https://www.wikidata.org/wiki/Wikidata:Licensing. MusicBrainz artist → Wikidata via the `wikidata` URL relationship; image = property P18 **I** | Free + commercial; no key |
+| **Wikimedia Commons** (the P18 file) | License is per file; when required, credit the original creator, name the licence and link it; "Other restrictions may apply" (e.g. personality rights of identifiable people) **V** — https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia. Author/licence readable at runtime from the file's `extmetadata` (imageinfo API) **I** | Free + commercial for most files; show credit line per image; skip files without a free licence |
+| Wikimedia APIs | Informative User-Agent with contact, format `<client>/<version> (<contact>)`, or blocked (HTTP 403) **V** — https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy | Same User-Agent rule as MusicBrainz |
+| **Bio** | Wikipedia intro text is CC BY-SA 4.0 (attribution + share-alike) **I**; Wikidata description is CC0 **V** | Short Wikidata description is safest; Wikipedia extract only with attribution link |
+| **Discography** | MusicBrainz release groups by artist MBID, CC0 **V** (§5) | No extra source needed |
+| **Fanart.tv** | Terms page HTTP 403, API docs 404 — NOT FOUND today. Known to need a project API key; images are fan-made **I** | Optional, only after its terms are read |
+| **TheAudioDB** | Free key "123", 30 req/min; Premium $8/month; MBID lookup `artist-mb.php?i={MBID}` **V** — https://www.theaudiodb.com/free_music_api. Commercial terms not read; images "Most are fan created" **V** | Not recommended (unclear rights) |
+
+**Recommendation:** Wikidata + Commons primary (photo by URL with credit line, loaded at runtime, not stored); Wikidata description as bio; discography from MusicBrainz. Fanart.tv optional fallback only once its terms are verified. TheAudioDB excluded. Artists with no free P18 image keep the initials placeholder.

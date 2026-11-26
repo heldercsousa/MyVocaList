@@ -24,6 +24,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | | 🏁 **MVP release** |
 | — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
 | 2026-11-22 | ↳ Deezer vs MusicBrainz — systematic comparison with pros and cons | 💡 Pending |
+| 2026-11-26 | ↳ YouTube without key + MusicBrainz catalog + Wikidata artist images, replacing Deezer | 💡 Pending |
 | — | **Cross-cutting** | — |
 | 2026-11-24 | ↳ CRUD list search: load-more and pull-to-refresh can overwrite newer search results (suspected race) | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END business-features -->
