@@ -42,6 +42,9 @@ Origin: Helder, 2026-11-25/26 — no YouTube Data API key; "Aprovo uso do MusicB
 ## Out of scope
 Lyrics source (Bandokê lyrics decision stays in `findings.md` §5); charts/"popular now"; Fanart.tv (until its terms are read); audio previews.
 
+## Decided by Helder (2026-11-26)
+- Artist images: Wikidata + Wikimedia Commons as the primary source; Fanart.tv only as a supplement, and only if its terms allow it (still unverified).
+
 ## Open questions for Helder
 1. Contact string for the User-Agent (an app URL or a project email).
 2. Free API during the free phase, then MetaBrainz plan or CC0 subset before any paid tier — confirm.
