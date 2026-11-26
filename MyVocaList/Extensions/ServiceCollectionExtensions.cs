@@ -112,7 +112,6 @@ public static class ServiceCollectionExtensions
         // YouTube Karaoke
         services.AddScoped<ISongKaraokeUrlRepository, SongKaraokeUrlRepository>();
         services.AddScoped<ISongKaraokeUrlService, SongKaraokeUrlService>();
-        services.AddScoped<IYouTubeSearchService, YouTubeSearchService>();
         services.AddScoped<INextSingerAlertService, NextSingerAlertService>();
 
         return services;

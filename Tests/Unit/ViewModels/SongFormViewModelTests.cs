@@ -19,7 +19,6 @@ public class SongFormViewModelTests
     private SongFormViewModel CreateSut(
         Mock<ISongKaraokeUrlService>? urlService = null,
         Mock<ISnackbarComponent>? snackbar = null,
-        Mock<ISecureStorageWrapper>? secureStorage = null,
         Mock<ISongService>? songService = null,
         Mock<IArtistService>? artistService = null,
         IMessenger? messenger = null)
@@ -30,7 +29,6 @@ public class SongFormViewModelTests
             (snackbar ?? new Mock<ISnackbarComponent>()).Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
-            (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
             messenger ?? new Mock<IMessenger>().Object,
             _navigationMock.Object,
             _suggestionsMock.Object,
@@ -514,10 +512,8 @@ public class SongFormViewModelTests
         snackbar.Setup(s => s.ShowWithUndoAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<Task>>()))
                 .Callback<string, string, Func<Task>>((_, _, _) => callOrder.Add("snackbar"))
                 .Returns(Task.CompletedTask);
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
 
-        var sut = CreateSut(urlService: urlService, snackbar: snackbar, secureStorage: secureStorage);
+        var sut = CreateSut(urlService: urlService, snackbar: snackbar);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
 
@@ -545,10 +541,8 @@ public class SongFormViewModelTests
         snackbar.Setup(s => s.ShowWithUndoAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<Task>>()))
                 .Callback<string, string, Func<Task>>((_, _, action) => action().GetAwaiter().GetResult())
                 .Returns(Task.CompletedTask);
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
 
-        var sut = CreateSut(urlService: urlService, snackbar: snackbar, secureStorage: secureStorage);
+        var sut = CreateSut(urlService: urlService, snackbar: snackbar);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
 
@@ -570,10 +564,8 @@ public class SongFormViewModelTests
         urlService.Setup(s => s.GetUrlsForSongAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
         var snackbar = new Mock<ISnackbarComponent>();
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
 
-        var sut = CreateSut(urlService: urlService, snackbar: snackbar, secureStorage: secureStorage);
+        var sut = CreateSut(urlService: urlService, snackbar: snackbar);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
 
@@ -1417,25 +1409,6 @@ public class SongFormViewModelTests
         urlService.Verify(s => s.RemoveUrlAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    // ── BUG-020: SongFormPage FAB crash — SecureStorage failure in OnAppearing ────
-
-    // [AC] BUG-020: SecureStorage.GetAsync failure (e.g. corrupted Android keystore) must not
-    // crash the app when SongFormPage.OnAppearing (async void) awaits RefreshApiKeyFlagAsync.
-    [Fact]
-    public async Task RefreshApiKeyFlagAsync_SecureStorageThrows_DoesNotThrowAndSetsFalse()
-    {
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>()))
-                     .ThrowsAsync(new InvalidOperationException("Keystore error"));
-
-        var sut = CreateSut(secureStorage: secureStorage);
-
-        var exception = await Record.ExceptionAsync(() => sut.RefreshApiKeyFlagAsync());
-
-        Assert.Null(exception);
-        Assert.False(sut.HasYouTubeApiKey);
-    }
-
     // ── BUG-024: edit-mode hydration + full-data save (regression) ────────
 
     private static Mock<ISongService> MakeSongServiceWithSong(Song song)
@@ -1461,13 +1434,11 @@ public class SongFormViewModelTests
             Lyrics = "Stored lyrics"
         };
         var songService = MakeSongServiceWithSong(song);
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
 
-        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        var sut = CreateSut(urlService: urlService, songService: songService);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
 
@@ -1488,13 +1459,11 @@ public class SongFormViewModelTests
             ExternalProvider = "Deezer"
         };
         var songService = MakeSongServiceWithSong(song);
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
 
-        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        var sut = CreateSut(urlService: urlService, songService: songService);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
 
@@ -1516,13 +1485,11 @@ public class SongFormViewModelTests
         var requests = new List<SongFormSaveRequest>();
         var songService = MakeSongServiceWithSong(song);
         SetupSave(songService, requests, _ => SavedOutcome(42));
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
 
-        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        var sut = CreateSut(urlService: urlService, songService: songService);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
         sut.CompleteHydration();
@@ -1552,13 +1519,11 @@ public class SongFormViewModelTests
         var requests = new List<SongFormSaveRequest>();
         var songService = MakeSongServiceWithSong(song);
         SetupSave(songService, requests, _ => SavedOutcome(42));
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
 
-        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        var sut = CreateSut(urlService: urlService, songService: songService);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
         sut.CompleteHydration();
@@ -1831,13 +1796,11 @@ public class SongFormViewModelTests
         };
         var songService = MakeSongServiceWithSong(song);
         var artistService = new Mock<IArtistService>();
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
 
-        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
+        var sut = CreateSut(urlService: urlService,
             songService: songService, artistService: artistService);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
@@ -1866,13 +1829,11 @@ public class SongFormViewModelTests
         var requests = new List<SongFormSaveRequest>();
         var songService = MakeSongServiceWithSong(song);
         SetupSave(songService, requests, _ => SavedOutcome(42));
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
 
-        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        var sut = CreateSut(urlService: urlService, songService: songService);
         sut.SongIdRaw = "42";
         await WaitUntilAsync(() => !sut.IsSongLoading);
         sut.CompleteHydration();
@@ -1909,12 +1870,10 @@ public class SongFormViewModelTests
     private async Task<SongFormViewModel> CreateEditSutAsync(
         Song song, Mock<ISongService> songService, Mock<IArtistService>? artistService = null)
     {
-        var secureStorage = new Mock<ISecureStorageWrapper>();
-        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.GetUrlsForSongAsync(song.Id, It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
-        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
+        var sut = CreateSut(urlService: urlService,
             songService: songService, artistService: artistService);
         sut.SongIdRaw = song.Id.ToString();
         await WaitUntilAsync(() => !sut.IsSongLoading);

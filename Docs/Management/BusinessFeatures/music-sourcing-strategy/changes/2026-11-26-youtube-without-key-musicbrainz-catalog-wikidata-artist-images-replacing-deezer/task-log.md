@@ -101,3 +101,31 @@ Remaining "deezer" text in `.cs` outside Tests/Docs: `Services/ILyricsProvider.c
 
 ### Build notes
 Red run first: 3/3 failed (migration not found). After: 2051 passed, 0 failed. UPDATE only (no table rebuild), so the FTS5 triggers are untouched. MigrationsLock is a runtime clear before MigrateAsync, unaffected. Android build result in commit report.
+
+---
+## Task: T4 Remove the YouTube Data API, add search-out (REQ-MSRC-04, -05)
+**Plan:** `plan.md` (this folder)
+**Status:** To Review
+**Started:** 2026-11-26
+**Completed:** 2026-11-26
+
+### Changed files:
+- Deleted: `Domain/ServicesInterfaces/IYouTubeSearchService.cs`, `Services/YouTubeSearchService.cs`, `Contracts/DTOs/List/YouTubeSearchResultDto.cs`, `Contracts/Messages/YouTubeVideoPickedMessage.cs`, `MyVocaList/UI/ViewModels/YouTubeSearchViewModel.cs`, `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml(.cs)`, `Tests/Unit/Services/YouTubeSearchServiceTests.cs`, `Tests/Unit/ViewModels/YouTubeSearchViewModelTests.cs`
+- New: `Domain/Rules/YouTubeSearchLinkRules.cs` (`BuildResultsUrl(title, artist)` -> `.../results?search_query=<title> <artist> karaoke`), `Tests/Unit/Domain/YouTubeSearchLinkRulesTests.cs`, `Tests/Unit/ViewModels/SettingsViewModelTests.cs`
+- `MyVocaList/UI/ViewModels/SettingsViewModel.cs` (only `InitializeAsync` removing secure-storage key `youtube_api_key`, failure logged not thrown; feedback command kept), `MyVocaList/UI/Pages/Settings/SettingsPage.xaml` (key section removed)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (no secure storage / API-key flag / picker command; `LaunchYouTubeSearch` uses the rule), `MyVocaList/UI/Pages/Songs/SongFormPage.xaml(.cs)` ("Search on YouTube" + paste field kept; API-key list item and "go to settings" block removed; `OnAppearing` no longer async)
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `MyVocaList/MauiProgram.cs`, `MyVocaList/AppShell.xaml.cs`, `MyVocaList/Navigation/Routes.cs` (registration + route removed)
+- Tests: removed `ISecureStorageWrapper` argument from every `SongFormViewModel` construction (`SongFormViewModel*Tests`, `LoadingHoldTests`, `SongSuggestionTitleSearchRealStackTests`); dropped the BUG-020 `RefreshApiKeyFlagAsync` test (method removed)
+
+### AC traceability
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-MSRC-04 | service, key setting, search page and route deleted; stored key removed on Settings open | `InitializeAsync_RemovesStoredYouTubeKey`, `InitializeAsync_SecureStorageThrows_DoesNotThrow`, `BuildResultsUrl_NeverUsesDataApiHost` |
+| REQ-MSRC-05 | `YouTubeSearchLinkRules.BuildResultsUrl` + `SongFormViewModel.LaunchYouTubeSearch` | `BuildResultsUrl_BuildsResultsUrlWithKaraokeSuffix`, `BuildResultsUrl_TrimsAndEncodesSpecialCharacters` |
+
+### Build notes
+Red run first: compile failure (rule type missing, old `SettingsViewModel` constructor) for the right reason. After: 2040 passed, 0 failed. Android build: 0 errors. Not emulator-checked.
+
+### Design concern
+- Plan named the test `LaunchYouTubeSearch_BuildsResultsUrlWithKaraokeSuffix` over a "launcher abstraction"; none exists (static `Launcher`), so the URL is built by a pure rule and tested there.
+- Out of T4's file list, left as is: `SongsViewModel.LaunchYouTubeSearchAsync` still builds `karaoke <title> <artist>` itself (should use the rule); `SongFormViewModel` keeps an unused `IMessenger` dependency; `Resources/Raw/releases.json` mentions YouTube (release notes text).

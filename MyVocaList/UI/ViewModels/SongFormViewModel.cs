@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.Suggestions;
-using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
@@ -24,7 +23,6 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongFormViewModel> _logger;
     private readonly ISongKaraokeUrlService _karaokeUrlService;
-    private readonly ISecureStorageWrapper _secureStorage;
     private readonly IMessenger _messenger;
     private readonly INavigationService _navigationService;
     private readonly ISongSuggestionService _songSuggestions;
@@ -77,7 +75,6 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private ObservableRangeCollection<SongKaraokeUrlDto> _karaokeUrls = [];
     private readonly HashSet<string> _addedVideoIds = [];
     private readonly List<string> _pendingRawUrls = [];   // BUG-009: buffer for new-song mode
-    [ObservableProperty] private bool _hasYouTubeApiKey;
     [ObservableProperty] private string _pasteUrlInput = string.Empty;
     [ObservableProperty] private string _pasteUrlError = string.Empty;
     [ObservableProperty] private bool _hasPasteUrlError;
@@ -213,7 +210,6 @@ public partial class SongFormViewModel : ViewModelBase
         ISnackbarComponent snackbarService,
         ILogger<SongFormViewModel> logger,
         ISongKaraokeUrlService karaokeUrlService,
-        ISecureStorageWrapper secureStorage,
         IMessenger messenger,
         INavigationService navigationService,
         ISongSuggestionService songSuggestions,
@@ -227,7 +223,6 @@ public partial class SongFormViewModel : ViewModelBase
         _snackbarService = snackbarService;
         _logger = logger;
         _karaokeUrlService = karaokeUrlService;
-        _secureStorage = secureStorage;
         _messenger = messenger;
         _navigationService = navigationService;
         _songSuggestions = songSuggestions;
@@ -245,11 +240,8 @@ public partial class SongFormViewModel : ViewModelBase
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
         ArtistBlurredWithoutSelectionCommand = new RelayCommand(OnArtistBlurredWithoutSelection);
-        NavigateToYouTubeSearchCommand = new AsyncRelayCommand(NavigateToYouTubeSearchAsync,
-            AsyncRelayCommandOptions.None);
         AddFromPasteCommand = new AsyncRelayCommand(AddFromPasteAsync);
         RemoveUrlCommand = new AsyncRelayCommand<SongKaraokeUrlDto>(RemoveUrlAsync);
-        GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("//settings"));
 
         // Duplicate-song and artist-match sheet commands
         OpenExistingSongCommand = new AsyncRelayCommand<SongMatch>(OpenExistingSongAsync);
@@ -267,10 +259,8 @@ public partial class SongFormViewModel : ViewModelBase
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
     /// <summary>Invoked by the artist autocomplete field when the user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
-    public IAsyncRelayCommand NavigateToYouTubeSearchCommand { get; }
     public IAsyncRelayCommand AddFromPasteCommand { get; }
     public IAsyncRelayCommand<SongKaraokeUrlDto> RemoveUrlCommand { get; }
-    public IAsyncRelayCommand GoToSettingsCommand { get; }
 
     // Duplicate-song sheet
     /// <summary>Opens the stored song's edit form in place of this add form (REQ-SFT-22/24).</summary>
@@ -1214,29 +1204,9 @@ public partial class SongFormViewModel : ViewModelBase
         }
     }
 
-    public async Task RefreshApiKeyFlagAsync()
-    {
-        // BUG-020: SecureStorage.GetAsync can throw (e.g. corrupted Android keystore alias).
-        // This is awaited from SongFormPage.OnAppearing, which is `async void` — an unhandled
-        // exception here escapes to AppDomain.UnhandledException and crashes the app. Treat a
-        // storage failure the same as "no key configured" instead of crashing.
-        try
-        {
-            var key = await _secureStorage.GetAsync("youtube_api_key");
-            HasYouTubeApiKey = !string.IsNullOrWhiteSpace(key);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to read YouTube API key from secure storage");
-            HasYouTubeApiKey = false;
-        }
-    }
-
     private async Task LoadKaraokeUrlsAsync(CancellationToken ct = default)
     {
         if (!SongId.HasValue) return;
-        var apiKey = await _secureStorage.GetAsync("youtube_api_key");
-        HasYouTubeApiKey = !string.IsNullOrWhiteSpace(apiKey);
         var songId = SongId.Value;
         // Bug fix: the database read runs on a background thread (see HydrateStoredSongAsync).
         var urls = await Task.Run(() => _karaokeUrlService.GetUrlsForSongAsync(songId, ct));
@@ -1245,41 +1215,6 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     // ── YouTube URL section ───────────────────────────────────────────────
-
-    private async Task NavigateToYouTubeSearchAsync()
-    {
-        _messenger.Register<YouTubeVideoPickedMessage>(this, (_, msg) =>
-        {
-            var rawUrl = $"https://youtu.be/{msg.Result.VideoId}";
-            if (!SongId.HasValue)
-            {
-                // BUG-009: buffer in new-song mode
-                _ = BufferUrlAsync(rawUrl, msg.Result.VideoId);
-            }
-            else
-            {
-                _ = AddUrlFromPickerAsync(rawUrl, msg.Result.VideoId);
-            }
-            _messenger.Unregister<YouTubeVideoPickedMessage>(this);
-        });
-        await Shell.Current.GoToAsync(Routes.YouTubeSearch);
-    }
-
-    private async Task AddUrlFromPickerAsync(string rawUrl, string videoId, CancellationToken ct = default)
-    {
-        if (IsVideoIdAdded(videoId)) return;
-        var (success, message, dto) = await _karaokeUrlService.AddUrlAsync(SongId!.Value, rawUrl, ct: ct);
-        if (success && dto is not null)
-        {
-            _addedVideoIds.Add(videoId);
-            RunOnUiThread(() => KaraokeUrls.Add(dto));
-            await _snackbarService.ShowSuccessAsync("URL added");
-        }
-        else
-        {
-            await _snackbarService.ShowErrorAsync(message);
-        }
-    }
 
     public bool IsVideoIdAdded(string videoId) => _addedVideoIds.Contains(videoId)
         || KaraokeUrls.Any(u => u.VideoId == videoId);
@@ -1400,9 +1335,7 @@ public partial class SongFormViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(artist))
             return;
 
-        var query = $"karaoke {title} {artist}";
-        var encodedQuery = Uri.EscapeDataString(query);
-        var youtubeUri = new Uri($"https://www.youtube.com/results?search_query={encodedQuery}");
+        var youtubeUri = new Uri(YouTubeSearchLinkRules.BuildResultsUrl(title, artist));
 
         if (!await Launcher.TryOpenAsync(youtubeUri))
             await Browser.OpenAsync(youtubeUri, BrowserLaunchMode.SystemPreferred);

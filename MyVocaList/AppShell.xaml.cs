@@ -29,7 +29,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormPage));
         Routing.RegisterRoute(Routes.SongForm, typeof(SongFormPage));
         Routing.RegisterRoute(Routes.Feedback, typeof(FeedbackPage));
-        Routing.RegisterRoute(Routes.YouTubeSearch, typeof(YouTubeSearchPage));
 
         _ = viewModel.InitializeAsync();
     }

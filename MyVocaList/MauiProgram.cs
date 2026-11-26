@@ -145,7 +145,6 @@ public static class MauiProgram
         builder.Services.AddTransient<ArtistFormViewModel>();
         builder.Services.AddTransient<SongsViewModel>();
         builder.Services.AddTransient<SongFormViewModel>();
-        builder.Services.AddTransient<YouTubeSearchViewModel>();
         builder.Services.AddTransient<VenueMapPickerViewModel>();
 
         // Pages
@@ -159,7 +158,6 @@ public static class MauiProgram
         builder.Services.AddTransient<PersonFormPage>();
         builder.Services.AddTransient<ArtistFormPage>();
         builder.Services.AddTransient<SongFormPage>();
-        builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();

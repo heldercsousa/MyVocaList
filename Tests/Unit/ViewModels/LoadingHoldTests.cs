@@ -135,7 +135,6 @@ public class LoadingHoldTests
             new Mock<ISnackbarComponent>().Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             urls.Object,
-            new Mock<ISecureStorageWrapper>().Object,
             new Mock<IMessenger>().Object,
             new Mock<INavigationService>().Object,
             suggestions.Object,

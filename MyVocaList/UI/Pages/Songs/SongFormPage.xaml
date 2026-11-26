@@ -352,41 +352,11 @@
                                         StrokeShape="RoundRectangle 8">
                                     <VerticalStackLayout Spacing="8">
 
-                                        <buttons:SfButton Text="🔍 Search YouTube"
+                                        <buttons:SfButton Text="🔍 Search on YouTube"
                                                           Style="{StaticResource SfOutlinedButton}"
                                                           HorizontalOptions="Fill"
                                                           Command="{Binding LaunchYouTubeSearchCommand}"
                                                           IsEnabled="{Binding CanLaunchYouTubeSearch}" />
-
-                                        <lists:ListItem
-                                            Headline="Search YouTube (API)"
-                                            IsVisible="{Binding HasYouTubeApiKey}">
-                                            <lists:ListItem.LeadingContent>
-                                                <ImageButton Style="{StaticResource SfIconButton}"
-                                                             Source="search_outlined"
-                                                             InputTransparent="True" />
-                                            </lists:ListItem.LeadingContent>
-                                            <lists:ListItem.TrailingContent>
-                                                <ImageButton Style="{StaticResource SfIconButton}"
-                                                             Source="arrow_forward_outlined"
-                                                             InputTransparent="True" />
-                                            </lists:ListItem.TrailingContent>
-                                            <lists:ListItem.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding NavigateToYouTubeSearchCommand}" />
-                                            </lists:ListItem.GestureRecognizers>
-                                        </lists:ListItem>
-
-                                        <VerticalStackLayout Spacing="4"
-                                                             IsVisible="{Binding HasYouTubeApiKey, Converter={StaticResource InverseBoolConverter}}">
-                                            <Label Text="Add a YouTube API key in Settings to enable search."
-                                                   StyleClass="Body.Small"
-                                                   TextColor="{StaticResource OnSurfaceVariant}" />
-                                            <buttons:SfButton Text="Go to Settings"
-                                                              Style="{StaticResource SfOutlinedButton}"
-                                                              HorizontalOptions="Start"
-                                                              Padding="16,0"
-                                                              Command="{Binding GoToSettingsCommand}" />
-                                        </VerticalStackLayout>
 
                                         <Label Text="Or paste a YouTube URL"
                                                StyleClass="Body.Small"

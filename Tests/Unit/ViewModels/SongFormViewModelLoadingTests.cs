@@ -43,7 +43,6 @@ public class SongFormViewModelLoadingTests
             _snackbarMock.Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             _urlServiceMock.Object,
-            new Mock<ISecureStorageWrapper>().Object,
             new Mock<IMessenger>().Object,
             _navigationMock.Object,
             _suggestionsMock.Object,

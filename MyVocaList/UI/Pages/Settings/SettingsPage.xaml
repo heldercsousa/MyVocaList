@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
-    xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     x:Class="MyVocaList.UI.Pages.Settings.SettingsPage"
     x:DataType="vm:SettingsViewModel"
@@ -13,59 +12,6 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="24">
-
-            <!-- YouTube Integration section -->
-            <Label Text="YouTube Integration"
-                   StyleClass="Title.Medium"
-                   TextColor="{StaticResource OnSurface}" />
-
-            <VerticalStackLayout Spacing="12">
-                <inputlayout:SfTextInputLayout
-                    Hint="YouTube Data API v3 Key"
-                    ContainerType="Outlined"
-                    EnablePasswordVisibilityToggle="True">
-                    <Entry
-                        Text="{Binding ApiKeyInput, Mode=TwoWay}"
-                        Placeholder="Paste your API key here"
-                        PlaceholderColor="{StaticResource OnSurfaceVariant}"
-                        TextColor="{StaticResource OnSurface}"
-                        IsPassword="True" />
-                </inputlayout:SfTextInputLayout>
-
-                <HorizontalStackLayout Spacing="8">
-                    <buttons:SfButton
-                        Text="Test"
-                        Style="{StaticResource SfOutlinedButton}"
-                        Command="{Binding TestApiKeyCommand}"
-                        IsEnabled="{Binding IsTestingKey, Converter={StaticResource InverseBoolConverter}}" />
-                    <buttons:SfButton
-                        Text="Save"
-                        Style="{StaticResource SfFilledButton}"
-                        Command="{Binding SaveApiKeyCommand}" />
-                    <buttons:SfButton
-                        Text="Clear"
-                        Style="{StaticResource SfTextButton}"
-                        Command="{Binding ClearApiKeyCommand}" />
-                </HorizontalStackLayout>
-
-                <ActivityIndicator
-                    IsRunning="{Binding IsTestingKey}"
-                    IsVisible="{Binding IsTestingKey}"
-                    Color="{StaticResource Primary}"
-                    HorizontalOptions="Start" />
-
-                <Label
-                    Text="{Binding ApiKeyStatus}"
-                    IsVisible="{Binding HasApiKeyStatus}"
-                    StyleClass="Body.Small"
-                    TextColor="{StaticResource OnSurfaceVariant}" />
-            </VerticalStackLayout>
-
-            <Label
-                StyleClass="Body.Small"
-                Opacity="0.6"
-                TextColor="{StaticResource OnSurfaceVariant}"
-                Text="Free quota: ~100 searches/day. Without a key, paste YouTube URLs directly." />
 
             <!-- Help and Feedback section -->
             <Label

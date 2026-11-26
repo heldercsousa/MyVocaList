@@ -99,7 +99,6 @@ public class SongSuggestionTitleSearchRealStackTests
             new Mock<ISnackbarComponent>().Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             new Mock<ISongKaraokeUrlService>().Object,
-            new Mock<ISecureStorageWrapper>().Object,
             new Mock<IMessenger>().Object,
             new Mock<INavigationService>().Object,
             host.Resolve<ISongSuggestionService>(),
