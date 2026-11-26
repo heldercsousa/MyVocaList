@@ -27,7 +27,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isScrolled;
     [ObservableProperty] private int _selectedCount;
-    [ObservableProperty] private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
+    [ObservableProperty] private SheetState _confirmSheetState = SheetState.Hidden;
     [ObservableProperty] private bool _hasMoreItems = true;
     /// <summary>
     /// True while the list is replacing its rows: first load, later visit, debounced search, filter reload. CrudListView
@@ -38,7 +38,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     [ObservableProperty] private string _confirmMessage = string.Empty;
     [ObservableProperty] private string _confirmActionText = "Delete";
     [ObservableProperty] private bool _isSelectionMode;
-    [ObservableProperty] private BottomSheetState _itemActionsSheetState = BottomSheetState.Hidden;
+    [ObservableProperty] private SheetState _itemActionsSheetState = SheetState.Hidden;
     [ObservableProperty] private bool _isItemMenuOpen;
 
     private IReadOnlyList<ItemMenuAction> _itemMenuActions;
@@ -393,7 +393,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
                 SelectedCount = 0;
             });
         };
-        ConfirmSheetState = BottomSheetState.HalfExpanded;
+        ConfirmSheetState = SheetState.HalfExpanded;
     }
 
     private async Task ExecuteConfirmActionAsync()
@@ -409,7 +409,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void DismissConfirmSheet()
     {
-        ConfirmSheetState = BottomSheetState.Hidden;
+        ConfirmSheetState = SheetState.Hidden;
         _pendingConfirmAction = null;
     }
 
@@ -447,13 +447,13 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             return true;
         }
 
-        if (ItemActionsSheetState != BottomSheetState.Hidden)
+        if (ItemActionsSheetState != SheetState.Hidden)
         {
             CloseItemActions();
             return true;
         }
 
-        if (ConfirmSheetState != BottomSheetState.Hidden)
+        if (ConfirmSheetState != SheetState.Hidden)
         {
             DismissConfirmSheet();
             return true;
@@ -524,7 +524,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void BeginSelection(TItem item)
     {
-        // Set first so the view switches DX selection to Multiple before the item is added.
+        // Set first so the view switches selection to Multiple before the item is added.
         IsSelectionMode = true;
         RunOnUiThread(() =>
         {
@@ -536,7 +536,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private void OpenItemActions(TItem item)
     {
         ItemActionsTarget = item;
-        ItemActionsSheetState = BottomSheetState.HalfExpanded;
+        ItemActionsSheetState = SheetState.HalfExpanded;
     }
 
     private void OpenItemMenu(object parameter)
@@ -549,7 +549,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void CloseItemActions()
     {
-        ItemActionsSheetState = BottomSheetState.Hidden;
+        ItemActionsSheetState = SheetState.Hidden;
         IsItemMenuOpen = false;
         ItemActionsTarget = default;
     }

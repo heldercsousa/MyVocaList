@@ -1,12 +1,13 @@
 ---
 id: ui-component-library-licensing
 title: **UI library migration — DevExpress → Syncfusion, coexisting page by page**
-status: 🟡 In Progress
+status: ✅ Done
 target: —
 section: DevCycleCraft
 goal: replace every DevExpress control with Syncfusion before the MVP launch, keeping the app working at every commit.
 gate: Pre-MVP blocker. Spec approved by Helder on 2026-11-22; the plan waits for his review before any code.
 pointer: cross-cutting/ui-component-library-licensing/
+closed: 2026-11
 order: 530
 kind: feature
 ---

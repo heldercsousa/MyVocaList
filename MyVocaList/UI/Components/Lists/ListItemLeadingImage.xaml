@@ -2,7 +2,7 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingImage"
     x:Name="self">
 
@@ -22,10 +22,10 @@
 
         <!-- Placeholder icon sits under the image: a loaded image covers it, a missing or failed one leaves it visible. -->
         <Grid>
-            <dx:DXImage
+            <Image
                 Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
                 IsVisible="{Binding PlaceholderIcon, Source={x:Reference self}, Converter={StaticResource IsNotNullConverter}}"
-                TintColor="{StaticResource OnSurfaceVariant}"
+                behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
                 WidthRequest="24"
                 HeightRequest="24"
                 HorizontalOptions="Center"

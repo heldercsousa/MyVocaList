@@ -1,3 +1,5 @@
+using SfSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
+
 namespace MyVocaList.UI.Components.Sheets;
 
 /// <summary>
@@ -20,7 +22,8 @@ public partial class UpdateRequiredBottomSheet : ContentView
         MessageLabel.Text = string.IsNullOrWhiteSpace(result.UpdateMessage)
             ? "This version is no longer supported. Please update to continue."
             : result.UpdateMessage;
-        Sheet.State = BottomSheetState.HalfExpanded;
+        Sheet.State = SfSheetState.HalfExpanded;
+        Sheet.IsOpen = true;
     }
 
     private async void OnUpdateNowClicked(object sender, EventArgs e)

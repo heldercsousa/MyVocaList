@@ -2,15 +2,16 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
-    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
-    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
     xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:resolution="clr-namespace:MyVocaList.Domain.Resolution;assembly=MyVocaList.Domain"
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
@@ -21,253 +22,27 @@
         <ToolbarItem Text="Save" Command="{Binding SaveCommand}" />
     </ContentPage.ToolbarItems>
 
-    <!-- Root Grid so BottomSheets can overlay the ScrollView -->
-    <Grid>
+    <!-- ── Resolution BottomSheet (Task 4.5) ──────────────────────────────── -->
+    <!--
+        Shown when the resolution engine returns a non-NoMatch result.
+        Lists exact/fuzzy candidates; user chooses Open existing, Save as new song, or Cancel.
+        SfBottomSheet hosts the page body in Content and the panel in BottomSheetContent. Two sheets share the page, so the
+        artist-match sheet is nested inside this sheet's Content (precedent: CrudListView). The ViewModel never opens both
+        at once. The open/close state of both is driven from code-behind (IsOpen + State).
+    -->
+    <bottomsheet:SfBottomSheet x:Name="resolutionSheet"
+                               AllowedState="All"
+                               HalfExpandedRatio="0.7"
+                               ContentPadding="0"
+                               IsModal="True"
+                               ShowGrabber="True"
+                               CornerRadius="28,28,0,0"
+                               StateChanged="OnResolutionSheetStateChanged">
+        <bottomsheet:SfBottomSheet.Background>
+            <SolidColorBrush Color="{StaticResource Surface}" />
+        </bottomsheet:SfBottomSheet.Background>
 
-        <ScrollView>
-            <!-- REQ-SLD-32: placeholder in place of the fields while a stored song loads (edit mode) -->
-            <dx:ShimmerView IsLoading="{Binding IsSongLoading}">
-                <dx:ShimmerView.LoadingView>
-                    <VerticalStackLayout Padding="24" Spacing="16">
-                        <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
-                        <BoxView WidthRequest="120" HeightRequest="120" CornerRadius="8" HorizontalOptions="Center"
-                                 Color="{StaticResource SurfaceContainerHighest}" />
-                        <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
-                        <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
-                        <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
-                    </VerticalStackLayout>
-                </dx:ShimmerView.LoadingView>
-                <dx:ShimmerView.Content>
-                    <VerticalStackLayout Padding="24" Spacing="16">
-
-                        <!-- Title is the first field (REQ-SFT-01). A defined Title shows as Headline Medium text; a tap
-                             opens the editor with the text kept and releases a picked Title (REQ-PIC-23..27). Add mode:
-                             the search box over local songs and Deezer (REQ-SFT-02). Edit mode: plain editable text for
-                             every song (IsSearchEnabled false, REQ-SFT-27, REQ-PIC-29). Blur validation runs
-                             ValidateTitle (the VM's first check). A stored Deezer song shows its Title as plain text
-                             (REQ-SLD-36): the Label below, in the same text style; the tap-to-edit field is hidden. -->
-                        <Label Text="{Binding SongTitle}"
-                               StyleClass="Headline.Medium"
-                               IsVisible="{Binding IsTitleFrozen}" />
-                        <textfields:TapToEditField x:Name="titleTapField"
-                                                   Text="{Binding SongTitle}"
-                                                   TextStyleClass="Headline.Medium"
-                                                   HasError="{Binding TitleHasError}"
-                                                   IsEditing="{Binding IsTitleEditing, Mode=TwoWay}"
-                                                   IsVisible="{Binding IsTitleEditable}">
-                            <textfields:AutocompleteDXField x:Name="titleField"
-                                                            LabelText="Title"
-                                                            PlaceholderText="Enter song title"
-                                                            Text="{Binding SongTitle, Mode=TwoWay}"
-                                                            IsLocked="{Binding IsTitleLocked, Mode=TwoWay}"
-                                                            IsSearchEnabled="{Binding IsTitleSearchEnabled}"
-                                                            SupportingText="{Binding TitleSupportingText}"
-                                                            HasError="{Binding TitleHasError}"
-                                                            ErrorText="{Binding TitleErrorText}"
-                                                            OptionSource="{Binding TitleOptionSource}"
-                                                            SelectCommand="{Binding SelectTitleCommand}"
-                                                            ClearCommand="{Binding ClearTitleCommand}"
-                                                            BlurWithoutPickCommand="{Binding ValidateTitleCommand}" />
-                        </textfields:TapToEditField>
-
-                        <Label Text="{Binding CharacterCounterText}"
-                               IsVisible="{Binding ShowCharacterCounter}"
-                               StyleClass="Body.Small"
-                               HorizontalOptions="End">
-                            <Label.Triggers>
-                                <DataTrigger TargetType="Label"
-                                             Binding="{Binding IsCharacterCounterError}"
-                                             Value="True">
-                                    <Setter Property="TextColor" Value="{StaticResource Error}" />
-                                </DataTrigger>
-                                <DataTrigger TargetType="Label"
-                                             Binding="{Binding IsCharacterCounterWarning}"
-                                             Value="True">
-                                    <Setter Property="TextColor" Value="{StaticResource Warning}" />
-                                </DataTrigger>
-                            </Label.Triggers>
-                        </Label>
-
-                        <!-- Song picture, directly below Title (REQ-PIC-12..16): 120 dp rounded square, upload,
-                             replace and remove; nothing is stored before Save (REQ-PIC-17). -->
-                        <media:ImagePickerField ImageSource="{Binding FormImageSource}"
-                                                ThumbnailSource="{Binding FormImageThumbnailSource}"
-                                                PlaceholderIcon="music_note_outlined"
-                                                HasImage="{Binding HasFormImage}"
-                                                HintText="{Binding ImageHintText}"
-                                                PickCommand="{Binding PickImageCommand}"
-                                                RemoveCommand="{Binding RemoveImageCommand}"
-                                                IsBusy="{Binding IsImageBusy}" />
-
-                        <!-- Artist (REQ-SFT-01): a Deezer song shows the artist as plain text that cannot be edited
-                             (REQ-SLD-12); a local-only song keeps the tap-to-edit field (REQ-SLD-13). A defined Artist shows as
-                             Title Large text; a tap opens the editor with the text kept and releases the picked artist, in
-                             add and edit mode, so the artist of a stored song can be changed (REQ-PIC-23..28, 31). A pick
-                             or the resolution of the typed name on Save is decided by the VM and the Service. -->
-                        <Label Text="{Binding ArtistSearchText}"
-                               StyleClass="Title.Large"
-                               IsVisible="{Binding IsArtistFrozen}" />
-                        <textfields:TapToEditField x:Name="artistTapField"
-                                                   Text="{Binding ArtistSearchText}"
-                                                   TextStyleClass="Title.Large"
-                                                   HasError="{Binding ArtistHasError}"
-                                                   IsEditing="{Binding IsArtistEditing, Mode=TwoWay}"
-                                                   IsVisible="{Binding IsArtistEditable}">
-                            <textfields:AutocompleteDXField x:Name="artistField"
-                                                            LabelText="Artist"
-                                                            PlaceholderText="Search artists..."
-                                                            Text="{Binding ArtistSearchText, Mode=TwoWay}"
-                                                            IsLocked="{Binding IsArtistLocked, Mode=TwoWay}"
-                                                            HasError="{Binding ArtistHasError}"
-                                                            ErrorText="{Binding ArtistErrorText}"
-                                                            OptionSource="{Binding ArtistOptionSource}"
-                                                            SelectCommand="{Binding SelectArtistCommand}"
-                                                            ClearCommand="{Binding ClearArtistCommand}"
-                                                            BlurWithoutPickCommand="{Binding ArtistBlurredWithoutSelectionCommand}" />
-                        </textfields:TapToEditField>
-
-                        <Editor Placeholder="{Binding LyricsPlaceholder}"
-                                Text="{Binding Lyrics, Mode=TwoWay}"
-                                MaxLength="10000"
-                                AutoSize="TextChanges"
-                                MinimumHeightRequest="120"
-                                BackgroundColor="{StaticResource SurfaceContainerHighest}"
-                                TextColor="{StaticResource OnSurface}"
-                                PlaceholderColor="{StaticResource OnSurfaceVariant}" />
-
-                        <!-- YouTube URLs section header -->
-                        <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
-                            <Label Text="▶" TextColor="Red" FontAttributes="Bold" VerticalOptions="Center" />
-                            <Label Text="YouTube URLs" StyleClass="Title.Small" VerticalOptions="Center" />
-                            <Label Text="optional" Opacity="0.5" StyleClass="Body.Small" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-
-                        <!-- Saved / buffered URL list -->
-                        <VerticalStackLayout Spacing="4"
-                                             BindableLayout.ItemsSource="{Binding KaraokeUrls}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="dtoList:SongKaraokeUrlDto">
-                                    <Grid ColumnDefinitions="*,Auto" Padding="0,4">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="{Binding VideoId}"
-                                                   StyleClass="Body.Medium"
-                                                   LineBreakMode="TailTruncation" />
-                                            <HorizontalStackLayout Spacing="8">
-                                                <Label Text="{Binding PlayCount, StringFormat='{0} plays'}"
-                                                       StyleClass="Body.Small"
-                                                       TextColor="{StaticResource OnSurfaceVariant}" />
-                                                <Label Text="{Binding DurationSeconds, Converter={StaticResource SecondsToMinutesConverter}}"
-                                                       StyleClass="Body.Small"
-                                                       TextColor="{StaticResource OnSurfaceVariant}"
-                                                       IsVisible="{Binding DurationSeconds, Converter={StaticResource IsNotNullConverter}}" />
-                                                <Border BackgroundColor="{StaticResource Primary}"
-                                                        StrokeThickness="0"
-                                                        StrokeShape="RoundRectangle 4"
-                                                        Padding="4,2"
-                                                        IsVisible="{Binding IsSuggested}">
-                                                    <Label Text="★ SUGGESTED" StyleClass="Body.Small" TextColor="{StaticResource OnPrimary}" />
-                                                </Border>
-                                            </HorizontalStackLayout>
-                                            <Label Text="{Binding Label}"
-                                                   StyleClass="Body.Small"
-                                                   TextColor="{StaticResource OnSurfaceVariant}"
-                                                   IsVisible="{Binding Label, Converter={StaticResource IsNotNullConverter}}" />
-                                        </VerticalStackLayout>
-                                        <dx:DXButton Grid.Column="1"
-                                                     Content="✕"
-                                                     Style="{StaticResource OutlinedButton}"
-                                                     VerticalOptions="Center"
-                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=RemoveUrlCommand}"
-                                                     CommandParameter="{Binding .}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
-
-                        <!-- Search and paste strip -->
-                        <Border BackgroundColor="{StaticResource SurfaceContainerLow}"
-                                StrokeThickness="0"
-                                Padding="12"
-                                StrokeShape="RoundRectangle 8">
-                            <VerticalStackLayout Spacing="8">
-
-                                <dx:DXButton Content="🔍 Search YouTube"
-                                             Style="{StaticResource OutlinedButton}"
-                                             HorizontalOptions="Fill"
-                                             Command="{Binding LaunchYouTubeSearchCommand}"
-                                             IsEnabled="{Binding CanLaunchYouTubeSearch}" />
-
-                                <lists:ListItem
-                                    Headline="Search YouTube (API)"
-                                    IsVisible="{Binding HasYouTubeApiKey}">
-                                    <lists:ListItem.LeadingContent>
-                                        <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                                     Icon="search_outlined"
-                                                     InputTransparent="True" />
-                                    </lists:ListItem.LeadingContent>
-                                    <lists:ListItem.TrailingContent>
-                                        <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                                     Icon="arrow_forward_outlined"
-                                                     InputTransparent="True" />
-                                    </lists:ListItem.TrailingContent>
-                                    <lists:ListItem.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding NavigateToYouTubeSearchCommand}" />
-                                    </lists:ListItem.GestureRecognizers>
-                                </lists:ListItem>
-
-                                <VerticalStackLayout Spacing="4"
-                                                     IsVisible="{Binding HasYouTubeApiKey, Converter={StaticResource InverseBoolConverter}}">
-                                    <Label Text="Add a YouTube API key in Settings to enable search."
-                                           StyleClass="Body.Small"
-                                           TextColor="{StaticResource OnSurfaceVariant}" />
-                                    <dx:DXButton Content="Go to Settings"
-                                                 Style="{StaticResource OutlinedButton}"
-                                                 HorizontalOptions="Start"
-                                                 Padding="16,0"
-                                                 Command="{Binding GoToSettingsCommand}" />
-                                </VerticalStackLayout>
-
-                                <Label Text="Or paste a YouTube URL"
-                                       StyleClass="Body.Small"
-                                       TextColor="{StaticResource OnSurfaceVariant}" />
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <dxe:TextEdit Grid.Column="0"
-                                                  Text="{Binding PasteUrlInput, Mode=TwoWay}"
-                                                  PlaceholderText="https://youtu.be/..." />
-                                    <dx:DXButton Grid.Column="1"
-                                                 Content="Add"
-                                                 Style="{StaticResource FilledButton}"
-                                                 VerticalOptions="End"
-                                                 Padding="16,0"
-                                                 Command="{Binding AddFromPasteCommand}" />
-                                </Grid>
-                                <Label Text="{Binding PasteUrlError}"
-                                       IsVisible="{Binding HasPasteUrlError}"
-                                       StyleClass="Body.Small"
-                                       TextColor="{StaticResource Error}" />
-
-                            </VerticalStackLayout>
-                        </Border>
-
-                    </VerticalStackLayout>
-                </dx:ShimmerView.Content>
-            </dx:ShimmerView>
-        </ScrollView>
-
-        <!-- ── Resolution BottomSheet (Task 4.5) ──────────────────────────────── -->
-        <!--
-            Shown when the resolution engine returns a non-NoMatch result.
-            Lists exact/fuzzy candidates; user chooses Open existing, Save as new version, or Cancel.
-        -->
-        <dx:BottomSheet x:Name="resolutionSheet"
-                        AllowedState="All"
-                        HalfExpandedRatio="0.7"
-                        IsModal="True"
-                        ShowGrabber="True"
-                        AllowDismiss="True"
-                        BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        StateChanged="OnResolutionSheetStateChanged">
+        <bottomsheet:SfBottomSheet.BottomSheetContent>
             <!-- BUG-084: body scrolls; Cancel is pinned in row 1 so a long candidate list cannot push it out of reach. -->
             <Grid RowDefinitions="*,Auto">
 
@@ -294,13 +69,13 @@
                                                    StyleClass="Body.Small"
                                                    TextColor="{StaticResource OnSurfaceVariant}" />
                                         </VerticalStackLayout>
-                                        <dx:DXButton Grid.Column="1"
-                                                     Content="Open existing"
-                                                     Style="{StaticResource OutlinedButton}"
-                                                     Padding="16,0"
-                                                     VerticalOptions="Center"
-                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=OpenExistingSongCommand}"
-                                                     CommandParameter="{Binding .}" />
+                                        <buttons:SfButton Grid.Column="1"
+                                                          Text="Open existing"
+                                                          Style="{StaticResource SfOutlinedButton}"
+                                                          Padding="16,0"
+                                                          VerticalOptions="Center"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=OpenExistingSongCommand}"
+                                                          CommandParameter="{Binding .}" />
                                     </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
@@ -311,10 +86,10 @@
                         <!-- Save as new song option (possible duplicates only; REQ-SFT-23, REQ-RMV-07: never offered for an exact match) -->
                         <VerticalStackLayout Padding="24,12" Spacing="8"
                                              IsVisible="{Binding IsExactDuplicate, Converter={StaticResource InverseBoolConverter}}">
-                            <dx:DXButton Content="Save as new song"
-                                         Style="{StaticResource OutlinedButton}"
-                                         HorizontalOptions="Fill"
-                                         Command="{Binding ConfirmSaveAsNewSongCommand}" />
+                            <buttons:SfButton Text="Save as new song"
+                                              Style="{StaticResource SfOutlinedButton}"
+                                              HorizontalOptions="Fill"
+                                              Command="{Binding ConfirmSaveAsNewSongCommand}" />
                         </VerticalStackLayout>
 
                     </VerticalStackLayout>
@@ -323,88 +98,355 @@
                 <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
                     <BoxView Style="{StaticResource Divider}" />
 
-                    <dx:DXButton Content="Cancel"
-                                 Style="{StaticResource BottomSheetCancelAction}"
-                                 Command="{Binding DismissResolutionSheetCommand}" />
+                    <buttons:SfButton Text="Cancel"
+                                      Style="{StaticResource SfBottomSheetCancelAction}"
+                                      Command="{Binding DismissResolutionSheetCommand}" />
                 </VerticalStackLayout>
 
             </Grid>
-        </dx:BottomSheet>
+        </bottomsheet:SfBottomSheet.BottomSheetContent>
 
-        <!-- ── Artist-match BottomSheet (Task 5.3, REQ-SFT-19) ─────────────────── -->
-        <!--
-            Shown when the Service finds near-duplicate artists for the typed name. Lists the
-            candidates best-first; the user chooses Use '<existing>', Create '<typed>' or Cancel.
-            Back or scrim saves nothing (DismissArtistMatchSheetCommand).
-        -->
-        <dx:BottomSheet x:Name="artistMatchSheet"
-                        AllowedState="All"
-                        HalfExpandedRatio="0.7"
-                        IsModal="True"
-                        ShowGrabber="True"
-                        AllowDismiss="True"
-                        BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        StateChanged="OnArtistMatchSheetStateChanged">
-            <!-- BUG-084: body scrolls; Cancel is pinned in row 1 so a long candidate list cannot push it out of reach. -->
-            <Grid RowDefinitions="*,Auto">
+        <bottomsheet:SfBottomSheet.Content>
 
-                <ScrollView Grid.Row="0">
-                    <VerticalStackLayout Padding="0,0,0,8">
+            <!-- ── Artist-match BottomSheet (Task 5.3, REQ-SFT-19) ─────────────── -->
+            <!--
+                Shown when the Service finds near-duplicate artists for the typed name. Lists the
+                candidates best-first; the user chooses Use '<existing>', Create '<typed>' or Cancel.
+                Back, the scrim or a drag down saves nothing (DismissArtistMatchSheetCommand).
+            -->
+            <bottomsheet:SfBottomSheet x:Name="artistMatchSheet"
+                                       AllowedState="All"
+                                       HalfExpandedRatio="0.7"
+                                       ContentPadding="0"
+                                       IsModal="True"
+                                       ShowGrabber="True"
+                                       CornerRadius="28,28,0,0"
+                                       StateChanged="OnArtistMatchSheetStateChanged">
+                <bottomsheet:SfBottomSheet.Background>
+                    <SolidColorBrush Color="{StaticResource Surface}" />
+                </bottomsheet:SfBottomSheet.Background>
 
-                        <Label Text="Similar artist found"
-                               Style="{StaticResource BottomSheetTitle}"
-                               Margin="24,20,24,8" />
+                <bottomsheet:SfBottomSheet.BottomSheetContent>
+                    <!-- BUG-084: body scrolls; Cancel is pinned in row 1 so a long candidate list cannot push it out of reach. -->
+                    <Grid RowDefinitions="*,Auto">
 
-                        <BoxView Style="{StaticResource Divider}" />
+                        <ScrollView Grid.Row="0">
+                            <VerticalStackLayout Padding="0,0,0,8">
 
-                        <!-- Candidate list (near-duplicate artists, best first) -->
-                        <VerticalStackLayout Spacing="0"
-                                             BindableLayout.ItemsSource="{Binding ArtistMatchCandidates}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="resolution:ArtistMatch">
-                                    <Grid ColumnDefinitions="*,Auto" Padding="24,12">
-                                        <Label Grid.Column="0"
-                                               Text="{Binding Name}"
-                                               StyleClass="Body.Large"
-                                               TextColor="{StaticResource OnSurface}"
-                                               VerticalOptions="Center" />
-                                        <dx:DXButton Grid.Column="1"
-                                                     Content="{Binding Name, StringFormat='Use \'{0}\''}"
-                                                     Style="{StaticResource OutlinedButton}"
-                                                     Padding="16,0"
-                                                     VerticalOptions="Center"
-                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=UseExistingArtistCommand}"
-                                                     CommandParameter="{Binding .}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
+                                <Label Text="Similar artist found"
+                                       Style="{StaticResource BottomSheetTitle}"
+                                       Margin="24,20,24,8" />
+
+                                <BoxView Style="{StaticResource Divider}" />
+
+                                <!-- Candidate list (near-duplicate artists, best first) -->
+                                <VerticalStackLayout Spacing="0"
+                                                     BindableLayout.ItemsSource="{Binding ArtistMatchCandidates}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="resolution:ArtistMatch">
+                                            <Grid ColumnDefinitions="*,Auto" Padding="24,12">
+                                                <Label Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       StyleClass="Body.Large"
+                                                       TextColor="{StaticResource OnSurface}"
+                                                       VerticalOptions="Center" />
+                                                <buttons:SfButton Grid.Column="1"
+                                                                  Text="{Binding Name, StringFormat='Use \'{0}\''}"
+                                                                  Style="{StaticResource SfOutlinedButton}"
+                                                                  Padding="16,0"
+                                                                  VerticalOptions="Center"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=UseExistingArtistCommand}"
+                                                                  CommandParameter="{Binding .}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <BoxView Style="{StaticResource Divider}" />
+
+                                <!-- Create the typed name as a new artist -->
+                                <VerticalStackLayout Padding="24,12" Spacing="8">
+                                    <buttons:SfButton Text="{Binding ArtistMatchTypedName, StringFormat='Create \'{0}\''}"
+                                                      Style="{StaticResource SfOutlinedButton}"
+                                                      HorizontalOptions="Fill"
+                                                      Command="{Binding CreateTypedArtistCommand}" />
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </ScrollView>
+
+                        <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
+                            <BoxView Style="{StaticResource Divider}" />
+
+                            <buttons:SfButton Text="Cancel"
+                                              Style="{StaticResource SfBottomSheetCancelAction}"
+                                              Command="{Binding DismissArtistMatchSheetCommand}" />
                         </VerticalStackLayout>
 
-                        <BoxView Style="{StaticResource Divider}" />
+                    </Grid>
+                </bottomsheet:SfBottomSheet.BottomSheetContent>
 
-                        <!-- Create the typed name as a new artist -->
-                        <VerticalStackLayout Padding="24,12" Spacing="8">
-                            <dx:DXButton Content="{Binding ArtistMatchTypedName, StringFormat='Create \'{0}\''}"
-                                         Style="{StaticResource OutlinedButton}"
-                                         HorizontalOptions="Fill"
-                                         Command="{Binding CreateTypedArtistCommand}" />
-                        </VerticalStackLayout>
+                <bottomsheet:SfBottomSheet.Content>
 
-                    </VerticalStackLayout>
-                </ScrollView>
+                    <!-- Page body: ScrollView with the loading skeleton overlaid while a stored song loads. -->
+                    <Grid>
 
-                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
-                    <BoxView Style="{StaticResource Divider}" />
+                        <ScrollView>
+                            <VerticalStackLayout Padding="24" Spacing="16">
 
-                    <dx:DXButton Content="Cancel"
-                                 Style="{StaticResource BottomSheetCancelAction}"
-                                 Command="{Binding DismissArtistMatchSheetCommand}" />
-                </VerticalStackLayout>
+                                <!-- Title is the first field (REQ-SFT-01). A defined Title shows as Headline Medium text; a tap
+                                     opens the editor with the text kept and releases a picked Title (REQ-PIC-23..27). Add mode:
+                                     the search box over local songs and Deezer (REQ-SFT-02). Edit mode: plain editable text for
+                                     every song (IsSearchEnabled false, REQ-SFT-27, REQ-PIC-29). Blur validation runs
+                                     ValidateTitle (the VM's first check). A stored Deezer song shows its Title as plain text
+                                     (REQ-SLD-36): the Label below, in the same text style; the tap-to-edit field is hidden. -->
+                                <Label Text="{Binding SongTitle}"
+                                       StyleClass="Headline.Medium"
+                                       IsVisible="{Binding IsTitleFrozen}" />
+                                <textfields:TapToEditField x:Name="titleTapField"
+                                                             Text="{Binding SongTitle}"
+                                                             TextStyleClass="Headline.Medium"
+                                                             HasError="{Binding TitleHasError}"
+                                                             IsEditing="{Binding IsTitleEditing, Mode=TwoWay}"
+                                                             IsVisible="{Binding IsTitleEditable}">
+                                    <textfields:AutocompleteField x:Name="titleField"
+                                                                    LabelText="Title"
+                                                                    PlaceholderText="Enter song title"
+                                                                    Text="{Binding SongTitle, Mode=TwoWay}"
+                                                                    IsLocked="{Binding IsTitleLocked, Mode=TwoWay}"
+                                                                    IsSearchEnabled="{Binding IsTitleSearchEnabled}"
+                                                                    SupportingText="{Binding TitleSupportingText}"
+                                                                    HasError="{Binding TitleHasError}"
+                                                                    ErrorText="{Binding TitleErrorText}"
+                                                                    OptionSource="{Binding TitleOptionSource}"
+                                                                    SelectCommand="{Binding SelectTitleCommand}"
+                                                                    ClearCommand="{Binding ClearTitleCommand}"
+                                                                    BlurWithoutPickCommand="{Binding ValidateTitleCommand}" />
+                                </textfields:TapToEditField>
 
-            </Grid>
-        </dx:BottomSheet>
+                                <Label Text="{Binding CharacterCounterText}"
+                                       IsVisible="{Binding ShowCharacterCounter}"
+                                       StyleClass="Body.Small"
+                                       HorizontalOptions="End">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding IsCharacterCounterError}"
+                                                     Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Error}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding IsCharacterCounterWarning}"
+                                                     Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
 
-    </Grid>
+                                <!-- Song picture, directly below Title (REQ-PIC-12..16): 120 dp rounded square, upload,
+                                     replace and remove; nothing is stored before Save (REQ-PIC-17). -->
+                                <media:ImagePickerField ImageSource="{Binding FormImageSource}"
+                                                          ThumbnailSource="{Binding FormImageThumbnailSource}"
+                                                          PlaceholderIcon="music_note_outlined"
+                                                          HasImage="{Binding HasFormImage}"
+                                                          HintText="{Binding ImageHintText}"
+                                                          PickCommand="{Binding PickImageCommand}"
+                                                          RemoveCommand="{Binding RemoveImageCommand}"
+                                                          IsBusy="{Binding IsImageBusy}" />
+
+                                <!-- Artist (REQ-SFT-01): a Deezer song shows the artist as plain text that cannot be edited
+                                     (REQ-SLD-12); a local-only song keeps the tap-to-edit field (REQ-SLD-13). A defined Artist shows as
+                                     Title Large text; a tap opens the editor with the text kept and releases the picked artist, in
+                                     add and edit mode, so the artist of a stored song can be changed (REQ-PIC-23..28, 31). A pick
+                                     or the resolution of the typed name on Save is decided by the VM and the Service. -->
+                                <Label Text="{Binding ArtistSearchText}"
+                                       StyleClass="Title.Large"
+                                       IsVisible="{Binding IsArtistFrozen}" />
+                                <textfields:TapToEditField x:Name="artistTapField"
+                                                             Text="{Binding ArtistSearchText}"
+                                                             TextStyleClass="Title.Large"
+                                                             HasError="{Binding ArtistHasError}"
+                                                             IsEditing="{Binding IsArtistEditing, Mode=TwoWay}"
+                                                             IsVisible="{Binding IsArtistEditable}">
+                                    <textfields:AutocompleteField x:Name="artistField"
+                                                                    LabelText="Artist"
+                                                                    PlaceholderText="Search artists..."
+                                                                    Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                                                                    IsLocked="{Binding IsArtistLocked, Mode=TwoWay}"
+                                                                    HasError="{Binding ArtistHasError}"
+                                                                    ErrorText="{Binding ArtistErrorText}"
+                                                                    OptionSource="{Binding ArtistOptionSource}"
+                                                                    SelectCommand="{Binding SelectArtistCommand}"
+                                                                    ClearCommand="{Binding ClearArtistCommand}"
+                                                                    BlurWithoutPickCommand="{Binding ArtistBlurredWithoutSelectionCommand}" />
+                                </textfields:TapToEditField>
+
+                                <!-- Lyrics: multiline Editor (design § Control mapping: MultilineEdit -> SfTextInputLayout + Editor).
+                                     The DX original shows no character counter, so none is added. -->
+                                <inputlayout:SfTextInputLayout Hint="Lyrics"
+                                                               ContainerType="Outlined">
+                                    <inputlayout:SfTextInputLayout.HintLabelStyle>
+                                        <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                                    </inputlayout:SfTextInputLayout.HintLabelStyle>
+                                    <Editor Placeholder="{Binding LyricsPlaceholder}"
+                                            Text="{Binding Lyrics, Mode=TwoWay}"
+                                            MaxLength="10000"
+                                            AutoSize="TextChanges"
+                                            MinimumHeightRequest="120"
+                                            TextColor="{StaticResource OnSurface}"
+                                            PlaceholderColor="{StaticResource OnSurfaceVariant}" />
+                                </inputlayout:SfTextInputLayout>
+
+                                <!-- YouTube URLs section header -->
+                                <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
+                                    <Label Text="▶" TextColor="Red" FontAttributes="Bold" VerticalOptions="Center" />
+                                    <Label Text="YouTube URLs" StyleClass="Title.Small" VerticalOptions="Center" />
+                                    <Label Text="optional" Opacity="0.5" StyleClass="Body.Small" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+
+                                <!-- Saved / buffered URL list -->
+                                <VerticalStackLayout Spacing="4"
+                                                     BindableLayout.ItemsSource="{Binding KaraokeUrls}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="dtoList:SongKaraokeUrlDto">
+                                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                    <Label Text="{Binding VideoId}"
+                                                           StyleClass="Body.Medium"
+                                                           LineBreakMode="TailTruncation" />
+                                                    <HorizontalStackLayout Spacing="8">
+                                                        <Label Text="{Binding PlayCount, StringFormat='{0} plays'}"
+                                                               StyleClass="Body.Small"
+                                                               TextColor="{StaticResource OnSurfaceVariant}" />
+                                                        <Label Text="{Binding DurationSeconds, Converter={StaticResource SecondsToMinutesConverter}}"
+                                                               StyleClass="Body.Small"
+                                                               TextColor="{StaticResource OnSurfaceVariant}"
+                                                               IsVisible="{Binding DurationSeconds, Converter={StaticResource IsNotNullConverter}}" />
+                                                        <Border BackgroundColor="{StaticResource Primary}"
+                                                                StrokeThickness="0"
+                                                                StrokeShape="RoundRectangle 4"
+                                                                Padding="4,2"
+                                                                IsVisible="{Binding IsSuggested}">
+                                                            <Label Text="★ SUGGESTED" StyleClass="Body.Small" TextColor="{StaticResource OnPrimary}" />
+                                                        </Border>
+                                                    </HorizontalStackLayout>
+                                                    <Label Text="{Binding Label}"
+                                                           StyleClass="Body.Small"
+                                                           TextColor="{StaticResource OnSurfaceVariant}"
+                                                           IsVisible="{Binding Label, Converter={StaticResource IsNotNullConverter}}" />
+                                                </VerticalStackLayout>
+                                                <buttons:SfButton Grid.Column="1"
+                                                                  Text="✕"
+                                                                  Style="{StaticResource SfOutlinedButton}"
+                                                                  VerticalOptions="Center"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=RemoveUrlCommand}"
+                                                                  CommandParameter="{Binding .}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <!-- Search and paste strip -->
+                                <Border BackgroundColor="{StaticResource SurfaceContainerLow}"
+                                        StrokeThickness="0"
+                                        Padding="12"
+                                        StrokeShape="RoundRectangle 8">
+                                    <VerticalStackLayout Spacing="8">
+
+                                        <buttons:SfButton Text="🔍 Search YouTube"
+                                                          Style="{StaticResource SfOutlinedButton}"
+                                                          HorizontalOptions="Fill"
+                                                          Command="{Binding LaunchYouTubeSearchCommand}"
+                                                          IsEnabled="{Binding CanLaunchYouTubeSearch}" />
+
+                                        <lists:ListItem
+                                            Headline="Search YouTube (API)"
+                                            IsVisible="{Binding HasYouTubeApiKey}">
+                                            <lists:ListItem.LeadingContent>
+                                                <ImageButton Style="{StaticResource SfIconButton}"
+                                                             Source="search_outlined"
+                                                             InputTransparent="True" />
+                                            </lists:ListItem.LeadingContent>
+                                            <lists:ListItem.TrailingContent>
+                                                <ImageButton Style="{StaticResource SfIconButton}"
+                                                             Source="arrow_forward_outlined"
+                                                             InputTransparent="True" />
+                                            </lists:ListItem.TrailingContent>
+                                            <lists:ListItem.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding NavigateToYouTubeSearchCommand}" />
+                                            </lists:ListItem.GestureRecognizers>
+                                        </lists:ListItem>
+
+                                        <VerticalStackLayout Spacing="4"
+                                                             IsVisible="{Binding HasYouTubeApiKey, Converter={StaticResource InverseBoolConverter}}">
+                                            <Label Text="Add a YouTube API key in Settings to enable search."
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                                            <buttons:SfButton Text="Go to Settings"
+                                                              Style="{StaticResource SfOutlinedButton}"
+                                                              HorizontalOptions="Start"
+                                                              Padding="16,0"
+                                                              Command="{Binding GoToSettingsCommand}" />
+                                        </VerticalStackLayout>
+
+                                        <Label Text="Or paste a YouTube URL"
+                                               StyleClass="Body.Small"
+                                               TextColor="{StaticResource OnSurfaceVariant}" />
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <inputlayout:SfTextInputLayout Grid.Column="0"
+                                                                           Hint="YouTube URL"
+                                                                           ContainerType="Outlined">
+                                                <inputlayout:SfTextInputLayout.HintLabelStyle>
+                                                    <inputlayout:LabelStyle TextColor="{StaticResource OnSurfaceVariant}" />
+                                                </inputlayout:SfTextInputLayout.HintLabelStyle>
+                                                <Entry Text="{Binding PasteUrlInput, Mode=TwoWay}"
+                                                       Placeholder="https://youtu.be/..."
+                                                       PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                                                       TextColor="{StaticResource OnSurface}"
+                                                       Keyboard="Url" />
+                                            </inputlayout:SfTextInputLayout>
+                                            <buttons:SfButton Grid.Column="1"
+                                                              Text="Add"
+                                                              Style="{StaticResource SfFilledButton}"
+                                                              VerticalOptions="Start"
+                                                              Margin="0,4,0,0"
+                                                              Padding="16,0"
+                                                              Command="{Binding AddFromPasteCommand}" />
+                                        </Grid>
+                                        <Label Text="{Binding PasteUrlError}"
+                                               IsVisible="{Binding HasPasteUrlError}"
+                                               StyleClass="Body.Small"
+                                               TextColor="{StaticResource Error}" />
+
+                                    </VerticalStackLayout>
+                                </Border>
+
+                            </VerticalStackLayout>
+                        </ScrollView>
+
+                        <!-- REQ-SLD-32: placeholder in place of the fields while a stored song loads (edit mode).
+                             Stock Border bones (SfShimmer CustomView renders white; design § Control mapping fallback);
+                             opaque Surface overlay, the opacity pulse runs in code-behind. -->
+                        <Grid x:Name="skeletonHost"
+                              BackgroundColor="{StaticResource Surface}"
+                              IsVisible="{Binding IsSongLoading}">
+                            <VerticalStackLayout x:Name="skeletonBones" Padding="24" Spacing="16" VerticalOptions="Start">
+                                <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
+                                <BoxView WidthRequest="120" HeightRequest="120" CornerRadius="8" HorizontalOptions="Center"
+                                         Color="{StaticResource SurfaceContainerHighest}" />
+                                <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
+                                <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
+                                <BoxView HeightRequest="56" CornerRadius="8" Color="{StaticResource SurfaceContainerHighest}" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                    </Grid>
+
+                </bottomsheet:SfBottomSheet.Content>
+
+            </bottomsheet:SfBottomSheet>
+
+        </bottomsheet:SfBottomSheet.Content>
+
+    </bottomsheet:SfBottomSheet>
 
 </ContentPage>

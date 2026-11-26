@@ -60,15 +60,18 @@ public partial class SearchAppBar : AppBarBase
     {
         base.OnPropertyChanged(propertyName);
         if (propertyName == nameof(IsVisible) && IsVisible)
-            searchEdit?.Focus();
+            InnerEntry?.Focus();
     }
+
+    // OutlinedTextField is a ContentView (Border > Entry) and does not forward Focus/Unfocus to its Entry.
+    private Entry? InnerEntry => (searchEdit.Content as Border)?.Content as Entry;
 
     // ── Leading button: always dismisses search ────────────────────────────
 
     private void OnLeadingButtonClicked(object sender, EventArgs e)
     {
         SearchText = string.Empty;
-        searchEdit.Unfocus();
+        InnerEntry?.Unfocus();
         BackCommand?.Execute(null);
     }
 }

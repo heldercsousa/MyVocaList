@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MyVocaList.UI.Components.TextFields"
+    x:Class="MyVocaList.UI.Components.TextFields.OutlinedTextField"
+    x:Name="self">
+
+    <!-- MD3 outlined text field (stock MAUI). Outline 1dp, Primary 2dp when focused, corner radius 4.
+         Focus stroke is view-only state handled in code-behind. -->
+    <Border x:Name="outline"
+            Stroke="{StaticResource Outline}"
+            StrokeThickness="1"
+            BackgroundColor="Transparent"
+            Padding="16,0"
+            MinimumHeightRequest="56">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="4" />
+        </Border.StrokeShape>
+        <local:OutlinedTextFieldSfEntry x:Name="entry"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{StaticResource OnSurface}"
+                                        PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                                        VerticalOptions="Center"
+                                        Text="{Binding Text, Source={x:Reference self}, Mode=TwoWay}"
+                                        Placeholder="{Binding Placeholder, Source={x:Reference self}}"
+                                        IsPassword="{Binding IsPassword, Source={x:Reference self}}"
+                                        Keyboard="{Binding Keyboard, Source={x:Reference self}}"
+                                        ReturnType="{Binding ReturnType, Source={x:Reference self}}"
+                                        ReturnCommand="{Binding ReturnCommand, Source={x:Reference self}}"
+                                        ClearButtonVisibility="{Binding ClearButtonVisibility, Source={x:Reference self}}"
+                                        Focused="OnEntryFocused"
+                                        Unfocused="OnEntryUnfocused"
+                                        Completed="OnEntryCompleted" />
+    </Border>
+</ContentView>

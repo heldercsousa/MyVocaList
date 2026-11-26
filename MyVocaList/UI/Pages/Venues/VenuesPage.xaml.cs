@@ -1,3 +1,5 @@
+using SfBottomSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
+
 namespace MyVocaList.UI.Pages.Venues;
 
 public partial class VenuesPage : CrudListPageBase
@@ -17,22 +19,35 @@ public partial class VenuesPage : CrudListPageBase
         AttachViewModel();
     }
 
-    /// <summary>Shows the exit confirmation sheet from any caller (menu item, AppShell fallback).</summary>
+    /// <summary>Shows the exit confirmation sheet.</summary>
     public void ShowExitConfirmation()
     {
-        exitConfirmSheet.Show(BottomSheetState.HalfExpanded, this);
+        exitConfirmSheet.State = SfBottomSheetState.HalfExpanded;
+        exitConfirmSheet.IsOpen = true;
     }
 
     protected override bool OnBackButtonPressed()
     {
-        // Let the base class dismiss the CRUD delete-confirmation sheet first (if open) --
-        // that takes precedence over the exit confirmation. Only show exit confirmation
-        // when the base class did not handle the back press.
+        // Android Back does not close an SfBottomSheet, so the exit sheet is closed here first.
+        if (exitConfirmSheet.IsOpen)
+        {
+            CloseExitConfirmation();
+            return true;
+        }
+
+        // Then the CRUD back order (menu -> item-actions sheet -> confirm sheet -> selection);
+        // the exit sheet shows only when the base class did not handle the press.
         if (base.OnBackButtonPressed())
             return true;
 
         ShowExitConfirmation();
         return true;
+    }
+
+    private void CloseExitConfirmation()
+    {
+        exitConfirmSheet.IsOpen = false;
+        exitConfirmSheet.State = SfBottomSheetState.Hidden;
     }
 
     private void OnConfirmExit(object sender, EventArgs e)
@@ -42,6 +57,6 @@ public partial class VenuesPage : CrudListPageBase
 
     private void OnCancelExit(object sender, EventArgs e)
     {
-        exitConfirmSheet.Close();
+        CloseExitConfirmation();
     }
 }

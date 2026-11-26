@@ -2,8 +2,8 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
-    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     x:Class="MyVocaList.UI.Pages.Settings.SettingsPage"
     x:DataType="vm:SettingsViewModel"
@@ -20,25 +20,31 @@
                    TextColor="{StaticResource OnSurface}" />
 
             <VerticalStackLayout Spacing="12">
-                <dxe:PasswordEdit
-                    Text="{Binding ApiKeyInput, Mode=TwoWay}"
-                    LabelText="YouTube Data API v3 Key"
-                    PlaceholderText="Paste your API key here"
-                    PasswordIconVisibility="Always" />
+                <inputlayout:SfTextInputLayout
+                    Hint="YouTube Data API v3 Key"
+                    ContainerType="Outlined"
+                    EnablePasswordVisibilityToggle="True">
+                    <Entry
+                        Text="{Binding ApiKeyInput, Mode=TwoWay}"
+                        Placeholder="Paste your API key here"
+                        PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                        TextColor="{StaticResource OnSurface}"
+                        IsPassword="True" />
+                </inputlayout:SfTextInputLayout>
 
                 <HorizontalStackLayout Spacing="8">
-                    <dx:DXButton
-                        Content="Test"
-                        Style="{StaticResource OutlinedButton}"
+                    <buttons:SfButton
+                        Text="Test"
+                        Style="{StaticResource SfOutlinedButton}"
                         Command="{Binding TestApiKeyCommand}"
                         IsEnabled="{Binding IsTestingKey, Converter={StaticResource InverseBoolConverter}}" />
-                    <dx:DXButton
-                        Content="Save"
-                        Style="{StaticResource FilledButton}"
+                    <buttons:SfButton
+                        Text="Save"
+                        Style="{StaticResource SfFilledButton}"
                         Command="{Binding SaveApiKeyCommand}" />
-                    <dx:DXButton
-                        Content="Clear"
-                        Style="{StaticResource TextButton}"
+                    <buttons:SfButton
+                        Text="Clear"
+                        Style="{StaticResource SfTextButton}"
                         Command="{Binding ClearApiKeyCommand}" />
                 </HorizontalStackLayout>
 
@@ -67,9 +73,9 @@
                 StyleClass="Title.Medium"
                 TextColor="{StaticResource OnSurface}" />
 
-            <dx:DXButton
-                Content="Send Feedback"
-                Style="{StaticResource OutlinedButton}"
+            <buttons:SfButton
+                Text="Send Feedback"
+                Style="{StaticResource SfOutlinedButton}"
                 HorizontalOptions="Fill"
                 Command="{Binding NavigateToFeedbackCommand}" />
 

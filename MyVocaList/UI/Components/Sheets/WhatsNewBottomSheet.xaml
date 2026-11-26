@@ -3,20 +3,30 @@
     x:Class="MyVocaList.UI.Components.Sheets.WhatsNewBottomSheet"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui">
+    xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit">
 
-    <dx:BottomSheet
+    <bottomsheet:SfBottomSheet
         x:Name="Sheet"
-        AllowDismiss="True"
-        HalfExpandedRatio="0.6">
+        AllowedState="All"
+        HalfExpandedRatio="0.6"
+        ContentPadding="0"
+        IsModal="True"
+        ShowGrabber="True"
+        CornerRadius="28,28,0,0">
 
-        <dx:BottomSheet.Content>
+        <bottomsheet:SfBottomSheet.Background>
+            <SolidColorBrush Color="{StaticResource Surface}" />
+        </bottomsheet:SfBottomSheet.Background>
+
+        <bottomsheet:SfBottomSheet.BottomSheetContent>
             <ScrollView>
                 <VerticalStackLayout Padding="24,16,24,32" Spacing="0">
 
                     <Label
                         x:Name="TitleLabel"
                         StyleClass="Title.Large"
+                        TextColor="{StaticResource OnSurface}"
                         Margin="0,0,0,4" />
 
                     <Label
@@ -29,6 +39,7 @@
                         x:Name="HighlightsTitleLabel"
                         Text="What's New"
                         StyleClass="Title.Medium"
+                        TextColor="{StaticResource OnSurface}"
                         Margin="0,0,0,8" />
 
                     <VerticalStackLayout
@@ -40,6 +51,7 @@
                         x:Name="FixesTitleLabel"
                         Text="Bug Fixes"
                         StyleClass="Title.Medium"
+                        TextColor="{StaticResource OnSurface}"
                         Margin="0,0,0,8" />
 
                     <VerticalStackLayout
@@ -47,14 +59,14 @@
                         Spacing="6"
                         Margin="0,0,0,24" />
 
-                    <dx:DXButton
-                        Content="Got it"
-                        ButtonType="Filled"
+                    <buttons:SfButton
+                        Text="Got it"
+                        Style="{StaticResource SfFilledButton}"
                         HorizontalOptions="Fill"
                         Clicked="OnGotItClicked" />
 
                 </VerticalStackLayout>
             </ScrollView>
-        </dx:BottomSheet.Content>
-    </dx:BottomSheet>
+        </bottomsheet:SfBottomSheet.BottomSheetContent>
+    </bottomsheet:SfBottomSheet>
 </ContentView>

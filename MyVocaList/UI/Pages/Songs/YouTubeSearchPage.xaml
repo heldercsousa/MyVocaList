@@ -8,7 +8,7 @@
     xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
     xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:sflv="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
     x:DataType="vm:YouTubeSearchViewModel"
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
@@ -24,34 +24,29 @@
 
     <Grid>
 
-        <!-- Shimmer skeleton: visible while IsLoading -->
-        <dx:ShimmerView IsVisible="{Binding IsLoading}">
-            <VerticalStackLayout Spacing="0">
-                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
-                         Color="{StaticResource SurfaceVariant}" />
-                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
-                         Color="{StaticResource SurfaceVariant}" />
-                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
-                         Color="{StaticResource SurfaceVariant}" />
-                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
-                         Color="{StaticResource SurfaceVariant}" />
-                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
-                         Color="{StaticResource SurfaceVariant}" />
-            </VerticalStackLayout>
-        </dx:ShimmerView>
+        <!-- Loading skeleton: stock Border bones (SfShimmer CustomView renders white, see CrudListView). -->
+        <VerticalStackLayout Spacing="0" IsVisible="{Binding IsLoading}">
+            <Border StrokeThickness="0" HeightRequest="56" Margin="16,8" BackgroundColor="{StaticResource SurfaceVariant}" />
+            <Border StrokeThickness="0" HeightRequest="56" Margin="16,8" BackgroundColor="{StaticResource SurfaceVariant}" />
+            <Border StrokeThickness="0" HeightRequest="56" Margin="16,8" BackgroundColor="{StaticResource SurfaceVariant}" />
+            <Border StrokeThickness="0" HeightRequest="56" Margin="16,8" BackgroundColor="{StaticResource SurfaceVariant}" />
+            <Border StrokeThickness="0" HeightRequest="56" Margin="16,8" BackgroundColor="{StaticResource SurfaceVariant}" />
+        </VerticalStackLayout>
 
-        <!-- EmptyState: visible when searched but no results (list renders on top when HasResults) -->
         <states:EmptyState
             Illustration="search_outlined"
             Headline="{Binding EmptyStateMessage}"
             IsVisible="{Binding IsShowEmptyState}" />
 
-        <!-- Results list: visible while HasResults — renders above EmptyState in z-order -->
-        <dx:DXCollectionView
+        <sflv:SfListView
             ItemsSource="{Binding Results}"
             IsVisible="{Binding HasResults}"
-            UseRippleEffect="True">
-            <dx:DXCollectionView.ItemTemplate>
+            AutoFitMode="DynamicHeight"
+            SelectionMode="None"
+            ShowItemSeparator="False"
+            BackgroundColor="{StaticResource Surface}"
+            ItemTapped="OnItemTapped">
+            <sflv:SfListView.ItemTemplate>
                 <DataTemplate x:DataType="dtoList:YouTubeSearchResultDto">
                     <lists:ListItem
                         Headline="{Binding Title}"
@@ -61,15 +56,10 @@
                                 ImageSource="{Binding ThumbnailUrl}"
                                 Aspect="AspectFill" />
                         </lists:ListItem.LeadingContent>
-                        <lists:ListItem.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectResultCommand}"
-                                CommandParameter="{Binding .}" />
-                        </lists:ListItem.GestureRecognizers>
                     </lists:ListItem>
                 </DataTemplate>
-            </dx:DXCollectionView.ItemTemplate>
-        </dx:DXCollectionView>
+            </sflv:SfListView.ItemTemplate>
+        </sflv:SfListView>
 
     </Grid>
 </ContentPage>

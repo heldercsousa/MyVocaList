@@ -113,12 +113,12 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 - [x] **T2.10 `PeopleSfPage`** [P, wave after T2.9] — Consumes: `CrudListViewSf`, app bars, `PersonsViewModel` · Files: `MyVocaList/UI/Pages/People/PeopleSfPage.xaml(.cs)` · Risk: Medium · Demo: list states + P9 match DX · Lane: Standard · Copy merged 2026-11-25 (registered; parity PASS 2026-11-25, polish merged)
 - [x] **T2.11 `SongsSfPage`** [P, wave after T2.9] — Consumes: `CrudListViewSf`, app bars, `SongsViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongsSfPage.xaml(.cs)` · Risk: Medium · Demo: list states match DX · Lane: Standard · Copy merged 2026-11-25 (registered; parity PASS 2026-11-25, polish merged)
 - [x] **T2.12 `ArtistsSfPage`** [P, wave after T2.9] — Consumes: `CrudListViewSf`, app bars, `ArtistsViewModel` · Files: `MyVocaList/UI/Pages/Artists/ArtistsSfPage.xaml(.cs)` · Risk: Medium · Demo: list states match DX · Lane: Standard · Copy merged 2026-11-25 (registered; parity PASS 2026-11-25, polish merged)
-- [~] **T2.13 `YouTubeSearchSfPage`** [P, wave after T2.9] — Consumes: `SearchAppBarSf`, T2.0 list verdict, `YouTubeSearchViewModel` · Files: `MyVocaList/UI/Pages/Songs/YouTubeSearchSfPage.xaml(.cs)` · Risk: Medium (filter chips) · Demo: search + chips match DX · Lane: Standard — Copy merged 2026-11-26 (registered youtube-search-sf; parity pending)
-- [ ] **T2.14 Cut over Venues** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: flyout and PushAsync open the Sf page
-- [ ] **T2.15 Cut over People** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `people` flyout item and PushAsync open the Sf page
-- [ ] **T2.16 Cut over Songs** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `songs` flyout item and PushAsync open the Sf page
-- [ ] **T2.17 Cut over Artists** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `artists` flyout item and PushAsync open the Sf page
-- [ ] **T2.18 Cut over YouTubeSearch** [SEQUENTIAL] — Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the song form opens the Sf search
+- [x] **T2.13 `YouTubeSearchSfPage`** [P, wave after T2.9] — Consumes: `SearchAppBarSf`, T2.0 list verdict, `YouTubeSearchViewModel` · Files: `MyVocaList/UI/Pages/Songs/YouTubeSearchSfPage.xaml(.cs)` · Risk: Medium (filter chips) · Demo: search + chips match DX · Lane: Standard — Copy merged 2026-11-26 (registered youtube-search-sf; parity PASS; results list unverified — no API key)
+- [x] **T2.14 Cut over Venues** [SEQUENTIAL] — Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: flyout and PushAsync open the Sf page
+- [x] **T2.15 Cut over People** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `people` flyout item and PushAsync open the Sf page
+- [x] **T2.16 Cut over Songs** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `songs` flyout item and PushAsync open the Sf page
+- [x] **T2.17 Cut over Artists** [SEQUENTIAL] — Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml`, `NavigationConfig.cs`, `PreviewRoutes.cs` · Demo: the `artists` flyout item and PushAsync open the Sf page
+- [x] **T2.18 Cut over YouTubeSearch** [SEQUENTIAL] — Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the song form opens the Sf search
 
 ## Phase 3 — Forms [after Phase 2 copies; key set]
 
@@ -129,68 +129,68 @@ Component tasks: Recipe C · **Produces** the named Sf component with the DX ori
 - [x] **T3.5 `PersonFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `PersonFormViewModel` · Files: `MyVocaList/UI/Pages/People/PersonFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
 - [x] **T3.6 `ArtistFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `ArtistFormViewModel` · Files: `MyVocaList/UI/Pages/Artists/ArtistFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard
 - [x] **T3.7 `SongFormSfPage`** [P, wave 3b] — Recipe P · Consumes: T3.1–T3.3, `SongFormViewModel` · Files: `MyVocaList/UI/Pages/Songs/SongFormSfPage.xaml(.cs)` · Risk: Medium · Demo: as T3.4 · Lane: Standard · Copy merged 2026-11-24 (review C1 fixed by sheet-button styles move; parity pending)
-- [~] **T3.8 `FeedbackSfPage`** [SEQUENTIAL] — Recipe P · Consumes: T0.1b `SfComboBox` verdict, `FeedbackViewModel` · Files: `MyVocaList/UI/Pages/Feedback/FeedbackSfPage.xaml(.cs)` · Risk: Medium · Demo: send feedback works; P12 matches · Lane: Standard
-- [ ] **T3.9 Cut over VenueForm** [SEQUENTIAL] — Recipe X · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the list opens the Sf form
-- [ ] **T3.10 Cut over PersonForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the singers list opens the Sf page
-- [ ] **T3.11 Cut over ArtistForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the artists list opens the Sf page
-- [ ] **T3.12 Cut over SongForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the songs list opens the Sf page
-- [ ] **T3.13 Cut over Feedback** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the Preferences page's feedback action opens the Sf page
+- [x] **T3.8 `FeedbackSfPage`** [SEQUENTIAL] — Recipe P · Consumes: T0.1b `SfComboBox` verdict, `FeedbackViewModel` · Files: `MyVocaList/UI/Pages/Feedback/FeedbackSfPage.xaml(.cs)` · Risk: Medium · Demo: send feedback works; P12 matches · Lane: Standard
+- [x] **T3.9 Cut over VenueForm** [SEQUENTIAL] — Recipe X · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the list opens the Sf form
+- [x] **T3.10 Cut over PersonForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the singers list opens the Sf page
+- [x] **T3.11 Cut over ArtistForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the artists list opens the Sf page
+- [x] **T3.12 Cut over SongForm** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the songs list opens the Sf page
+- [x] **T3.13 Cut over Feedback** [SEQUENTIAL] — Recipe X · Consumes: the copy's parity, Helder's go · Files: `AppShell.xaml.cs`, `PreviewRoutes.cs` · Demo: the Preferences page's feedback action opens the Sf page
 
 ## Phase 4 — Shell [after Phase 3 cut-overs]
 
 - [x] **T4.1a `WhatsNewBottomSheetSf`, `UpdateAvailableBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/WhatsNewBottomSheetSf.xaml(.cs)`, `…/UpdateAvailableBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: each opens from the preview page · Lane: Standard · Done 2026-11-24 (AllowDismiss dropped: Sf default dismiss)
-- [ ] **T4.1b `UpdateRequiredBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/UpdateRequiredBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: opens from the preview page · Lane: Standard
-- [ ] **T4.2 AppShell on Syncfusion (in place)** [SEQUENTIAL] — Consumes: T4.1a, T4.1b, `SfFlyoutMenuButton` · Files: `MyVocaList/AppShell.xaml`, `MyVocaList/AppShell.xaml.cs` · Risk: High (every navigation) · Demo: flyout and sheets match DX; P10, P14 · Lane: Elevated
+- [x] **T4.1b `UpdateRequiredBottomSheetSf`** [P] — Recipe C · Consumes: T0.4a · Files: `MyVocaList/UI/Components/Sheets/UpdateRequiredBottomSheetSf.xaml(.cs)` · Risk: Low · Demo: opens from the preview page · Lane: Standard
+- [x] **T4.2 AppShell on Syncfusion (in place)** [SEQUENTIAL] — Consumes: T4.1a, T4.1b, `SfFlyoutMenuButton` · Files: `MyVocaList/AppShell.xaml`, `MyVocaList/AppShell.xaml.cs` · Risk: High (every navigation) · Demo: flyout and sheets match DX; P10, P14 · Lane: Elevated
 
 ## Phase 5 — Removal [**Helder approves the start explicitly; hard to reverse**]
 
 Each deletion briefing records the I-4 grep gate first. Paths are under `MyVocaList/` unless noted; each `X` means `X.xaml` + `X.xaml.cs`.
 
-- [ ] **T5.1a Delete the 4 Phase-1 DX pages** [SEQUENTIAL]
+- [x] **T5.1a Delete the 4 Phase-1 DX pages** [SEQUENTIAL]
   - **Produces:** nothing (deletions) · **Consumes:** T1.5–T1.8 cut-overs · **Risk:** Low
   - **Files owned (deleted):** `UI/Pages/About/AboutPage`, `UI/Pages/BackupRestore/BackupRestorePage`, `UI/Pages/Settings/SettingsPage`, `UI/Pages/Venues/VenueMapPickerPage`; their DI lines in `MauiProgram.cs`
   - **Demo:** builds; tests pass; every Phase-1 route opens its Sf page · **Review lane:** Elevated
-- [ ] **T5.1b Delete the 5 Phase-2 DX pages** [SEQUENTIAL]
+- [x] **T5.1b Delete the 5 Phase-2 DX pages** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** T2.14–T2.18 · **Risk:** Low
   - **Files owned (deleted):** `UI/Pages/Venues/VenuesPage`, `UI/Pages/People/PeoplePage`, `UI/Pages/Songs/SongsPage`, `UI/Pages/Artists/ArtistsPage`, `UI/Pages/Songs/YouTubeSearchPage`; their DI lines
   - **Demo:** as T5.1a for the list routes · **Review lane:** Elevated
-- [ ] **T5.1c Delete the 5 Phase-3 DX pages** [SEQUENTIAL]
+- [x] **T5.1c Delete the 5 Phase-3 DX pages** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** T3.9–T3.13 · **Risk:** Low
   - **Files owned (deleted):** `UI/Pages/Venues/VenueFormPage`, `UI/Pages/People/PersonFormPage`, `UI/Pages/Artists/ArtistFormPage`, `UI/Pages/Songs/SongFormPage`, `UI/Pages/Feedback/FeedbackPage`; their DI lines
   - **Demo:** as T5.1a for the form routes · **Review lane:** Elevated
-- [ ] **T5.1d Delete DX components and unused components** [SEQUENTIAL]
+- [x] **T5.1d Delete DX components and unused components** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** T5.1a–c, T4.2 · **Risk:** Medium (a missed consumer breaks the build)
   - **Files owned (deleted):** `UI/Components/CrudListView`; `Lists/ListItemCheckbox`, `Lists/ListItemLeadingAvatar`, `Lists/ListItemLeadingImage`, `Lists/ListItemLeadingMonogram`, `Lists/ListItemOverflowButton`, `Lists/ListItemLeadingIcon`; `States/EmptyState`; `Toolbars/FloatingToolbar`; `Menus/Menu`, `Menus/OverflowMenuButton`; `AppBars/SearchBar`, `AppBars/SmallAppBar`, `AppBars/SearchAppBar`; `Media/ImagePickerField`; `TextFields/AutocompleteDXField`, `TextFields/TapToEditField`; `Sheets/ConfirmSheet`, `Sheets/WhatsNewBottomSheet`, `Sheets/UpdateAvailableBottomSheet`, `Sheets/UpdateRequiredBottomSheet` (all under `UI/Components/`). Kept: `ListItem`, `AppBarBase.cs`, `IMenuHost.cs`, `MenuItemSelection.cs`, `MenuItemShape.cs`, `MenuResolution.cs`, `AutocompleteDXFieldLogic.cs`, `TapToEditFieldLogic.cs`, `CurrentSingerCard`, `SnackbarComponent.cs`
   - **Demo:** builds; tests pass · **Review lane:** Elevated
-- [ ] **T5.1e Delete the frozen AutocompleteField folder and stale csproj entries** [SEQUENTIAL]
+- [x] **T5.1e Delete the frozen AutocompleteField folder and stale csproj entries** [SEQUENTIAL]
   - **Produces:** nothing · **Consumes:** nothing · **Risk:** Low
   - **Files owned:** `UI/Components/AutocompleteField/**` (deleted); `MyVocaList.csproj` (L159-163 Samples exclusion, L172-176 AutocompleteField exclusions)
   - **Demo:** Debug and Release builds pass · **Review lane:** Standard
-- [ ] **T5.2 `SheetState`; ViewModels off DevExpress; converter retargeted; type-only test edits (Tester, same commit)** [SEQUENTIAL — exception to the 5-file limit logged first]
+- [x] **T5.2 `SheetState`; ViewModels off DevExpress; converter retargeted; type-only test edits (Tester, same commit)** [SEQUENTIAL — exception to the 5-file limit logged first]
   - **Produces:** `SheetState` enum; `SheetStateConverter` (key `SheetStateToSf`) · **Consumes:** T5.1d, REQ-UIMIG-13 authorization (granted 2026-11-22) · **Risk:** High (sheet state in every list)
   - **Files owned:** `UI/ViewModels/SheetState.cs`, `UI/ViewModels/CrudListViewModelBase.cs`, `UI/ViewModels/ICrudListViewModel.cs`, `UI/ViewModels/PersonsViewModel.cs`, `UI/ViewModels/VenuesViewModel.cs`, `UI/Converters/SheetStateConverter.cs` (moved), `App.xaml`, `UI/Components/CrudListViewSf.xaml`; Tester: `Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs`, `Tests/Unit/Converters/SheetStateConverterTests.cs` (moved)
   - **Demo:** tests pass; sheets open and close on Venues · **Review lane:** Architectural
-- [ ] **T5.3 Remove DX init and warm-up; rewrite DX comments in shared files** [SEQUENTIAL — exception logged first]
+- [x] **T5.3 Remove DX init and warm-up; rewrite DX comments in shared files** [SEQUENTIAL — exception logged first]
   - **Produces:** no DX call at startup · **Consumes:** T5.2 · **Risk:** Medium (startup path)
   - **Files owned:** `MauiProgram.cs`, `App.xaml.cs`, `UI/ViewModels/SongFormViewModel.cs`, `UI/ViewModels/ICrudListViewModel.cs`, `UI/ViewModels/PersonsViewModel.cs`, `UI/ViewModels/VenuesViewModel.cs`, `UI/Components/TextFields/AutocompleteDXFieldLogic.cs`, `UI/Components/TextFields/TapToEditFieldLogic.cs`, `UI/Collections/ObservableRangeCollection.cs`, `Platforms/Android/PopupBackHandler.cs`
   - **Demo:** app starts on the emulator; no `UseDevExpress` or warm-up left · **Review lane:** Elevated
-- [ ] **T5.4 Remove DX global usings, styles, packages, setup docs; release check = 0** [SEQUENTIAL — after T5.3]
+- [x] **T5.4 Remove DX global usings, styles, packages, setup docs; release check = 0** [SEQUENTIAL — after T5.3]
   - **Produces:** a DevExpress-free solution · **Consumes:** T5.3, REQ-UIMIG-13 authorization (granted 2026-11-22) · **Risk:** High (packages)
   - **Files owned:** `GlobalUsings.cs`, `Resources/Styles/MaterialStyles.xaml`, `MyVocaList.csproj`, `Directory.Packages.props` (repo root), `Tests/MyVocaList.Tests.csproj`, `Docs/DevEnv/devenv-setup.md` § 2; Tester: the authorized test-comment and `using` lines
   - **Demo:** `python .claude/scripts/migration/check_dx.py --release` exits 0 · **Review lane:** Elevated
-- [ ] **T5.5a Drop the `Sf` suffix — components** [SEQUENTIAL — one commit per rename; exception logged once]
+- [x] **T5.5a Drop the `Sf` suffix — components** [SEQUENTIAL — one commit per rename; exception logged once]
   - **Produces:** components under their original names · **Consumes:** T5.4 · **Risk:** Medium (many references)
   - **Files owned:** each renamed pair plus its consumers and registration lines (list in `plan.md` § Phase 5)
   - **Demo:** builds and tests pass after each commit · **Review lane:** Standard
-- [ ] **T5.5b Drop the `Sf` suffix — pages** [SEQUENTIAL — one commit per rename]
+- [x] **T5.5b Drop the `Sf` suffix — pages** [SEQUENTIAL — one commit per rename]
   - **Produces:** pages under their original names · **Consumes:** T5.5a · **Risk:** Medium
   - **Files owned:** each renamed page pair, `MauiProgram.cs`, `AppShell.xaml(.cs)`, `NavigationConfig.cs`
   - **Demo:** every route in `Routes.cs` and `AppShell.xaml` opens its page · **Review lane:** Standard
-- [ ] **T5.5c Drop the `Sf` suffix — forms and sheets** [SEQUENTIAL — one commit per rename]
+- [x] **T5.5c Drop the `Sf` suffix — forms and sheets** [SEQUENTIAL — one commit per rename]
   - **Produces:** forms and sheets under their original names · **Consumes:** T5.5b · **Risk:** Medium
   - **Files owned:** each renamed pair, `MauiProgram.cs`, `AppShell.xaml.cs`
   - **Demo:** every form route opens; sheets open at startup checks · **Review lane:** Standard
-- [ ] **T5.6 Remove preview infrastructure and the migration folder; close the item** [SEQUENTIAL]
+- [x] **T5.6 Remove preview infrastructure and the migration folder; close the item** [SEQUENTIAL]
   - **Produces:** no preview code; item closed · **Consumes:** T5.5c · **Risk:** Low
   - **Files owned:** `UI/Migration/**` (deleted), `AppShell.xaml.cs`, `Navigation/NavigationConfig.cs`, `MyVocaList.csproj`, `.claude/githooks/pre-commit` (`--staged` block), `.claude/library/constraints-reference.md` § DevExpress / UI (Helder reviews)
   - **Demo:** Release build has no preview code; the backlog row shows ✅ · **Review lane:** Standard

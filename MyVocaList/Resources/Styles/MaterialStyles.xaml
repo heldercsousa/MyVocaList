@@ -8,8 +8,7 @@
     xmlns:popup="clr-namespace:Syncfusion.Maui.Toolkit.Popup;assembly=Syncfusion.Maui.Toolkit"
     xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
-    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
-    xmlns:dx="http://schemas.devexpress.com/maui">
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors">
 
     <!-- ================================================================ -->
     <!-- CONTAINER STYLES                                                 -->
@@ -27,90 +26,8 @@
     </Style>
 
     <!-- ================================================================ -->
-    <!-- DEVEXPRESS BUTTON STYLES (MD3-Inspired)                          -->
-    <!-- ================================================================ -->
-
-    <Style TargetType="dx:DXButton" x:Key="FilledButton">
-        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-        <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
-        <Setter Property="CornerRadius" Value="20" />
-        <Setter Property="HeightRequest" Value="40" />
-        <Setter Property="PressedBackgroundColor" Value="{StaticResource Primary}" />
-        <Setter Property="PressedTextColor" Value="{StaticResource OnPrimary}" />
-    </Style>
-
-    <Style TargetType="dx:DXButton" x:Key="FilledTonalButton">
-        <Setter Property="BackgroundColor" Value="{StaticResource SecondaryContainer}" />
-        <Setter Property="TextColor" Value="{StaticResource OnSecondaryContainer}" />
-        <Setter Property="CornerRadius" Value="20" />
-        <Setter Property="HeightRequest" Value="40" />
-    </Style>
-
-    <Style TargetType="dx:DXButton" x:Key="OutlinedButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource Primary}" />
-        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="20" />
-        <Setter Property="HeightRequest" Value="40" />
-    </Style>
-
-    <Style TargetType="dx:DXButton" x:Key="TextButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource Primary}" />
-        <Setter Property="CornerRadius" Value="20" />
-        <Setter Property="HeightRequest" Value="40" />
-    </Style>
-
-    <!-- ================================================================ -->
-    <!-- DEVEXPRESS EDITOR STYLES                                         -->
-    <!-- ================================================================ -->
-
-    <Style TargetType="dx:TextEdit">
-        <Setter Property="LabelText" Value="" />
-        <Setter Property="BoxMode" Value="Outlined" />
-        <!-- BoxCornerRadius property removed in DevExpress 25.1.3+ -->
-        <!--<Setter Property="BoxCornerRadius" Value="4" />-->
-        <Setter Property="FocusedBorderColor" Value="{StaticResource Primary}" />
-        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
-        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-    </Style>
-
-    <!-- AutoCompleteEdit follows the same Outlined form-field convention as TextEdit (REQ-DXAC-12) -->
-    <Style TargetType="dx:AutoCompleteEdit">
-        <Setter Property="BoxMode" Value="Outlined" />
-        <Setter Property="FocusedBorderColor" Value="{StaticResource Primary}" />
-        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
-        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-    </Style>
-
-    <!-- ComboBoxEdit follows the same Outlined form-field convention as TextEdit and AutoCompleteEdit (selected value readability) -->
-    <Style TargetType="dx:ComboBoxEdit">
-        <Setter Property="BoxMode" Value="Outlined" />
-        <Setter Property="FocusedBorderColor" Value="{StaticResource Primary}" />
-        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
-        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-    </Style>
-
-    <!-- ================================================================ -->
     <!-- FLYOUT MENU STYLES                                               -->
     <!-- ================================================================ -->
-
-    <Style TargetType="dx:DXButton" x:Key="FlyoutMenuButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
-        <Setter Property="PressedBackgroundColor" Value="{StaticResource SurfaceContainerHigh}" />
-        <Setter Property="Padding" Value="16,12" />
-        <Setter Property="CornerRadius" Value="28" />
-        <Setter Property="HeightRequest" Value="48" />
-        <Setter Property="HorizontalContentAlignment" Value="Start" />
-        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
-        <Setter Property="FontFamily" Value="RobotoMedium" />
-        <Setter Property="FontSize" Value="14" />
-    </Style>
 
     <!-- ================================================================ -->
     <!-- SHELL & NAVIGATION                                               -->
@@ -193,41 +110,10 @@
     <!-- ================================================================ -->
 
     <!-- MD3: Standard icon button — action/trailing role (OnSurfaceVariant) -->
-    <Style x:Key="StandardIconButton" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
-        <Setter Property="WidthRequest" Value="48" />
-        <Setter Property="HeightRequest" Value="48" />
-        <Setter Property="CornerRadius" Value="24" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalOptions" Value="Center" />
-    </Style>
-
     <!-- MD3: Standard icon button — navigation/leading role (OnSurface, higher prominence) -->
-    <Style x:Key="NavigationIconButton" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="IconColor" Value="{StaticResource OnSurface}" />
-        <Setter Property="WidthRequest" Value="48" />
-        <Setter Property="HeightRequest" Value="48" />
-        <Setter Property="CornerRadius" Value="24" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalOptions" Value="Center" />
-    </Style>
-
     <!-- MD3: Vibrant toolbar icon button — for use inside SecondaryContainer toolbar.
          PressedBackgroundColor uses SurfaceContainerHighest (darker) so press is visible
          against the SecondaryContainer toolbar bg. -->
-    <Style x:Key="VibrantToolbarIconButton" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="IconColor" Value="{StaticResource OnSecondaryContainer}" />
-        <Setter Property="PressedBackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
-        <Setter Property="WidthRequest" Value="48" />
-        <Setter Property="HeightRequest" Value="48" />
-        <Setter Property="CornerRadius" Value="24" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalOptions" Value="Center" />
-    </Style>
-
     <!-- ================================================================ -->
     <!-- UTILITY STYLES                                                    -->
     <!-- ================================================================ -->
@@ -236,15 +122,6 @@
          Positioning (HorizontalOptions, VerticalOptions, Margin) is the caller's responsibility —
          FAB is used both inline (beside FloatingToolbar in HorizontalStackLayout) and
          independently. Never set layout options here. -->
-    <Style x:Key="Fab" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-        <Setter Property="IconColor" Value="{StaticResource OnPrimary}" />
-        <Setter Property="PressedBackgroundColor" Value="{StaticResource PrimaryContainer}" />
-        <Setter Property="WidthRequest" Value="56" />
-        <Setter Property="HeightRequest" Value="56" />
-        <Setter Property="CornerRadius" Value="16" />
-    </Style>
-
     <!-- MD3: Divider — use Color (BoxView-specific fill), NOT BackgroundColor -->
     <Style x:Key="Divider" TargetType="BoxView">
         <Setter Property="HeightRequest" Value="1" />
@@ -252,13 +129,6 @@
     </Style>
 
     <!-- Loading skeleton bone — matches ListItem 56dp height -->
-    <Style x:Key="SkeletonBone" TargetType="dx:DXBorder">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
-        <Setter Property="CornerRadius" Value="0" />
-        <Setter Property="HeightRequest" Value="56" />
-        <Setter Property="Margin" Value="0,1" />
-    </Style>
-
     <!-- MD3: Bottom sheet — title (titleLarge: 22sp, RobotoRegular, OnSurface) -->
     <Style x:Key="BottomSheetTitle" TargetType="Label">
         <Setter Property="FontFamily" Value="RobotoRegular" />
@@ -269,50 +139,9 @@
     </Style>
 
     <!-- MD3: Bottom sheet — destructive action button -->
-    <Style x:Key="BottomSheetDestructiveAction" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource Error}" />
-        <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="HeightRequest" Value="56" />
-    </Style>
-
     <!-- MD3: Bottom sheet — cancel/dismiss action button -->
-    <Style x:Key="BottomSheetCancelAction" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource Primary}" />
-        <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="HeightRequest" Value="56" />
-    </Style>
-
     <!-- MD3: Bottom sheet — menu item (list layout), bodyLarge -->
-    <Style x:Key="BottomSheetMenuItem" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
-        <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="HorizontalContentAlignment" Value="Start" />
-        <Setter Property="HeightRequest" Value="56" />
-        <Setter Property="Padding" Value="16,0" />
-        <Setter Property="FontSize" Value="16" />
-    </Style>
-
     <!-- MD3: Menus — vertical menu item (icon + label), Menus - Common tokens; label = Label Large (RobotoMedium 14) -->
-    <Style x:Key="MenuItem" TargetType="dx:DXButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
-        <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="HorizontalContentAlignment" Value="Start" />
-        <Setter Property="HeightRequest" Value="44" />
-        <Setter Property="Padding" Value="12,0" />
-        <Setter Property="CornerRadius" Value="4" />
-        <Setter Property="IconIndent" Value="12" />
-        <Setter Property="IconWidth" Value="20" />
-        <Setter Property="IconHeight" Value="20" />
-        <Setter Property="FontFamily" Value="RobotoMedium" />
-        <Setter Property="FontSize" Value="14" />
-    </Style>
-
     <!-- Neon glow effect — primary (critical actions) -->
     <Style x:Key="NeonGlowPrimary" TargetType="Shadow">
         <Setter Property="Radius" Value="8" />
@@ -340,17 +169,6 @@
     </Style>
 
     <!-- MD3: Empty state — Illustration slot (icon-only display button) -->
-    <Style x:Key="EmptyStateIllustration" TargetType="dx:DXButton">
-        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
-        <Setter Property="IconWidth" Value="64" />
-        <Setter Property="IconHeight" Value="64" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="InputTransparent" Value="True" />
-        <Setter Property="WidthRequest" Value="80" />
-        <Setter Property="HeightRequest" Value="80" />
-        <Setter Property="HorizontalOptions" Value="Center" />
-    </Style>
-
     <!-- ================================================================ -->
     <!-- NAVIGATION DRAWER STYLES                                         -->
     <!-- ================================================================ -->
@@ -525,7 +343,7 @@
         </Setter>
     </Style>
 
-    <!-- Same look as the DX FlyoutMenuButton. SfButton cannot tint its own ImageSource (IconTintColorBehavior throws on it), so the
+    <!-- Flyout menu button look. SfButton cannot tint its own ImageSource (IconTintColorBehavior throws on it), so the
          content is a DataTemplate (SfButton.Content) with an Image tinted through IconTint plus a Label. Consumers still set the
          button's ImageSource and Text; the template reads them from the ancestor SfButton. -->
     <Style x:Key="SfFlyoutMenuButton" TargetType="buttons:SfButton">

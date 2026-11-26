@@ -3,7 +3,7 @@
     x:Class="MyVocaList.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
     xmlns:models="clr-namespace:MyVocaList.UI.Models"
     xmlns:venues="clr-namespace:MyVocaList.UI.Pages.Venues"
     xmlns:people="clr-namespace:MyVocaList.UI.Pages.People"
@@ -35,7 +35,7 @@
     <!-- Flyout Content: Grouped navigation menu -->
     <Shell.FlyoutContentTemplate>
         <DataTemplate x:DataType="vm:AppShellViewModel">
-            <dx:DXScrollView BackgroundColor="{StaticResource Surface}">
+            <ScrollView BackgroundColor="{StaticResource Surface}">
                 <VerticalStackLayout Padding="12,0" Spacing="16"
                                      BindableLayout.ItemsSource="{Binding MenuGroups}">
                     <BindableLayout.ItemTemplate>
@@ -46,11 +46,11 @@
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="models:MenuItemDescription">
-                                            <dx:DXButton Content="{Binding Name}"
-                                                         Icon="{Binding IconSource}"
-                                                         Style="{StaticResource FlyoutMenuButton}"
-                                                         Command="{Binding NavigateCommand}"
-                                                         CommandParameter="{Binding Route}" />
+                                            <buttons:SfButton Text="{Binding Name}"
+                                                              ImageSource="{Binding IconSource}"
+                                                              Style="{StaticResource SfFlyoutMenuButton}"
+                                                              Command="{Binding NavigateCommand}"
+                                                              CommandParameter="{Binding Route}" />
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
@@ -58,7 +58,7 @@
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-            </dx:DXScrollView>
+            </ScrollView>
         </DataTemplate>
     </Shell.FlyoutContentTemplate>
 
@@ -80,19 +80,19 @@
     </FlyoutItem>
 
     <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="backup" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestoreSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestorePage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="settings" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="about" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate about:AboutSfPage}" />
+        <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
     </FlyoutItem>
 
 </Shell>

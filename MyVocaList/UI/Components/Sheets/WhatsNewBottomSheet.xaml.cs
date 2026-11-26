@@ -1,3 +1,5 @@
+using SfSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
+
 namespace MyVocaList.UI.Components.Sheets;
 
 public partial class WhatsNewBottomSheet : ContentView
@@ -24,7 +26,8 @@ public partial class WhatsNewBottomSheet : ContentView
         PopulateBulletList(HighlightsList, entry.Highlights);
         PopulateBulletList(FixesList, entry.Fixes);
 
-        Sheet.State = DevExpress.Maui.Controls.BottomSheetState.HalfExpanded;
+        Sheet.State = SfSheetState.HalfExpanded;
+        Sheet.IsOpen = true;
     }
 
     private static void PopulateBulletList(VerticalStackLayout container, IReadOnlyList<string> items)
@@ -32,17 +35,20 @@ public partial class WhatsNewBottomSheet : ContentView
         container.Children.Clear();
         foreach (var item in items)
         {
-            container.Children.Add(new Label
+            var label = new Label
             {
                 Text = $"• {item}",
                 StyleClass = ["Body.Medium"]
-            });
+            };
+            label.SetDynamicResource(Label.TextColorProperty, "OnSurfaceVariant");
+            container.Children.Add(label);
         }
     }
 
     private void OnGotItClicked(object sender, EventArgs e)
     {
         _whatsNewService?.MarkCurrentVersionSeen();
-        Sheet.State = DevExpress.Maui.Controls.BottomSheetState.Hidden;
+        Sheet.IsOpen = false;
+        Sheet.State = SfSheetState.Hidden;
     }
 }

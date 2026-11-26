@@ -2,7 +2,6 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:converters="clr-namespace:MyVocaList.UI.Converters"
-             xmlns:migration="clr-namespace:MyVocaList.UI.Migration"
              x:Class="MyVocaList.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -11,8 +10,8 @@
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:SecondsToMinutesConverter x:Key="SecondsToMinutesConverter" />
             <converters:ImageReferenceConverter x:Key="ImageReferenceConverter" />
-            <migration:DxSheetStateConverter x:Key="DxSheetStateToSf" />
-            <migration:DxSheetStateToIsOpenConverter x:Key="DxSheetStateToSfIsOpen" />
+            <converters:SheetStateConverter x:Key="SheetStateToSf" />
+            <converters:SheetStateToIsOpenConverter x:Key="SheetStateToSfIsOpen" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/MaterialColors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/MaterialStyles.xaml" />

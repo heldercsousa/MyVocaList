@@ -1,8 +1,7 @@
 namespace MyVocaList.UI.Components.Menus;
 
 /// <summary>
-/// Implemented by a view that hosts a <see cref="Menu"/>. An <c>OverflowMenuButton</c> without an explicit menu walks its
-/// ancestors and uses the nearest <see cref="HostedMenu"/> (REQ-OVFM-20).
+/// Implemented by a view that hosts a <see cref="Menu"/> so overflow buttons can resolve it from the visual tree.
 /// </summary>
 public interface IMenuHost
 {

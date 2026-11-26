@@ -2,7 +2,7 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:chips="clr-namespace:Syncfusion.Maui.Toolkit.Chips;assembly=Syncfusion.Maui.Toolkit"
     xmlns:svc="clr-namespace:MyVocaList.Services;assembly=MyVocaList.Services"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     x:Class="MyVocaList.UI.Pages.About.AboutPage"
@@ -81,15 +81,20 @@
                     IsVisible="{Binding IsDirty}"
                     StyleClass="Body.Medium"
                     TextColor="{StaticResource Error}" />
-                <dxe:ChoiceChipGroup
+                <chips:SfChipGroup
+                    ChipType="Choice"
+                    ChoiceMode="Single"
                     ItemsSource="{Binding Groups}"
-                    DisplayMember="Label"
+                    DisplayMemberPath="Label"
                     SelectedItem="{Binding SelectedGroup, Mode=TwoWay}"
-                    IsMultiline="True"
-                    Margin="0"
-                    ChipTextColor="{StaticResource OnSurface}"
-                    ChipSelectedBackgroundColor="{StaticResource SecondaryContainer}"
-                    ChipSelectedTextColor="{StaticResource OnSecondaryContainer}" />
+                    ChipFontAttributes="Bold"
+                    ChipTextSize="14"
+                    ChipPadding="3,2,2,3"
+                    Margin="7,11,0,19">
+                    <chips:SfChipGroup.ChipLayout>
+                        <FlexLayout Wrap="Wrap" />
+                    </chips:SfChipGroup.ChipLayout>
+                </chips:SfChipGroup>
                 <VerticalStackLayout
                     BindableLayout.ItemsSource="{Binding SelectedGroup.Rows}"
                     Spacing="4">

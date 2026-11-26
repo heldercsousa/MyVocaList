@@ -1,4 +1,3 @@
-using DevExpress.Maui.Controls;
 using MyVocaList.UI.Collections;
 using System.Collections.Concurrent;
 
@@ -279,7 +278,7 @@ public class CrudListViewModelBaseTests
         sut.ItemLongPressCommand.Execute("item-2");
 
         Assert.Equal("item-2", sut.ItemActionsTargetValue);
-        Assert.Equal(BottomSheetState.HalfExpanded, sut.ItemActionsSheetState);
+        Assert.Equal(SheetState.HalfExpanded, sut.ItemActionsSheetState);
         Assert.Equal(["item-1"], sut.SelectedItemsList);
     }
 
@@ -293,7 +292,7 @@ public class CrudListViewModelBaseTests
 
         await sut.EditItemCommand.ExecuteAsync(null);
 
-        Assert.Equal(BottomSheetState.Hidden, sut.ItemActionsSheetState);
+        Assert.Equal(SheetState.Hidden, sut.ItemActionsSheetState);
         Assert.Null(sut.ItemActionsTargetValue);
         Assert.Equal(["item-2"], sut.EditNavigations);
     }
@@ -308,8 +307,8 @@ public class CrudListViewModelBaseTests
 
         sut.DeleteItemCommand.Execute(null);
 
-        Assert.Equal(BottomSheetState.Hidden, sut.ItemActionsSheetState);
-        Assert.Equal(BottomSheetState.HalfExpanded, sut.ConfirmSheetState);
+        Assert.Equal(SheetState.Hidden, sut.ItemActionsSheetState);
+        Assert.Equal(SheetState.HalfExpanded, sut.ConfirmSheetState);
 
         await sut.ConfirmActionCommand.ExecuteAsync(null);
 
@@ -326,12 +325,12 @@ public class CrudListViewModelBaseTests
         sut.DeleteSelectedCommand.Execute(null);          // opens confirm sheet
 
         Assert.True(sut.HandleBack());                    // 1: item actions
-        Assert.Equal(BottomSheetState.Hidden, sut.ItemActionsSheetState);
-        Assert.Equal(BottomSheetState.HalfExpanded, sut.ConfirmSheetState);
+        Assert.Equal(SheetState.Hidden, sut.ItemActionsSheetState);
+        Assert.Equal(SheetState.HalfExpanded, sut.ConfirmSheetState);
         Assert.True(sut.IsSelectionMode);
 
         Assert.True(sut.HandleBack());                    // 2: confirm sheet
-        Assert.Equal(BottomSheetState.Hidden, sut.ConfirmSheetState);
+        Assert.Equal(SheetState.Hidden, sut.ConfirmSheetState);
         Assert.True(sut.IsSelectionMode);
 
         Assert.True(sut.HandleBack());                    // 3: selection
@@ -363,7 +362,7 @@ public class CrudListViewModelBaseTests
 
         Assert.False(sut.IsSelectionMode);
         Assert.Empty(sut.SelectedItemsList);
-        Assert.Equal(BottomSheetState.Hidden, sut.ItemActionsSheetState);
+        Assert.Equal(SheetState.Hidden, sut.ItemActionsSheetState);
     }
 
     [Fact]
@@ -441,7 +440,7 @@ public class CrudListViewModelBaseTests
         sut.DeleteItemCommand.Execute(null);
 
         Assert.False(sut.IsItemMenuOpen);
-        Assert.Equal(BottomSheetState.HalfExpanded, sut.ConfirmSheetState);
+        Assert.Equal(SheetState.HalfExpanded, sut.ConfirmSheetState);
 
         await sut.ConfirmActionCommand.ExecuteAsync(null);
 
@@ -460,7 +459,7 @@ public class CrudListViewModelBaseTests
         Assert.False(sut.IsItemMenuOpen);
         Assert.Null(sut.ItemActionsTargetValue);
         Assert.Empty(sut.EditNavigations);
-        Assert.Equal(BottomSheetState.Hidden, sut.ConfirmSheetState);
+        Assert.Equal(SheetState.Hidden, sut.ConfirmSheetState);
         Assert.Empty(sut.DeletedBatches);
     }
 
@@ -502,7 +501,7 @@ public class CrudListViewModelBaseTests
         Assert.True(sut.HandleBack());
 
         Assert.False(sut.IsItemMenuOpen);
-        Assert.Equal(BottomSheetState.Hidden, sut.ConfirmSheetState);
+        Assert.Equal(SheetState.Hidden, sut.ConfirmSheetState);
         Assert.False(sut.IsSelectionMode);
     }
 

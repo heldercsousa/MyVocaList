@@ -2,9 +2,10 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
-    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:inputlayout="clr-namespace:Syncfusion.Maui.Toolkit.TextInputLayout;assembly=Syncfusion.Maui.Toolkit"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
     x:Class="MyVocaList.UI.Pages.Venues.VenueFormPage"
     x:DataType="vm:VenueFormViewModel"
@@ -15,14 +16,18 @@
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">
 
-            <dxe:TextEdit x:Name="nameEdit"
-                          Text="{Binding VenueName, Mode=TwoWay}"
-                          LabelText="Venue Name"
-                          PlaceholderText="Enter venue name"
-                          MaxCharacterCount="60"
-                          HasError="{Binding NameHasError}"
-                          ErrorText="{Binding NameErrorText}"
-                          Unfocused="OnNameUnfocused" />
+            <inputlayout:SfTextInputLayout Hint="Venue Name"
+                                           ContainerType="Outlined"
+                                           HasError="{Binding NameHasError}"
+                                           ErrorText="{Binding NameErrorText}">
+                <Entry x:Name="nameEdit"
+                       Text="{Binding VenueName, Mode=TwoWay}"
+                       MaxLength="60"
+                       TextColor="{StaticResource OnSurface}"
+                       Placeholder="Enter venue name"
+                       PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                       Unfocused="OnNameUnfocused" />
+            </inputlayout:SfTextInputLayout>
 
             <Label Text="{Binding CharacterCounterText}"
                    IsVisible="{Binding ShowCharacterCounter}"
@@ -44,74 +49,125 @@
 
             <!-- Form picture (REQ-VEN-08..11): the ViewModel owns which picture is shown, the buttons' state and the commands. -->
             <media:ImagePickerField ImageSource="{Binding FormImageSource}"
-                                    ThumbnailSource="{Binding FormImageThumbnailSource}"
-                                    PlaceholderIcon="nightlife_outlined"
-                                    HasImage="{Binding HasFormImage}"
-                                    HintText="{Binding ImageHintText}"
-                                    PickCommand="{Binding PickImageCommand}"
-                                    RemoveCommand="{Binding RemoveImageCommand}"
-                                    IsBusy="{Binding IsImageBusy}" />
+                                      ThumbnailSource="{Binding FormImageThumbnailSource}"
+                                      PlaceholderIcon="nightlife_outlined"
+                                      HasImage="{Binding HasFormImage}"
+                                      HintText="{Binding ImageHintText}"
+                                      PickCommand="{Binding PickImageCommand}"
+                                      RemoveCommand="{Binding RemoveImageCommand}"
+                                      IsBusy="{Binding IsImageBusy}" />
 
             <!-- Address section (REQ-VEN-12, 23) -->
             <Label Text="Address"
                    StyleClass="Title.Medium"
                    TextColor="{StaticResource OnSurface}" />
 
-            <dx:DXButton Content="{Binding MapButtonText}"
-                         Icon="map_outlined"
-                         Style="{StaticResource FilledTonalButton}"
-                         HorizontalOptions="Fill"
-                         Command="{Binding PickOnMapCommand}" />
+            <!-- Filled tonal look: SfFilledButton with the SecondaryContainer tokens (no Sf tonal style exists). -->
+            <buttons:SfButton Style="{StaticResource SfFilledButton}"
+                              Text="{Binding MapButtonText}"
+                              ImageSource="map_outlined"
+                              Background="{StaticResource SecondaryContainerBrush}"
+                              HorizontalOptions="Fill"
+                              Command="{Binding PickOnMapCommand}">
+                <buttons:SfButton.Content>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="Center">
+                            <Image WidthRequest="18" HeightRequest="18" VerticalOptions="Center"
+                                   Source="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=ImageSource}"
+                                   behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}" />
+                            <Label VerticalOptions="Center" FontAttributes="Bold" FontSize="14"
+                                   TextColor="{StaticResource OnSecondaryContainer}"
+                                   Text="{Binding Source={RelativeSource AncestorType={x:Type buttons:SfButton}}, Path=Text}" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </buttons:SfButton.Content>
+            </buttons:SfButton>
 
             <Label Text="Find the place on the map to fill the address, or type it below."
                    StyleClass="Body.Small"
                    TextColor="{StaticResource OnSurfaceVariant}" />
 
-            <dxe:TextEdit Text="{Binding AddressLine1, Mode=TwoWay}"
-                          LabelText="Street address"
-                          MaxCharacterCount="100"
-                          HasError="{Binding AddressLine1HasError}"
-                          ErrorText="{Binding AddressLine1ErrorText}" />
+            <inputlayout:SfTextInputLayout Hint="Street address"
+                                           ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="100"
+                                           HasError="{Binding AddressLine1HasError}"
+                                           ErrorText="{Binding AddressLine1ErrorText}">
+                <Entry
+                       Text="{Binding AddressLine1, Mode=TwoWay}"
+                       MaxLength="100"
+                       TextColor="{StaticResource OnSurface}" />
+            </inputlayout:SfTextInputLayout>
 
-            <dxe:TextEdit Text="{Binding AddressLine2, Mode=TwoWay}"
-                          LabelText="Address line 2 (optional)"
-                          MaxCharacterCount="100"
-                          HasError="{Binding AddressLine2HasError}"
-                          ErrorText="{Binding AddressLine2ErrorText}" />
+            <inputlayout:SfTextInputLayout Hint="Address line 2 (optional)"
+                                           ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="100"
+                                           HasError="{Binding AddressLine2HasError}"
+                                           ErrorText="{Binding AddressLine2ErrorText}">
+                <Entry
+                       Text="{Binding AddressLine2, Mode=TwoWay}"
+                       MaxLength="100"
+                       TextColor="{StaticResource OnSurface}" />
+            </inputlayout:SfTextInputLayout>
 
-            <dxe:TextEdit Text="{Binding City, Mode=TwoWay}"
-                          LabelText="City"
-                          MaxCharacterCount="80"
-                          HasError="{Binding CityHasError}"
-                          ErrorText="{Binding CityErrorText}" />
+            <inputlayout:SfTextInputLayout Hint="City"
+                                           ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="80"
+                                           HasError="{Binding CityHasError}"
+                                           ErrorText="{Binding CityErrorText}">
+                <Entry
+                       Text="{Binding City, Mode=TwoWay}"
+                       MaxLength="80"
+                       TextColor="{StaticResource OnSurface}" />
+            </inputlayout:SfTextInputLayout>
 
-            <dxe:TextEdit Text="{Binding Region, Mode=TwoWay}"
-                          LabelText="State / Province / Region"
-                          MaxCharacterCount="80"
-                          HasError="{Binding RegionHasError}"
-                          ErrorText="{Binding RegionErrorText}" />
+            <inputlayout:SfTextInputLayout Hint="State / Province / Region"
+                                           ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="80"
+                                           HasError="{Binding RegionHasError}"
+                                           ErrorText="{Binding RegionErrorText}">
+                <Entry
+                       Text="{Binding Region, Mode=TwoWay}"
+                       MaxLength="80"
+                       TextColor="{StaticResource OnSurface}" />
+            </inputlayout:SfTextInputLayout>
 
-            <dxe:TextEdit Text="{Binding PostalCode, Mode=TwoWay}"
-                          LabelText="Postal code"
-                          MaxCharacterCount="20"
-                          HasError="{Binding PostalCodeHasError}"
-                          ErrorText="{Binding PostalCodeErrorText}" />
+            <inputlayout:SfTextInputLayout Hint="Postal code"
+                                           ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="20"
+                                           HasError="{Binding PostalCodeHasError}"
+                                           ErrorText="{Binding PostalCodeErrorText}">
+                <Entry
+                       Text="{Binding PostalCode, Mode=TwoWay}"
+                       MaxLength="20"
+                       TextColor="{StaticResource OnSurface}" />
+            </inputlayout:SfTextInputLayout>
 
-            <dxe:TextEdit Text="{Binding Country, Mode=TwoWay}"
-                          LabelText="Country"
-                          MaxCharacterCount="60"
-                          HasError="{Binding CountryHasError}"
-                          ErrorText="{Binding CountryErrorText}" />
+            <inputlayout:SfTextInputLayout Hint="Country"
+                                           ContainerType="Outlined"
+                                           ShowCharCount="True"
+                                           CharMaxLength="60"
+                                           HasError="{Binding CountryHasError}"
+                                           ErrorText="{Binding CountryErrorText}">
+                <Entry
+                       Text="{Binding Country, Mode=TwoWay}"
+                       MaxLength="60"
+                       TextColor="{StaticResource OnSurface}" />
+            </inputlayout:SfTextInputLayout>
 
             <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
-                <dx:DXButton Content="Cancel"
-                             Style="{StaticResource OutlinedButton}"
-                             Padding="24,0"
-                             Command="{Binding CancelCommand}" />
-                <dx:DXButton Content="Save"
-                             Style="{StaticResource FilledButton}"
-                             Padding="24,0"
-                             Command="{Binding SaveCommand}" />
+                <buttons:SfButton Text="Cancel"
+                                  Style="{StaticResource SfOutlinedButton}"
+                                  Padding="24,0"
+                                  Command="{Binding CancelCommand}" />
+                <buttons:SfButton Text="Save"
+                                  Style="{StaticResource SfFilledButton}"
+                                  Padding="24,0"
+                                  Command="{Binding SaveCommand}" />
             </HorizontalStackLayout>
 
         </VerticalStackLayout>

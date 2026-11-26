@@ -2,7 +2,7 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:entity="clr-namespace:MyVocaList.Domain.Entity;assembly=MyVocaList.Domain"
     x:Class="MyVocaList.UI.Pages.BackupRestore.BackupRestorePage"
@@ -27,19 +27,19 @@
             <!-- Actions -->
             <Label Text="Backup" StyleClass="Title.Medium" TextColor="{StaticResource OnSurface}" />
 
-            <dx:DXButton Content="Back Up Now"
-                         Style="{StaticResource FilledButton}"
+            <buttons:SfButton Text="Back Up Now"
+                         Style="{StaticResource SfFilledButton}"
                          Command="{Binding BackupNowCommand}" />
 
-            <dx:DXButton Content="Export Backup"
-                         Style="{StaticResource OutlinedButton}"
+            <buttons:SfButton Text="Export Backup"
+                         Style="{StaticResource SfOutlinedButton}"
                          Command="{Binding ExportCommand}" />
 
             <!-- Restore -->
             <Label Text="Restore" StyleClass="Title.Medium" TextColor="{StaticResource OnSurface}" />
 
-            <dx:DXButton Content="Restore from File"
-                         Style="{StaticResource OutlinedButton}"
+            <buttons:SfButton Text="Restore from File"
+                         Style="{StaticResource SfOutlinedButton}"
                          Command="{Binding RestoreCommand}" />
 
             <!-- History -->

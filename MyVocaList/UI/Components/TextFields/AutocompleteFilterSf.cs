@@ -4,7 +4,7 @@ using Syncfusion.Maui.Inputs;
 namespace MyVocaList.UI.Components.TextFields;
 
 /// <summary>
-/// The <c>SfAutocomplete</c> filter and search behaviour of <see cref="AutocompleteFieldSf"/>. It replaces the
+/// The <c>SfAutocomplete</c> filter and search behaviour of <see cref="AutocompleteField"/>. It replaces the
 /// built-in filter, so the menu shows exactly what the field's search returns, in the same order (REQ-ACF-16,
 /// -22; BUG-056), and it disables the built-in highlight, so the first row is never pre-selected and the editor
 /// never auto-appends the rest of a suggestion. The search itself (decision rules, debounce, option source)

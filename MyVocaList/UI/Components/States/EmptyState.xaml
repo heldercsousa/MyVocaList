@@ -2,7 +2,7 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     x:Class="MyVocaList.UI.Components.States.EmptyState"
     x:Name="self">
 
@@ -17,9 +17,16 @@
         Spacing="8">
 
         <!-- Illustration slot: display-only icon, 80×80dp, 64dp icon -->
-        <dx:DXButton x:Name="illustrationButton"
-                     Style="{StaticResource EmptyStateIllustration}"
-                     Icon="{Binding Illustration, Source={x:Reference self}}" />
+        <Image x:Name="illustrationImage"
+               Source="{Binding Illustration, Source={x:Reference self}}"
+               WidthRequest="64"
+               HeightRequest="64"
+               Margin="8"
+               Aspect="AspectFit"
+               HorizontalOptions="Center"
+               InputTransparent="True"
+               AutomationProperties.IsInAccessibleTree="False"
+               behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}" />
 
         <!-- Headline slot -->
         <Label x:Name="headlineLabel"

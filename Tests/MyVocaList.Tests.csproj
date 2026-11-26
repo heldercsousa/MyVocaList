@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Maui.Core" />
     <PackageReference Include="Plugin.LocalNotification" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="xunit" />
@@ -34,9 +33,5 @@
     <!-- MAUI head project: referenced for ViewModel + Component tests -->
     <ProjectReference Include="..\MyVocaList\MyVocaList.csproj" />
     <ProjectReference Include="..\Extensions\MyVocaList.Extensions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <!-- Tests of the frozen AutocompleteField family (D-AC1, 2026-07-19) - excluded with the component. -->
-    <Compile Remove="Unit\Components\AutocompleteFieldDebounceTests.cs;Unit\Components\AutocompleteFieldProgrammaticTextGuardTests.cs;Unit\Components\AutocompleteSuggestionsPropagationTests.cs;Unit\Components\AutocompleteWindowClassTests.cs;Unit\Components\MobileFieldReopenGuardTests.cs;Unit\Components\AutocompleteSearchGateTests.cs" />
   </ItemGroup>
 </Project>

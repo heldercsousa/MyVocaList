@@ -2,23 +2,34 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:sfbuttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     x:Class="MyVocaList.UI.Components.Lists.ListItemCheckbox"
     x:Name="self">
 
-    <dx:DXButton
-        BackgroundColor="Transparent"
+    <!-- 48x48 transparent SfButton tap target hosting a non-interactive SfCheckBox (Content is a DataTemplate, so IsChecked binds via AncestorType); tap routes to ToggleItemSelectionCommand. -->
+    <buttons:SfButton
+        Background="{StaticResource TransparentBrush}"
         WidthRequest="48"
         HeightRequest="48"
         Padding="0"
+        CornerRadius="24"
         SemanticProperties.Description="Select"
         Command="{Binding BindingContext.ToggleItemSelectionCommand, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"
         CommandParameter="{Binding .}">
-
-        <dx:CheckEdit
-            InputTransparent="True"
-            IsChecked="{Binding IsChecked, Source={x:Reference self}}"
-            CheckedCheckBoxColor="{dx:ThemeColor Primary}" />
-    </dx:DXButton>
+        <buttons:SfButton.Content>
+            <DataTemplate>
+                <sfbuttons:SfCheckBox
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    InputTransparent="True"
+                    IsChecked="{Binding IsChecked, Mode=OneWay, Source={RelativeSource AncestorType={x:Type local:ListItemCheckbox}}}"
+                    CheckedColor="{StaticResource Primary}"
+                    UncheckedColor="{StaticResource OnSurfaceVariant}"
+                    TickColor="{StaticResource OnPrimary}" />
+            </DataTemplate>
+        </buttons:SfButton.Content>
+    </buttons:SfButton>
 </ContentView>

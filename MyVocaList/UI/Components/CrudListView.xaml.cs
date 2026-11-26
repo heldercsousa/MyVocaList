@@ -1,25 +1,35 @@
+using System.Collections.Specialized;
 using MyVocaList.UI.Components.Menus;
+using SfLoadMoreOption = Syncfusion.Maui.ListView.LoadMoreOption;
+using SfSelectionMode = Syncfusion.Maui.ListView.SelectionMode;
 
 namespace MyVocaList.UI.Components;
 
 /// <summary>
-/// Shared structural ContentView for CRUD list pages. Hosts the ShimmerView, DXCollectionView,
-/// FloatingToolbar, FAB, empty states, confirm BottomSheet, and the shared overflow <see cref="Menu"/>.
-/// Pages pass entity-specific DataTemplates and commands via BindableProperties; shared commands are bound directly
-/// via the ICrudListViewModel BindingContext.
+/// Syncfusion copy of <see cref="CrudListView"/>: the shared structural ContentView for CRUD list pages. Hosts the
+/// loading skeleton, the <c>SfListView</c> inside an <c>SfPullToRefresh</c>, the empty states, the floating toolbar,
+/// the FAB, the two bottom sheets and the shared overflow <see cref="Menu"/>. Pages pass entity-specific DataTemplates
+/// and commands via BindableProperties; shared commands are bound directly via the ICrudListViewModel BindingContext.
 /// </summary>
 public partial class CrudListView : ContentView, IMenuHost
 {
+    private const string SkeletonAnimationName = "CrudListViewSfSkeletonPulse";
+    private const uint SkeletonPulseLengthMs = 1400;
+    private const double SkeletonOpacityHigh = 1.0;
+    private const double SkeletonOpacityLow = 0.4;
+
     // -------------------------------------------------------------------------
-    // BindableProperties
+    // BindableProperties (same names, types and defaults as CrudListView)
     // -------------------------------------------------------------------------
 
-    /// <summary>Entity collection bound to DXCollectionView.ItemsSource.</summary>
+    /// <summary>Entity collection bound to SfListView.ItemsSource.</summary>
     public static readonly BindableProperty ItemsSourceProperty =
         BindableProperty.Create(nameof(ItemsSource), typeof(System.Collections.IList),
             typeof(CrudListView), null);
 
-    /// <summary>Selected-items collection. Assigned to DXCollectionView.SelectedItems in code-behind.</summary>
+    /// <summary>
+    /// Selected-items collection. SfListView.SelectedItems is get-only, so it is mirrored both ways in code-behind.
+    /// </summary>
     public static readonly BindableProperty SelectedItemsSourceProperty =
         BindableProperty.Create(nameof(SelectedItemsSource), typeof(System.Collections.IList),
             typeof(CrudListView), null,
@@ -35,7 +45,7 @@ public partial class CrudListView : ContentView, IMenuHost
         BindableProperty.Create(nameof(SelectedItemTemplate), typeof(DataTemplate),
             typeof(CrudListView), null);
 
-    /// <summary>Placeholder text for the internal persistent SearchBar (live — rendered in the search bar row).</summary>
+    /// <summary>Placeholder text for the internal persistent SearchBar.</summary>
     public static readonly BindableProperty SearchPlaceholderProperty =
         BindableProperty.Create(nameof(SearchPlaceholder), typeof(string),
             typeof(CrudListView), string.Empty);
@@ -67,9 +77,8 @@ public partial class CrudListView : ContentView, IMenuHost
             typeof(CrudListView), string.Empty);
 
     /// <summary>
-    /// Whether the "no items" empty state is visible. Bound to entity-specific VM bool property
-    /// (e.g. IsEmptyNoVenues) whose name differs per VM — therefore a BindableProperty, not a
-    /// direct BindingContext binding.
+    /// Whether the "no items" empty state is visible. Bound to the entity-specific VM bool property
+    /// (e.g. IsEmptyNoVenues), whose name differs per VM.
     /// </summary>
     public static readonly BindableProperty IsEmptyNoItemsProperty =
         BindableProperty.Create(nameof(IsEmptyNoItems), typeof(bool),
@@ -91,8 +100,8 @@ public partial class CrudListView : ContentView, IMenuHost
             typeof(CrudListView), "add_outlined");
 
     /// <summary>
-    /// Optional view shown above the list (e.g. FilterChipGroup for ArtistsPage).
-    /// When set, the filter row (Row 0) becomes Auto height and the view is displayed.
+    /// Optional view shown above the list (e.g. a filter chip group).
+    /// When set, the filter row becomes Auto height and the view is displayed.
     /// </summary>
     public static readonly BindableProperty FilterContentProperty =
         BindableProperty.Create(nameof(FilterContent), typeof(View),
@@ -193,15 +202,11 @@ public partial class CrudListView : ContentView, IMenuHost
 
     private MyVocaList.UI.ViewModels.ICrudListViewModel _viewModel;
 
-    /// <summary>
-    /// Set when the confirm sheet must open after the item actions sheet has hidden (sheet hand-off).
-    /// </summary>
-    private bool _showConfirmWhenActionsHidden;
+    /// <summary>The selected-items collection currently observed for changes (mirrored into SfListView.SelectedItems).</summary>
+    private INotifyCollectionChanged _observedSelection;
 
-    /// <summary>
-    /// Set when the confirm sheet must open after the overflow item menu has closed (Delete from the menu).
-    /// </summary>
-    private bool _showConfirmWhenMenuClosed;
+    /// <summary>Re-entrancy guard for the two-way SelectedItems mirror.</summary>
+    private bool _syncingSelection;
 
     // -------------------------------------------------------------------------
     // IMenuHost
@@ -216,18 +221,8 @@ public partial class CrudListView : ContentView, IMenuHost
 
     public CrudListView()
     {
-        // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
-        var sw = System.Diagnostics.Stopwatch.StartNew();
         InitializeComponent();
-        sw.Stop();
-        Serilog.Log.ForContext("SourceContext", nameof(CrudListView))
-            .Information("[PageLoad] CrudListView InitializeComponent={Ms}ms", sw.ElapsedMilliseconds);
-
-        Loaded += (_, _) =>
-            Serilog.Log.ForContext("SourceContext", nameof(CrudListView))
-                .Information("[PageLoad] CrudListView loaded={Ms}ms (ctor→Loaded)", sw.ElapsedMilliseconds);
-        // PHASE2-INSTRUMENTATION end
-
+        ((Syncfusion.Maui.Core.IParallaxView)listView).Scrolling += OnListViewScrolling;
         BindingContextChanged += OnBindingContextChanged;
     }
 
@@ -246,66 +241,97 @@ public partial class CrudListView : ContentView, IMenuHost
         {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
             ApplySelectionMode();
+            ApplyLoadMoreOption();
+            ApplySkeletonPulse();
         }
     }
 
     private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.ConfirmSheetState))
+        switch (e.PropertyName)
         {
-            if (_viewModel.ConfirmSheetState == BottomSheetState.Hidden)
-            {
-                _showConfirmWhenActionsHidden = false;
-                _showConfirmWhenMenuClosed = false;
-                confirmSheet.Close();
-            }
-            else if (itemActionsSheet.State != BottomSheetState.Hidden)
-            {
-                // Only one sheet at a time: the confirm sheet opens once the item actions sheet has hidden.
-                _showConfirmWhenActionsHidden = true;
-            }
-            else if (itemMenu.IsOpen)
-            {
-                // Only one surface at a time: the confirm sheet opens once the overflow menu has closed (REQ-OVFM-17).
-                _showConfirmWhenMenuClosed = true;
-            }
-            else
-            {
-                confirmSheet.Show(_viewModel.ConfirmSheetState, null);
-            }
-        }
-        else if (e.PropertyName == nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.IsSelectionMode))
-        {
-            ApplySelectionMode();
-        }
-        else if (e.PropertyName == nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.ItemActionsSheetState))
-        {
-            if (_viewModel.ItemActionsSheetState == BottomSheetState.Hidden)
-                itemActionsSheet.Close();
-            else
-                itemActionsSheet.Show(_viewModel.ItemActionsSheetState, null);
+            case nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.IsSelectionMode):
+                RunOnView(ApplySelectionMode);
+                break;
+            case nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.HasMoreItems):
+                RunOnView(ApplyLoadMoreOption);
+                break;
+            case nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.IsInitialLoading):
+                RunOnView(ApplySkeletonPulse);
+                break;
         }
     }
 
+    /// <summary>Runs <paramref name="action"/> inline on the UI thread, or dispatches it there from a background thread.</summary>
+    private void RunOnView(Action action)
+    {
+        if (Dispatcher.IsDispatchRequired)
+            Dispatcher.Dispatch(action);
+        else
+            action();
+    }
+
     /// <summary>
-    /// Maps the ViewModel's IsSelectionMode to the DXCollectionView selection mode (design I4).
-    /// When entering selection mode, the view's SelectedItems is reassigned to the ViewModel collection
-    /// so DX reflects the VM state after the switch.
+    /// Maps the ViewModel's IsSelectionMode to the SfListView selection mode, then mirrors the ViewModel selection
+    /// into the list so the SelectedItemTemplate reflects the VM state after the switch.
     /// </summary>
     private void ApplySelectionMode()
     {
-        if (collectionView == null || _viewModel == null)
+        if (listView == null || _viewModel == null)
             return;
 
         if (_viewModel.IsSelectionMode)
+            searchBar.ClearSearchFocus();
+
+        var mode = _viewModel.IsSelectionMode ? SfSelectionMode.Multiple : SfSelectionMode.None;
+        if (listView.SelectionMode != mode)
         {
-            collectionView.SelectionMode = Microsoft.Maui.Controls.SelectionMode.Multiple;
-            collectionView.SelectedItems = SelectedItemsSource;
+            // Switching to None clears the list selection; that must not write back into the ViewModel.
+            _syncingSelection = true;
+            try
+            {
+                listView.SelectionMode = mode;
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
         }
-        else
+
+        SyncListSelectionFromSource();
+    }
+
+    /// <summary>Load-more on scroll only while the ViewModel has more pages (DX: IsLoadMoreEnabled="{Binding HasMoreItems}").</summary>
+    private void ApplyLoadMoreOption()
+    {
+        if (listView == null)
+            return;
+
+        listView.LoadMoreOption = _viewModel?.HasMoreItems == true
+            ? SfLoadMoreOption.AutoOnScroll
+            : SfLoadMoreOption.None;
+    }
+
+    /// <summary>Starts the skeleton opacity pulse while the initial load runs; stops it otherwise.</summary>
+    private void ApplySkeletonPulse()
+    {
+        if (skeletonBones == null)
+            return;
+
+        this.AbortAnimation(SkeletonAnimationName);
+        skeletonBones.Opacity = SkeletonOpacityHigh;
+
+        if (_viewModel?.IsInitialLoading != true)
+            return;
+
+        var pulse = new Animation
         {
-            collectionView.SelectionMode = Microsoft.Maui.Controls.SelectionMode.None;
-        }
+            { 0, 0.5, new Animation(v => skeletonBones.Opacity = v, SkeletonOpacityHigh, SkeletonOpacityLow) },
+            { 0.5, 1, new Animation(v => skeletonBones.Opacity = v, SkeletonOpacityLow, SkeletonOpacityHigh) },
+        };
+        pulse.Commit(this, SkeletonAnimationName, length: SkeletonPulseLengthMs,
+            finished: (_, _) => skeletonBones.Opacity = SkeletonOpacityHigh,
+            repeat: () => _viewModel?.IsInitialLoading == true);
     }
 
     // -------------------------------------------------------------------------
@@ -314,112 +340,148 @@ public partial class CrudListView : ContentView, IMenuHost
 
     private void OnSelectedItemsSourceChanged(System.Collections.IList newValue)
     {
-        if (collectionView != null)
-            collectionView.SelectedItems = newValue;
+        if (_observedSelection != null)
+            _observedSelection.CollectionChanged -= OnSelectedItemsSourceCollectionChanged;
+
+        _observedSelection = newValue as INotifyCollectionChanged;
+
+        if (_observedSelection != null)
+            _observedSelection.CollectionChanged += OnSelectedItemsSourceCollectionChanged;
+
+        SyncListSelectionFromSource();
     }
 
     private void OnFilterContentChanged(View newView)
     {
         var hasFilter = newView != null;
         filterRow.Height = hasFilter ? GridLength.Auto : new GridLength(0);
-        // Host the filter View directly. A bare ContentPresenter only presents content
-        // when it lives inside a ControlTemplate (it resolves Content from the templated
-        // parent); placed directly in a layout it renders nothing regardless of its
-        // Content binding — which is why the filter chips never appeared after migration.
-        // Assigning ContentView.Content reparents the View into the visual tree correctly.
+        // Host the filter View directly: assigning ContentView.Content reparents the View into the visual tree.
         filterContentHost.Content = newView;
         filterContentHost.IsVisible = hasFilter;
     }
 
     // -------------------------------------------------------------------------
-    // DXCollectionView event handlers
+    // SelectedItems mirror (SfListView.SelectedItems is get-only)
     // -------------------------------------------------------------------------
 
-    private void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEventArgs e)
+    /// <summary>ViewModel selection changed (tap on a checkbox, select all, clear): mirror it into the list.</summary>
+    private void OnSelectedItemsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (_syncingSelection)
+            return;
+
+        RunOnView(SyncListSelectionFromSource);
+    }
+
+    /// <summary>Replaces the list's SelectedItems with the ViewModel's selected items (only in selection mode).</summary>
+    private void SyncListSelectionFromSource()
+    {
+        if (listView == null)
+            return;
+
+        _syncingSelection = true;
+        try
+        {
+            var target = listView.SelectedItems;
+            target.Clear();
+
+            if (listView.SelectionMode == SfSelectionMode.None || SelectedItemsSource == null)
+                return;
+
+            foreach (var item in SelectedItemsSource)
+                target.Add(item);
+        }
+        finally
+        {
+            _syncingSelection = false;
+        }
+    }
+
+    /// <summary>
+    /// The list selection changed by a user tap in selection mode: apply it to the ViewModel collection, then report
+    /// the count. The count is read inside the dispatched action so a stale queued value cannot override the settled state.
+    /// </summary>
+    private void OnListViewSelectionChanged(object sender, Syncfusion.Maui.ListView.ItemSelectionChangedEventArgs e)
+    {
+        if (_syncingSelection)
+            return;
+
+        var source = SelectedItemsSource;
+        if (source != null)
+        {
+            _syncingSelection = true;
+            try
+            {
+                foreach (var removed in e.RemovedItems)
+                    source.Remove(removed);
+
+                foreach (var added in e.AddedItems)
+                {
+                    if (!source.Contains(added))
+                        source.Add(added);
+                }
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+        }
+
+        Dispatcher.Dispatch(() => _viewModel?.OnSelectionChanged(listView.SelectedItems.Count));
+    }
+
+    // -------------------------------------------------------------------------
+    // SfListView event handlers
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Scroll offset → IsScrolled (liftOnScroll). SfListView has no public Scrolling event: it implements
+    /// <c>IParallaxView.Scrolling</c> explicitly, so the handler is attached in the constructor through that interface
+    /// (a XAML <c>Scrolling=</c> attribute fails at runtime with XamlParseException).
+    /// </summary>
+    private void OnListViewScrolling(object sender, Syncfusion.Maui.Core.ParallaxScrollingEventArgs e)
     {
         if (_viewModel != null)
-            _viewModel.IsScrolled = e.Offset > 0;
+            _viewModel.IsScrolled = e.ScrollY > 0;
     }
 
     /// <summary>
-    /// DX selection changed. The count is read inside the dispatched action, not before it, so a stale
-    /// queued value (for example the 0 raised by the None to Multiple switch) cannot override the settled state.
+    /// Tap on an item. Forwards to the ViewModel, which navigates in browse mode and is a no-op in selection mode
+    /// (there SfListView toggles the row selection itself).
     /// </summary>
-    private void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
+    private void OnItemTapped(object sender, Syncfusion.Maui.ListView.ItemTappedEventArgs e)
     {
-        Dispatcher.Dispatch(() => _viewModel?.OnSelectionChanged(CurrentSelectedCount()));
-    }
-
-    private int CurrentSelectedCount() =>
-        (collectionView.SelectedItems as System.Collections.ICollection)?.Count ?? 0;
-
-    /// <summary>
-    /// Tap on an item. Forwards to the ViewModel, which navigates in browse mode and is a no-op in selection mode.
-    /// </summary>
-    private void OnItemTap(object sender, CollectionViewGestureEventArgs e)
-    {
-        if (_viewModel?.ItemTapCommand is { } command && command.CanExecute(e.Item))
-            command.Execute(e.Item);
+        if (_viewModel?.ItemTapCommand is { } command && command.CanExecute(e.DataItem))
+            command.Execute(e.DataItem);
     }
 
     /// <summary>
     /// Press-and-hold on an item. Forwards to the ViewModel, which starts selection in browse mode
     /// and opens the item actions sheet in selection mode.
     /// </summary>
-    private void OnItemLongPress(object sender, CollectionViewGestureEventArgs e)
+    private void OnItemLongPress(object sender, Syncfusion.Maui.ListView.ItemLongPressEventArgs e)
     {
-        if (_viewModel?.ItemLongPressCommand is { } command && command.CanExecute(e.Item))
-            command.Execute(e.Item);
+        if (_viewModel?.ItemLongPressCommand is { } command && command.CanExecute(e.DataItem))
+            command.Execute(e.DataItem);
     }
 
     // -------------------------------------------------------------------------
     // BottomSheet event handler
     // -------------------------------------------------------------------------
 
-    private void OnConfirmSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
-    {
-        // Sheet closed by gesture (swipe-down) — sync back to ViewModel
-        if (e.NewValue == BottomSheetState.Hidden &&
-            _viewModel != null &&
-            _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
-        {
-            _viewModel.ConfirmSheetState = BottomSheetState.Hidden;
-        }
-    }
-
     /// <summary>
-    /// Item actions sheet state changed. A swipe-dismiss is synced back to the ViewModel, and a pending
-    /// confirm sheet is shown once the item actions sheet has hidden.
+    /// Item actions sheet closed (drag down ends in Collapsed, or the ViewModel hid it). The TwoWay State binding has
+    /// already written Hidden back; DismissItemActionsCommand also clears the item-actions target, as CrudListView does
+    /// on a swipe-dismiss. The command is idempotent, so a close the ViewModel started is unaffected.
     /// </summary>
-    private void OnItemActionsSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
+    private void OnItemActionsSheetStateChanged(object sender, Syncfusion.Maui.Toolkit.BottomSheet.StateChangedEventArgs e)
     {
-        if (e.NewValue != BottomSheetState.Hidden)
-            return;
+        var closed = e.NewState is Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Hidden
+            or Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Collapsed;
+        var wasOpen = e.OldState is not Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Hidden
+            and not Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState.Collapsed;
 
-        // Sheet closed by gesture (swipe-down) — sync back to ViewModel
-        if (_viewModel != null && _viewModel.ItemActionsSheetState != BottomSheetState.Hidden)
-            _viewModel.DismissItemActionsCommand.Execute(null);
-
-        if (_showConfirmWhenActionsHidden)
-        {
-            _showConfirmWhenActionsHidden = false;
-            if (_viewModel != null && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
-                confirmSheet.Show(_viewModel.ConfirmSheetState, null);
-        }
-    }
-
-    /// <summary>
-    /// Overflow item menu closed (outside tap, back, Edit, or a page action). Flushes a Delete-deferred confirm sheet.
-    /// Never dispatches DismissItemMenuCommand: the TwoWay IsOpen binding has already written the close back.
-    /// The back route is owned by <see cref="Menu"/> (REQ-OVFM-13b), not by this view.
-    /// </summary>
-    private void OnItemMenuClosed(object sender, EventArgs e)
-    {
-        if (!_showConfirmWhenMenuClosed)
-            return;
-
-        _showConfirmWhenMenuClosed = false;
-        if (_viewModel != null && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
-            confirmSheet.Show(_viewModel.ConfirmSheetState, null);
+        if (closed && wasOpen)
+            _viewModel?.DismissItemActionsCommand.Execute(null);
     }
 }
