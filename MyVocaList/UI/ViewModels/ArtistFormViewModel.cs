@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
@@ -21,6 +22,7 @@ public partial class ArtistFormViewModel : ViewModelBase
     private readonly IArtistSuggestionService _artistSuggestions;
     private readonly IImageStore _imageStore;
     private readonly IPhotoPicker _photoPicker;
+    private readonly IArtistProfileService _artistProfile;
 
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : null; }
 
@@ -117,7 +119,8 @@ public partial class ArtistFormViewModel : ViewModelBase
         INavigationService navigationService,
         IArtistSuggestionService artistSuggestions,
         IImageStore imageStore,
-        IPhotoPicker photoPicker)
+        IPhotoPicker photoPicker,
+        IArtistProfileService artistProfile)
     {
         _artistService = artistService;
         _snackbarService = snackbarService;
@@ -127,6 +130,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         _artistSuggestions = artistSuggestions;
         _imageStore = imageStore;
         _photoPicker = photoPicker;
+        _artistProfile = artistProfile;
 
         NameOptionSource = new MenuOptionSource(SearchNameAsync);
 
@@ -167,6 +171,50 @@ public partial class ArtistFormViewModel : ViewModelBase
             _storedImageReference = artist.ImageUrl;
             NotifyFormImageChanged();
         });
+
+        if (artist.ExternalProvider == ProviderNames.MusicBrainz && !string.IsNullOrEmpty(artist.ExternalId))
+            await LoadProfileAsync(artist.ExternalId);
+    }
+
+    // ── Artist profile (REQ-MSRC-08, -09, -10): runtime only, never stored ─────────
+    private const string ProfileUnavailableMessage = "Could not load the artist profile. Showing your saved data.";
+
+    [ObservableProperty] private string? _profileImageUrl;
+    [ObservableProperty] private string? _profileImageCredit;
+    [ObservableProperty] private string? _profileDescription;
+    [ObservableProperty] private IReadOnlyList<ReleaseGroupDto> _discography = [];
+
+    public bool HasProfileImage => !string.IsNullOrEmpty(ProfileImageUrl);
+    public bool HasProfileDescription => !string.IsNullOrEmpty(ProfileDescription);
+    public bool HasDiscography => Discography.Count > 0;
+    public bool HasProfile => HasProfileImage || HasProfileDescription || HasDiscography;
+
+    /// <summary>Initials shown while there is no free photo (REQ-MSRC-08).</summary>
+    public string ArtistInitials =>
+        string.Concat((ArtistName ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2).Select(w => char.ToUpperInvariant(w[0])));
+
+    /// <summary>Loads the profile for a MusicBrainz artist id; a failure shows a non-blocking message (REQ-MSRC-10).</summary>
+    public async Task LoadProfileAsync(string mbid)
+    {
+        var profile = await _artistProfile.GetAsync(mbid);
+        if (profile is null)
+        {
+            await _snackbarService.ShowErrorAsync(ProfileUnavailableMessage);
+            return;
+        }
+
+        RunOnUiThread(() =>
+        {
+            ProfileImageUrl = profile.ImageUrl;
+            ProfileImageCredit = profile.ImageCredit;
+            ProfileDescription = profile.Description;
+            Discography = profile.Discography;
+            OnPropertyChanged(nameof(HasProfileImage));
+            OnPropertyChanged(nameof(HasProfileDescription));
+            OnPropertyChanged(nameof(HasDiscography));
+            OnPropertyChanged(nameof(HasProfile));
+        });
     }
 
     partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
@@ -193,6 +241,7 @@ public partial class ArtistFormViewModel : ViewModelBase
 
     partial void OnArtistNameChanged(string value)
     {
+        OnPropertyChanged(nameof(ArtistInitials));
         // Counter guidance uses the trimmed length — the same string ValidateNameInput checks —
         // so the counter never reports an error the validator would not.
         UpdateCharacterCounter(value?.Trim().Length ?? 0);
