@@ -369,20 +369,20 @@ public class ArtistFormViewModelTests
     }
 
     [Fact]
-    // [AC] REQ-SFT-49: the Deezer artist id and provider are not stored; Save creates the artist with the name only.
-    public async Task SelectName_DeezerPickThenSave_CreatesWithNameOnlyNoExternalIdentity()
+    // [AC] REQ-MSRC-03 (supersedes REQ-SFT-49): a picked remote artist's id and provider are stored on Save.
+    public async Task SelectName_DeezerPickThenSave_CreatesWithPickedExternalIdentity()
     {
         var sut = CreateAddFormSut();
         await sut.SelectNameCommand.ExecuteAsync(Pick(RemoteArtist("Metallica Tribute", externalId: "dz-9")));
         _serviceMock.Setup(s => s.ValidateNameInput("Metallica Tribute")).Returns((true, ""));
         _serviceMock
-            .Setup(s => s.CreateArtistAsync("Metallica Tribute", null, null, It.IsAny<CancellationToken>()))
+            .Setup(s => s.CreateArtistAsync("Metallica Tribute", "dz-9", It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, "Artist 'Metallica Tribute' created successfully", new Artist { Name = "Metallica Tribute" }));
 
         await sut.SaveCommand.ExecuteAsync(null);
 
         _serviceMock.Verify(
-            s => s.CreateArtistAsync("Metallica Tribute", null, null, It.IsAny<CancellationToken>()),
+            s => s.CreateArtistAsync("Metallica Tribute", "dz-9", It.IsAny<string?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
