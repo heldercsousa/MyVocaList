@@ -63,6 +63,7 @@ public class AppServicesRegistrationTests
             // MAUI-platform-only dependencies, registered in MauiProgram.cs — mocked here.
             services.AddSingleton(Mock.Of<ISnackbarComponent>());
             services.AddSingleton(Mock.Of<ISecureStorageWrapper>());
+            services.AddSingleton(Mock.Of<ISharedLinkInbox>()); // registered in MauiProgram.cs (REQ-MSRC-06)
             services.AddSingleton<IMessenger>(new WeakReferenceMessenger());
             services.AddSingleton(Mock.Of<INavigationService>());
             // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).

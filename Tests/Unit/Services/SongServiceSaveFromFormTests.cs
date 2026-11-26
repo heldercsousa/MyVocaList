@@ -221,6 +221,22 @@ public class SongServiceSaveFromFormTests
     }
 
     [Fact]
+    // [AC] REQ-MSRC-02: saving a MusicBrainz pick stores the provider name and the MBID, and no image.
+    public async Task SaveAsync_MusicBrainzPick_StoresProviderAndMbid()
+    {
+        const string mbid = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
+        SetupArtistResolution(ResolutionKind.ExactLocalMatch, exactId: 4);
+
+        var outcome = await CreateSut().SaveFromFormAsync(
+            NewRequest(artistId: null, provider: MyVocaList.Domain.Constants.ProviderNames.MusicBrainz, externalId: mbid));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        Assert.Equal("MusicBrainz", AddedSong!.ExternalProvider);
+        Assert.Equal(mbid, AddedSong.ExternalId);
+        Assert.Null(AddedSong.ImageUrl);
+    }
+
+    [Fact]
     // [AC] REQ-SFT-52: a padded / differently cased / accented variant ("  métallica ") is decided by
     // the DB collation inside IArtistResolutionService, never by a C# comparison: the service hands the
     // typed text to the resolver (case and accent untouched) and reuses the id it returns.

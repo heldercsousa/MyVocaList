@@ -28,8 +28,8 @@ public class SongSuggestionServiceTests
 
     public SongSuggestionServiceTests()
     {
-        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("MusicBrainz");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns("Deezer");
+        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         // Moq returns null for Task<IReadOnlyList<T>> by default; make every lookup explicit-empty.
@@ -232,8 +232,8 @@ public class SongSuggestionServiceTests
         SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep"));
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(
-                "Deezer", It.Is<IReadOnlyCollection<string>>(ids => ids.Contains("dz-1")), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "Deezer", "dz-1") });
+                "MusicBrainz", It.Is<IReadOnlyCollection<string>>(ids => ids.Contains("dz-1")), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "MusicBrainz", "dz-1") });
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
@@ -272,7 +272,7 @@ public class SongSuggestionServiceTests
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(
                 It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "Deezer", "dz-1") });
+            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "MusicBrainz", "dz-1") });
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync("creep", [7]);

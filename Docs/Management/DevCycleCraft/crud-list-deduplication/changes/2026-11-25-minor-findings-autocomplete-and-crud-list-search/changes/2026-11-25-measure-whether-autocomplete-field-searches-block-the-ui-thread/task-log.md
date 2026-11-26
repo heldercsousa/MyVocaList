@@ -67,3 +67,9 @@ Files written and re-read: `SongFormViewModel.cs` L386-395 and title read; `Arti
 
 - Janky-frame share was 95–98 % in every run: the emulator's software rendering, not the read.
 - Conclusion: the after runs are mostly faster at p90 (34–36 ms against 48–69 ms), but the spread is wide (one after run reached 61 / 700). The emulator suggests the offload helps and shows no regression; it does not prove it. Device confirmation on a real phone stays with Helder.
+
+## Phone check (Helder, 2026-11-26)
+
+Debug APK `com.myvocalist-debug-20261126-173207-b410cb1f.apk`, on Helder's phone.
+
+- **Pass.** Typing in the Song, Artist and Person form autocomplete fields does not stutter or freeze. This is the device check the gate asked for; it confirms no visible jank on a real phone, while the emulator numbers above stay indicative only.

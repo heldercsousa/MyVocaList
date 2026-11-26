@@ -26,7 +26,7 @@ public partial class SongFormPage : ContentPage
         viewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
 
@@ -47,11 +47,11 @@ public partial class SongFormPage : ContentPage
 
         ApplySkeletonPulse();
 
-        // BUG-020: RefreshApiKeyFlagAsync wraps SecureStorage.GetAsync in its own try-catch so a
-        // corrupted Android keystore alias cannot crash this async void OnAppearing — do not
-        // remove that try-catch.
-        await ViewModel.RefreshApiKeyFlagAsync();
         ViewModel.InitializeArtistField(); // BUG-008: reliable artist field init after all query props set
+
+        // REQ-MSRC-06: attach a link shared while no form was open, and react to links shared from now on.
+        ViewModel.StartListeningForSharedLinks();
+        _ = ViewModel.ApplyPendingSharedLinkAsync();
     }
 
     // Android Back does not close an SfBottomSheet: while a sheet is open, Back dismisses it through the same
@@ -221,6 +221,7 @@ public partial class SongFormPage : ContentPage
     {
         base.OnDisappearing();
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        ViewModel.StopListeningForSharedLinks();
         this.AbortAnimation(SkeletonAnimationName);
         ViewModel.CancelLyricsLookupOnOpen();
     }

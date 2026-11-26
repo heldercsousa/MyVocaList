@@ -40,3 +40,10 @@ Files written and re-read: `SongFormViewModel.cs` L380-400 (search core), L440-4
 ### Round 2 (coordinator request): B1 cancellation and the live out-of-order path
 - `SearchArtistsCoreAsync_CancelledToken_CancelsTheServiceRead` (B1). Red: with the token replaced by `CancellationToken.None` in the service read, the test FAILED (TimeoutException: service read never cancelled). Restored.
 - `ArtistOptionSearch_OutOfOrderCompletion_LatestQueryWins` (REQ-ACREATE-13 on the live `ArtistOptionSource` path, replacing the removed BUG-051 test). The superseded read honours its token; the newer answer is shown, the late older answer is dropped (cancelled). Green (SongForm suite passes). Red not separately demonstrated for this test.
+
+## Phone check (Helder, 2026-11-26)
+
+Debug APK `com.myvocalist-debug-20261126-173207-b410cb1f.apk`, on Helder's phone.
+
+- **Fail: the Song form Artist field shows no suggestions.** Registered as BUG-092 ([README](../../../../BusinessFeatures/artists-songs/bugs/2026-11-26-BUG-092-song-form-the-artist-field-shows-no-suggestions/README.md)). Helder accepted closing this item and fixing BUG-092 after the DX to Syncfusion migration lands. The cause is not yet known: it may come from the migration, or from this branch's changes to `SongFormViewModel.SearchArtistsCoreAsync` (B1 token, B2 constant, B4 offload, B12 removal).
+- The YouTube search part (B11) no longer applies: develop removed the YouTube search page (`f4d87771`), and the merge accepted that deletion.

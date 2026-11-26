@@ -38,7 +38,7 @@ public interface ISongRepository
     /// <summary>
     /// REQ-SFT-26: true when another song holds this external identity.
     /// </summary>
-    /// <param name="provider">External provider name (e.g. "Deezer").</param>
+    /// <param name="provider">External provider name (e.g. "MusicBrainz").</param>
     /// <param name="externalId">External id value for that provider.</param>
     /// <param name="excludeId">Id of the song being edited — excluded from the check; null when creating.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -69,7 +69,7 @@ public interface ISongRepository
         int artistId, string title, int take, CancellationToken ct = default);
 
     /// <summary>REQ-SFT-05(a): songs holding any of the given external ids for one provider.</summary>
-    /// <param name="provider">External provider name (e.g. "Deezer").</param>
+    /// <param name="provider">External provider name (e.g. "MusicBrainz").</param>
     /// <param name="externalIds">External ids to look up.</param>
     /// <param name="ct">Cancellation token.</param>
     Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct);

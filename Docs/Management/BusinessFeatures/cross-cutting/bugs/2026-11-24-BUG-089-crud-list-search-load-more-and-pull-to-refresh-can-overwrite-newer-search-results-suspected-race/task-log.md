@@ -29,3 +29,9 @@ B6 and B7 reproduced at unit level (not on device). B8 is code-reading only: the
 ### Build notes
 Build: passed (0 errors) | Tests: 55 passed (filtered) | Commit SHA: see git log
 Files written and re-read: `CrudListViewModelBase.cs` (LoadFirstPageAsync head, apply block, LoadMore block), `CrudListStaleLoadTests.cs`.
+
+## Phone check (Helder, 2026-11-26)
+
+Debug APK `com.myvocalist-debug-20261126-173207-b410cb1f.apk`, on Helder's phone.
+
+- **Pass.** Search followed by pull-to-refresh, and load-more followed by a quick search: every row matches the search.

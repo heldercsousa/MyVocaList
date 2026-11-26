@@ -57,3 +57,9 @@ Files written and re-read: `CrudListViewModelBase.cs` (line 359 and using block)
 - Result: once the first key lands, the loading placeholder shows and stays on through every keystroke. It never flashes back to rows between keys. This matches the unit test `TypingFasterThanTheDebounce_KeepsTheShimmerOnUntilTheLastSearchApplies`.
 - Open, not resolved: in the 10-second recording no results appeared after the last key, and later attempts to repeat the search were spoiled by driving errors (taps and keys landed on other pages; the search box once showed "aqeda"). Whether results take that long on the emulator, or a search sometimes doesn't apply, needs a check on a real phone: type "adega" on Venues and see that the "Adega ..." rows appear within about a second.
 - Resolved (same day, clean re-run with focus confirmed by screenshot): Artists, "ram" shows only Ramones within 3 s; Venues (500 rows), "cafe" typed one key at a time at 150 ms shows the Café venues (accent-insensitive) within 3 s. Search results do apply; the earlier "no results" came from the driving errors, not the app. A real-phone check stays useful but is not blocking.
+
+## Phone check (Helder, 2026-11-26)
+
+Debug APK `com.myvocalist-debug-20261126-173207-b410cb1f.apk`, on Helder's phone.
+
+- **Pass.** Venues "cafe" and Artists "ram": the placeholder stays on while typing without flashing, and results appear soon after typing stops. This closes the open device check.

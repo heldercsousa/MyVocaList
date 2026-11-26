@@ -14,7 +14,7 @@ namespace MyVocaList.Services;
 /// <inheritdoc />
 public class ArtistSuggestionService : IArtistSuggestionService
 {
-    private const string DeezerProviderName = "Deezer";
+    private const string MusicProviderName = ProviderNames.MusicBrainz;
 
     private readonly IArtistRepository _artistRepository;
     private readonly IUnitOfWork _uow;
@@ -79,7 +79,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
             return new ArtistRemoteSearchResult([], RemoteSearchStatus.Offline);
         }
 
-        var raw = await TryFetchDeezerAsync(q, ct);
+        var raw = await TryFetchRemoteAsync(q, ct);
         if (raw is null)
             return new ArtistRemoteSearchResult([], RemoteSearchStatus.Unavailable);
         if (raw.Count == 0)
@@ -89,7 +89,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
         var names = rows.Select(r => r.ArtistName).Distinct().ToList();
 
         // No HTTP inside the read scope: the fetch above has completed (REQ-UOW-43). One collated lookup per
-        // name — the DB, not C#, decides which Deezer names already exist locally (HARD RULE).
+        // name — the DB, not C#, decides which remote names already exist locally (HARD RULE).
         var existing = names.Count == 0
             ? new HashSet<string>()
             : await _uow.ExecuteReadAsync(async sp =>
@@ -116,12 +116,12 @@ public class ArtistSuggestionService : IArtistSuggestionService
     // ── Helpers ──────────────────────────────────────────────────────────
 
     /// <summary>Returns null on any failure/timeout (Unavailable); rethrows caller cancellation.</summary>
-    private async Task<IReadOnlyList<MusicSearchResultDto>?> TryFetchDeezerAsync(string q, CancellationToken ct)
+    private async Task<IReadOnlyList<MusicSearchResultDto>?> TryFetchRemoteAsync(string q, CancellationToken ct)
     {
-        var deezer = _providers.FirstOrDefault(p => p.ProviderName == DeezerProviderName);
-        if (deezer is null)
+        var provider = _providers.FirstOrDefault(p => p.ProviderName == MusicProviderName);
+        if (provider is null)
         {
-            _logger.LogWarning("Deezer provider is not registered; remote artist search unavailable");
+            _logger.LogWarning("MusicBrainz provider is not registered; remote artist search unavailable");
             return null;
         }
 
@@ -129,7 +129,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
         linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds);
         try
         {
-            var results = await deezer.SearchArtistsAsync(q, linked.Token);
+            var results = await provider.SearchArtistsAsync(q, linked.Token);
             return results?.ToList() ?? [];
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -138,7 +138,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Deezer artist search failed or timed out for query '{Query}'", q);
+            _logger.LogWarning(ex, "MusicBrainz artist search failed or timed out for query '{Query}'", q);
             return null;
         }
     }

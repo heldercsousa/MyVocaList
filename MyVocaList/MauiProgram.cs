@@ -93,7 +93,7 @@ public static class MauiProgram
 
         // Repositories, HTTP metadata providers, and business services
         // (extracted to a testable extension — see BUG-021 DI regression tests)
-        builder.Services.AddAppServices();
+        builder.Services.AddAppServices(config);
 
         // MAUI-platform services
         builder.Services.AddSingleton<IPreferences>(_ => Preferences.Default);
@@ -109,6 +109,7 @@ public static class MauiProgram
             DeviceInfo.Current.Platform == DevicePlatform.iOS ? "ios" : "android",
             sp.GetRequiredService<ILogger<VersionCheckService>>()));
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
+        builder.Services.AddSingleton<MyVocaList.Domain.ServicesInterfaces.ISharedLinkInbox, MyVocaList.UI.Services.SharedLinkInbox>(); // REQ-MSRC-06
         builder.Services.AddSingleton<ISecureStorageWrapper, SecureStorageWrapper>();
         builder.Services.AddSingleton<INavigationService, MyVocaList.UI.Services.NavigationService>();
         // REQ-SFT-53: device network state for the offline check. Kept here (not in AddAppServices) so the
@@ -145,7 +146,6 @@ public static class MauiProgram
         builder.Services.AddTransient<ArtistFormViewModel>();
         builder.Services.AddTransient<SongsViewModel>();
         builder.Services.AddTransient<SongFormViewModel>();
-        builder.Services.AddTransient<YouTubeSearchViewModel>();
         builder.Services.AddTransient<VenueMapPickerViewModel>();
 
         // Pages
@@ -159,7 +159,6 @@ public static class MauiProgram
         builder.Services.AddTransient<PersonFormPage>();
         builder.Services.AddTransient<ArtistFormPage>();
         builder.Services.AddTransient<SongFormPage>();
-        builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();

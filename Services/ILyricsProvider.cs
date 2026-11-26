@@ -3,7 +3,7 @@ using MyVocaList.Contracts.DTOs;
 namespace MyVocaList.Services;
 
 /// <summary>
-/// Source of song lyrics (LRCLIB for the Deezer pick flow). No consumer until the lyrics service is wired.
+/// Source of song lyrics (LRCLIB for the remote pick flow). No consumer until the lyrics service is wired.
 /// </summary>
 public interface ILyricsProvider
 {

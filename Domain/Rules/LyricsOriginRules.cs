@@ -47,7 +47,7 @@ public static class LyricsOriginRules
             : LyricsOrigin.User;
 
     /// <summary>
-    /// True when opening the song starts a lookup on open (REQ-SLD-19, 24): a Deezer song with blank lyrics and no
+    /// True when opening the song starts a lookup on open (REQ-SLD-19, 24): a music-database song with blank lyrics and no
     /// recorded origin.
     /// </summary>
     /// <param name="externalProvider">The song's music-database provider.</param>
@@ -55,7 +55,7 @@ public static class LyricsOriginRules
     /// <param name="lyrics">The stored lyrics.</param>
     /// <param name="origin">The stored origin; null = not recorded.</param>
     public static bool NeedsLookupOnOpen(string? externalProvider, string? externalId, string? lyrics, LyricsOrigin? origin)
-        => SongIdentityRules.IsDeezerSong(externalProvider, externalId)
+        => SongIdentityRules.IsRemoteSong(externalProvider, externalId)
             && string.IsNullOrWhiteSpace(lyrics)
             && origin is null;
 

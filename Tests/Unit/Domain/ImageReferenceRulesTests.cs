@@ -99,16 +99,17 @@ public class ImageReferenceRulesTests
             ImageReferenceRules.ToDisplaySource(ArtistRef, ImageSize.Large, Root));
 
     [Fact]
-    // [AC] REQ-PIC-03: a Deezer URL is rewritten to /500x500- for the large size.
-    public void ToDisplaySource_DeezerLarge_RewritesSizeSegment()
-        => Assert.Equal(
-            "https://cdn-images.dzcdn.net/images/cover/abc123/500x500-000000-80-0-0.jpg",
-            ImageReferenceRules.ToDisplaySource(DeezerUrl, ImageSize.Large, Root));
+    // [AC] REQ-MSRC-01: a MusicBrainz pick carries no image, so no reference exists and nothing is displayed.
+    public void ImageReferenceRules_MusicBrainzSong_HasNoStoredImage()
+    {
+        Assert.Null(ImageReferenceRules.Normalize(null));
+        Assert.Null(ImageReferenceRules.ToDisplaySource(null, ImageSize.Large, Root));
+    }
 
     [Fact]
-    // [AC] REQ-PIC-03: a Deezer URL is unchanged for the thumbnail.
-    public void ToDisplaySource_DeezerThumbnail_IsUnchanged()
-        => Assert.Equal(DeezerUrl, ImageReferenceRules.ToDisplaySource(DeezerUrl, ImageSize.Thumbnail, Root));
+    // [AC] REQ-MSRC-01: a stored URL is never rewritten for the large size (the Deezer size-segment rewrite is gone).
+    public void ToDisplaySource_UrlWithSizeSegmentLarge_IsUnchanged()
+        => Assert.Equal(DeezerUrl, ImageReferenceRules.ToDisplaySource(DeezerUrl, ImageSize.Large, Root));
 
     [Theory]
     [InlineData(ImageSize.Thumbnail)]
@@ -116,13 +117,6 @@ public class ImageReferenceRulesTests
     // [AC] REQ-PIC-03: any other image URL is unchanged for both sizes.
     public void ToDisplaySource_OtherUrl_IsUnchanged(ImageSize size)
         => Assert.Equal("https://e.com/pic.jpg", ImageReferenceRules.ToDisplaySource("https://e.com/pic.jpg", size, Root));
-
-    [Fact]
-    // [AC] REQ-PIC-03: only the first /250x250- segment is replaced.
-    public void ToDisplaySource_DeezerLarge_ReplacesOnlyFirstOccurrence()
-        => Assert.Equal(
-            "https://e.com/500x500-a/250x250-b.jpg",
-            ImageReferenceRules.ToDisplaySource("https://e.com/250x250-a/250x250-b.jpg", ImageSize.Large, Root));
 
     [Theory]
     [InlineData(null)]

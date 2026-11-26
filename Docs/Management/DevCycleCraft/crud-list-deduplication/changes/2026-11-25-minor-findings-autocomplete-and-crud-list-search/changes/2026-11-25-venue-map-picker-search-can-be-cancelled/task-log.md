@@ -38,3 +38,9 @@ Files written and re-read: `VenueMapPickerViewModel.cs` L141-197 and the tap met
 ### Round 2 (coordinator request): map tap cancels a pending search
 - Test `MapTap_CancelsAPendingSubmitSearch` added (REQ-VEN-26 / B10).
 - Red: with the `CancelPendingSearch()` call in `OnMapTappedAsync` temporarily commented out, the test FAILED (`Assert.True() Failure`). Line restored; green again (VenueMapPickerViewModelTests with SongForm suite: 128 passed).
+
+## Phone check (Helder, 2026-11-26)
+
+Debug APK `com.myvocalist-debug-20261126-173207-b410cb1f.apk`, on Helder's phone.
+
+- **Pass.** A map tap during an address search wins, and leaving the page during a search does not crash.

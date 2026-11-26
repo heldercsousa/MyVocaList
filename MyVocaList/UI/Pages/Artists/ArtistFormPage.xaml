@@ -16,8 +16,8 @@
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">
 
-            <!-- Name (REQ-PIC-33, 37): the shared autocomplete field. Add mode: local artists, then Deezer;
-                 a local pick opens that artist, a Deezer pick fills Name in the picked state. Edit mode:
+            <!-- Name (REQ-PIC-33, 37): the shared autocomplete field. Add mode: local artists, then MusicBrainz;
+                 a local pick opens that artist, a MusicBrainz pick fills Name in the picked state. Edit mode:
                  plain editable text (IsSearchEnabled false). A defined Name reads as Headline Medium text
                  and a tap opens the editor (REQ-PIC-23..26). Blur validation runs ValidateName. -->
             <textfields:TapToEditField x:Name="nameTapToEdit"

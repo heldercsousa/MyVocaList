@@ -27,7 +27,7 @@ public static class SearchConstants
     /// </summary>
     public const int MaxSearchResults = 5;
 
-    /// <summary>Rows kept and grouped out of one Deezer track answer (REQ-SLD-10).</summary>
+    /// <summary>Rows kept and grouped out of one remote track answer (REQ-SLD-10).</summary>
     public const int RemoteSongFetchCount = 25;
 
     /// <summary>

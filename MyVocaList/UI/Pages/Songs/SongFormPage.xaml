@@ -196,9 +196,9 @@
 
                                 <!-- Title is the first field (REQ-SFT-01). A defined Title shows as Headline Medium text; a tap
                                      opens the editor with the text kept and releases a picked Title (REQ-PIC-23..27). Add mode:
-                                     the search box over local songs and Deezer (REQ-SFT-02). Edit mode: plain editable text for
+                                     the search box over local songs and MusicBrainz (REQ-SFT-02). Edit mode: plain editable text for
                                      every song (IsSearchEnabled false, REQ-SFT-27, REQ-PIC-29). Blur validation runs
-                                     ValidateTitle (the VM's first check). A stored Deezer song shows its Title as plain text
+                                     ValidateTitle (the VM's first check). A stored MusicBrainz song shows its Title as plain text
                                      (REQ-SLD-36): the Label below, in the same text style; the tap-to-edit field is hidden. -->
                                 <Label Text="{Binding SongTitle}"
                                        StyleClass="Headline.Medium"
@@ -253,7 +253,7 @@
                                                           RemoveCommand="{Binding RemoveImageCommand}"
                                                           IsBusy="{Binding IsImageBusy}" />
 
-                                <!-- Artist (REQ-SFT-01): a Deezer song shows the artist as plain text that cannot be edited
+                                <!-- Artist (REQ-SFT-01): a MusicBrainz song shows the artist as plain text that cannot be edited
                                      (REQ-SLD-12); a local-only song keeps the tap-to-edit field (REQ-SLD-13). A defined Artist shows as
                                      Title Large text; a tap opens the editor with the text kept and releases the picked artist, in
                                      add and edit mode, so the artist of a stored song can be changed (REQ-PIC-23..28, 31). A pick
@@ -352,41 +352,11 @@
                                         StrokeShape="RoundRectangle 8">
                                     <VerticalStackLayout Spacing="8">
 
-                                        <buttons:SfButton Text="🔍 Search YouTube"
+                                        <buttons:SfButton Text="🔍 Search on YouTube"
                                                           Style="{StaticResource SfOutlinedButton}"
                                                           HorizontalOptions="Fill"
                                                           Command="{Binding LaunchYouTubeSearchCommand}"
                                                           IsEnabled="{Binding CanLaunchYouTubeSearch}" />
-
-                                        <lists:ListItem
-                                            Headline="Search YouTube (API)"
-                                            IsVisible="{Binding HasYouTubeApiKey}">
-                                            <lists:ListItem.LeadingContent>
-                                                <ImageButton Style="{StaticResource SfIconButton}"
-                                                             Source="search_outlined"
-                                                             InputTransparent="True" />
-                                            </lists:ListItem.LeadingContent>
-                                            <lists:ListItem.TrailingContent>
-                                                <ImageButton Style="{StaticResource SfIconButton}"
-                                                             Source="arrow_forward_outlined"
-                                                             InputTransparent="True" />
-                                            </lists:ListItem.TrailingContent>
-                                            <lists:ListItem.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding NavigateToYouTubeSearchCommand}" />
-                                            </lists:ListItem.GestureRecognizers>
-                                        </lists:ListItem>
-
-                                        <VerticalStackLayout Spacing="4"
-                                                             IsVisible="{Binding HasYouTubeApiKey, Converter={StaticResource InverseBoolConverter}}">
-                                            <Label Text="Add a YouTube API key in Settings to enable search."
-                                                   StyleClass="Body.Small"
-                                                   TextColor="{StaticResource OnSurfaceVariant}" />
-                                            <buttons:SfButton Text="Go to Settings"
-                                                              Style="{StaticResource SfOutlinedButton}"
-                                                              HorizontalOptions="Start"
-                                                              Padding="16,0"
-                                                              Command="{Binding GoToSettingsCommand}" />
-                                        </VerticalStackLayout>
 
                                         <Label Text="Or paste a YouTube URL"
                                                StyleClass="Body.Small"

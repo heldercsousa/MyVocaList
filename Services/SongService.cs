@@ -31,8 +31,8 @@ public class SongService : ISongService
 
     private const string ArtistRequiredMessage = "Artist is required";
     private const string ArtistNotFoundMessage = "Artist not found";
-    private const string DeezerArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
-    private const string DeezerTitleFrozenMessage = "The title of a song from the music database cannot be changed.";
+    private const string RemoteArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
+    private const string RemoteTitleFrozenMessage = "The title of a song from the music database cannot be changed.";
 
     /// <summary>The one duplicate message for an exact song identity (REQ-RMV-06, REQ-RMV-10).</summary>
     private const string DuplicateTitleMessage = "This artist already has a song with this title.";
@@ -244,17 +244,17 @@ public class SongService : ISongService
             if (song == null)
                 return (false, "Song not found", SaveField.None);
 
-            // REQ-SLD-15: the artist of a Deezer song cannot change, whatever the caller sends; checked before
+            // REQ-SLD-15: the artist of a remote-catalog song cannot change, whatever the caller sends; checked before
             // the identity check and before any artist is created.
-            if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
+            if (MyVocaList.Domain.Rules.SongIdentityRules.IsRemoteSong(song.ExternalProvider, song.ExternalId)
                 && (hasNewArtistName || (artistId.HasValue && artistId.Value != song.ArtistId)))
-                return (false, DeezerArtistFrozenMessage, SaveField.Artist);
+                return (false, RemoteArtistFrozenMessage, SaveField.Artist);
 
-            // REQ-SLD-37: the title of a Deezer song cannot change either; compared after the trimming every
+            // REQ-SLD-37: the title of a remote-catalog song cannot change either; compared after the trimming every
             // title gets (ValidateTitleInput above), ordinal, character by character.
-            if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
+            if (MyVocaList.Domain.Rules.SongIdentityRules.IsRemoteSong(song.ExternalProvider, song.ExternalId)
                 && !string.Equals(title.Trim(), song.Title, StringComparison.Ordinal))
-                return (false, DeezerTitleFrozenMessage, SaveField.Title);
+                return (false, RemoteTitleFrozenMessage, SaveField.Title);
 
             // REQ-SFT-26: an external identity held by ANOTHER song (self excluded) is rejected before
             // any artist is created, so a refused save never leaves a new artist behind.
@@ -547,22 +547,22 @@ public class SongService : ISongService
         // the SongResolutionService -> ISongService constructor cycle.
         var resolved = await _uow.ExecuteReadAsync<SaveFormResolution>(async sp =>
         {
-            // REQ-SLD-15 / REQ-SLD-30: in edit mode the artist of a Deezer song is the stored one. The id is
+            // REQ-SLD-15 / REQ-SLD-30: in edit mode the artist of a remote-catalog song is the stored one. The id is
             // compared, never the typed text; a match needs no artist resolution at all.
             if (!isAddMode)
             {
                 var songRepository = sp.GetRequiredService<ISongRepository>();
                 var storedSong = await songRepository.GetByIdAsync(request.SongId!.Value, ct);
                 if (storedSong is not null
-                    && MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(storedSong.ExternalProvider, storedSong.ExternalId))
+                    && MyVocaList.Domain.Rules.SongIdentityRules.IsRemoteSong(storedSong.ExternalProvider, storedSong.ExternalId))
                 {
                     if (request.ArtistId != storedSong.ArtistId)
-                        return SaveFormResolution.Stop(SaveFailed(DeezerArtistFrozenMessage, SaveField.Artist));
+                        return SaveFormResolution.Stop(SaveFailed(RemoteArtistFrozenMessage, SaveField.Artist));
 
-                    // REQ-SLD-37: the title of a Deezer song cannot change either; the trimmed request title is
+                    // REQ-SLD-37: the title of a remote-catalog song cannot change either; the trimmed request title is
                     // compared ordinally with the stored one (the same rule as UpdateSongCoreAsync).
                     if (!string.Equals(request.Title.Trim(), storedSong.Title, StringComparison.Ordinal))
-                        return SaveFormResolution.Stop(SaveFailed(DeezerTitleFrozenMessage, SaveField.Title));
+                        return SaveFormResolution.Stop(SaveFailed(RemoteTitleFrozenMessage, SaveField.Title));
 
                     return SaveFormResolution.Proceed(storedSong.ArtistId, null, fillArtistImage: false);
                 }

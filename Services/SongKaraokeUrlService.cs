@@ -4,7 +4,7 @@ using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Domain.UnitOfWork;
-using System.Text.RegularExpressions;
+using MyVocaList.Domain.Rules;
 
 namespace MyVocaList.Services;
 
@@ -13,11 +13,6 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
     private readonly ISongKaraokeUrlRepository _repo;
     private readonly IUnitOfWork _uow;
     private readonly ILogger<SongKaraokeUrlService> _logger;
-
-    // Matches the 11-char video ID segment in all supported YouTube URL formats
-    private static readonly Regex VideoIdRegex = new(
-        @"(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([A-Za-z0-9_-]{11})",
-        RegexOptions.Compiled);
 
     public SongKaraokeUrlService(ISongKaraokeUrlRepository repo, IUnitOfWork uow, ILogger<SongKaraokeUrlService> logger)
     {
@@ -29,9 +24,7 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
     /// <inheritdoc />
     public string? ExtractVideoId(string rawUrl)
     {
-        if (string.IsNullOrWhiteSpace(rawUrl)) return null;
-        var match = VideoIdRegex.Match(rawUrl);
-        return match.Success ? match.Groups[1].Value : null;
+        return YouTubeLinkRules.TryExtractVideoId(rawUrl, out var videoId) ? videoId : null;
     }
 
     /// <inheritdoc />

@@ -3,7 +3,7 @@ using MyVocaList.Contracts.DTOs;
 namespace MyVocaList.Services;
 
 /// <summary>
-/// Lyrics lookup for the Song form's Deezer pick flow: offline skip, time bound, one retry, length limit and trim
+/// Lyrics lookup for the Song form's remote pick flow: offline skip, time bound, one retry, length limit and trim
 /// (REQ-LYR-02, 03, 05, 06, 07, 08).
 /// </summary>
 public interface ISongLyricsService

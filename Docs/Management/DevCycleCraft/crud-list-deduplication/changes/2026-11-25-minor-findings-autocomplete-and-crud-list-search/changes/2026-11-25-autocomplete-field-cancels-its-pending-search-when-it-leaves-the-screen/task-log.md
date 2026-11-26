@@ -30,3 +30,9 @@
 ### Build notes
 Build: Android build run before this change set; re-run after this edit: see commit | Tests: 14 passed (filtered) | Commit SHA: see git log
 Files written and re-read: `AutocompleteFieldSf.xaml.cs` L296-299 and L469-472.
+
+## Phone check (Helder, 2026-11-26)
+
+Debug APK `com.myvocalist-debug-20261126-173207-b410cb1f.apk`, on Helder's phone.
+
+- **Pass.** Typing in the Song form Title field and pressing Back at once: no crash, and no old suggestion list on reopening.
