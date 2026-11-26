@@ -45,7 +45,7 @@ Lyrics source (Bandokê lyrics decision stays in `findings.md` §5); charts/"pop
 ## Decided by Helder (2026-11-26)
 - Artist images: Wikidata + Wikimedia Commons as the primary source; Fanart.tv only as a supplement, and only if its terms allow it (still unverified).
 
-## Open questions for Helder
-1. Contact string for the User-Agent (an app URL or a project email).
-2. Free API during the free phase, then MetaBrainz plan or CC0 subset before any paid tier — confirm.
-3. Clear Deezer-sourced titles' provenance silently, or tell the user once?
+## Answered by Helder (2026-11-26)
+1. User-Agent contact: Helder's e-mail for now, read from configuration (user env var / local settings), never committed to the public repo. A project URL replaces it once the app is renamed and a domain bought before the MVP.
+2. Confirmed: free API during the free phase; MetaBrainz plan or a CC0 dump before any paid tier. A dump is server-side only (full dump is several GB compressed, tens of GB loaded; not viable on device), so it belongs to the cloud phase.
+3. No user notice: the app is not in production and is installed only on Helder's phone. Deezer-sourced data is cleared silently in the migration; song rows themselves are edited in place, never recreated.
