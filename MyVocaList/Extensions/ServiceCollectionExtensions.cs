@@ -103,6 +103,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILyricsProvider>(sp => sp.GetRequiredService<LrclibLyricsProvider>());
         services.AddScoped<ISongLyricsService, SongLyricsService>();
 
+        // REQ-MSRC-14: keyless YouTube oEmbed. Same typed-client pattern as above.
+        services.AddHttpClient<YouTubeOEmbedClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://www.youtube.com/");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+        services.AddScoped<IYouTubeOEmbedClient>(sp => sp.GetRequiredService<YouTubeOEmbedClient>());
+
         // Services
         services.AddScoped<IVenueService, VenueService>();
         services.AddScoped<IPersonService, PersonService>();

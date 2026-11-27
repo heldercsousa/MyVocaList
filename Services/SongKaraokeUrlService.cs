@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
@@ -12,10 +13,12 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
 {
     private readonly ISongKaraokeUrlRepository _repo;
     private readonly IUnitOfWork _uow;
+    private readonly IYouTubeOEmbedClient _oEmbed;
     private readonly ILogger<SongKaraokeUrlService> _logger;
 
-    public SongKaraokeUrlService(ISongKaraokeUrlRepository repo, IUnitOfWork uow, ILogger<SongKaraokeUrlService> logger)
+    public SongKaraokeUrlService(ISongKaraokeUrlRepository repo, IUnitOfWork uow, IYouTubeOEmbedClient oEmbed, ILogger<SongKaraokeUrlService> logger)
     {
+        _oEmbed = oEmbed;
         _repo = repo;
         _uow = uow;
         _logger = logger;
@@ -47,7 +50,16 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
             return Task.FromResult<(bool success, string message, SongKaraokeUrlDto? url)>(
                 (false, "Not a valid YouTube URL.", null));
 
-        return _uow.ExecuteAsync<(bool success, string message, SongKaraokeUrlDto? url)>(async sp =>
+        return AddUrlCoreAsync(songId, videoId, label, ct);
+    }
+
+    private async Task<(bool success, string message, SongKaraokeUrlDto? url)> AddUrlCoreAsync(
+        int songId, string videoId, string? label, CancellationToken ct)
+    {
+        // REQ-MSRC-14: the network call stays outside the transaction; a failure leaves the row without a title.
+        var info = await _oEmbed.GetVideoInfoAsync(videoId, ct);
+
+        return await _uow.ExecuteAsync<(bool success, string message, SongKaraokeUrlDto? url)>(async sp =>
         {
             // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
             var repo = sp.GetRequiredService<ISongKaraokeUrlRepository>();
@@ -60,13 +72,39 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
                 SongId = songId,
                 VideoId = videoId,
                 Label = label?.Trim() is { Length: > 0 } l ? l : null,
-                AddedAt = DateTime.UtcNow
+                AddedAt = DateTime.UtcNow,
+                Title = info?.Title,
+                ThumbnailUrl = info?.ThumbnailUrl
             };
 
             await repo.AddAsync(entity, ct);
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
             return (true, string.Empty, ToDto(entity, isSuggested: false));
         }, ct);
+    }
+
+    /// <inheritdoc />
+    public Task<YouTubeVideoInfo?> GetVideoInfoAsync(string videoId, CancellationToken ct = default)
+        => _oEmbed.GetVideoInfoAsync(videoId, ct);
+
+    /// <inheritdoc />
+    public async Task<List<SongKaraokeUrlDto>> FillMissingVideoInfoAsync(int songId, CancellationToken ct = default)
+    {
+        var urls = await GetUrlsForSongAsync(songId, ct);
+        var filled = new List<SongKaraokeUrlDto>();
+        foreach (var url in urls.Where(u => string.IsNullOrWhiteSpace(u.Title)))
+        {
+            var info = await _oEmbed.GetVideoInfoAsync(url.VideoId, ct);
+            if (info is null) continue;
+
+            await _uow.ExecuteAsync(async sp =>
+            {
+                var repo = sp.GetRequiredService<ISongKaraokeUrlRepository>();
+                await repo.UpdateVideoInfoAsync(songId, url.VideoId, info.Title, info.ThumbnailUrl, ct);
+            }, ct);
+            filled.Add(url with { Title = info.Title, ThumbnailUrl = info.ThumbnailUrl });
+        }
+        return filled;
     }
 
     /// <inheritdoc />
@@ -109,5 +147,5 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
         }, ct);
 
     private static SongKaraokeUrlDto ToDto(SongKaraokeUrl u, bool isSuggested)
-        => new(u.VideoId, u.SongId, u.PlayCount, u.DurationSeconds, u.LastUsedAt, u.AddedAt, u.Label, isSuggested);
+        => new(u.VideoId, u.SongId, u.PlayCount, u.DurationSeconds, u.LastUsedAt, u.AddedAt, u.Label, isSuggested, u.Title, u.ThumbnailUrl);
 }

@@ -16,6 +16,9 @@ public interface ISongKaraokeUrlRepository
     Task AddAsync(SongKaraokeUrl url, CancellationToken ct = default);
     Task RemoveAsync(int songId, string videoId, CancellationToken ct = default);
 
+    /// <summary>REQ-MSRC-14: stores the oEmbed title and thumbnail on the existing row, in place.</summary>
+    Task UpdateVideoInfoAsync(int songId, string videoId, string title, string? thumbnailUrl, CancellationToken ct = default);
+
     /// <summary>Increments PlayCount by 1 and sets LastUsedAt = UtcNow for the given (songId, videoId).</summary>
     Task IncrementPlayCountAsync(int songId, string videoId, CancellationToken ct = default);
 }

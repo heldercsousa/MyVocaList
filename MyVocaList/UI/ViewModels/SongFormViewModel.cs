@@ -1189,6 +1189,52 @@ public partial class SongFormViewModel : ViewModelBase
         var urls = await Task.Run(() => _karaokeUrlService.GetUrlsForSongAsync(songId, ct));
         foreach (var u in urls) _addedVideoIds.Add(u.VideoId);
         RunOnUiThread(() => KaraokeUrls.ReplaceRange(urls));
+
+        // REQ-MSRC-14: rows without a title are filled lazily, off the UI thread; the form never waits for it.
+        if (urls.Any(u => string.IsNullOrWhiteSpace(u.Title)))
+            _ = Task.Run(() => FillMissingVideoInfoAsync(songId));
+    }
+
+    /// <summary>REQ-MSRC-14: fills the title and thumbnail of stored rows that lack them. Failures are logged and silent.</summary>
+    private async Task FillMissingVideoInfoAsync(int songId)
+    {
+        try
+        {
+            var filled = await _karaokeUrlService.FillMissingVideoInfoAsync(songId);
+            if (filled.Count == 0) return;
+            RunOnUiThread(() =>
+            {
+                foreach (var row in filled) ReplaceRowInfo(row.VideoId, row.Title, row.ThumbnailUrl);
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Filling YouTube titles for song {SongId} failed", songId);
+        }
+    }
+
+    /// <summary>REQ-MSRC-14: fills a not-yet-stored (buffered) row for display only; the stored row is filled on the next form open.</summary>
+    private async Task FillBufferedRowInfoAsync(string videoId)
+    {
+        try
+        {
+            var info = await _karaokeUrlService.GetVideoInfoAsync(videoId);
+            if (info is null) return;
+            RunOnUiThread(() => ReplaceRowInfo(videoId, info.Title, info.ThumbnailUrl));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Fetching the YouTube title of video {VideoId} failed", videoId);
+        }
+    }
+
+    private void ReplaceRowInfo(string videoId, string? title, string? thumbnailUrl)
+    {
+        var index = -1;
+        for (var i = 0; i < KaraokeUrls.Count; i++)
+            if (KaraokeUrls[i].VideoId == videoId) { index = i; break; }
+        if (index < 0) return;
+        KaraokeUrls[index] = KaraokeUrls[index] with { Title = title, ThumbnailUrl = thumbnailUrl };
     }
 
     // ── YouTube URL section ───────────────────────────────────────────────
@@ -1286,6 +1332,7 @@ public partial class SongFormViewModel : ViewModelBase
             HasPasteUrlError = false;
         });
 
+        _ = Task.Run(() => FillBufferedRowInfoAsync(videoId));
         return Task.CompletedTask;
     }
 
