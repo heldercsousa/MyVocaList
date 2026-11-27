@@ -167,7 +167,27 @@ public class SongSuggestionService : ISongSuggestionService
             group.Add(row);
         }
 
-        return groups.Select(group => group[0]).ToList();
+        return DistinctByTitleAndArtistName(groups.Select(group => group[0]));
+    }
+
+    // [AC] REQ-MSRC-17: one row per (title, artist name) pair on the fetched page. MusicBrainz lists one
+    // artist under several ids (or none), which the id-based grouping above cannot merge. Ordinal in-memory
+    // comparison of the provider's own text, display-only (HARD RULE: no rewriting). The provider order is its
+    // relevance order, so the first row of a pair is its best-scored recording.
+    private static List<MusicSearchResultDto> DistinctByTitleAndArtistName(IEnumerable<MusicSearchResultDto> rows)
+    {
+        var seen = new HashSet<(string Title, string Artist)>();
+        var result = new List<MusicSearchResultDto>();
+        foreach (var row in rows)
+        {
+            // Rows without an artist id are never merged (REQ-SLD-11).
+            if (string.IsNullOrWhiteSpace(row.ExternalArtistId)
+                || string.IsNullOrWhiteSpace(row.SongTitle) || string.IsNullOrWhiteSpace(row.ArtistName)
+                || seen.Add((row.SongTitle, row.ArtistName)))
+                result.Add(row);
+        }
+
+        return result;
     }
 
     // Promoted rows also come through here, so they carry the stored images and no album (REQ-ART-06).
