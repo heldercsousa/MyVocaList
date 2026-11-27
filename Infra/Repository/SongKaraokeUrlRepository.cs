@@ -53,6 +53,17 @@ public class SongKaraokeUrlRepository : ISongKaraokeUrlRepository
     }
 
     /// <inheritdoc />
+    public async Task UpdateVideoInfoAsync(int songId, string videoId, string title, string? thumbnailUrl, CancellationToken ct = default)
+    {
+        await _db.SongKaraokeUrls
+                 .Where(u => u.SongId == songId && u.VideoId == videoId)
+                 .ExecuteUpdateAsync(s => s
+                     .SetProperty(u => u.Title, title)
+                     .SetProperty(u => u.ThumbnailUrl, thumbnailUrl),
+                     ct);
+    }
+
+    /// <inheritdoc />
     public async Task IncrementPlayCountAsync(int songId, string videoId, CancellationToken ct = default)
     {
         await _db.SongKaraokeUrls

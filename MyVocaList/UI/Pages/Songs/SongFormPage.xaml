@@ -308,10 +308,20 @@
                                                      BindableLayout.ItemsSource="{Binding KaraokeUrls}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="dtoList:SongKaraokeUrlDto">
-                                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
-                                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                                    <Label Text="{Binding VideoId}"
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,4">
+                                                <!-- REQ-MSRC-14: the video thumbnail (oEmbed), when known -->
+                                                <Image Grid.Column="0"
+                                                       Source="{Binding ThumbnailUrl}"
+                                                       WidthRequest="64"
+                                                       HeightRequest="48"
+                                                       Aspect="AspectFill"
+                                                       VerticalOptions="Center"
+                                                       IsVisible="{Binding HasThumbnail}" />
+                                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                    <!-- REQ-MSRC-14: the video title, falling back to the video id -->
+                                                    <Label Text="{Binding DisplayTitle}"
                                                            StyleClass="Body.Medium"
+                                                           MaxLines="2"
                                                            LineBreakMode="TailTruncation" />
                                                     <HorizontalStackLayout Spacing="8">
                                                         <Label Text="{Binding PlayCount, StringFormat='{0} plays'}"
@@ -334,7 +344,7 @@
                                                            TextColor="{StaticResource OnSurfaceVariant}"
                                                            IsVisible="{Binding Label, Converter={StaticResource IsNotNullConverter}}" />
                                                 </VerticalStackLayout>
-                                                <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                                <HorizontalStackLayout Grid.Column="2" Spacing="8">
                                                     <buttons:SfButton Text="▶"
                                                                       Style="{StaticResource SfOutlinedButton}"
                                                                       VerticalOptions="Center"

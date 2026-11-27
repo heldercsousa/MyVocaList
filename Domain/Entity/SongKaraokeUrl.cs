@@ -10,5 +10,11 @@ public class SongKaraokeUrl
     public DateTime AddedAt { get; set; }
     public string? Label { get; set; }
 
+    /// <summary>REQ-MSRC-14: the YouTube video title (oEmbed); null until fetched.</summary>
+    public string? Title { get; set; }
+
+    /// <summary>REQ-MSRC-14: the YouTube thumbnail address (oEmbed); null until fetched.</summary>
+    public string? ThumbnailUrl { get; set; }
+
     public Song Song { get; set; }
 }

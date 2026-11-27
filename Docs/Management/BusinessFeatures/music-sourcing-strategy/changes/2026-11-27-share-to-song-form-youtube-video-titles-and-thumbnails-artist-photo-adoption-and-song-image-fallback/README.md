@@ -38,7 +38,7 @@ Requested by Helder on 2026-11-27 after the on-device test of APK 8270f468. Appr
 - REQ-MSRC-12 lyrics depend on the provider's coverage.
 
 ## Tasks
-- [ ] S1 oEmbed client + title/thumbnail on `SongKaraokeUrl` (migration, in place) — REQ-MSRC-14
+- [x] S1 oEmbed client + title/thumbnail on `SongKaraokeUrl` (migration, in place) — REQ-MSRC-14
 - [ ] S2 Share → Song form routing, replacing the snackbar — REQ-MSRC-11
 - [ ] S3 Prefill from the video title (cleaning + MusicBrainz + lyrics) — REQ-MSRC-12, -13
 - [x] S4 Artist photo adoption — REQ-MSRC-15

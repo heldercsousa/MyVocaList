@@ -1,3 +1,4 @@
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
@@ -22,6 +23,15 @@ public interface ISongKaraokeUrlService
     Task RecordPlayAsync(int songId, string videoId, CancellationToken ct = default);
 
     Task<SongKaraokeUrlDto?> GetSuggestedUrlAsync(int songId, CancellationToken ct = default);
+
+    /// <summary>
+    /// REQ-MSRC-14: fills the title and thumbnail of every stored row of the song that lacks a title (oEmbed, in place).
+    /// Returns the rows that were filled; failures are logged and the row keeps falling back to the video id.
+    /// </summary>
+    Task<List<SongKaraokeUrlDto>> FillMissingVideoInfoAsync(int songId, CancellationToken ct = default);
+
+    /// <summary>REQ-MSRC-14: the oEmbed title and thumbnail of a video (null on any failure), for rows not stored yet.</summary>
+    Task<YouTubeVideoInfo?> GetVideoInfoAsync(string videoId, CancellationToken ct = default);
 
     /// <summary>
     /// Extracts the 11-char video ID from any YouTube URL format.

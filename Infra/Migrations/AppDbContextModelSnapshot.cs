@@ -441,6 +441,16 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0);
 
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
                     b.HasKey("SongId", "VideoId");
 
                     b.ToTable("SongKaraokeUrls", (string)null);

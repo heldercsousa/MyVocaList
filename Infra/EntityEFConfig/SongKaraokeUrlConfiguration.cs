@@ -34,6 +34,16 @@ public class SongKaraokeUrlConfiguration : IEntityTypeConfiguration<SongKaraokeU
                .IsRequired(false)
                .HasMaxLength(100);
 
+        builder.Property(u => u.Title)
+               .HasColumnType("TEXT")
+               .IsRequired(false)
+               .HasMaxLength(300);
+
+        builder.Property(u => u.ThumbnailUrl)
+               .HasColumnType("TEXT")
+               .IsRequired(false)
+               .HasMaxLength(500);
+
         builder.HasOne(u => u.Song)
                .WithMany()
                .HasForeignKey(u => u.SongId)
