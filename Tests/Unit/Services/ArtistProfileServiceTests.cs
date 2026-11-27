@@ -24,11 +24,11 @@ public class ArtistProfileServiceTests
 
     private const string MbWithWikidata = """
         {"relations":[{"type":"wikidata","url":{"resource":"https://www.wikidata.org/wiki/Q1299"}}],
-         "release-groups":[{"id":"rg1","title":"Help!","first-release-date":"1965-08-06"},{"id":"rg2","title":"Untitled","first-release-date":""}]}
+         "release-groups":[{"id":"rg2","title":"Untitled","first-release-date":"","primary-type":"Album","secondary-types":[]},{"id":"rg1","title":"Help!","first-release-date":"1965-08-06","primary-type":"Album","secondary-types":[]}]}
         """;
     private const string MbNoWikidata = """
         {"relations":[{"type":"official homepage","url":{"resource":"https://example.org"}}],
-         "release-groups":[{"id":"rg1","title":"Help!","first-release-date":"1965"}]}
+         "release-groups":[{"id":"rg1","title":"Help!","first-release-date":"1965","primary-type":"Album","secondary-types":[]}]}
         """;
     private const string WdFull = """
         {"entities":{"Q1299":{"claims":{"P18":[{"mainsnak":{"datavalue":{"value":"The Beatles.jpg"}}}]},
@@ -71,6 +71,29 @@ public class ArtistProfileServiceTests
         Assert.Equal(2, profile.Discography.Count);
         Assert.Equal(new ReleaseGroupDto("rg1", "Help!", "1965"), profile.Discography[0]);
         Assert.Null(profile.Discography[1].FirstReleaseYear);
+    }
+
+    private const string MbMixedGroups = """
+        {"release-groups":[
+         {"id":"a","title":"Late","first-release-date":"1990-01-01","primary-type":"Album","secondary-types":[]},
+         {"id":"b","title":"Early","first-release-date":"1975-05-05","primary-type":"Album","secondary-types":[]},
+         {"id":"c","title":"Single One","first-release-date":"1980","primary-type":"Single","secondary-types":[]},
+         {"id":"d","title":"Live Show","first-release-date":"1985","primary-type":"Album","secondary-types":["Live"]},
+         {"id":"e","title":"EARLY","first-release-date":"1976","primary-type":"Album","secondary-types":[]},
+         {"id":"f","title":"No Date","primary-type":"Album","secondary-types":[]},
+         {"id":"g","title":"Typeless","first-release-date":"1970"}]}
+        """;
+
+    [Fact]
+    public async Task GetAsync_Discography_OnlyStudioAlbumsDedupedByTitleOldestFirst()
+    {
+        // [AC] REQ-MSRC-09: discography lists Album-only release groups, one per title, oldest first, unknown year last
+        var sut = Create(Chain(MbMixedGroups, WdFull, CommonsFull));
+
+        var profile = await sut.GetAsync(Mbid);
+
+        Assert.NotNull(profile);
+        Assert.Equal(["b", "a", "f"], profile.Discography.Select(g => g.Mbid));
     }
 
     [Fact]

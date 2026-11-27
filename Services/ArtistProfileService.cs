@@ -108,16 +108,27 @@ public sealed partial class ArtistProfileService : IArtistProfileService
         var list = new List<ReleaseGroupDto>();
         if (!root.TryGetProperty("release-groups", out var groups) || groups.ValueKind != JsonValueKind.Array)
             return list;
+        // Display-only de-duplication by title (ordinal, ignoring case); not a search or a DB uniqueness rule.
+        var seenTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var g in groups.EnumerateArray())
         {
             var gid = Str(g, "id");
             var title = Str(g, "title");
             if (gid is null || title is null)
                 continue;
+            // Albums only: primary type Album and no secondary type (no live, compilation, remix, ...).
+            if (Str(g, "primary-type") != "Album"
+                || (g.TryGetProperty("secondary-types", out var secondary)
+                    && secondary.ValueKind == JsonValueKind.Array && secondary.GetArrayLength() > 0))
+                continue;
             var date = Str(g, "first-release-date");
-            list.Add(new ReleaseGroupDto(gid, title, date is { Length: >= 4 } ? date[..4] : null));
+            var year = date is { Length: >= 4 } ? date[..4] : null;
+            list.Add(new ReleaseGroupDto(gid, title, year));
         }
-        return list;
+
+        // Oldest first, unknown year last; the sort is stable, so equal years keep the provider order.
+        var ordered = list.OrderBy(r => r.FirstReleaseYear is null).ThenBy(r => r.FirstReleaseYear, StringComparer.Ordinal);
+        return ordered.Where(r => seenTitles.Add(r.Title)).ToList();
     }
 
     private static string? ReadWikidataId(JsonElement root)
