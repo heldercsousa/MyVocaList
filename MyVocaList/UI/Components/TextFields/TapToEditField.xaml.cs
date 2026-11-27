@@ -350,7 +350,9 @@ public partial class TapToEditField : ContentView
     private void OnInnerEditorFocused(object? sender, FocusEventArgs e) => IsEditing = true;
 
     // The delay lets a pick, the X icon and blur validation (which may set HasError) finish first.
-    private void OnInnerEditorUnfocused(object? sender, FocusEventArgs e)
+    private void OnInnerEditorUnfocused(object? sender, FocusEventArgs e) => ScheduleBlurCheck();
+
+    private void ScheduleBlurCheck()
     {
         var blurred = _innerEditor;
         Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(TapToEditFieldLogic.BlurSettleMilliseconds), () =>
@@ -359,7 +361,7 @@ public partial class TapToEditField : ContentView
             if (blurred is null || !ReferenceEquals(blurred, _innerEditor))
                 return;
 
-            if (TapToEditFieldLogic.ShouldEndEditingAfterBlur(blurred.IsFocused))
+            if (TapToEditFieldLogic.ShouldEndEditingAfterBlur(blurred.IsFocused, _autocomplete?.IsDropDownOpen ?? false))
                 IsEditing = false;
         });
     }
@@ -368,6 +370,14 @@ public partial class TapToEditField : ContentView
     // (select command, unfocus, keyboard hide) completes before its host is hidden.
     private void OnAutocompletePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (sender is AutocompleteField { IsDropDownOpen: false }
+            && e.PropertyName == nameof(AutocompleteField.IsDropDownOpen))
+        {
+            // The menu closed while the editor may already be blurred: the blur check was skipped, so re-run it.
+            ScheduleBlurCheck();
+            return;
+        }
+
         if (e.PropertyName != nameof(AutocompleteField.IsLocked) || sender is not AutocompleteField { IsLocked: true })
             return;
 

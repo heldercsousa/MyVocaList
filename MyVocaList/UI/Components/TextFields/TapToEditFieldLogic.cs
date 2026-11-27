@@ -28,7 +28,9 @@ internal static class TapToEditFieldLogic
 
     /// <summary>
     /// After a blur and the settle delay, the editor state ends only when the inner editor has not taken
-    /// focus back in the meantime (REQ-PIC-25).
+    /// focus back in the meantime and the suggestions menu is closed (REQ-PIC-25). An open menu keeps the
+    /// state: typing the first character opens it and may blur the editor, which must not switch to the text state.
     /// </summary>
-    public static bool ShouldEndEditingAfterBlur(bool isEditorFocused) => !isEditorFocused;
+    public static bool ShouldEndEditingAfterBlur(bool isEditorFocused, bool isDropDownOpen)
+        => !isEditorFocused && !isDropDownOpen;
 }

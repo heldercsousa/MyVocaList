@@ -431,6 +431,22 @@ public partial class AutocompleteField : ContentView
 
         if (TryGetToken(hintKey) is { } hint)
             layout.HintLabelStyle = new Syncfusion.Maui.Core.LabelStyle { TextColor = hint };
+
+        ApplyCaretColor();
+    }
+
+    // MD3 text field caret color = primary. The control exposes no cursor color, so tint the inner entry's native
+    // cursor drawable (Android 10+; the older default stays).
+    private void ApplyCaretColor()
+    {
+#if ANDROID
+        if (!OperatingSystem.IsAndroidVersionAtLeast(29)
+            || FindInnerEntry()?.Handler?.PlatformView is not Android.Widget.EditText editText
+            || TryGetToken(FocusedColorKey) is not { } primary)
+            return;
+
+        editText.TextCursorDrawable?.SetTint(Microsoft.Maui.Platform.ColorExtensions.ToPlatform(primary));
+#endif
     }
 
     private static Color? TryGetToken(string key) =>

@@ -20,6 +20,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-21 | ↳ Artist catalog: add cover songs by hand (catalog picker) | 💡 Pending |
 | 2026-11-21 | ↳ Deezer browse: popular-now cards, artist profile with discography and top hits, read-only Deezer song view | 💡 Pending |
 | 2026-11-26 | ↳ Song form: the Artist field shows no suggestions | 💡 Pending |
+| 2026-11-27 | ↳ TapToEditField/AutocompleteField: first keystroke stays editing, dropdown below field, visible caret | 🟡 In Progress |
 | — | **Queue Entry Point Redesign — QueuePage as CRUD event list** | 💡 Pending |
 | 2026-11-19 | ↳ Catalog as an auto-filled grouped grid, filled from karaoke participations | 💡 Pending |
 | — | | 🏁 **MVP release** |

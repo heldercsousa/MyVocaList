@@ -63,6 +63,7 @@
                                DropDownBackground="{StaticResource SurfaceContainerBrush}"
                                DropDownStroke="{StaticResource TransparentBrush}"
                                DropDownCornerRadius="4"
+                               DropDownPlacement="Bottom"
                                DropDownItemTextColor="{StaticResource OnSurface}"
                                SelectedDropDownItemBackground="{StaticResource SurfaceContainerHighestBrush}">
             <!-- MD3 outlined-text-field error-trailing-icon-color = error (REQ-ACF-08) -->
