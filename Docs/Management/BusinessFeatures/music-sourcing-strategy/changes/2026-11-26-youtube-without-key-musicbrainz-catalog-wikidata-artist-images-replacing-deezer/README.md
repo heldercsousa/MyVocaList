@@ -1,12 +1,13 @@
 ---
 id: youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer
 title: YouTube without key + MusicBrainz catalog + Wikidata artist images, replacing Deezer
-status: 💡 Pending
+status: ✅ Done
 target: 2026-11-26
 section: BusinessFeatures
 parent: music-sourcing-strategy
 goal: Replace Deezer and the key-based YouTube search with a MusicBrainz catalog, search-out/share-back YouTube links and Wikidata/Commons artist images, migrating existing Deezer rows in place.
 gate: Helder reviews the spec before any code.
+closed: 2026-11
 kind: change
 ---
 
