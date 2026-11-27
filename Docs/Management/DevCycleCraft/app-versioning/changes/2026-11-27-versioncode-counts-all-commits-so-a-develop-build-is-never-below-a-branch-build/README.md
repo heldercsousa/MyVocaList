@@ -1,10 +1,11 @@
 ---
 id: versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build
 title: versionCode counts all commits so a develop build is never below a branch build
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-27
 parent: app-versioning
 goal: Debug APKs from develop install over APKs built from task branches
+closed: 2026-11
 kind: change
 ---
 
