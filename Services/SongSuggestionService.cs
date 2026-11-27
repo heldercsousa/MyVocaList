@@ -186,7 +186,9 @@ public class SongSuggestionService : ISongSuggestionService
         }
 
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds);
+        // The MusicBrainz limiter's wait (and one 503 retry) happens inside the call, so the bound adds room for it;
+        // the request itself keeps the full RemoteSearchTimeoutMilliseconds.
+        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds + 2 * MusicBrainzRateLimiter.MinimumIntervalMs);
         try
         {
             var results = await provider.SearchSongsAsync(q, null, linked.Token);
