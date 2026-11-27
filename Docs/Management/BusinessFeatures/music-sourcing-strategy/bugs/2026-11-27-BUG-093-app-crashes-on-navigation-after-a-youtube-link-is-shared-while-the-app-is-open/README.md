@@ -22,3 +22,5 @@ Sharing a link reuses the running app instance; navigating afterwards never cras
 
 ## Regression test
 UI/platform only. A manual E2E is recorded in the task-log: share from YouTube with the Songs list open, then navigate to every flyout item.
+
+> **Spec updated [2026-11-27]:** Fix: `MainActivity` now uses `LaunchMode.SingleTask`, so a YouTube share is delivered to `OnNewIntent` of the existing instance (`ISharedLinkInbox` handling unchanged). UI/platform only, manual E2E pending.
