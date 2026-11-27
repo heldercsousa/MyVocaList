@@ -2,6 +2,12 @@ using MyVocaList.Contracts.DTOs;
 using System.Net;
 using System.Text;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Tests.Infrastructure;
+using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Rules;
+using MyVocaList.Domain.ServicesInterfaces;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -19,8 +25,12 @@ public class ArtistProfileServiceTests
     private static HttpResponseMessage Json(string body, HttpStatusCode status = HttpStatusCode.OK) =>
         new(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
 
-    private static ArtistProfileService Create(Func<Uri, HttpResponseMessage> respond) =>
-        new(new HttpClient(new StubHandler(respond)), new MusicBrainzRateLimiter(), NullLogger<ArtistProfileService>.Instance);
+    private readonly Mock<IArtistRepository> _artists = new();
+    private readonly Mock<IImageStore> _images = new();
+
+    private ArtistProfileService Create(Func<Uri, HttpResponseMessage> respond) =>
+        new(new HttpClient(new StubHandler(respond)), new MusicBrainzRateLimiter(), _artists.Object, PassthroughUnitOfWork.Over(_artists), _images.Object,
+            NullLogger<ArtistProfileService>.Instance);
 
     private const string MbWithWikidata = """
         {"relations":[{"type":"wikidata","url":{"resource":"https://www.wikidata.org/wiki/Q1299"}}],
@@ -144,5 +154,75 @@ public class ArtistProfileServiceTests
         var sut = Create(_ => throw new HttpRequestException("offline"));
 
         Assert.Null(await sut.GetAsync(Mbid));
+    }
+
+    // ── Photo adoption (REQ-MSRC-15) ───────────────────────────────────────────
+
+    private const string LocalRef = "local:artists/0123456789abcdef0123456789abcdef";
+    private const string PhotoUrl = "https://upload.wikimedia.org/thumb/500px-x.jpg";
+    private static readonly ArtistProfileDto ProfileWithPhoto = new(PhotoUrl, "Jane, CC BY", "https://cc", null, []);
+
+    private static Func<Uri, HttpResponseMessage> PhotoServer() => uri =>
+        uri.Host == "upload.wikimedia.org"
+            ? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent([1, 2, 3]) }
+            : Json("{}", HttpStatusCode.NotFound);
+
+    private void ArtistHas(string? imageUrl) =>
+        _artists.Setup(a => a.GetByIdAsync(7, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Artist { Id = 7, Name = "A", ImageUrl = imageUrl });
+
+    [Fact]
+    public async Task AdoptPhotoIfMissingAsync_ArtistHasNoPicture_StoresPhotoAsArtistPicture()
+    {
+        // [AC] REQ-MSRC-15: the licensed photo becomes the artist picture when the artist has none
+        ArtistHas(null);
+        _images.Setup(i => i.ImportAsync(It.IsAny<Stream>(), ImageOwnerKind.Artist, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, "ok", LocalRef));
+        var sut = Create(PhotoServer());
+
+        var reference = await sut.AdoptPhotoIfMissingAsync(7, ProfileWithPhoto);
+
+        Assert.Equal(LocalRef, reference);
+        _artists.Verify(a => a.UpdateAsync(It.Is<Artist>(x => x.ImageUrl == LocalRef), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task AdoptPhotoIfMissingAsync_ArtistHasPicture_NeverReplacesIt()
+    {
+        // [AC] REQ-MSRC-15: a picture the user chose is never replaced
+        ArtistHas("img/user.jpg");
+        var sut = Create(PhotoServer());
+
+        var reference = await sut.AdoptPhotoIfMissingAsync(7, ProfileWithPhoto);
+
+        Assert.Null(reference);
+        _images.Verify(i => i.ImportAsync(It.IsAny<Stream>(), It.IsAny<ImageOwnerKind>(), It.IsAny<CancellationToken>()), Times.Never);
+        _artists.Verify(a => a.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AdoptPhotoIfMissingAsync_ProfileHasNoPhoto_DoesNothing()
+    {
+        // [AC] REQ-MSRC-15: no licensed photo, nothing to adopt
+        ArtistHas(null);
+        var sut = Create(PhotoServer());
+
+        var reference = await sut.AdoptPhotoIfMissingAsync(7, new ArtistProfileDto(null, null, null, null, []));
+
+        Assert.Null(reference);
+        _artists.Verify(a => a.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AdoptPhotoIfMissingAsync_DownloadFails_ReturnsNullAndStoresNothing()
+    {
+        // [AC] REQ-MSRC-15: offline or failure leaves the artist without a picture
+        ArtistHas(null);
+        var sut = Create(_ => Json("{}", HttpStatusCode.InternalServerError));
+
+        var reference = await sut.AdoptPhotoIfMissingAsync(7, ProfileWithPhoto);
+
+        Assert.Null(reference);
+        _artists.Verify(a => a.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

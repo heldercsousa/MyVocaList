@@ -598,4 +598,18 @@ public class ArtistFormViewModelTests
         Assert.Single(sut.Discography);
         Assert.True(sut.HasDiscography);
     }
+
+    [Fact]
+    public async Task LoadProfileAsync_EditModeWithPhoto_AsksServiceToAdoptAndShowsIt()
+    {
+        // [AC] REQ-MSRC-15: the loaded profile photo is adopted by the service and shown in the form
+        var sut = CreateSut();
+        var dto = new ArtistProfileDto("https://x/y.jpg", "Jane, CC BY", "https://cc", null, []);
+        _profileMock.Setup(p => p.GetAsync("mbid", It.IsAny<CancellationToken>())).ReturnsAsync(dto);
+        _profileMock.Setup(p => p.AdoptPhotoIfMissingAsync(5, dto, It.IsAny<CancellationToken>())).ReturnsAsync("img/a.jpg");
+
+        await sut.LoadProfileAsync("mbid", 5);
+
+        _profileMock.Verify(p => p.AdoptPhotoIfMissingAsync(5, dto, It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

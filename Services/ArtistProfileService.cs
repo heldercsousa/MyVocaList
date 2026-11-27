@@ -1,5 +1,9 @@
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.Domain.Rules;
+using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.UnitOfWork;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -19,12 +23,21 @@ public sealed partial class ArtistProfileService : IArtistProfileService
 
     private readonly HttpClient _httpClient;
     private readonly MusicBrainzRateLimiter _rateLimiter;
+    // Governed dependency kept for the REQ-UOW-36/37 convention; never dereferenced - repositories come from the scope's `sp`.
+    private readonly IArtistRepository _artistRepository;
+    private readonly IUnitOfWork _uow;
+    private readonly IImageStore _imageStore;
     private readonly ILogger<ArtistProfileService> _logger;
 
-    public ArtistProfileService(HttpClient httpClient, MusicBrainzRateLimiter rateLimiter, ILogger<ArtistProfileService> logger)
+    public ArtistProfileService(
+        HttpClient httpClient, MusicBrainzRateLimiter rateLimiter,
+        IArtistRepository artistRepository, IUnitOfWork uow, IImageStore imageStore, ILogger<ArtistProfileService> logger)
     {
         _httpClient = httpClient;
         _rateLimiter = rateLimiter;
+        _artistRepository = artistRepository;
+        _uow = uow;
+        _imageStore = imageStore;
         _logger = logger;
     }
 
@@ -66,6 +79,61 @@ public sealed partial class ArtistProfileService : IArtistProfileService
             _logger.LogWarning(ex, "Artist profile lookup failed for {Mbid}", mbid);
             return null;
         }
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> AdoptPhotoIfMissingAsync(int artistId, ArtistProfileDto profile, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(profile.ImageUrl))
+            return null;
+
+        try
+        {
+            if (!await ArtistNeedsPictureAsync(artistId, ct))
+                return null;   // REQ-MSRC-15: a picture the user set is never replaced
+
+            await using var photo = new MemoryStream(await DownloadAsync(profile.ImageUrl, ct));
+            var (imported, _, reference) = await _imageStore.ImportAsync(photo, ImageOwnerKind.Artist, ct);
+            if (!imported || reference is null)
+                return null;
+
+            // Re-checked inside the write scope: a picture set while the download ran still wins.
+            var adopted = await _uow.ExecuteAsync<bool>(async sp =>
+            {
+                var repo = sp.GetRequiredService<IArtistRepository>();
+                var artist = await repo.GetByIdAsync(artistId, ct);
+                if (artist is null || !string.IsNullOrWhiteSpace(artist.ImageUrl))
+                    return false;
+                artist.ImageUrl = ImageReferenceRules.Normalize(reference);
+                artist.UpdatedAt = DateTime.UtcNow;
+                await repo.UpdateAsync(artist, ct);
+                return artist.ImageUrl is not null;
+            }, ct);
+            return adopted ? reference : null;
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or IOException)
+        {
+            _logger.LogWarning(ex, "Artist photo adoption failed for artist {ArtistId}", artistId);
+            return null;
+        }
+    }
+
+    private Task<bool> ArtistNeedsPictureAsync(int artistId, CancellationToken ct) =>
+        _uow.ExecuteReadAsync<bool>(async sp =>
+        {
+            var artist = await sp.GetRequiredService<IArtistRepository>().GetByIdAsync(artistId, ct);
+            return artist is not null && string.IsNullOrWhiteSpace(artist.ImageUrl);
+        }, ct);
+
+    private async Task<byte[]> DownloadAsync(string url, CancellationToken ct)
+    {
+        using var response = await _httpClient.GetAsync(url, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsByteArrayAsync(ct);
     }
 
     private async Task<(string? Url, string? Credit, string? LicenseUrl)> ResolveCommonsImageAsync(string fileName, CancellationToken ct)

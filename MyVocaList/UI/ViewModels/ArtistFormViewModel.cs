@@ -175,7 +175,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         });
 
         if (artist.ExternalProvider == ProviderNames.MusicBrainz && !string.IsNullOrEmpty(artist.ExternalId))
-            await LoadProfileAsync(artist.ExternalId);
+            await LoadProfileAsync(artist.ExternalId, artistId);
     }
 
     // ── Artist profile (REQ-MSRC-08, -09, -10): runtime only, never stored ─────────
@@ -197,7 +197,7 @@ public partial class ArtistFormViewModel : ViewModelBase
             .Take(2).Select(w => char.ToUpperInvariant(w[0])));
 
     /// <summary>Loads the profile for a MusicBrainz artist id; a failure shows a non-blocking message (REQ-MSRC-10).</summary>
-    public async Task LoadProfileAsync(string mbid)
+    public async Task LoadProfileAsync(string mbid, int? adoptForArtistId = null)
     {
         var profile = await _artistProfile.GetAsync(mbid);
         if (profile is null)
@@ -217,6 +217,18 @@ public partial class ArtistFormViewModel : ViewModelBase
             OnPropertyChanged(nameof(HasDiscography));
             OnPropertyChanged(nameof(HasProfile));
         });
+
+        // REQ-MSRC-15: the service adopts the photo only when the artist has no picture of its own.
+        if (adoptForArtistId is int artistId && _uploadedImageReference is null && !_imageRemoved)
+        {
+            var adopted = await _artistProfile.AdoptPhotoIfMissingAsync(artistId, profile);
+            if (adopted is not null)
+                RunOnUiThread(() =>
+                {
+                    _storedImageReference = adopted;
+                    NotifyFormImageChanged();
+                });
+        }
     }
 
     partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
