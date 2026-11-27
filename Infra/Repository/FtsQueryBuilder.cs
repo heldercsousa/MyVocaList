@@ -8,8 +8,9 @@ public static class FtsQueryBuilder
     private const int WindowLength = 3;
 
     /// <summary>
-    /// OR of the distinct 3-char windows of every whitespace-separated word of length &gt;= 3,
-    /// each double-quoted with '"' doubled. Returns null when no word has &gt;= 3 chars (caller uses the prefix path).
+    /// AND over the whitespace-separated words of length &gt;= 3; each word is the OR of its distinct 3-char windows
+    /// (each double-quoted with '"' doubled), e.g. ("don" OR "ont") AND ("cry"). Every word must match.
+    /// Returns null when no word has &gt;= 3 chars (caller uses the prefix path).
     /// Query construction only; case/diacritic folding is done by the SQLite tokenizer.
     /// </summary>
     /// <param name="query">Raw user query.</param>
@@ -17,11 +18,12 @@ public static class FtsQueryBuilder
     {
         if (string.IsNullOrWhiteSpace(query)) return null;
 
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-        var sb = new StringBuilder();
+        var groups = new List<string>();
 
         foreach (var word in query.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
         {
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var sb = new StringBuilder();
             for (var i = 0; i + WindowLength <= word.Length; i++)
             {
                 var window = word.Substring(i, WindowLength);
@@ -30,8 +32,9 @@ public static class FtsQueryBuilder
                 if (sb.Length > 0) sb.Append(" OR ");
                 sb.Append('"').Append(window.Replace("\"", "\"\"")).Append('"');
             }
+            if (sb.Length > 0) groups.Add("(" + sb + ")");
         }
 
-        return sb.Length == 0 ? null : sb.ToString();
+        return groups.Count == 0 ? null : string.Join(" AND ", groups);
     }
 }

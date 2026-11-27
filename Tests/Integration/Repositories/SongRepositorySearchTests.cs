@@ -49,7 +49,7 @@ public class SongRepositorySearchTests : IAsyncLifetime
     // [AC] REQ-SFT-30: query words become an OR of distinct quoted 3-char windows
     [Fact]
     public void BuildTrigramMatch_DontCry_ReturnsQuotedWindowsOred()
-        => Assert.Equal("\"don\" OR \"ont\" OR \"cry\"", FtsQueryBuilder.BuildTrigramMatch("dont cry"));
+        => Assert.Equal("(\"don\" OR \"ont\") AND (\"cry\")", FtsQueryBuilder.BuildTrigramMatch("dont cry"));
 
     // [AC] REQ-SFT-33: no word of 3+ chars means no FTS query (prefix path)
     [Theory]
@@ -62,7 +62,15 @@ public class SongRepositorySearchTests : IAsyncLifetime
     // [AC] REQ-SFT-02: a double quote inside a word is doubled inside the quoted window
     [Fact]
     public void BuildTrigramMatch_QuoteInWord_IsDoubled()
-        => Assert.Equal("\"don\" OR \"on\"\"\" OR \"n\"\"t\"", FtsQueryBuilder.BuildTrigramMatch("don\"t"));
+        => Assert.Equal("(\"don\" OR \"on\"\"\" OR \"n\"\"t\")", FtsQueryBuilder.BuildTrigramMatch("don\"t"));
+
+    // [AC] REQ-SFT-30: every query word must match (BUG: shared 3-letter window pulled in unrelated songs)
+    [Fact]
+    public async Task SearchTitleCandidatesAsync_UnrelatedSharedWindow_NotReturned()
+    {
+        var hits = await _repo.SearchTitleCandidatesAsync("cry cure", 50, CancellationToken.None);
+        Assert.DoesNotContain(hits, h => h.Title == "Cry");
+    }
 
     // [AC] REQ-SFT-30: "dont cry" finds "Don't Cry"
     [Fact]
