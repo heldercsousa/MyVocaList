@@ -2188,6 +2188,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-share-to-song-fo
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{43BD647C-BDC4-50AB-B77B-28A7362C3462}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open", "2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open", "{F03FB816-F5E5-5FE9-9019-1A1BF177ED47}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\bugs\2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\bugs\2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2652,6 +2659,8 @@ Global
 		{2CEFA2B1-9B07-571C-B052-8DA69F36DE1C} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
 		{2506D09E-74C3-5A10-9004-0093A0E2A1BD} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{F20C26BD-1891-56E0-ACA9-672B09181169} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
+		{43BD647C-BDC4-50AB-B77B-28A7362C3462} = {FA1234BC-0001-4000-8000-0000000000D5}
+		{F03FB816-F5E5-5FE9-9019-1A1BF177ED47} = {43BD647C-BDC4-50AB-B77B-28A7362C3462}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
