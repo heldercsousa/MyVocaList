@@ -66,6 +66,21 @@ public class MusicBrainzProviderTests
     }
 
     [Fact]
+    public async Task SearchSongsAsync_Http503ThenOk_RetriesOnceAndReturnsResults()
+    {
+        // [AC] REQ-MSRC-10: one transient 503 (server-side rate limit) is retried after the limiter wait, not surfaced
+        var calls = 0;
+        var (provider, handler) = Create(_ => ++calls == 1
+            ? Json("{}", HttpStatusCode.ServiceUnavailable)
+            : Json("""{"recordings":[{"id":"r1","title":"Mama","length":1000,"artist-credit":[{"name":"Queen","artist":{"id":"a1","name":"Queen"}}]}]}"""));
+
+        var result = Assert.Single(await provider.SearchSongsAsync("mama"));
+
+        Assert.Equal("r1", result.ExternalId);
+        Assert.Equal(2, handler.Requests.Count);
+    }
+
+    [Fact]
     public async Task WaitAsync_TwoCalls_SecondWaitsAtLeast1000ms()
     {
         // [AC] REQ-MSRC-10: at most one request per second through the shared limiter

@@ -1,5 +1,6 @@
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Domain.Constants;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace MyVocaList.Services;
@@ -74,6 +75,14 @@ public sealed class MusicBrainzProvider : IMusicMetadataProvider
         {
             await _rateLimiter.WaitAsync(ct);
             var response = await _httpClient.GetAsync(url, ct);
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+            {
+                // MusicBrainz answers 503 when two requests reach it less than a second apart (network jitter
+                // can shrink our 1 s spacing). Retry once after the next limiter slot instead of failing the search.
+                response.Dispose();
+                await _rateLimiter.WaitAsync(ct);
+                response = await _httpClient.GetAsync(url, ct);
+            }
             if (!response.IsSuccessStatusCode)
                 throw new MusicProviderException($"MusicBrainz returned HTTP {(int)response.StatusCode}");
             return await response.Content.ReadFromJsonAsync<T>(ct);
