@@ -177,7 +177,7 @@
 	     copied ApplicationDisplayVersion/ApplicationVersion into the manifest inputs. DependsOnTargets="MinVer"
 	     pulls MinVer forward so MinVerVersion exists before either consumer runs. -->
 	<Target Name="SetVersionFromMinVer" DependsOnTargets="MinVer" BeforeTargets="_GetAndroidPackageName;GenerateAssemblyInfo" Condition="'$(DesignTimeBuild)' != 'true'">
-		<Exec Command="git rev-list --count --first-parent HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" ContinueOnError="true" IgnoreExitCode="true" StandardErrorImportance="low">
+		<Exec Command="git rev-list --count HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" ContinueOnError="true" IgnoreExitCode="true" StandardErrorImportance="low">
 			<Output TaskParameter="ConsoleOutput" PropertyName="_BidCount" />
 		</Exec>
 		<Error Condition="'$(_BidCount)' == '' Or !$([System.Text.RegularExpressions.Regex]::IsMatch('$(_BidCount)', '^\d+$'))" Text="versionCode: git rev-list --count failed - git history is required (REQ-BID-06)." />

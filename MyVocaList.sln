@@ -2201,6 +2201,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-taptoeditfield-a
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret\task-log.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build", "2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build", "{67CC4313-C4E6-5DFC-8D94-8865312CC2C3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2668,6 +2673,7 @@ Global
 		{43BD647C-BDC4-50AB-B77B-28A7362C3462} = {FA1234BC-0001-4000-8000-0000000000D5}
 		{F03FB816-F5E5-5FE9-9019-1A1BF177ED47} = {43BD647C-BDC4-50AB-B77B-28A7362C3462}
 		{DC3F7D30-A96C-56B5-B843-313899946780} = {FA1234BC-0001-4000-8000-00000000007F}
+		{67CC4313-C4E6-5DFC-8D94-8865312CC2C3} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
