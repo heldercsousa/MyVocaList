@@ -82,13 +82,17 @@ public class TapToEditFieldLogicTests
         Assert.False(release);
     }
 
-    // [AC] REQ-PIC-25: a blur ends the editor state only when the inner editor has not taken focus back.
+    // [AC] REQ-PIC-25: a blur ends the editor state only when the inner editor has not taken focus back
+    // and the suggestions menu is not open (the menu steals focus while the user types the first character).
     [Theory]
-    [InlineData(false, true)]
-    [InlineData(true, false)]
-    public void ShouldEndEditingAfterBlur_ReturnsTrueOnlyWhenEditorStillUnfocused(bool isEditorFocused, bool expected)
+    [InlineData(false, false, true)]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, false)]
+    [InlineData(true, true, false)]
+    public void ShouldEndEditingAfterBlur_ReturnsTrueOnlyWhenEditorUnfocusedAndMenuClosed(
+        bool isEditorFocused, bool isDropDownOpen, bool expected)
     {
-        var endEditing = TapToEditFieldLogic.ShouldEndEditingAfterBlur(isEditorFocused);
+        var endEditing = TapToEditFieldLogic.ShouldEndEditingAfterBlur(isEditorFocused, isDropDownOpen);
 
         Assert.Equal(expected, endEditing);
     }
