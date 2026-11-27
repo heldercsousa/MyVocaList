@@ -46,5 +46,5 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
 | — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
-| 2026-11-27 | ↳ versionCode counts all commits so a develop build is never below a branch build | 💡 Pending |
+| 2026-11-27 | ↳ versionCode counts all commits so a develop build is never below a branch build | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->

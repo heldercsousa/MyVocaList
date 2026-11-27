@@ -1,7 +1,7 @@
 ---
 id: versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build
 title: versionCode counts all commits so a develop build is never below a branch build
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-27
 parent: app-versioning
 goal: Debug APKs from develop install over APKs built from task branches
@@ -27,4 +27,3 @@ An APK built on a task branch (`8270f468` → 2061) was higher than the later de
 
 ## Verification
 Manual: build and check the manifest `versionCode` ≥ 2979; install over the 2061 APK.
-
