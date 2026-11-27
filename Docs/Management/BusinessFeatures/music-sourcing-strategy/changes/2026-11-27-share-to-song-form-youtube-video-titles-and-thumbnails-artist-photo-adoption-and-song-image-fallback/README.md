@@ -25,6 +25,8 @@ Requested by Helder on 2026-11-27 after the on-device test of APK 8270f468. Appr
 | REQ-MSRC-14 | Each YouTube URL row shows the video title and thumbnail, not the raw video id. | Both come from oEmbed and are stored on the row when it is added. Existing rows are filled lazily when the form opens. Offline or on failure the row falls back to the video id. |
 | REQ-MSRC-15 | The licensed Wikidata/Commons photo becomes the artist picture when the artist has none of its own. | It is shown in the form's circle, with the credit kept below. A picture the user chose is never replaced. |
 | REQ-MSRC-16 | A song with no picture of its own shows a fallback in lists and the form placeholder. | The album cover is used first (Cover Art Archive for the picked release, when known). The artist picture is used next. The music note icon is used last. |
+| REQ-MSRC-17 | MusicBrainz title suggestions are distinct. | One row per (title, artist) pair, keeping the best-scored recording. Done on the fetched page, display-only, with no extra request. |
+| REQ-MSRC-18 | Every autocomplete suggestion row shows a picture. | The song's own picture comes first. The album cover comes next, as the Cover Art Archive `release/{mbid}/front-250` URL built from the recording's release with no extra API call and loaded lazily by the image. The artist picture comes next. The current note/avatar icon is used last. |
 
 ## Constraints
 - Song rows are edited in place and never recreated.
@@ -40,4 +42,5 @@ Requested by Helder on 2026-11-27 after the on-device test of APK 8270f468. Appr
 - [ ] S2 Share → Song form routing, replacing the snackbar — REQ-MSRC-11
 - [ ] S3 Prefill from the video title (cleaning + MusicBrainz + lyrics) — REQ-MSRC-12, -13
 - [ ] S4 Artist photo adoption — REQ-MSRC-15
-- [ ] S5 Song image fallback (Cover Art Archive, then the artist) — REQ-MSRC-16
+- [ ] S5 Song image fallback (Cover Art Archive, then the artist) — REQ-MSRC-16, -18
+- [ ] S6 Distinct MusicBrainz title suggestions — REQ-MSRC-17
