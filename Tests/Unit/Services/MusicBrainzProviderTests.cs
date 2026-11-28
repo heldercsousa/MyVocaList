@@ -44,6 +44,17 @@ public class MusicBrainzProviderTests
     }
 
     [Fact]
+    public async Task SearchSongsAsync_FirstRelease_CarriesReleaseMbid()
+    {
+        // [AC] REQ-MSRC-18: the recording's first release id travels so the cover URL is built with no extra call
+        var (provider, _) = Create(_ => Json("""{"recordings":[{"id":"r1","title":"T","artist-credit":[{"name":"A","artist":{"id":"a1","name":"A"}}],"releases":[{"id":"76df3287-6cda-33eb-8e9a-044b5e15ffdd","title":"Alb"}]}]}"""));
+
+        var result = Assert.Single(await provider.SearchSongsAsync("t"));
+
+        Assert.Equal("76df3287-6cda-33eb-8e9a-044b5e15ffdd", result.ReleaseMbid);
+    }
+
+    [Fact]
     public async Task SearchArtistsAsync_MapsMbidAndName()
     {
         // [AC] REQ-MSRC-02: artist results carry the MBID as ExternalId and the MusicBrainz provider name
