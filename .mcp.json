@@ -36,6 +36,14 @@
       ],
       "_comment": "MudBlazor component docs MCP — community project mcbodge/MudMCP. Used during Blazor Hybrid spike and migration. Version 9.0.0 = MudBlazor package version queried."
     },
+    "sf-maui-mcp": {
+      "command": "dnx",
+      "args": [ "Syncfusion.Maui.MCP", "--yes" ],
+      "env": {
+        "Syncfusion_API_Key_Path": "C:/Users/helde/.syncfusion/api-key.txt"
+      },
+      "_comment": "Syncfusion MAUI docs MCP (help.syncfusion.com/maui/mcp). Key from syncfusion.com/account/api-key, separate from the product license key; kept outside the repo."
+    },
     "sqlite": {
       "command": "cmd",
       "args": [
