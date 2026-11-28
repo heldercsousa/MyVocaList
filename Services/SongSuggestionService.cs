@@ -16,7 +16,7 @@ namespace MyVocaList.Services;
 /// <inheritdoc />
 public class SongSuggestionService : ISongSuggestionService
 {
-    private const string DeezerProviderName = "Deezer";
+    private const string MusicProviderName = ProviderNames.MusicBrainz;
 
     private readonly ISongRepository _songRepository;
     private readonly IArtistRepository _artistRepository;
@@ -105,7 +105,7 @@ public class SongSuggestionService : ISongSuggestionService
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Offline);
         }
 
-        var fetched = await TryFetchDeezerAsync(q, ct);
+        var fetched = await TryFetchRemoteAsync(q, ct);
         if (fetched is null)
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Unavailable);
         if (fetched.Count == 0)
@@ -128,16 +128,16 @@ public class SongSuggestionService : ISongSuggestionService
         var top = remaining.Take(SearchConstants.MaxSearchResults).ToList();
         var remote = await ResolveLocalArtistsAsync(top, ct);
         _logger.LogInformation(
-            "Remote title search '{Query}': {Raw} from Deezer, {Promoted} matched the library, {Remote} remote options",
+            "Remote title search '{Query}': {Raw} from MusicBrainz, {Promoted} matched the library, {Remote} remote options",
             q, fetched.Count, promoted.Count, remote.Count);
         return new SongRemoteSearchResult(promoted, remote, RemoteSearchStatus.Ok);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
-    // Groups rows by (Deezer artist id, short title), compared ordinally with no text rewriting (HARD RULE).
+    // Groups rows by (provider artist id, short title), compared ordinally with no text rewriting (HARD RULE).
     // A row without an artist id, or without a title, is its own group. The kept row is the first row of its
-    // group, in Deezer's order (REQ-SLD-06, 11; REQ-RMV-08: no version-based collapse step).
+    // group, in the provider order (REQ-SLD-06, 11; REQ-RMV-08: no version-based collapse step).
     private static List<MusicSearchResultDto> CollapseSongGroups(IReadOnlyList<MusicSearchResultDto> rows)
     {
         var groups = new List<List<MusicSearchResultDto>>();
@@ -167,7 +167,27 @@ public class SongSuggestionService : ISongSuggestionService
             group.Add(row);
         }
 
-        return groups.Select(group => group[0]).ToList();
+        return DistinctByTitleAndArtistName(groups.Select(group => group[0]));
+    }
+
+    // [AC] REQ-MSRC-17: one row per (title, artist name) pair on the fetched page. MusicBrainz lists one
+    // artist under several ids (or none), which the id-based grouping above cannot merge. Ordinal in-memory
+    // comparison of the provider's own text, display-only (HARD RULE: no rewriting). The provider order is its
+    // relevance order, so the first row of a pair is its best-scored recording.
+    private static List<MusicSearchResultDto> DistinctByTitleAndArtistName(IEnumerable<MusicSearchResultDto> rows)
+    {
+        var seen = new HashSet<(string Title, string Artist)>();
+        var result = new List<MusicSearchResultDto>();
+        foreach (var row in rows)
+        {
+            // Rows without an artist id are never merged (REQ-SLD-11).
+            if (string.IsNullOrWhiteSpace(row.ExternalArtistId)
+                || string.IsNullOrWhiteSpace(row.SongTitle) || string.IsNullOrWhiteSpace(row.ArtistName)
+                || seen.Add((row.SongTitle, row.ArtistName)))
+                result.Add(row);
+        }
+
+        return result;
     }
 
     // Promoted rows also come through here, so they carry the stored images and no album (REQ-ART-06).
@@ -176,20 +196,22 @@ public class SongSuggestionService : ISongSuggestionService
         false, hit.ArtistName, hit.ImageUrl, hit.ArtistImageUrl, null);
 
     /// <summary>Returns null on any failure/timeout (Unavailable); rethrows caller cancellation.</summary>
-    private async Task<IReadOnlyList<MusicSearchResultDto>?> TryFetchDeezerAsync(string q, CancellationToken ct)
+    private async Task<IReadOnlyList<MusicSearchResultDto>?> TryFetchRemoteAsync(string q, CancellationToken ct)
     {
-        var deezer = _providers.FirstOrDefault(p => p.ProviderName == DeezerProviderName);
-        if (deezer is null)
+        var provider = _providers.FirstOrDefault(p => p.ProviderName == MusicProviderName);
+        if (provider is null)
         {
-            _logger.LogWarning("Deezer provider is not registered; remote title search unavailable");
+            _logger.LogWarning("MusicBrainz provider is not registered; remote title search unavailable");
             return null;
         }
 
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds);
+        // The MusicBrainz limiter's wait (and one 503 retry) happens inside the call, so the bound adds room for it;
+        // the request itself keeps the full RemoteSearchTimeoutMilliseconds.
+        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds + 2 * MusicBrainzRateLimiter.MinimumIntervalMs);
         try
         {
-            var results = await deezer.SearchSongsAsync(q, null, linked.Token);
+            var results = await provider.SearchSongsAsync(q, null, linked.Token);
             return results?.ToList() ?? [];
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -198,7 +220,7 @@ public class SongSuggestionService : ISongSuggestionService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Deezer title search failed or timed out for query '{Query}'", q);
+            _logger.LogWarning(ex, "MusicBrainz title search failed or timed out for query '{Query}'", q);
             return null;
         }
     }
@@ -213,7 +235,7 @@ public class SongSuggestionService : ISongSuggestionService
 
         var ids = raw.Select(r => r.ExternalId).Where(i => !string.IsNullOrEmpty(i)).Distinct().ToList();
         IReadOnlyList<SongSearchHit> byIdentity = ids.Count > 0
-            ? await songRepository.FindByExternalIdsAsync(DeezerProviderName, ids, ct)
+            ? await songRepository.FindByExternalIdsAsync(MusicProviderName, ids, ct)
             : [];
         promoted.AddRange(byIdentity);
         var matchedIds = byIdentity.Select(h => h.ExternalId).ToHashSet();
@@ -270,7 +292,7 @@ public class SongSuggestionService : ISongSuggestionService
             return new SongSuggestionDto(
                 null, r.SongTitle ?? string.Empty, r.ArtistName, artist?.Id, r.ExternalId, r.Provider,
                 true, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle,
-                r.DurationSeconds);
+                r.DurationSeconds, r.ExternalArtistId, r.ReleaseMbid);
         }).ToList();
     }
 }

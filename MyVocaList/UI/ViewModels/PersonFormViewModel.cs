@@ -494,7 +494,8 @@ public partial class PersonFormViewModel : ViewModelBase
         if (trimmed.Length < SearchConstants.MinimumLocalQueryLength)
             return [];
 
-        var results = await _personService.SearchPersonsStartsWithAsync(trimmed, cancellationToken: ct);
+        // B4: the local SQLite read runs off the UI thread (SQLITE-WORKAROUND, as CrudListViewModelBase does).
+        var results = await Task.Run(() => _personService.SearchPersonsStartsWithAsync(trimmed, cancellationToken: ct), ct);
         return results.Select(p => new AutocompleteSuggestion(
             p.FullName,
             p.GetDisplayIdentifier(),

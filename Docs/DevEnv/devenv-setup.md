@@ -46,20 +46,21 @@ The DevFlow agent package (`Redth.MauiDevFlow.Agent`) is already referenced by
 
 ---
 
-## 2. DevExpress (required to build)
+## 2. Syncfusion license key (Release builds only)
 
-The UI uses **DevExpress .NET MAUI 25.2**, which needs a license. DevExpress's free MAUI offer
-ended on 2024-12-31. The choice of licensed library is open: see the backlog item *UI component
-library licensing* (`Docs/Management/cross-cutting/ui-component-library-licensing/`).
+The UI is migrating to **Syncfusion .NET MAUI**. Its license key is read at build time from the
+user environment variable `SYNCFUSION_LICENSE_KEY` and compiled into a generated file under
+`obj/`. The key is never committed.
 
-1. Add your personal DevExpress NuGet feed. Copy the URL from your account at
-   <https://nuget.devexpress.com>, then run:
+1. Get the key from your Syncfusion Community License account (the account owner does this).
+2. Set it as a user environment variable on Windows, then restart Visual Studio or the shell so
+   the new value is picked up:
    ```powershell
-   dotnet nuget add source "<your DevExpress feed URL>" -n DevExpress
+   setx SYNCFUSION_LICENSE_KEY "<your Syncfusion license key>"
    ```
-2. Put your license key in `%APPDATA%\DevExpress\DevExpress_License.txt`. Create this file **by
-   hand** and never commit it. Without it the build still succeeds, but it reports `DX1000` /
-   `DX1001` ("For evaluation purposes only") warnings.
+3. A **Release** build fails without it, with `SYNCFUSION_LICENSE_KEY is not set — required for
+   Release builds.` A **Debug** build works without it, and the app then shows Syncfusion's trial
+   notice.
 
 ---
 
@@ -141,7 +142,6 @@ only when Helder asks for them.
 | `/mcp` warns a key is missing after `load-env.ps1` | The terminal host kept its old environment. Close **all** terminal windows (and VS / VS Code if Claude Code runs inside them), then open a fresh one. Details: `.claude/library/dev-env-setup.md`. |
 | `uvx` not found | Add `%USERPROFILE%\.local\bin` to PATH, or put the full path to `uvx.exe` in `.mcp.json`. |
 | SQLite MCP fails to start | The `--db-path` file does not exist. Create it (`database-setup.md`) and check the path points at your clone. |
-| Build warnings `DX1000` / `DX1001` | The DevExpress license file is missing (step 2). |
 | App crashes at launch with an NRE in `ShellFlyoutTemplatedContentRenderer.LoadView` | Stale Android build output. Delete every `bin/` and `obj/` folder (`limparBinObj.bat` at the repo root does this), then rebuild. |
 | A tool or agent says there is no emulator | Look in the Visual Studio SDK path `C:\Program Files (x86)\Android\android-sdk\emulator\`, not `C:\Android`. |
 | `maui-devflow list` is empty | Use a Debug build on a running emulator, and check `adb devices`. |

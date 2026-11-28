@@ -19,8 +19,7 @@ public record ArtistListItem(int Id, string Name, string ExternalProvider, int C
     /// <summary>Short provider badge text for UI display.</summary>
     public string ProviderBadgeText => ExternalProvider switch
     {
-        "musicbrainz" => "MB",
-        "deezer" => "DZ",
+        "MusicBrainz" or "musicbrainz" => "MB",
         _ => string.Empty
     };
 }

@@ -2,6 +2,8 @@ using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Syncfusion.Maui.Core.Hosting;
+using Syncfusion.Maui.Toolkit.Hosting;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions;
@@ -31,14 +33,16 @@ public static class MauiProgram
                 config = new ConfigurationBuilder().AddJsonStream(stream).Build();
         }
 
+        // REQ-UIMIG-16: the key is generated at build time from SYNCFUSION_LICENSE_KEY; empty (Debug without a key) shows the trial notice.
+        if (!string.IsNullOrEmpty(SyncfusionLicense.Key))
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(SyncfusionLicense.Key);
+
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
-            .UseDevExpress(useLocalization: false)
-            .UseDevExpressCollectionView()
-            .UseDevExpressControls()
-            .UseDevExpressEditors()
+            .ConfigureSyncfusionCore()
+            .ConfigureSyncfusionToolkit()
             .ConfigureFonts(fonts =>
             {
                 // Roboto for Material Design 3
@@ -89,7 +93,7 @@ public static class MauiProgram
 
         // Repositories, HTTP metadata providers, and business services
         // (extracted to a testable extension — see BUG-021 DI regression tests)
-        builder.Services.AddAppServices();
+        builder.Services.AddAppServices(config);
 
         // MAUI-platform services
         builder.Services.AddSingleton<IPreferences>(_ => Preferences.Default);
@@ -105,6 +109,7 @@ public static class MauiProgram
             DeviceInfo.Current.Platform == DevicePlatform.iOS ? "ios" : "android",
             sp.GetRequiredService<ILogger<VersionCheckService>>()));
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
+        builder.Services.AddSingleton<MyVocaList.Domain.ServicesInterfaces.ISharedLinkInbox, MyVocaList.UI.Services.SharedLinkInbox>(); // REQ-MSRC-06
         builder.Services.AddSingleton<ISecureStorageWrapper, SecureStorageWrapper>();
         builder.Services.AddSingleton<INavigationService, MyVocaList.UI.Services.NavigationService>();
         // REQ-SFT-53: device network state for the offline check. Kept here (not in AddAppServices) so the
@@ -141,20 +146,21 @@ public static class MauiProgram
         builder.Services.AddTransient<ArtistFormViewModel>();
         builder.Services.AddTransient<SongsViewModel>();
         builder.Services.AddTransient<SongFormViewModel>();
-        builder.Services.AddTransient<YouTubeSearchViewModel>();
         builder.Services.AddTransient<VenueMapPickerViewModel>();
+        builder.Services.AddTransient<YouTubePlayerViewModel>();
 
         // Pages
-        builder.Services.AddTransient<VenueFormPage>();
         builder.Services.AddTransient<VenueMapPickerPage>();
-        builder.Services.AddTransient<PersonFormPage>();
+        builder.Services.AddTransient<YouTubePlayerPage>();
         builder.Services.AddTransient<VenuesPage>();
         builder.Services.AddTransient<PeoplePage>();
-        builder.Services.AddTransient<ArtistsPage>();
-        builder.Services.AddTransient<ArtistFormPage>();
         builder.Services.AddTransient<SongsPage>();
+        builder.Services.AddTransient<ArtistsPage>();
+        builder.Services.AddTransient<FeedbackPage>();
+        builder.Services.AddTransient<VenueFormPage>();
+        builder.Services.AddTransient<PersonFormPage>();
+        builder.Services.AddTransient<ArtistFormPage>();
         builder.Services.AddTransient<SongFormPage>();
-        builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();
@@ -164,7 +170,6 @@ public static class MauiProgram
         // Feedback
         builder.Services.AddTransient<IFeedbackService, FeedbackService>();
         builder.Services.AddTransient<FeedbackViewModel>();
-        builder.Services.AddTransient<FeedbackPage>();
         builder.Services.AddHttpClient("feedback");
         builder.Services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
         // IAppInfo is registered once, above with the other MAUI-platform services (REQ-UOW-21).

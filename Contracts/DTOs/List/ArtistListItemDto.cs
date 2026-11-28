@@ -12,8 +12,7 @@ public record ArtistListItemDto(
 
     public string ProviderBadgeText => ExternalProvider switch
     {
-        "musicbrainz" => "MB",
-        "deezer" => "DZ",
+        "MusicBrainz" or "musicbrainz" => "MB",
         _ => string.Empty
     };
 }

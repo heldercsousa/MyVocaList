@@ -1,3 +1,4 @@
+using MyVocaList.Domain.Constants;
 using MyVocaList.UI.Collections;
 using MyVocaList.UI.Services;
 
@@ -13,6 +14,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private volatile bool _isLoading;
     // Bumped (on the UI thread) by every load that shows the shimmer; only the newest one may end it (REQ-DLH-05).
     private int _loadGeneration;
+    private int _queryGeneration; // BUG-089: bumped by every first-page load (search, reload, refresh)
     private readonly ILogger _logger;
 
     /// <summary>True once a load has applied its rows, i.e. the first load completed. Set on the UI thread.</summary>
@@ -25,7 +27,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isScrolled;
     [ObservableProperty] private int _selectedCount;
-    [ObservableProperty] private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
+    [ObservableProperty] private SheetState _confirmSheetState = SheetState.Hidden;
     [ObservableProperty] private bool _hasMoreItems = true;
     /// <summary>
     /// True while the list is replacing its rows: first load, later visit, debounced search, filter reload. CrudListView
@@ -36,7 +38,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     [ObservableProperty] private string _confirmMessage = string.Empty;
     [ObservableProperty] private string _confirmActionText = "Delete";
     [ObservableProperty] private bool _isSelectionMode;
-    [ObservableProperty] private BottomSheetState _itemActionsSheetState = BottomSheetState.Hidden;
+    [ObservableProperty] private SheetState _itemActionsSheetState = SheetState.Hidden;
     [ObservableProperty] private bool _isItemMenuOpen;
 
     private IReadOnlyList<ItemMenuAction> _itemMenuActions;
@@ -177,6 +179,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private async Task LoadFirstPageAsync(CancellationToken cancellationToken, int? shimmerGeneration = null)
     {
         var applied = false;
+        // BUG-089: every first-page load (search, reload, refresh) starts a new query generation. A load-more or a
+        // refresh that started under an older generation must not change the rows.
+        var queryGeneration = Interlocked.Increment(ref _queryGeneration);
         try
         {
             _currentPage = 1;
@@ -206,13 +211,16 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             await hold;
 
             // A superseded shimmered load (a newer search or reload started) applies nothing: the newest load owns the rows and the shimmer.
-            if (cancellationToken.IsCancellationRequested || IsSuperseded(shimmerGeneration)) return;
+            if (cancellationToken.IsCancellationRequested || IsSuperseded(shimmerGeneration) || IsStaleQuery(queryGeneration)) return;
 
             _totalCount = totalCount;
             var hasMore = totalCount > list.Count;
 
             RunOnUiThread(() =>
             {
+                // BUG-089 B8: re-check on the UI thread, where the rows are applied; a newer load may have started since the check above.
+                if (IsSuperseded(shimmerGeneration) || IsStaleQuery(queryGeneration)) return;
+
                 Items.ReplaceRange(list);
                 HasMoreItems = hasMore;
                 if (SelectedItems.Count > 0)
@@ -259,6 +267,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private bool IsSuperseded(int? shimmerGeneration) =>
         shimmerGeneration.HasValue && shimmerGeneration.Value != CurrentLoadGeneration;
 
+    // BUG-089: true once a newer first-page load has started after the given query generation.
+    private bool IsStaleQuery(int queryGeneration) => Volatile.Read(ref _queryGeneration) != queryGeneration;
+
     protected async Task RefreshAsync()
     {
         RunOnUiThread(() => IsRefreshing = true);
@@ -284,14 +295,24 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         {
             loadingPage = _currentPage + 1;
 
+            // BUG-089: the page belongs to the query captured here; a newer first-page load makes it stale.
+            var queryGeneration = Volatile.Read(ref _queryGeneration);
+            var query = _currentSearchQuery;
+
             // SQLITE-WORKAROUND: same offload as LoadFirstPageAsync — SQLite query + lazy
             // projection enumeration must not run on the UI thread.
             var (list, totalCount) = await Task.Run(async () =>
             {
                 var (itemsEnumerable, total) = await FetchMoreAsync(
-                    loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
+                    loadingPage, AppPagination.DefaultPageSize, query);
                 return (itemsEnumerable.ToList(), total);
             });
+
+            if (IsStaleQuery(queryGeneration))
+            {
+                RunOnUiThread(() => IsRefreshing = false);
+                return;
+            }
 
             _totalCount = totalCount;
             var hasMore = (list.Count + Items.Count) < _totalCount;
@@ -299,6 +320,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
             RunOnUiThread(() =>
             {
+                if (IsStaleQuery(queryGeneration)) // BUG-089: re-check on the UI thread, where the rows are appended
+                {
+                    IsRefreshing = false;
+                    return;
+                }
+
                 Items.AddRange(list);
                 HasMoreItems = hasMore;
                 IsRefreshing = false;
@@ -317,25 +344,38 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void TriggerSearchDebounce()
     {
-        try { _searchCts?.Cancel(); _searchCts?.Dispose(); }
-        catch { /* ignore disposal races */ }
+        // Cancel only: the old task may still use its token, and its own finally disposes the source.
+        try { _searchCts?.Cancel(); } catch (ObjectDisposedException) { /* already released by its task */ }
 
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
+        var cts = new CancellationTokenSource();
+        _searchCts = cts;
+        var token = cts.Token;
 
         // REQ-DLH-05: the shimmer shows from the keystroke until the newest search applies its rows.
         var generation = BeginShimmeredLoad();
 
+        // B9: the task is not given the token, so it always runs and its finally releases the last source
+        // (a cancelled-before-start task would skip the finally). Every source is disposed there.
         _ = Task.Run(async () =>
         {
             try
             {
-                await Task.Delay(400, token);
+                await Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds, token);
                 if (token.IsCancellationRequested) return;
                 await LoadFirstPageAsync(token, generation);
             }
             catch (OperationCanceledException) { }
-        }, token);
+            catch (Exception ex)
+            {
+                // B5: the full detail goes to the log only; the current rows stay. The base has no user-message mechanism.
+                _logger.LogError(ex, "CRUD list search failed");
+            }
+            finally
+            {
+                if (ReferenceEquals(_searchCts, cts)) _searchCts = null;
+                cts.Dispose();
+            }
+        });
     }
 
     private void RequestDelete(IList<TItem> items)
@@ -353,7 +393,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
                 SelectedCount = 0;
             });
         };
-        ConfirmSheetState = BottomSheetState.HalfExpanded;
+        ConfirmSheetState = SheetState.HalfExpanded;
     }
 
     private async Task ExecuteConfirmActionAsync()
@@ -369,7 +409,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void DismissConfirmSheet()
     {
-        ConfirmSheetState = BottomSheetState.Hidden;
+        ConfirmSheetState = SheetState.Hidden;
         _pendingConfirmAction = null;
     }
 
@@ -407,13 +447,13 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             return true;
         }
 
-        if (ItemActionsSheetState != BottomSheetState.Hidden)
+        if (ItemActionsSheetState != SheetState.Hidden)
         {
             CloseItemActions();
             return true;
         }
 
-        if (ConfirmSheetState != BottomSheetState.Hidden)
+        if (ConfirmSheetState != SheetState.Hidden)
         {
             DismissConfirmSheet();
             return true;
@@ -484,7 +524,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void BeginSelection(TItem item)
     {
-        // Set first so the view switches DX selection to Multiple before the item is added.
+        // Set first so the view switches selection to Multiple before the item is added.
         IsSelectionMode = true;
         RunOnUiThread(() =>
         {
@@ -496,7 +536,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private void OpenItemActions(TItem item)
     {
         ItemActionsTarget = item;
-        ItemActionsSheetState = BottomSheetState.HalfExpanded;
+        ItemActionsSheetState = SheetState.HalfExpanded;
     }
 
     private void OpenItemMenu(object parameter)
@@ -509,7 +549,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private void CloseItemActions()
     {
-        ItemActionsSheetState = BottomSheetState.Hidden;
+        ItemActionsSheetState = SheetState.Hidden;
         IsItemMenuOpen = false;
         ItemActionsTarget = default;
     }

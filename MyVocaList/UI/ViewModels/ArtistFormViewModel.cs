@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
@@ -21,6 +22,7 @@ public partial class ArtistFormViewModel : ViewModelBase
     private readonly IArtistSuggestionService _artistSuggestions;
     private readonly IImageStore _imageStore;
     private readonly IPhotoPicker _photoPicker;
+    private readonly IArtistProfileService _artistProfile;
 
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : null; }
 
@@ -40,7 +42,7 @@ public partial class ArtistFormViewModel : ViewModelBase
     // Offline wording stays local (artists); the unavailable note is SearchNotes.Unavailable (UI/Constants), shared with the Song form.
     private const string OfflineNote = "You're offline — showing artists from your library only.";
 
-    /// <summary>Name field option source: local artists ("In your library"), then Deezer ("Deezer") (REQ-SFT-47).</summary>
+    /// <summary>Name field option source: local artists ("In your library"), then MusicBrainz ("MusicBrainz") (REQ-SFT-47).</summary>
     public IMenuOptionSource NameOptionSource { get; }
 
     [ObservableProperty] private string _nameSupportingText = string.Empty;
@@ -59,19 +61,21 @@ public partial class ArtistFormViewModel : ViewModelBase
 
     private string? _uploadedImageReference;   // REQ-PIC-35 (1): the picture uploaded in this form
     private string? _storedImageReference;     // REQ-PIC-35 (2), edit mode: the artist's stored picture
-    private string? _pendingImageUrl;          // REQ-PIC-35 (2), add mode: the picture of the picked Deezer artist
+    private string? _pendingImageUrl;          // REQ-PIC-35 (2), add mode: the picture of the picked MusicBrainz artist
     private bool _imageRemoved;                // REQ-PIC-20: "Remove picture" until a later pick or upload
 
-    // REQ-PIC-37: the Name the last Deezer pick wrote. The Deezer picture belongs to the form only while
+    // REQ-PIC-37: the Name the last MusicBrainz pick wrote. The MusicBrainz picture belongs to the form only while
     // Name still equals it. An exact (ordinal) comparison that decides which pending value applies; it is
     // not search or de-duplication.
     private string? _pickedName;
+    private string? _pickedExternalId;
+    private string? _pickedExternalProvider;
 
     [ObservableProperty] private bool _isImageBusy;
 
     /// <summary>
     /// The form picture's reference (REQ-PIC-35, 20, 37): the upload; else the stored picture (edit mode) or
-    /// the picked Deezer artist's picture while Name is unchanged (add mode); null after "Remove picture".
+    /// the picked MusicBrainz artist's picture while Name is unchanged (add mode); null after "Remove picture".
     /// </summary>
     private string? FormImageReference =>
         _imageRemoved ? null : _uploadedImageReference ?? (IsEditMode ? _storedImageReference : PickedImageReference);
@@ -117,7 +121,8 @@ public partial class ArtistFormViewModel : ViewModelBase
         INavigationService navigationService,
         IArtistSuggestionService artistSuggestions,
         IImageStore imageStore,
-        IPhotoPicker photoPicker)
+        IPhotoPicker photoPicker,
+        IArtistProfileService artistProfile)
     {
         _artistService = artistService;
         _snackbarService = snackbarService;
@@ -127,6 +132,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         _artistSuggestions = artistSuggestions;
         _imageStore = imageStore;
         _photoPicker = photoPicker;
+        _artistProfile = artistProfile;
 
         NameOptionSource = new MenuOptionSource(SearchNameAsync);
 
@@ -167,6 +173,62 @@ public partial class ArtistFormViewModel : ViewModelBase
             _storedImageReference = artist.ImageUrl;
             NotifyFormImageChanged();
         });
+
+        if (artist.ExternalProvider == ProviderNames.MusicBrainz && !string.IsNullOrEmpty(artist.ExternalId))
+            await LoadProfileAsync(artist.ExternalId, artistId);
+    }
+
+    // ── Artist profile (REQ-MSRC-08, -09, -10): runtime only, never stored ─────────
+    private const string ProfileUnavailableMessage = "Could not load the artist profile. Showing your saved data.";
+
+    [ObservableProperty] private string? _profileImageUrl;
+    [ObservableProperty] private string? _profileImageCredit;
+    [ObservableProperty] private string? _profileDescription;
+    [ObservableProperty] private IReadOnlyList<ReleaseGroupDto> _discography = [];
+
+    public bool HasProfileImage => !string.IsNullOrEmpty(ProfileImageUrl);
+    public bool HasProfileDescription => !string.IsNullOrEmpty(ProfileDescription);
+    public bool HasDiscography => Discography.Count > 0;
+    public bool HasProfile => HasProfileImage || HasProfileDescription || HasDiscography;
+
+    /// <summary>Initials shown while there is no free photo (REQ-MSRC-08).</summary>
+    public string ArtistInitials =>
+        string.Concat((ArtistName ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2).Select(w => char.ToUpperInvariant(w[0])));
+
+    /// <summary>Loads the profile for a MusicBrainz artist id; a failure shows a non-blocking message (REQ-MSRC-10).</summary>
+    public async Task LoadProfileAsync(string mbid, int? adoptForArtistId = null)
+    {
+        var profile = await _artistProfile.GetAsync(mbid);
+        if (profile is null)
+        {
+            await _snackbarService.ShowErrorAsync(ProfileUnavailableMessage);
+            return;
+        }
+
+        RunOnUiThread(() =>
+        {
+            ProfileImageUrl = profile.ImageUrl;
+            ProfileImageCredit = profile.ImageCredit;
+            ProfileDescription = profile.Description;
+            Discography = profile.Discography;
+            OnPropertyChanged(nameof(HasProfileImage));
+            OnPropertyChanged(nameof(HasProfileDescription));
+            OnPropertyChanged(nameof(HasDiscography));
+            OnPropertyChanged(nameof(HasProfile));
+        });
+
+        // REQ-MSRC-15: the service adopts the photo only when the artist has no picture of its own.
+        if (adoptForArtistId is int artistId && _uploadedImageReference is null && !_imageRemoved)
+        {
+            var adopted = await _artistProfile.AdoptPhotoIfMissingAsync(artistId, profile);
+            if (adopted is not null)
+                RunOnUiThread(() =>
+                {
+                    _storedImageReference = adopted;
+                    NotifyFormImageChanged();
+                });
+        }
     }
 
     partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
@@ -193,11 +255,12 @@ public partial class ArtistFormViewModel : ViewModelBase
 
     partial void OnArtistNameChanged(string value)
     {
+        OnPropertyChanged(nameof(ArtistInitials));
         // Counter guidance uses the trimmed length — the same string ValidateNameInput checks —
         // so the counter never reports an error the validator would not.
         UpdateCharacterCounter(value?.Trim().Length ?? 0);
 
-        // REQ-PIC-37: the picked Deezer picture follows whether Name still equals the picked name.
+        // REQ-PIC-37: the picked MusicBrainz picture follows whether Name still equals the picked name.
         if (_pendingImageUrl is not null)
             NotifyFormImageChanged();
 
@@ -257,7 +320,7 @@ public partial class ArtistFormViewModel : ViewModelBase
             else
             {
                 var imageReference = FormImageReference;   // read before the Name could change
-                var (success, message, artist) = await _artistService.CreateArtistAsync(name);
+                var (success, message, artist) = await _artistService.CreateArtistAsync(name, _pickedExternalId, _pickedExternalProvider);
                 if (!success)
                 {
                     ApplyAsyncFailure(message);
@@ -316,6 +379,8 @@ public partial class ArtistFormViewModel : ViewModelBase
         _uploadedImageReference = imageReference;
         _pendingImageUrl = null;
         _pickedName = null;
+        _pickedExternalId = null;
+        _pickedExternalProvider = null;
         _storedImageReference = null;
         _imageRemoved = false;
         ArtistId = artistId;
@@ -397,7 +462,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         if (IsEditMode)
             return [];
 
-        var local = await _artistSuggestions.SearchNameLocalAsync(query, ct);
+        var local = await Task.Run(() => _artistSuggestions.SearchNameLocalAsync(query, ct), ct); // B4: local SQLite read off the UI thread
         var remote = await _artistSuggestions.SearchNameRemoteAsync(query, ct);
 
         ct.ThrowIfCancellationRequested();   // stale query: never touch the note
@@ -414,7 +479,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         }
 
         return local.Select(dto => ToNameOption(dto, "In your library"))
-                    .Concat(remote.Remote.Select(dto => ToNameOption(dto, "Deezer")))
+                    .Concat(remote.Remote.Select(dto => ToNameOption(dto, "MusicBrainz")))
                     .ToList();
     }
 
@@ -428,8 +493,8 @@ public partial class ArtistFormViewModel : ViewModelBase
         };
 
     /// <summary>
-    /// Local pick opens that artist's edit form, replacing the add form (REQ-SFT-48). Deezer pick fills
-    /// and locks Name only; the provider id is not stored (REQ-SFT-49).
+    /// Local pick opens that artist's edit form, replacing the add form (REQ-SFT-48). MusicBrainz pick fills
+    /// and locks Name and keeps the provider identity, stored on Save (REQ-MSRC-03).
     /// </summary>
     [RelayCommand]
     private Task SelectName(AutocompleteSuggestion? option)
@@ -443,6 +508,8 @@ public partial class ArtistFormViewModel : ViewModelBase
             // a pick after "Remove picture" sets a picture again (REQ-PIC-20).
             _pendingImageUrl = dto.ImageUrl;
             _pickedName = dto.Name;
+            _pickedExternalId = dto.ExternalId;
+            _pickedExternalProvider = dto.ExternalProvider;
             _imageRemoved = false;
             ArtistName = dto.Name;
             IsNameLocked = true;
@@ -454,12 +521,14 @@ public partial class ArtistFormViewModel : ViewModelBase
             $"../{Routes.ArtistForm}?artistId={dto.LocalId.Value}&artistName={Uri.EscapeDataString(dto.Name)}");
     }
 
-    /// <summary>X on Name: empties and unlocks it, drops the note (REQ-SFT-06/49) and the Deezer picture, not an upload (REQ-PIC-35).</summary>
+    /// <summary>X on Name: empties and unlocks it, drops the note (REQ-SFT-06/49) and the MusicBrainz picture, not an upload (REQ-PIC-35).</summary>
     [RelayCommand]
     private void ClearName()
     {
         _pendingImageUrl = null;
         _pickedName = null;
+        _pickedExternalId = null;
+        _pickedExternalProvider = null;
         ArtistName = string.Empty;
         IsNameLocked = false;
         NameSupportingText = string.Empty;

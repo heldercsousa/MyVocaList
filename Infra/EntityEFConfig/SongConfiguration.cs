@@ -38,6 +38,11 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .IsRequired(false)
                .HasMaxLength(ImageUrlRules.MaxLength);
 
+        // REQ-MSRC-16: MusicBrainz release id (GUID text), nullable, never searched.
+        builder.Property(s => s.ReleaseMbid)
+               .IsRequired(false)
+               .HasMaxLength(36);
+
         builder.Property(s => s.CreatedAt).IsRequired();
         builder.Property(s => s.UpdatedAt).IsRequired();
 

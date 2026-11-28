@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyVocaList — Ecossistema de IA para UI/UX e .NET MAUI 10</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-cyan-500 selection:text-slate-950">
+
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🎤</span>
+                    <span class="font-bold text-lg tracking-tight text-white">MyVocaList <span class="text-cyan-400 font-normal">| Arquitetura IA UI/UX</span></span>
+                </div>
+                <div class="hidden md:flex space-x-6 text-sm font-medium">
+                    <a href="#resumo" class="text-slate-300 hover:text-cyan-400 transition">Kit Recomendado</a>
+                    <a href="#loop-visual" class="text-slate-300 hover:text-cyan-400 transition">Loop Visual MAUI</a>
+                    <a href="#ferramentas" class="text-slate-300 hover:text-cyan-400 transition">MCPs & Skills</a>
+                    <a href="#stacks" class="text-slate-300 hover:text-cyan-400 transition">Decisão de Stack</a>
+                    <a href="#workflow" class="text-slate-300 hover:text-cyan-400 transition">Workflow</a>
+                    <a href="#riscos" class="text-slate-300 hover:text-cyan-400 transition">Riscos</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 border-b border-slate-800 py-14 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-4">
+                <span>Diagnóstico Técnico • Novembro 2026</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+                Equipando o <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-amber-400">Claude Code</span> para Crítica, Prototipação e Loop Visual
+            </h1>
+            <p class="text-lg text-slate-300 max-w-3xl leading-relaxed mb-8">
+                Análise aprofundada do ecossistema de servidores MCP e Agent Skills para o <strong>MyVocaList</strong> (.NET MAUI 10): como superar os gargalos de inspeção visual em XAML nativo, projetar interfaces de alto contraste para bares noturnos e decidir o destino da migração Syncfusion vs. Blazor Hybrid.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-md">
+                    <div class="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1">Ação Imediata</div>
+                    <div class="text-2xl font-extrabold text-white mb-1">Pausar Syncfusion</div>
+                    <p class="text-xs text-slate-400">Decidir entre MAUI 10 Puro ou Blazor Hybrid antes de concluir a troca de suíte.</p>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-md">
+                    <div class="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">Contexto Crítico</div>
+                    <div class="text-2xl font-extrabold text-white mb-1">Bar Escuro • ≥ 7:1</div>
+                    <p class="text-xs text-slate-400">Alvos de toque ≥ 48×48 dp, polegar no terço inferior e zero dependência de áudio.</p>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-md">
+                    <div class="text-pink-400 text-xs font-bold uppercase tracking-wider mb-1">Orçamento de Contexto</div>
+                    <div class="text-2xl font-extrabold text-white mb-1">3 a 5 MCPs</div>
+                    <p class="text-xs text-slate-400">Limite ideal ativo simultaneamente para evitar saturação dos 25k tokens do Claude.</p>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-md">
+                    <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">Docs Oficiais MAUI 10</div>
+                    <div class="text-2xl font-extrabold text-white mb-1">Zero Custo / GA</div>
+                    <p class="text-xs text-slate-400">Microsoft Learn MCP elimina APIs obsoletas sem necessidade de chave de API.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+
+        <section id="resumo" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+                    <span class="text-cyan-400">01.</span> Kits Recomendados para Instalação
+                </h2>
+                <p class="text-slate-300 mt-2 max-w-4xl">
+                    Para evitar inflar o contexto do Claude Code com ferramentas redundantes ou inseguras, a adoção deve ser dividida em dois estágios: um <strong>Kit Mínimo</strong> para operar hoje no .NET MAUI 10 nativo e um <strong>Kit Completo</strong> que incorpora prototipação, compilação de tokens e auditoria Web caso a camada visual migre para Blazor Hybrid.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold uppercase">Começar Hoje • MAUI 10 Nativo</span>
+                            <span class="text-2xl">⚡</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-4">Kit Mínimo Operacional</h3>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-cyan-400 font-bold">1.</span>
+                                <div>
+                                    <strong class="text-white">Microsoft Learn MCP</strong> <span class="text-xs text-emerald-400">[Verificado]</span>
+                                    <p class="text-xs text-slate-400 mt-0.5">Documentação oficial do .NET MAUI 10 (read-only, gratuito, sem autenticação).</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-cyan-400 font-bold">2.</span>
+                                <div>
+                                    <strong class="text-white">Microsoft.Maui.DevFlow</strong> <span class="text-xs text-amber-400">[Preview]</span>
+                                    <p class="text-xs text-slate-400 mt-0.5">Árvore visual JSON e screenshots PNG in-app (sólido no iOS/Mac; Android/Win em evolução).</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-cyan-400 font-bold">3.</span>
+                                <div>
+                                    <strong class="text-white">Maestro MCP / Appium MCP + FlaUI-MCP</strong>
+                                    <p class="text-xs text-slate-400 mt-0.5">Cobertura caixa-preta em Android/iOS (Maestro/Appium) e árvore UIA3 no Windows (FlaUI-MCP).</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-cyan-400 font-bold">4.</span>
+                                <div>
+                                    <strong class="text-white">Skill: design-critique (Anthropic)</strong>
+                                    <p class="text-xs text-slate-400 mt-0.5">Crítica heurística em 5 eixos sobre screenshots + arquivo local <code class="text-cyan-300">DESIGN_CONTEXT.md</code>.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400">
+                        <strong class="text-amber-300">Condicional:</strong> Adicione <code class="text-slate-200">Syncfusion.MAUI.MCP</code> + <code class="text-slate-200">sfdotnet skills</code> apenas se decidir concluir a suíte comercial.
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold uppercase">Expansão & Blazor Hybrid</span>
+                            <span class="text-2xl">🚀</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-4">Kit Completo de Prototipação e Web</h3>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-amber-400 font-bold">1.</span>
+                                <div>
+                                    <strong class="text-white">Google Stitch MCP ou Penpot MCP Oficial</strong>
+                                    <p class="text-xs text-slate-400 mt-0.5">Geração de variantes noturnas e extração de <code class="text-amber-300">DESIGN.md</code> (Stitch) ou design open-source self-hosted (Penpot).</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-amber-400 font-bold">2.</span>
+                                <div>
+                                    <strong class="text-white">Style Dictionary (via Bash) + Context7 MCP</strong>
+                                    <p class="text-xs text-slate-400 mt-0.5">Compila tokens JSON únicos para <code class="text-amber-300">Colors.xaml</code> ou <code class="text-amber-300">tokens.css</code>; Context7 indexa libs OSS.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-amber-400 font-bold">3.</span>
+                                <div>
+                                    <strong class="text-white">Playwright MCP + Chrome DevTools MCP</strong> <span class="text-xs text-pink-400">[Só Web/Blazor]</span>
+                                    <p class="text-xs text-slate-400 mt-0.5">Inspeção total de DOM, CSS, console, rede e Lighthouse (40,2k e 58,7k stars).</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-amber-400 font-bold">4.</span>
+                                <div>
+                                    <strong class="text-white">AccessLint + Vercel web-design-guidelines</strong> <span class="text-xs text-pink-400">[Só Web/Blazor]</span>
+                                    <p class="text-xs text-slate-400 mt-0.5">Auditoria automatizada WCAG 2.2 AA (contraste e tamanho de alvo de toque no DOM vivo).</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400">
+                        <strong class="text-pink-300">Atenção:</strong> Ferramentas de DOM/CSS não enxergam XAML nativo; destravam apenas se adotar Blazor Hybrid.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="loop-visual" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+                    <span class="text-cyan-400">02.</span> Diagnóstico do Loop Visual por Plataforma
+                </h2>
+                <p class="text-slate-300 mt-2 max-w-4xl">
+                    O maior gargalo técnico do .NET MAUI frente à Web em novembro de 2026 é fechar o ciclo autônomo de <em>compilar → capturar tela → inspecionar árvore → validar acessibilidade</em>. Enquanto o ecossistema Web possui cobertura integral, o MAUI nativo exige combinar ferramentas distintas por sistema operacional e compensar manualmente a ausência de auditoria automática de WCAG.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-lg font-bold text-white mb-1">Maturidade do Loop Visual por Alvo de Execução</h3>
+                    <p class="text-xs text-slate-400 mb-4">Pontuação técnica (0 a 5) baseada na disponibilidade de árvore semântica, captura de tela, estabilidade e auditoria WCAG.</p>
+                    <div class="chart-container">
+                        <canvas id="visualLoopChart"></canvas>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-4 leading-relaxed">
+                        <strong>Conclusão dos dados:</strong> Web/Blazor Hybrid atinge o teto técnico com Playwright e Chrome DevTools. No nativo, iOS/Mac lidera graças ao <code class="text-cyan-300">Microsoft.Maui.DevFlow</code>, seguido pelo Windows via <code class="text-cyan-300">FlaUI-MCP</code>. Android nativo sofre com o status <em>"In progress"</em> do DevFlow e necessidade de ponte manual <code class="text-cyan-300">adb reverse</code>.
+                    </p>
+                </div>
+
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="bg-slate-900 border-l-4 border-emerald-400 rounded-r-xl p-5 shadow-md">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-bold text-emerald-300 text-sm uppercase tracking-wide">✅ O que funciona hoje</h4>
+                            <span class="text-xs text-slate-400">Pronto para uso</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <strong>iOS/Mac:</strong> <code class="text-white">DevFlow</code> lê árvore JSON e muta propriedades em runtime. <strong>Windows:</strong> <code class="text-white">FlaUI-MCP</code> (UIA3) captura janelas em background sem roubar foco. <strong>Mobile Caixa-Preta:</strong> <code class="text-white">Maestro MCP</code> e <code class="text-white">Appium MCP</code> navegam pela árvore nativa de acessibilidade.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 border-l-4 border-amber-400 rounded-r-xl p-5 shadow-md">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-bold text-amber-300 text-sm uppercase tracking-wide">⚠️ O que é gambiarra (Atrito)</h4>
+                            <span class="text-xs text-slate-400">Exige contorno</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <strong>DevFlow em Android/Win:</strong> ainda experimental com issues abertas (#654, #807) e <code class="text-white">adb reverse</code> manual. <strong>Windows-MCP:</strong> expõe PowerShell (alerta de segurança) e estoura 25k tokens. <strong>iOS WKWebView:</strong> exige ponte <code class="text-white">DevFlow.Blazor</code> para falar CDP.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 border-l-4 border-rose-500 rounded-r-xl p-5 shadow-md">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-bold text-rose-400 text-sm uppercase tracking-wide">🚫 O que não existe hoje</h4>
+                            <span class="text-xs text-slate-400">Lacuna estrutural</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Não existe equivalente ao <code class="text-white">axe-core</code> / <code class="text-white">AccessLint</code> para auditar contraste real ou área mínima de toque (dp/pt) em árvore XAML viva, nem hot-swap estilo <code class="text-white">/impeccable live</code>, nem MCP mantido para o antigo <code class="text-white">WinAppDriver</code>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ferramentas" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+                    <span class="text-cyan-400">03.</span> Avaliação de Utilidade e Tração da Comunidade
+                </h2>
+                <p class="text-slate-300 mt-2 max-w-4xl">
+                    Nem todo servidor MCP popular no GitHub resolve o problema de um aplicativo .NET MAUI 10. O gráfico abaixo cruza a nota de utilidade específica para o MyVocaList (1 a 5) por categoria, enquanto a tabela interativa permite filtrar os servidores e skills por compatibilidade e custo.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+                <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-lg font-bold text-white mb-1">Top Ferramentas por Utilidade no MyVocaList</h3>
+                    <p class="text-xs text-slate-400 mb-4">Nota de 1 a 5 considerando aderência ao MAUI 10 nativo, segurança e custo-benefício.</p>
+                    <div class="chart-container">
+                        <canvas id="toolsUtilityChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-lg font-bold text-white mb-1">Popularidade no GitHub (Stars Verificadas)</h3>
+                    <p class="text-xs text-slate-400 mb-4">Escala em milhares de stars (nov/2026). Alta popularidade web não implica suporte a XAML.</p>
+                    <div class="chart-container">
+                        <canvas id="starsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Matriz Filtrável de MCP Servers e Skills</h3>
+                        <p class="text-xs text-slate-400">Filtre pelo suporte real ao .NET MAUI nativo ou veja o ecossistema completo.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2" id="filterButtons">
+                        <button data-filter="all" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500 text-slate-950 transition">Todos (16)</button>
+                        <button data-filter="sim" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">MAUI Nativo (Sim)</button>
+                        <button data-filter="parcial" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Parcial / Plataforma</button>
+                        <button data-filter="web" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Só Web / Blazor</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-xs uppercase text-slate-400">
+                                <th class="py-3 px-4">Ferramenta & Mantenedor</th>
+                                <th class="py-3 px-4">Categoria</th>
+                                <th class="py-3 px-4">Suporte MAUI</th>
+                                <th class="py-3 px-4">Custo / Licença</th>
+                                <th class="py-3 px-4 text-right">Nota</th>
+                            </tr>
+                        </thead>
+                        <tbody id="toolsTableBody" class="divide-y divide-slate-800/70 text-slate-300">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="stacks" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+                    <span class="text-cyan-400">04.</span> Decisão Estratégica: Qual Stack Escolher Agora?
+                </h2>
+                <p class="text-slate-300 mt-2 max-w-4xl">
+                    Ter melhores ferramentas de IA em uma stack não significa automaticamente que ela seja a melhor arquitetura para o produto. Como a migração DevExpress → Syncfusion está inconclusa e boa parte da interface será retrabalhada, compare abaixo os três caminhos viáveis para o MyVocaList.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 items-center">
+                <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-lg font-bold text-white mb-1">Radar Comparativo das Arquiteturas</h3>
+                    <p class="text-xs text-slate-400 mb-4">Avaliação multidimensional (1 = pior cenário / alto custo, 5 = cenário ideal).</p>
+                    <div class="chart-container">
+                        <canvas id="stackRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-lg font-bold text-white mb-1">Posicionamento: Autonomia IA vs. Reuso Pós-MVP</h3>
+                    <p class="text-xs text-slate-400 mb-4">Dispersão interativa (Plotly WebGL/Canvas) considerando esforço imediato de migração.</p>
+                    <div id="plotlyStackChart" class="w-full h-[340px]"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <span class="inline-block px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 text-xs font-bold mb-3">Caminho A • Custo Zero</span>
+                        <h3 class="text-lg font-bold text-white mb-2">.NET MAUI 10 Puro</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            <strong>Se o objetivo for lançar o MVP rápido com fluidez nativa e zero licença:</strong> aborte a suíte paga da Syncfusion agora. Consolide seus componentes próprios (<code class="text-cyan-300">AppBars</code>, <code class="text-cyan-300">ListItems</code>, <code class="text-cyan-300">FloatingToolbar</code>) e use o <code class="text-cyan-300">Syncfusion.Maui.Toolkit</code> (gratuito/OSS) apenas se precisar de BottomSheet ou Shimmer.
+                        </p>
+                    </div>
+                    <div class="text-xs text-slate-400 pt-3 border-t border-slate-800">
+                        <strong>Trade-off:</strong> Sem vendor lock-in e scroll nativo imediato, mas sem auditoria WCAG automática no XAML.
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <span class="inline-block px-2.5 py-1 rounded bg-indigo-500/20 text-indigo-300 text-xs font-bold mb-3">Caminho B • Telas Densas Host</span>
+                        <h3 class="text-lg font-bold text-white mb-2">MAUI 10 + Syncfusion</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            <strong>Se o objetivo for manter XAML nativo prevendo DataGrids e gráficos complexos no host:</strong> conclua a migração e acople imediatamente <code class="text-indigo-300">Syncfusion.MAUI.MCP</code> + <code class="text-indigo-300">sfdotnet skills</code> para impedir que o Claude Code misture APIs legadas ou gere banners de licença.
+                        </p>
+                    </div>
+                    <div class="text-xs text-slate-400 pt-3 border-t border-slate-800">
+                        <strong>Trade-off:</strong> Suporte Day-1 ao .NET 10, mas exige licença comercial acima do limite Community e customização estética.
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <span class="inline-block px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 text-xs font-bold mb-3">Caminho C • Máxima IA & PWA</span>
+                        <h3 class="text-lg font-bold text-white mb-2">MAUI Blazor Hybrid</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            <strong>Se o objetivo for maximizar a autonomia visual da IA e reaproveitar a UI no pós-MVP Web/PWA:</strong> migre a camada de apresentação para Razor + CSS (com Blazor Blueprint ou MudBlazor) agora, mantendo intactos os serviços C# e a API local.
+                        </p>
+                    </div>
+                    <div class="text-xs text-slate-400 pt-3 border-t border-slate-800">
+                        <strong>Trade-off:</strong> Destrava Playwright, Chrome DevTools e AccessLint, mas consome ~70 MB extra de RAM no Windows e não usa Native AOT lá.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+                    <span class="text-cyan-400">05.</span> Workflow Ponta a Ponta com Claude Code
+                </h2>
+                <p class="text-slate-300 mt-2 max-w-4xl">
+                    Antes da primeira execução, crie o arquivo <code class="text-cyan-300">DESIGN_CONTEXT.md</code> na raiz do projeto fixando as restrições de uso em casa noturna: contraste ≥ 7:1 nos dados da fila, fundo escuro sem branco puro ofuscante, botões de ação ≥ 56 dp no alcance do polegar e separação espacial entre <em>Entrar</em> e <em>Sair da fila</em>.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                    <div class="text-5xl font-black text-slate-800/80 absolute top-3 right-4 select-none">01</div>
+                    <span class="inline-block px-2.5 py-1 rounded bg-cyan-500/15 text-cyan-300 text-xs font-bold mb-3">Diagnóstico</span>
+                    <h3 class="text-lg font-bold text-white mb-2">Crítica Rigorosa</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        Capture screenshots e árvore semântica via <strong>DevFlow</strong> (iOS/Android), <strong>FlaUI-MCP</strong> (Windows) ou <strong>Chrome DevTools + AccessLint</strong> (Blazor). Rode a skill <strong>design-critique</strong> exigindo teste de leitura em 2 segundos e heurísticas de Nielsen.
+                    </p>
+                    <div class="text-[11px] font-mono text-cyan-400 bg-slate-950 p-2 rounded border border-slate-800">
+                        Saída: Lista de falhas UX + cores hardcoded
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                    <div class="text-5xl font-black text-slate-800/80 absolute top-3 right-4 select-none">02</div>
+                    <span class="inline-block px-2.5 py-1 rounded bg-indigo-500/15 text-indigo-300 text-xs font-bold mb-3">Ideação & Tokens</span>
+                    <h3 class="text-lg font-bold text-white mb-2">Prototipação</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        Gere variantes de tela escura no <strong>Google Stitch MCP</strong> (extraindo <code class="text-indigo-300">DESIGN.md</code>) ou no <strong>Penpot MCP</strong>. Compile os tokens JSON aprovados via <strong>Style Dictionary</strong> para gerar <code class="text-indigo-300">Colors.xaml</code> ou <code class="text-indigo-300">tokens.css</code>.
+                    </p>
+                    <div class="text-[11px] font-mono text-indigo-400 bg-slate-950 p-2 rounded border border-slate-800">
+                        Saída: DESIGN.md + ResourceDictionary/CSS
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                    <div class="text-5xl font-black text-slate-800/80 absolute top-3 right-4 select-none">03</div>
+                    <span class="inline-block px-2.5 py-1 rounded bg-amber-500/15 text-amber-300 text-xs font-bold mb-3">Construção</span>
+                    <h3 class="text-lg font-bold text-white mb-2">Implementação Guiada</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        Em MAUI 10, mantenha <strong>Microsoft Learn MCP</strong> ativo (e <code class="text-amber-300">Syncfusion.MAUI.MCP</code> se usar a suíte). Em Blazor Hybrid, acople <strong>Context7 MCP</strong> e a skill <strong>web-design-guidelines</strong> da Vercel.
+                    </p>
+                    <div class="text-[11px] font-mono text-amber-400 bg-slate-950 p-2 rounded border border-slate-800">
+                        Saída: XAML/Razor livre de APIs legadas
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                    <div class="text-5xl font-black text-slate-800/80 absolute top-3 right-4 select-none">04</div>
+                    <span class="inline-block px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 text-xs font-bold mb-3">Fechamento</span>
+                    <h3 class="text-lg font-bold text-white mb-2">Validação Visual</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        Execute os fluxos de entrar/sair da fila com <strong>FlaUI-MCP</strong> / <strong>Maestro</strong> / <strong>DevFlow</strong> (nativo) ou <strong>Playwright + AccessLint</strong> (Blazor). Submeta as novas capturas a uma 2ª rodada de <strong>design-critique</strong>.
+                    </p>
+                    <div class="text-[11px] font-mono text-emerald-400 bg-slate-950 p-2 rounded border border-slate-800">
+                        Saída: Evidência visual + aprovação WCAG
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="riscos" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+                    <span class="text-rose-400">06.</span> Armadilhas Críticas e Ferramentas Descontinuadas
+                </h2>
+                <p class="text-slate-300 mt-2 max-w-4xl">
+                    Antes de configurar o ambiente do Claude Code, observe as mudanças de ecossistema ocorridas nos últimos 12 meses e os riscos operacionais identificados na auditoria técnica.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+                    <div class="text-rose-400 font-bold text-sm mb-2">🪦 Pacotes Descontinuados / Renomeados</div>
+                    <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                        <li>• <code class="text-rose-300">@syncfusion/maui-assistant</code> (npm) foi <strong>descontinuado</strong>; substitua pelo NuGet <code class="text-white">Syncfusion.MAUI.MCP</code>.</li>
+                        <li>• <code class="text-rose-300">figma-developer-mcp</code> foi renomeado para <strong>Framelink MCP</strong> (v0.11.0, abr/2026).</li>
+                        <li>• <code class="text-rose-300">Redth.MauiDevFlow</code> foi absorvido por <code class="text-white">dotnet/maui-labs</code> (<code class="text-white">Microsoft.Maui.DevFlow</code>).</li>
+                        <li>• <strong>Galileo AI</strong> foi substituído pelo <strong>Google Stitch</strong>.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+                    <div class="text-amber-400 font-bold text-sm mb-2">🔒 Segurança & Telemetria Local</div>
+                    <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                        <li>• <strong>Windows-MCP:</strong> expõe ferramenta PowerShell e recebeu alerta <em>CAUTION</em> (SlowMist); prefira <code class="text-white">FlaUI-MCP</code>.</li>
+                        <li>• <strong>Chrome DevTools MCP:</strong> envia telemetria e URLs ao CrUX por padrão; passe <code class="text-white">--no-usage-statistics --no-performance-crux</code>.</li>
+                        <li>• <strong>DevFlow Agent:</strong> expõe servidor HTTP e storage do app; isole estritamente em <code class="text-white">#if DEBUG</code>.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+                    <div class="text-cyan-400 font-bold text-sm mb-2">💳 Cotas, Tokens & Licenças</div>
+                    <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                        <li>• <strong>Figma MCP Oficial:</strong> plano gratuito limita a <strong>6 chamadas/mês</strong>, travando o agente na 1ª sessão.</li>
+                        <li>• <strong>Estouro de 25k tokens:</strong> dumps completos de árvore UIA/XAML saturam o contexto; filtre profundidade.</li>
+                        <li>• <strong>Syncfusion MAUI 10:</strong> misturar <code class="text-white">Syncfusion.Maui.*</code> com <code class="text-white">Toolkit</code> ou divergir versões gera banner de licença.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 px-4 sm:px-6 lg:px-8 mt-12">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div>
+                <strong>MyVocaList • Pesquisa de Ferramental IA UI/UX</strong> — Baseado em fontes primárias verificadas em novembro de 2026 (Microsoft Learn, dotnet/maui-labs, Anthropic Skills, Chrome DevTools, Playwright, Google Stitch, Penpot e Syncfusion).
+            </div>
+            <div class="text-slate-500">
+                Visualizações via Chart.js & Plotly Canvas/WebGL
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function wrapLabel(str) {
+            if (str.length <= 16) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + (currentLine ? ' ' : '') + word).length > 16) {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                }
+            }
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        }
+
+        const standardTooltip = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    }
+                    return label;
+                }
+            }
+        };
+
+        const visualLoopLabels = [
+            'Blazor Hybrid (Playwright + Chrome DevTools)',
+            'MAUI Nativo iOS / Mac (DevFlow Preview)',
+            'MAUI Nativo Windows (FlaUI-MCP UIA3)',
+            'MAUI Mobile Caixa-Preta (Maestro / Appium)',
+            'MAUI Nativo Android (DevFlow In Progress)'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('visualLoopChart'), {
+            type: 'bar',
+            data: {
+                labels: visualLoopLabels,
+                datasets: [{
+                    label: 'Maturidade do Loop Visual (0–5)',
+                    data: [5.0, 4.0, 3.5, 3.2, 2.5],
+                    backgroundColor: [
+                        '#06b6d4',
+                        '#3b82f6',
+                        '#6366f1',
+                        '#f59e0b',
+                        '#f43f5e'
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 5,
+                        grid: { color: '#1e293b' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#e2e8f0', font: { size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: standardTooltip
+                }
+            }
+        });
+
+        const utilityLabels = [
+            'Microsoft Learn MCP (Docs MAUI 10)',
+            'Design Critique Skill (Anthropic)',
+            'Style Dictionary (Tokens XAML/CSS)',
+            'Context7 MCP (Docs Libs OSS)',
+            'Microsoft.Maui.DevFlow (Preview)',
+            'Google Stitch MCP / Penpot MCP',
+            'Syncfusion MAUI MCP (Se manter suíte)',
+            'FlaUI-MCP (Windows) / Maestro (Mobile)'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('toolsUtilityChart'), {
+            type: 'bar',
+            data: {
+                labels: utilityLabels,
+                datasets: [{
+                    label: 'Nota de Utilidade MyVocaList (1–5)',
+                    data: [5.0, 4.5, 4.5, 4.5, 4.0, 4.0, 4.0, 3.5],
+                    backgroundColor: '#06b6d4',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 5,
+                        grid: { color: '#1e293b' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#e2e8f0', font: { size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: standardTooltip
+                }
+            }
+        });
+
+        const starsLabels = [
+            'UI/UX Pro Max Skill',
+            'Impeccable Plugin',
+            'Context7 MCP',
+            'Chrome DevTools MCP',
+            'Playwright MCP (Microsoft)',
+            'Vercel Agent Skills',
+            'Framelink Figma MCP',
+            'Windows-MCP (CursorTouch)',
+            'Appium MCP Oficial',
+            'dotnet/maui-labs (DevFlow)'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('starsChart'), {
+            type: 'bar',
+            data: {
+                labels: starsLabels,
+                datasets: [{
+                    label: 'GitHub Stars (milhares)',
+                    data: [155.0, 118.0, 65.5, 58.7, 40.2, 35.0, 14.5, 12.2, 0.52, 0.24],
+                    backgroundColor: [
+                        '#6366f1',
+                        '#6366f1',
+                        '#06b6d4',
+                        '#f59e0b',
+                        '#f59e0b',
+                        '#f59e0b',
+                        '#3b82f6',
+                        '#f43f5e',
+                        '#10b981',
+                        '#10b981'
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { color: '#1e293b' },
+                        ticks: { color: '#94a3b8', callback: (v) => v + 'k' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#e2e8f0', font: { size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: standardTooltip
+                }
+            }
+        });
+
+        const radarLabels = [
+            'Loop Visual & Auditoria IA',
+            'Baixo Custo Migração Imediata',
+            'Performance & Scroll Nativo',
+            'Reuso Web / PWA Pós-MVP',
+            'Zero Custo de Licença'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('stackRadarChart'), {
+            type: 'radar',
+            data: {
+                labels: radarLabels,
+                datasets: [
+                    {
+                        label: 'MAUI 10 Puro',
+                        data: [2.8, 4.8, 5.0, 1.5, 5.0],
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.18)',
+                        pointBackgroundColor: '#06b6d4'
+                    },
+                    {
+                        label: 'MAUI 10 + Syncfusion',
+                        data: [3.2, 4.2, 4.6, 1.5, 2.5],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.18)',
+                        pointBackgroundColor: '#6366f1'
+                    },
+                    {
+                        label: 'MAUI Blazor Hybrid',
+                        data: [5.0, 2.2, 3.6, 5.0, 4.8],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.18)',
+                        pointBackgroundColor: '#f59e0b'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 5,
+                        ticks: { display: false },
+                        grid: { color: '#1e293b' },
+                        angleLines: { color: '#1e293b' },
+                        pointLabels: { color: '#cbd5e1', font: { size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#e2e8f0', boxWidth: 12, font: { size: 11 } }
+                    },
+                    tooltip: standardTooltip
+                }
+            }
+        });
+
+        Plotly.newPlot('plotlyStackChart', [{
+            x: [2.8, 3.2, 5.0],
+            y: [1.5, 1.5, 5.0],
+            text: ['MAUI 10 Puro<br>(Baixo custo migração)', 'MAUI + Syncfusion<br>(Controles densos)', 'MAUI Blazor Hybrid<br>(Máxima IA & PWA)'],
+            mode: 'markers+text',
+            type: 'scattergl',
+            textposition: ['top right', 'bottom right', 'bottom left'],
+            textfont: { color: '#e2e8f0', size: 11 },
+            marker: {
+                size: [36, 30, 22],
+                color: ['#06b6d4', '#6366f1', '#f59e0b'],
+                line: { color: '#0f172a', width: 2 }
+            },
+            hovertemplate: '<b>%{text}</b><br>Autonomia IA: %{x}/5<br>Reuso Pós-MVP: %{y}/5<extra></extra>'
+        }], {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(15,23,42,0.6)',
+            margin: { t: 20, r: 20, b: 45, l: 45 },
+            xaxis: {
+                title: { text: 'Autonomia Visual do Claude Code (1–5)', font: { color: '#94a3b8', size: 11 } },
+                range: [1.5, 5.6],
+                gridcolor: '#1e293b',
+                tickfont: { color: '#94a3b8' }
+            },
+            yaxis: {
+                title: { text: 'Reuso de UI no Pós-MVP Web/PWA (1–5)', font: { color: '#94a3b8', size: 11 } },
+                range: [0.5, 5.8],
+                gridcolor: '#1e293b',
+                tickfont: { color: '#94a3b8' }
+            }
+        }, { responsive: true, displayModeBar: false });
+
+        const toolsData = [
+            { name: 'Microsoft Learn MCP', maintainer: 'Microsoft (Oficial)', cat: 'E. Docs', support: 'sim', supportLabel: 'Sim (MAUI 10)', cost: 'Gratuito (Sem auth)', score: '5.0 / 5' },
+            { name: 'Design Critique Skill', maintainer: 'Anthropic (Oficial)', cat: 'B. Crítica UX', support: 'sim', supportLabel: 'Sim (Screenshots)', cost: 'Gratuito', score: '4.5 / 5' },
+            { name: 'Style Dictionary', maintainer: 'Comunidade / Standard', cat: 'D. Tokens', support: 'parcial', supportLabel: 'Parcial (Formatter XAML)', cost: 'Gratuito (Apache-2.0)', score: '4.5 / 5' },
+            { name: 'Context7 MCP', maintainer: 'Upstash (Oficial)', cat: 'E. Docs', support: 'parcial', supportLabel: 'Parcial (Libs OSS)', cost: 'Gratuito (MIT)', score: '4.5 / 5' },
+            { name: 'Microsoft.Maui.DevFlow', maintainer: 'Microsoft / maui-labs', cat: 'A. Loop Visual', support: 'sim', supportLabel: 'Sim (Preview iOS/Win/And)', cost: 'Gratuito (Preview)', score: '4.0 / 5' },
+            { name: 'Google Stitch MCP', maintainer: 'Google Labs (Oficial)', cat: 'C. Protótipo', support: 'parcial', supportLabel: 'Parcial (DESIGN.md / HTML)', cost: 'Gratuito (Conta Google)', score: '4.0 / 5' },
+            { name: 'Penpot MCP Oficial', maintainer: 'Penpot (Oficial)', cat: 'C. Protótipo', support: 'parcial', supportLabel: 'Parcial (Tokens / CSS)', cost: 'Gratuito (Self-host OSS)', score: '4.0 / 5' },
+            { name: 'Syncfusion MAUI MCP', maintainer: 'Syncfusion (Oficial)', cat: 'E. Docs', support: 'sim', supportLabel: 'Sim (100+ controles)', cost: 'Licença Syncfusion', score: '4.0 / 5' },
+            { name: 'Maestro MCP', maintainer: 'Mobile.dev (Oficial)', cat: 'A. Loop Visual', support: 'parcial', supportLabel: 'Parcial (Android / iOS)', cost: 'Gratuito (CLI local)', score: '3.5 / 5' },
+            { name: 'FlaUI-MCP', maintainer: 'Scott Hanselman', cat: 'A. Loop Visual', support: 'parcial', supportLabel: 'Parcial (Só Windows)', cost: 'Gratuito (MIT)', score: '3.5 / 5' },
+            { name: 'Appium MCP', maintainer: 'Appium (Oficial)', cat: 'A. Loop Visual', support: 'parcial', supportLabel: 'Parcial (Android / iOS)', cost: 'Gratuito (OSS)', score: '3.0 / 5' },
+            { name: 'Syncfusion MAUI UI Builder', maintainer: 'Syncfusion (Oficial)', cat: 'C. Protótipo', support: 'sim', supportLabel: 'Sim (XAML + MVVM)', cost: 'Licença Syncfusion', score: '3.0 / 5' },
+            { name: 'Playwright MCP', maintainer: 'Microsoft (Oficial)', cat: 'A. Loop Visual', support: 'web', supportLabel: 'Só Web / Blazor', cost: 'Gratuito (Apache-2.0)', score: '5.0 Web / 1.0 XAML' },
+            { name: 'Chrome DevTools MCP', maintainer: 'Google (Oficial)', cat: 'A. Loop Visual', support: 'web', supportLabel: 'Só Web / Blazor', cost: 'Gratuito', score: '5.0 Web / 1.0 XAML' },
+            { name: 'AccessLint (WCAG 2.2)', maintainer: 'AccessLint (Oficial)', cat: 'B. Crítica UX', support: 'web', supportLabel: 'Só Web / Blazor', cost: 'Gratuito (Local npm)', score: '4.5 Web / 1.0 XAML' },
+            { name: 'Figma MCP Oficial', maintainer: 'Figma (Oficial)', cat: 'C. Protótipo', support: 'parcial', supportLabel: 'Parcial (Frames/Vars)', cost: 'Teto 6/mês no Free', score: '2.0 Free / 4.0 Dev' }
+        ];
+
+        const tbody = document.getElementById('toolsTableBody');
+        function renderTable(filter) {
+            tbody.innerHTML = '';
+            const filtered = filter === 'all' ? toolsData : toolsData.filter(t => t.support === filter);
+            for (const item of filtered) {
+                const badgeClass = item.support === 'sim'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    : item.support === 'parcial'
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                        : 'bg-pink-500/20 text-pink-300 border-pink-500/30';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="font-semibold text-white">${item.name}</div>
+                        <div class="text-xs text-slate-400">${item.maintainer}</div>
+                    </td>
+                    <td class="py-3 px-4 text-xs text-slate-300">${item.cat}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded border text-xs font-medium ${badgeClass}">${item.supportLabel}</span>
+                    </td>
+                    <td class="py-3 px-4 text-xs text-slate-400">${item.cost}</td>
+                    <td class="py-3 px-4 text-right font-bold text-cyan-400 whitespace-nowrap">${item.score}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        renderTable('all');
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('bg-cyan-500', 'text-slate-950');
+                    b.classList.add('bg-slate-800', 'text-slate-300');
+                });
+                btn.classList.remove('bg-slate-800', 'text-slate-300');
+                btn.classList.add('bg-cyan-500', 'text-slate-950');
+                renderTable(btn.dataset.filter);
+            });
+        });
+    </script>
+</body>
+</html>

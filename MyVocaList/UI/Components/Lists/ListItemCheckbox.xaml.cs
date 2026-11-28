@@ -2,7 +2,7 @@ namespace MyVocaList.UI.Components.Lists;
 
 /// <summary>
 /// Trailing selection control for <see cref="ListItem"/> in CRUD list pages.
-/// Renders a 48×48 transparent tap target around a non-interactive <c>dx:CheckEdit</c>;
+/// Renders a 48×48 transparent tap target around a non-interactive <c>SfCheckBox</c>;
 /// the tap is routed to <c>CrudListPageBase</c>'s <c>ToggleItemSelectionCommand</c>.
 /// </summary>
 public partial class ListItemCheckbox : ContentView

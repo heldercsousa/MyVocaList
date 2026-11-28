@@ -2,21 +2,19 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:popup="clr-namespace:Syncfusion.Maui.Toolkit.Popup;assembly=Syncfusion.Maui.Toolkit"
     x:Class="MyVocaList.UI.Components.Menus.Menu"
     x:Name="self">
 
-    <!-- MD3 vertical menu host (Menus - Common). Wraps one DXPopup; the item buttons are built in code-behind
-         from ItemsSource so each one knows its index (per-corner shape, REQ-OVFM-21). -->
-    <dx:DXPopup x:Name="popup"
-                AllowShadow="True"
-                CornerRadius="16"
-                BackgroundColor="{StaticResource SurfaceContainerLow}"
-                HorizontalAlignment="Right">
-        <VerticalStackLayout x:Name="itemsHost"
-                             Padding="4,2"
-                             MinimumWidthRequest="112"
-                             MaximumWidthRequest="280" />
-    </dx:DXPopup>
+    <!-- MD3 vertical menu host (Menus - Common), Syncfusion copy of Menu. Wraps one SfPopup; the item buttons are built in
+         code-behind from ItemsSource so each one knows its index (per-corner shape, REQ-OVFM-21). The popup content template
+         is set in code-behind (it returns the code-built item stack). -->
+    <popup:SfPopup x:Name="popup"
+                   ShowHeader="False"
+                   ShowFooter="False"
+                   AutoSizeMode="Both"
+                   StaysOpen="False"
+                   ShowOverlayAlways="False"
+                   Padding="0" />
 
 </ContentView>

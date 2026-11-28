@@ -27,8 +27,8 @@ public class SongFormViewModelImageTests
             new Mock<ISnackbarComponent>().Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             new Mock<ISongKaraokeUrlService>().Object,
-            new Mock<ISecureStorageWrapper>().Object,
-            new Mock<IMessenger>().Object,
+            new Mock<ISharedLinkInbox>().Object,
+            new Mock<ISharedVideoService>().Object,
             _navigationMock.Object,
             _suggestionsMock.Object,
             TestImageStore.PassThrough().Object,
@@ -213,14 +213,14 @@ public class SongFormViewModelImageTests
     }
 
     [Fact]
-    public async Task TitleOption_RemoteRow_TrailingTextIsDeezerAndNoSourceWordInSupportingText()
+    public async Task TitleOption_RemoteRow_TrailingTextIsMusicBrainzAndNoSourceWordInSupportingText()
     {
         // [AC] REQ-ART-08: the Deezer option names its source as trailing text.
         SetupSearch([], [], [RemoteDto("Creep", "Radiohead")]);
 
         var option = await SingleTitleOption(CreateSut());
 
-        Assert.Equal("Deezer", option.TrailingText);
+        Assert.Equal("MusicBrainz", option.TrailingText);
         Assert.DoesNotContain("Deezer", option.SupportingText);
     }
 

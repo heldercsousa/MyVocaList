@@ -13,4 +13,15 @@ public partial class ArtistsPage : CrudListPageBase
         BindingContext = _viewModel;
         AttachViewModel();
     }
+
+    private readonly List<string> _roleFilters = [];
+
+    private void OnRoleFilterSelectionChanged(object? sender, Syncfusion.Maui.Toolkit.Chips.SelectionChangedEventArgs e)
+    {
+        if (e.RemovedItem?.ToString() is { } removed)
+            _roleFilters.Remove(removed);
+        if (e.AddedItem?.ToString() is { } added && !_roleFilters.Contains(added))
+            _roleFilters.Add(added);
+        _viewModel.SelectedRoleFilters = _roleFilters.ToList();
+    }
 }

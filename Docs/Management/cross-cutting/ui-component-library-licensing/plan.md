@@ -178,11 +178,11 @@ Precondition: P5 passed; Helder's go recorded in the task log; `SYNCFUSION_LICEN
 **Files:**
 - Create: `MyVocaList/UI/Migration/DxSheetStateConverter.cs`
 - Test: `Tests/Unit/Migration/DxSheetStateConverterTests.cs`
-- Orchestrator: `App.xaml` resource `<migration:DxSheetStateConverter x:Key="DxSheetStateToSf" />`; `Tests/MyVocaList.Tests.csproj` Toolkit reference if T0.1a says it is needed
+- Orchestrator: `App.xaml` resources `<migration:DxSheetStateConverter x:Key="DxSheetStateToSf" />` and `<migration:DxSheetStateToIsOpenConverter x:Key="DxSheetStateToSfIsOpen" />`; `Tests/MyVocaList.Tests.csproj` Toolkit reference if T0.1a says it is needed
 
-**Interfaces:** `public sealed class DxSheetStateConverter : IValueConverter` in `MyVocaList.UI.Migration`; `Convert` DX `BottomSheetState` → Sf state; `ConvertBack` Sf → DX, per design § Sheet-state bridge (Sf enum names from T0.1a; `using` aliases for the two same-named enums).
+**Interfaces:** `public sealed class DxSheetStateConverter : IValueConverter` in `MyVocaList.UI.Migration`; `Convert` DX `BottomSheetState` → Sf state; `ConvertBack` Sf → DX, per design § Sheet-state bridge (Sf enum names from T0.1a; `using` aliases for the two same-named enums). *Added 2026-11-23 from T0.1a:* in the same file, `public sealed class DxSheetStateToIsOpenConverter : IValueConverter` (key `DxSheetStateToSfIsOpen`, bound to `SfBottomSheet.IsOpen`): `Hidden` → `false`, other → `true`; `ConvertBack` `false` → `Hidden`, `true` → `Binding.DoNothing`. Sf `Collapsed` converts back to DX `Hidden`.
 
-- [ ] **Step 1: Failing tests**, each tagged `// [AC] REQ-UIMIG-07: with a bottom sheet open, back closes it`: `Convert_Hidden_IsClosed`, `Convert_HalfExpanded_IsHalfExpanded`, `Convert_FullExpanded_IsFullExpanded`, `ConvertBack_ClosedByUser_IsHidden`, `ConvertBack_DraggedToFull_IsFullExpanded`, `ConvertBack_DraggedToHalf_IsHalfExpanded`.
+- [ ] **Step 1: Failing tests**, each tagged `// [AC] REQ-UIMIG-07: with a bottom sheet open, back closes it`: `Convert_Hidden_IsClosed`, `Convert_HalfExpanded_IsHalfExpanded`, `Convert_FullExpanded_IsFullExpanded`, `ConvertBack_ClosedByUser_IsHidden`, `ConvertBack_DraggedToFull_IsFullExpanded`, `ConvertBack_DraggedToHalf_IsHalfExpanded`, plus (2026-11-23) `ConvertBack_Collapsed_IsHidden`, `IsOpen_Hidden_IsFalse`, `IsOpen_HalfExpanded_IsTrue`, `IsOpenBack_False_IsHidden`.
 - [ ] **Step 2:** Run → FAIL. If T0.1a found no plain `net10.0` Toolkit asset, the test project cannot name the Sf enum: replace these tests by an emulator check of the six transitions, record the decision in the task log, and go to Step 3.
 - [ ] **Step 3:** Implement. Unknown input → `Binding.DoNothing`.
 - [ ] **Step 4:** Run → PASS; full suite passes. `check_dx.py --staged` → 0 (bridge files exempt). Commit `feat: DxSheetStateConverter — migration bridge`.
@@ -251,12 +251,12 @@ Design § Decision: List control. On branch `task/spike-sflistview`, a minimal l
 
 ### Task T2.8a: `CrudListViewSf` — list body [SEQUENTIAL — after T2.0 confirmed and T2.1–T2.7]
 
-**Files:** Create `MyVocaList/UI/Components/CrudListViewSf.xaml(.cs)`. **Consumes:** Phase 2 components, T0.4a styles, T2.0 verdict. **Produces:** `CrudListViewSf : ContentView, IMenuHost` with the same BindableProperties and `DataTemplate` slots as `CrudListView` (`MyVocaList/UI/Components/CrudListView.xaml(.cs)`).
+**Files:** Create `MyVocaList/UI/Components/CrudListViewSf.xaml(.cs)`. **Consumes:** Phase 2 components, T0.4a styles, T2.0 verdict. **Produces:** `CrudListViewSf : ContentView, IMenuHostSf` (ruling 2026-11-23: `IMenuHost.HostedMenu` is typed `Menu?`) with the same BindableProperties and `DataTemplate` slots as `CrudListView` (`MyVocaList/UI/Components/CrudListView.xaml(.cs)`).
 - Recipe C: list = T2.0 verdict (`SfListView`, or stock `CollectionView` + a `DataTemplateSelector` choosing the selected/unselected row template + code-behind forwarding of tap and long-press to the VM commands, as `CrudListView.OnItemTap` / `OnItemLongPress`); `ShimmerView` → `SfShimmer` with token colors and no DX shimmer anywhere in the tree (REQ-UIMIG-04); `EmptyStateSf`; background below the last row = the page `Surface` token (REQ-UIMIG-02). Sheets and floating toolbar are stubs bound to nothing until T2.8b.
 
 ### Task T2.8b: `CrudListViewSf` — sheets, toolbar, menu [SEQUENTIAL — after T2.8a]
 
-Same files. Both bottom sheets → `SfBottomSheet` with `State="{Binding …SheetState, Converter={StaticResource DxSheetStateToSf}, Mode=TwoWay}"`; `FloatingToolbarSf`, FAB with `SfIconButton`, `MenuSf` through `IMenuHost`. Recipe C C3–C5.
+Same files. Both bottom sheets → `SfBottomSheet` with `State="{Binding …SheetState, Converter={StaticResource DxSheetStateToSf}, Mode=TwoWay}"`; `FloatingToolbarSf`, FAB with `SfIconButton`, `MenuSf` through `IMenuHostSf`. Recipe C C3–C5.
 
 ### Task T2.9: `VenuesSfPage` [SEQUENTIAL — first consumer; proves `CrudListViewSf` parity; about 2 h]
 

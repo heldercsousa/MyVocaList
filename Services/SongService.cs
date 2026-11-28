@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Contracts.Enums;
@@ -31,8 +31,8 @@ public class SongService : ISongService
 
     private const string ArtistRequiredMessage = "Artist is required";
     private const string ArtistNotFoundMessage = "Artist not found";
-    private const string DeezerArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
-    private const string DeezerTitleFrozenMessage = "The title of a song from the music database cannot be changed.";
+    private const string RemoteArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
+    private const string RemoteTitleFrozenMessage = "The title of a song from the music database cannot be changed.";
 
     /// <summary>The one duplicate message for an exact song identity (REQ-RMV-06, REQ-RMV-10).</summary>
     private const string DuplicateTitleMessage = "This artist already has a song with this title.";
@@ -222,7 +222,7 @@ public class SongService : ISongService
         int? artistId, string? newArtistName,
         CancellationToken ct,
         bool imageChanged = false, string? songImageReference = null,
-        string? artistImageUrl = null, bool fillArtistImage = false)
+        string? artistImageUrl = null, bool fillArtistImage = false, string? releaseMbid = null)
     {
         // REQ-SFT-28 / REQ-SFT-21: at most one of artistId / newArtistName (blank name = not
         // supplied). Pure input validation stays OUTSIDE the lambda (REQ-UOW-41).
@@ -244,17 +244,17 @@ public class SongService : ISongService
             if (song == null)
                 return (false, "Song not found", SaveField.None);
 
-            // REQ-SLD-15: the artist of a Deezer song cannot change, whatever the caller sends; checked before
+            // REQ-SLD-15: the artist of a remote-catalog song cannot change, whatever the caller sends; checked before
             // the identity check and before any artist is created.
-            if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
+            if (MyVocaList.Domain.Rules.SongIdentityRules.IsRemoteSong(song.ExternalProvider, song.ExternalId)
                 && (hasNewArtistName || (artistId.HasValue && artistId.Value != song.ArtistId)))
-                return (false, DeezerArtistFrozenMessage, SaveField.Artist);
+                return (false, RemoteArtistFrozenMessage, SaveField.Artist);
 
-            // REQ-SLD-37: the title of a Deezer song cannot change either; compared after the trimming every
+            // REQ-SLD-37: the title of a remote-catalog song cannot change either; compared after the trimming every
             // title gets (ValidateTitleInput above), ordinal, character by character.
-            if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
+            if (MyVocaList.Domain.Rules.SongIdentityRules.IsRemoteSong(song.ExternalProvider, song.ExternalId)
                 && !string.Equals(title.Trim(), song.Title, StringComparison.Ordinal))
-                return (false, DeezerTitleFrozenMessage, SaveField.Title);
+                return (false, RemoteTitleFrozenMessage, SaveField.Title);
 
             // REQ-SFT-26: an external identity held by ANOTHER song (self excluded) is rejected before
             // any artist is created, so a refused save never leaves a new artist behind.
@@ -345,6 +345,10 @@ public class SongService : ISongService
             if (imageChanged)
                 song.ImageUrl = songImageReference;
 
+            // REQ-MSRC-16: a new MusicBrainz pick replaces the stored release id; no pick keeps it.
+            if (releaseMbid is not null)
+                song.ReleaseMbid = releaseMbid;
+
             await songRepository.UpdateAsync(song, ct);
 
             // REQ-CATPROP-03: an author change moves the derived row, after every refusal above. A row the
@@ -386,7 +390,7 @@ public class SongService : ISongService
         string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct,
         string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false,
-        LyricsLookupResult? pickLyricsLookup = null)
+        LyricsLookupResult? pickLyricsLookup = null, string? artistExternalId = null, string? releaseMbid = null)
     {
         // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
         // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
@@ -424,7 +428,9 @@ public class SongService : ISongService
                 // and the unit of work skips the save and rolls back.
                 var artistService = sp.GetRequiredService<IArtistService>();
                 var (artistCreated, artistMessage, newArtist) =
-                    await artistService.CreateArtistAsync(newArtistName!, ct: ct);
+                    await artistService.CreateArtistAsync(
+                        newArtistName!, artistExternalId,
+                        artistExternalId is null ? null : MyVocaList.Domain.Constants.ProviderNames.MusicBrainz, ct);   // REQ-MSRC-13
                 if (!artistCreated || newArtist is null)
                     return (false, artistMessage, null, SaveField.Artist);
 
@@ -476,6 +482,7 @@ public class SongService : ISongService
                 ExternalId = externalId,
                 ExternalProvider = externalProvider,
                 ImageUrl = songImageUrl,
+                ReleaseMbid = releaseMbid,   // REQ-MSRC-16
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -541,28 +548,31 @@ public class SongService : ISongService
 
         var isAddMode = request.SongId is null;
 
+        // REQ-MSRC-13: the MusicBrainz artist id of the pick travels in add mode only; a blank one is no id.
+        var artistMbid = isAddMode && !string.IsNullOrWhiteSpace(request.ArtistExternalId) ? request.ArtistExternalId.Trim() : null;
+
         // Rules 2–3 are reads only. SaveFromFormAsync opens no write unit of work (REQ-SFT-46): the
         // only writes are CreateSongWithUrlsAsync / UpdateSongAsync below, each with its own unit of
         // work. Resolving the governed services from sp (REQ-UOW-37) also keeps SongService free of
         // the SongResolutionService -> ISongService constructor cycle.
         var resolved = await _uow.ExecuteReadAsync<SaveFormResolution>(async sp =>
         {
-            // REQ-SLD-15 / REQ-SLD-30: in edit mode the artist of a Deezer song is the stored one. The id is
+            // REQ-SLD-15 / REQ-SLD-30: in edit mode the artist of a remote-catalog song is the stored one. The id is
             // compared, never the typed text; a match needs no artist resolution at all.
             if (!isAddMode)
             {
                 var songRepository = sp.GetRequiredService<ISongRepository>();
                 var storedSong = await songRepository.GetByIdAsync(request.SongId!.Value, ct);
                 if (storedSong is not null
-                    && MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(storedSong.ExternalProvider, storedSong.ExternalId))
+                    && MyVocaList.Domain.Rules.SongIdentityRules.IsRemoteSong(storedSong.ExternalProvider, storedSong.ExternalId))
                 {
                     if (request.ArtistId != storedSong.ArtistId)
-                        return SaveFormResolution.Stop(SaveFailed(DeezerArtistFrozenMessage, SaveField.Artist));
+                        return SaveFormResolution.Stop(SaveFailed(RemoteArtistFrozenMessage, SaveField.Artist));
 
-                    // REQ-SLD-37: the title of a Deezer song cannot change either; the trimmed request title is
+                    // REQ-SLD-37: the title of a remote-catalog song cannot change either; the trimmed request title is
                     // compared ordinally with the stored one (the same rule as UpdateSongCoreAsync).
                     if (!string.Equals(request.Title.Trim(), storedSong.Title, StringComparison.Ordinal))
-                        return SaveFormResolution.Stop(SaveFailed(DeezerTitleFrozenMessage, SaveField.Title));
+                        return SaveFormResolution.Stop(SaveFailed(RemoteTitleFrozenMessage, SaveField.Title));
 
                     return SaveFormResolution.Proceed(storedSong.ArtistId, null, fillArtistImage: false);
                 }
@@ -601,11 +611,18 @@ public class SongService : ISongService
                 resolved.ArtistId, resolved.NewArtistName, request.Title,
                 request.Lyrics, externalId, externalProvider,
                 request.PendingUrls ?? [], ct,
-                songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup);
+                songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup,
+                resolved.NewArtistName is null ? null : artistMbid,
+                releaseMbid: string.IsNullOrWhiteSpace(request.ReleaseMbid) ? null : request.ReleaseMbid.Trim());
 
-            return created && song is not null
-                ? SaveSucceeded(createMessage, song.Id)
-                : SaveFailed(createMessage, failedField);
+            if (!created || song is null)
+                return SaveFailed(createMessage, failedField);
+
+            // REQ-MSRC-13: the artist this Save created gets its profile photo now (after the commit, never fails the save).
+            if (artistMbid is not null && resolved.NewArtistName is not null)
+                await AdoptNewArtistPhotoAsync(song.ArtistId, artistMbid, ct);
+
+            return SaveSucceeded(createMessage, song.Id);
         }
 
         // REQ-SFT-27: edit mode passes a null external identity — the stored identity is kept,
@@ -617,11 +634,39 @@ public class SongService : ISongService
             externalId: null, externalProvider: null,
             artistId: resolved.ArtistId, newArtistName: resolved.NewArtistName, ct: ct,
             imageChanged: request.ImageChanged, songImageReference: songImageUrl,
-            artistImageUrl: artistImageUrl, fillArtistImage: resolved.FillArtistImage);
+            artistImageUrl: artistImageUrl, fillArtistImage: resolved.FillArtistImage,
+            releaseMbid: string.IsNullOrWhiteSpace(request.ReleaseMbid) ? null : request.ReleaseMbid.Trim());
 
         return updated
             ? SaveSucceeded(updateMessage, songId)
             : SaveFailed(updateMessage, updateFailedField);
+    }
+
+    /// <summary>
+    /// REQ-MSRC-13/15: fetches the MusicBrainz profile of an artist this Save created and adopts its photo. The profile
+    /// service is resolved only when there is an artist id to look up. Any failure is logged and the save stands.
+    /// </summary>
+    private async Task AdoptNewArtistPhotoAsync(int artistId, string artistMbid, CancellationToken ct)
+    {
+        try
+        {
+            var profileService = await _uow.ExecuteReadAsync<IArtistProfileService?>(
+                sp => Task.FromResult<IArtistProfileService?>(sp.GetService<IArtistProfileService>()), ct);
+            if (profileService is null) return;
+
+            var profile = await profileService.GetAsync(artistMbid, ct);
+            if (profile is null) return;
+
+            await profileService.AdoptPhotoIfMissingAsync(artistId, profile, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Adopting the profile photo of new artist {ArtistId} failed", artistId);
+        }
     }
 
     /// <summary>
@@ -633,6 +678,9 @@ public class SongService : ISongService
     private async Task<SaveFormResolution> ResolveFormArtistAsync(
         IServiceProvider sp, SongFormSaveRequest request, CancellationToken ct)
     {
+        // REQ-MSRC-13: the artist's own MusicBrainz id (never the song's identity, REQ-SFT-41) lets the resolver reuse a known artist.
+        var artistMbid = request.SongId is null && !string.IsNullOrWhiteSpace(request.ArtistExternalId) ? request.ArtistExternalId.Trim() : null;
+
         if (request.ArtistId is { } pickedArtistId)
             return SaveFormResolution.Proceed(pickedArtistId, newArtistName: null);
 
@@ -654,7 +702,10 @@ public class SongService : ISongService
 
         var artistResolutionService = sp.GetRequiredService<IArtistResolutionService>();
         var resolution = await artistResolutionService.ResolveAsync(
-            new ArtistCandidate(typedName, ExternalProvider: null, ExternalId: null), ct);
+            new ArtistCandidate(
+                typedName,
+                ExternalProvider: artistMbid is null ? null : MyVocaList.Domain.Constants.ProviderNames.MusicBrainz,
+                ExternalId: artistMbid), ct);
 
         switch (resolution.Kind)
         {

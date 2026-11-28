@@ -1,3 +1,5 @@
+using SfSheetState = Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState;
+
 namespace MyVocaList.UI.Components.Sheets;
 
 /// <summary>
@@ -19,16 +21,21 @@ public partial class UpdateAvailableBottomSheet : ContentView
         _storeUrl = result.StoreUrl;
         TitleLabel.Text = "Update Available";
         BodyLabel.Text = $"Version {result.LatestVersion} is ready. Update for the latest features and fixes.";
-        Sheet.State = BottomSheetState.HalfExpanded;
+        Sheet.State = SfSheetState.HalfExpanded;
+        Sheet.IsOpen = true;
     }
 
     private async void OnUpdateNowClicked(object sender, EventArgs e)
     {
-        Sheet.State = BottomSheetState.Hidden;
+        Sheet.IsOpen = false;
+        Sheet.State = SfSheetState.Hidden;
         if (!string.IsNullOrEmpty(_storeUrl))
             await Launcher.OpenAsync(_storeUrl);
     }
 
     private void OnLaterClicked(object sender, EventArgs e)
-        => Sheet.State = BottomSheetState.Hidden;
+    {
+        Sheet.IsOpen = false;
+        Sheet.State = SfSheetState.Hidden;
+    }
 }

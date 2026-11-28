@@ -2,7 +2,7 @@
 <pages:CrudListPageBase
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:chips="clr-namespace:Syncfusion.Maui.Toolkit.Chips;assembly=Syncfusion.Maui.Toolkit"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:domain="clr-namespace:MyVocaList.Domain.ReadModels;assembly=MyVocaList.Domain"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
@@ -10,7 +10,6 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:views="clr-namespace:MyVocaList.UI.Components"
-    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     x:Class="MyVocaList.UI.Pages.Artists.ArtistsPage"
     x:Name="page"
     x:DataType="vm:ArtistsViewModel"
@@ -37,15 +36,17 @@
         FabDescription="Add artist">
 
         <views:CrudListView.FilterContent>
-            <dxe:FilterChipGroup SelectedItems="{Binding SelectedRoleFilters, Mode=TwoWay}"
-                                 Margin="16,4,16,4">
-                <dxe:FilterChipGroup.ItemsSource>
+            <chips:SfChipGroup ChipType="Filter"
+                               SelectionChanged="OnRoleFilterSelectionChanged"
+                               ChipTextColor="{StaticResource OnSurfaceVariant}"
+                               Margin="16,24,16,22">
+                <chips:SfChipGroup.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
                         <x:String>Authors</x:String>
                         <x:String>Performers</x:String>
                     </x:Array>
-                </dxe:FilterChipGroup.ItemsSource>
-            </dxe:FilterChipGroup>
+                </chips:SfChipGroup.ItemsSource>
+            </chips:SfChipGroup>
         </views:CrudListView.FilterContent>
 
         <views:CrudListView.ItemTemplate>
@@ -58,8 +59,8 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <dx:DXButton x:DataType="{x:Null}" Style="{StaticResource StandardIconButton}"
-                                         Icon="queue_music_outlined"
+                            <ImageButton x:DataType="{x:Null}" Style="{StaticResource SfIconButton}"
+                                         Source="queue_music_outlined"
                                          SemanticProperties.Description="View catalog"
                                          Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
                                          CommandParameter="{Binding .}"
@@ -81,8 +82,8 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <dx:DXButton x:DataType="{x:Null}" Style="{StaticResource StandardIconButton}"
-                                         Icon="queue_music_outlined"
+                            <ImageButton x:DataType="{x:Null}" Style="{StaticResource SfIconButton}"
+                                         Source="queue_music_outlined"
                                          SemanticProperties.Description="View catalog"
                                          Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
                                          CommandParameter="{Binding .}"

@@ -2,42 +2,48 @@
 <appbars:AppBarBase
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
-    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
+    xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     x:Class="MyVocaList.UI.Components.AppBars.SearchBar"
     x:Name="self">
 
     <!-- MD3 Search bar (standalone/docked): 56dp pill, SurfaceContainerLow;
          IsElevated (liftOnScroll) -> SurfaceContainer via UpdateContainerColor. -->
-    <dx:DXBorder x:Name="container"
-                 CornerRadius="28"
-                 HeightRequest="56"
-                 Margin="16,8"
-                 BackgroundColor="{StaticResource SurfaceContainerLow}">
+    <Border x:Name="container"
+            HeightRequest="56"
+            Margin="16,8"
+            Padding="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource SurfaceContainerLow}">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="28" />
+        </Border.StrokeShape>
 
-        <!-- Search input: flat TextEdit, bodyLarge 16sp; leading search_outlined icon is
-             non-interactive (StartIcon, no button); trailing auto clear icon.
+        <!-- Leading search_outlined icon is non-interactive (plain Image, no button).
+             Search input: OutlinedTextField (SfTextInputLayout fails here, design § Control mapping),
+             trailing auto clear icon = ClearButtonVisibility WhileEditing.
              No back arrow, no BackCommand, no auto-focus (REQ-SEARCHBAR-03). -->
-        <dxe:TextEdit x:Name="searchEdit"
-                      Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
-                      PlaceholderText="{Binding Placeholder, Source={x:Reference self}}"
-                      StartIcon="search_outlined"
-                      StartIconColor="{StaticResource OnSurfaceVariant}"
-                      BoxMode="Outlined"
-                      BorderColor="Transparent"
-                      FocusedBorderColor="Transparent"
-                      BackgroundColor="Transparent"
-                      TextColor="{StaticResource OnSurface}"
-                      TextFontSize="16"
-                      TextFontFamily="RobotoRegular"
-                      PlaceholderColor="{StaticResource OnSurfaceVariant}"
-                      ClearIconVisibility="Auto"
-                      ClearIconColor="{StaticResource OnSurfaceVariant}"
-                      Keyboard="Text"
-                      ReturnType="Search"
-                      VerticalOptions="Center"
-                      Margin="8,0"
-                      SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
-    </dx:DXBorder>
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="0" VerticalOptions="Center">
+            <Image Grid.Column="0"
+                   Source="search_outlined"
+                   WidthRequest="24"
+                   HeightRequest="24"
+                   Margin="20,0,0,0"
+                   VerticalOptions="Center"
+                   behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                   AutomationProperties.IsInAccessibleTree="False" />
+            <textfields:OutlinedTextField x:Name="searchEdit"
+                                            Grid.Column="1"
+                                            Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                                            Placeholder="{Binding Placeholder, Source={x:Reference self}}"
+                                            ClearButtonVisibility="WhileEditing"
+                                            Keyboard="Text"
+                                            ReturnType="Search"
+                                            ShowOutline="False"
+                                            VerticalOptions="Center"
+                                            Margin="-4,0,0,0"
+                                            SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
+        </Grid>
+    </Border>
 </appbars:AppBarBase>

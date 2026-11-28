@@ -2,7 +2,7 @@
 
 > Full detail for every constraint: `.claude/library/constraints-reference.md` (`##` sections: DevExpress/UI · .NET MAUI · EF Core/SQLite · Visual Studio Solution · Design/Prototyping · How to add entries), loaded via the `myvocalist-coding` skill map. The `##` headings below are cross-referenced by `§` anchor; the HARD RULE/HARD GATE lines stay inline.
 
-Other areas: DevExpress / UI (BindableLayout vs DXCollectionView, native dialogs, selection-after-reload, no-Windows) → `§ DevExpress / UI`; .NET MAUI (SafeAreaEdges, incremental XAML edits) → `§ .NET MAUI`; Stitch/Figma evaluations → `§ Design / Prototyping Tools`; adding a newly discovered constraint → `§ How to add entries`.
+Other areas: .NET MAUI (SafeAreaEdges, incremental XAML edits) → `§ .NET MAUI`; Stitch/Figma evaluations → `§ Design / Prototyping Tools`; adding a newly discovered constraint → `§ How to add entries`.
 
 ## EF Core / SQLite
 

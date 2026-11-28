@@ -147,11 +147,17 @@ public class Bug068RegressionTests
         public Task<bool> ExistsAsync(int songId, string videoId, CancellationToken ct = default)
             => inner.ExistsAsync(songId, videoId, ct);
 
+        public Task<int?> FindSongIdByVideoIdAsync(string videoId, CancellationToken ct = default)
+            => inner.FindSongIdByVideoIdAsync(videoId, ct);
+
         public Task AddAsync(SongKaraokeUrl url, CancellationToken ct = default)
             => throw new InvalidOperationException("injected");
 
         public Task RemoveAsync(int songId, string videoId, CancellationToken ct = default)
             => inner.RemoveAsync(songId, videoId, ct);
+
+        public Task UpdateVideoInfoAsync(int songId, string videoId, string title, string? thumbnailUrl, CancellationToken ct = default)
+            => inner.UpdateVideoInfoAsync(songId, videoId, title, thumbnailUrl, ct);
 
         public Task IncrementPlayCountAsync(int songId, string videoId, CancellationToken ct = default)
             => inner.IncrementPlayCountAsync(songId, videoId, ct);

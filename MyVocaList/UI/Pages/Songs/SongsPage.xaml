@@ -2,9 +2,10 @@
 <pages:CrudListPageBase
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:songs="clr-namespace:MyVocaList.UI.Pages.Songs"
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
@@ -45,9 +46,9 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <dx:DXButton Icon="language_outlined"
-                                         Style="{StaticResource StandardIconButton}"
-                                         Command="{Binding Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Path=BindingContext.LaunchYouTubeSearchCommand}"
+                            <ImageButton Source="language_outlined" Padding="15"
+                                         Style="{StaticResource SfIconButton}"
+                                         Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsPage}"
                                          CommandParameter="{Binding .}" />
                             <lists:ListItemCheckbox VerticalOptions="Center" />
                         </HorizontalStackLayout>
@@ -66,9 +67,9 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <dx:DXButton Icon="language_outlined"
-                                         Style="{StaticResource StandardIconButton}"
-                                         Command="{Binding Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Path=BindingContext.LaunchYouTubeSearchCommand}"
+                            <ImageButton Source="language_outlined" Padding="15"
+                                         Style="{StaticResource SfIconButton}"
+                                         Command="{Binding Source={x:Reference page}, Path=ViewModel.LaunchYouTubeSearchCommand, x:DataType=songs:SongsPage}"
                                          CommandParameter="{Binding .}" />
                             <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                         </HorizontalStackLayout>

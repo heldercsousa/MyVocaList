@@ -29,7 +29,7 @@ namespace MyVocaList.UI.ViewModels
         public ObservableRangeCollection<VenueListItemDto> Venues { get; }
         public ObservableRangeCollection<VenueListItemDto> SelectedVenues { get; }
 
-        /// <summary>Non-generic wrapper for binding to DXCollectionView SelectedItems (requires IList).</summary>
+        /// <summary>Non-generic wrapper for binding to the collection view SelectedItems (requires IList).</summary>
         public System.Collections.IList SelectedVenuesRaw => SelectedVenues;
 
         public IAsyncRelayCommand AddVenueCommand { get; }

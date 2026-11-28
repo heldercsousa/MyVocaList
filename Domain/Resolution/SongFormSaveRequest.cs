@@ -10,8 +10,8 @@ namespace MyVocaList.Domain.Resolution;
 /// <param name="Title">Song title as typed or filled by a pick.</param>
 /// <param name="Lyrics">Optional lyrics text.</param>
 /// <param name="ArtistId">Picked or stored local artist; <c>null</c> when only text is known.</param>
-/// <param name="ArtistText">Typed or Deezer-filled artist name, used when <paramref name="ArtistId"/> is <c>null</c>.</param>
-/// <param name="ExternalProvider">Music-database provider of the song's identity (e.g. "Deezer").</param>
+/// <param name="ArtistText">Typed or pick-filled artist name, used when <paramref name="ArtistId"/> is <c>null</c>.</param>
+/// <param name="ExternalProvider">Music-database provider of the song's identity (e.g. "MusicBrainz").</param>
 /// <param name="ExternalId">Music-database id of the song.</param>
 /// <param name="PendingUrls">Karaoke URLs to attach when the song is created.</param>
 /// <param name="ArtistDecision">The user's answer to the near-duplicate artist sheet, if any.</param>
@@ -21,15 +21,23 @@ namespace MyVocaList.Domain.Resolution;
 /// new song. Edit mode: stored only when <paramref name="ImageChanged"/> is true. Normalised by the Service
 /// (REQ-PIC-02).
 /// </param>
-/// <param name="ArtistImageUrl">Pending Deezer artist picture, applied under the REQ-ART-16 rule; normalised by the Service.</param>
+/// <param name="ArtistImageUrl">Pending catalog artist picture, applied under the REQ-ART-16 rule; normalised by the Service.</param>
 /// <param name="ImageChanged">
 /// Edit mode only: true when the user uploaded or removed the song picture, so the stored reference becomes
 /// <paramref name="ImageUrl"/> (null removes it). False keeps the stored reference whatever
 /// <paramref name="ImageUrl"/> holds (REQ-PIC-21). Ignored in add mode.
 /// </param>
+/// <param name="ArtistExternalId">
+/// REQ-MSRC-13: the MusicBrainz artist id of the held pick, sent only while the Artist text is the picked name. An artist
+/// created by this Save carries it, and its profile photo is fetched then. Ignored in edit mode.
+/// </param>
 /// <param name="PickLyricsLookup">
-/// The pick lookup of the held Deezer pick (REQ-LYR-02), or null when there is none. Used by the add-mode lyrics origin
+/// The pick lookup of the held catalog pick (REQ-LYR-02), or null when there is none. Used by the add-mode lyrics origin
 /// (REQ-SLD-26); ignored in edit mode.
+/// </param>
+/// <param name="ReleaseMbid">
+/// REQ-MSRC-16: the MusicBrainz release id of the held pick, stored on the song for the list album cover. Null keeps the
+/// stored value (edit mode); a non-null value replaces it.
 /// </param>
 public sealed record SongFormSaveRequest(
     int? SongId,
@@ -43,7 +51,9 @@ public sealed record SongFormSaveRequest(
     string? ImageUrl = null,
     string? ArtistImageUrl = null,
     bool ImageChanged = false,
-    LyricsLookupResult? PickLyricsLookup = null);
+    LyricsLookupResult? PickLyricsLookup = null,
+    string? ArtistExternalId = null,
+    string? ReleaseMbid = null);
 
 /// <summary>The user's answer to the near-duplicate artist sheet (REQ-SFT-19).</summary>
 public abstract record ArtistDecision

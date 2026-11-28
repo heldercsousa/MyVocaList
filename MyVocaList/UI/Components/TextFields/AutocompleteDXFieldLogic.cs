@@ -34,7 +34,7 @@ internal enum PickRoute
 
 /// <summary>
 /// Pure decision rules for the shared autocomplete field (`AutocompleteDXField`).
-/// No DevExpress or MAUI types are referenced here — see `design.md § 4`.
+/// No component-library or MAUI types are referenced here — see `design.md § 4`.
 /// </summary>
 internal static class AutocompleteDXFieldLogic
 {
@@ -97,7 +97,7 @@ internal static class AutocompleteDXFieldLogic
 
     /// <summary>
     /// Decides whether a search result opens the drop-down. A null or empty result keeps the menu closed, so
-    /// DevExpress never shows its "Not found" row. REQ-ACF-31.
+    /// the field never shows its "Not found" row. REQ-ACF-31.
     /// </summary>
     internal static bool ShowsMenu(IReadOnlyList<AutocompleteSuggestion>? options) => options is { Count: > 0 };
 }

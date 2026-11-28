@@ -16,8 +16,6 @@ public static class ImageReferenceRules
     public const int LargePixels = 512;
 
     private const int NameLength = 32;
-    private const string DeezerThumbnailSegment = "/250x250-";
-    private const string DeezerLargeSegment = "/500x500-";
 
     /// <summary>Every sub-folder that may appear in a local reference (songs, artists, venues).</summary>
     public static IReadOnlyList<string> Folders { get; } = [SongsFolder, ArtistsFolder, VenuesFolder];
@@ -47,17 +45,7 @@ public static class ImageReferenceRules
             return Path.Combine(imagesRoot, folder, name + suffix);
         }
 
-        var url = ImageUrlRules.Normalize(reference);
-        if (url is null)
-            return null;
-
-        if (size != ImageSize.Large)
-            return url;
-
-        var index = url.IndexOf(DeezerThumbnailSegment, StringComparison.Ordinal);
-        return index < 0
-            ? url
-            : string.Concat(url.AsSpan(0, index), DeezerLargeSegment, url.AsSpan(index + DeezerThumbnailSegment.Length));
+        return ImageUrlRules.Normalize(reference);
     }
 
     /// <summary>The two file paths of a well-formed local reference; false otherwise.</summary>

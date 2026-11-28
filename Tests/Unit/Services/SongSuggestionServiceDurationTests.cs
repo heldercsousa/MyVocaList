@@ -22,8 +22,8 @@ public class SongSuggestionServiceDurationTests
 
     public SongSuggestionServiceDurationTests()
     {
-        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("MusicBrainz");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns("Deezer");
+        _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         _songRepoMock
@@ -63,6 +63,18 @@ public class SongSuggestionServiceDurationTests
         => _deezerMock
             .Setup(p => p.SearchSongsAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(results.ToList());
+
+    [Fact]
+    public async Task SearchTitleRemoteAsync_RemoteRow_CarriesArtistExternalId()
+    {
+        // [AC] REQ-MSRC-13: a remote song suggestion carries the provider's artist id, so Save can store it on a new artist
+        SetupDeezer(new MusicSearchResultDto(
+            "rec-1", "MusicBrainz", "Radiohead", "Creep", null, null, "Pablo Honey", 215, "artist-mbid-1"));
+
+        var result = await CreateSut().SearchTitleRemoteAsync("creep", []);
+
+        Assert.Equal("artist-mbid-1", Assert.Single(result.Remote).ArtistExternalId);
+    }
 
     [Fact]
     public async Task SearchTitleRemoteAsync_RemoteRow_CarriesProviderDurationSeconds()

@@ -1,3 +1,4 @@
+using MyVocaList.Contracts.DTOs;
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Contracts.Models;
@@ -21,11 +22,12 @@ public class ArtistFormViewModelTests
     private readonly Mock<IMessenger> _messengerMock = new();
     private readonly Mock<INavigationService> _navigationMock = new();
     private readonly Mock<IArtistSuggestionService> _suggestionsMock = new();
+    private readonly Mock<IArtistProfileService> _profileMock = new();
 
     private ArtistFormViewModel CreateSut() =>
         new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object, _messengerMock.Object,
             _navigationMock.Object, _suggestionsMock.Object,
-            new Mock<IImageStore>().Object, new Mock<IPhotoPicker>().Object);
+            new Mock<IImageStore>().Object, new Mock<IPhotoPicker>().Object, _profileMock.Object);
 
     // ── Blur validation (ValidateNameCommand) ────────────────────────────────
 
@@ -306,7 +308,7 @@ public class ArtistFormViewModelTests
 
         Assert.Collection(options,
             o => { Assert.Equal("Metallica", o.Headline); Assert.Equal("In your library", o.SupportingText); },
-            o => { Assert.Equal("Metallica Tribute", o.Headline); Assert.Equal("Deezer", o.SupportingText); });
+            o => { Assert.Equal("Metallica Tribute", o.Headline); Assert.Equal("MusicBrainz", o.SupportingText); });
     }
 
     // ── Local pick opens the artist ────────────────────────────────────────────
@@ -367,20 +369,20 @@ public class ArtistFormViewModelTests
     }
 
     [Fact]
-    // [AC] REQ-SFT-49: the Deezer artist id and provider are not stored; Save creates the artist with the name only.
-    public async Task SelectName_DeezerPickThenSave_CreatesWithNameOnlyNoExternalIdentity()
+    // [AC] REQ-MSRC-03 (supersedes REQ-SFT-49): a picked remote artist's id and provider are stored on Save.
+    public async Task SelectName_DeezerPickThenSave_CreatesWithPickedExternalIdentity()
     {
         var sut = CreateAddFormSut();
         await sut.SelectNameCommand.ExecuteAsync(Pick(RemoteArtist("Metallica Tribute", externalId: "dz-9")));
         _serviceMock.Setup(s => s.ValidateNameInput("Metallica Tribute")).Returns((true, ""));
         _serviceMock
-            .Setup(s => s.CreateArtistAsync("Metallica Tribute", null, null, It.IsAny<CancellationToken>()))
+            .Setup(s => s.CreateArtistAsync("Metallica Tribute", "dz-9", It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, "Artist 'Metallica Tribute' created successfully", new Artist { Name = "Metallica Tribute" }));
 
         await sut.SaveCommand.ExecuteAsync(null);
 
         _serviceMock.Verify(
-            s => s.CreateArtistAsync("Metallica Tribute", null, null, It.IsAny<CancellationToken>()),
+            s => s.CreateArtistAsync("Metallica Tribute", "dz-9", It.IsAny<string?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -546,5 +548,68 @@ public class ArtistFormViewModelTests
             () => sut.NameOptionSource.SearchAsync("metallica", cts.Token));
 
         Assert.Equal(string.Empty, sut.NameSupportingText);
+    }
+
+    // ── Artist profile (REQ-MSRC-08, -09, -10) ─────────────────────────────────
+
+    [Fact]
+    public async Task LoadProfileAsync_NoProfile_ShowsInitialsPlaceholder()
+    {
+        // [AC] REQ-MSRC-08: no free image -> initials placeholder
+        var sut = CreateSut();
+        sut.ArtistName = "The Beatles";
+        _profileMock.Setup(p => p.GetAsync("mbid", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ArtistProfileDto(null, null, null, "English band", []));
+
+        await sut.LoadProfileAsync("mbid");
+
+        Assert.False(sut.HasProfileImage);
+        Assert.Equal("TB", sut.ArtistInitials);
+        Assert.Equal("English band", sut.ProfileDescription);
+    }
+
+    [Fact]
+    public async Task LoadProfileAsync_ProfileFails_ShowsNonBlockingMessage()
+    {
+        // [AC] REQ-MSRC-10: network failure shows a non-blocking message and no profile
+        var sut = CreateSut();
+        _profileMock.Setup(p => p.GetAsync("mbid", It.IsAny<CancellationToken>())).ReturnsAsync((ArtistProfileDto?)null);
+
+        await sut.LoadProfileAsync("mbid");
+
+        _snackMock.Verify(s => s.ShowErrorAsync(It.IsAny<string>()), Times.Once);
+        Assert.False(sut.HasProfile);
+        Assert.False(sut.HasProfileImage);
+    }
+
+    [Fact]
+    public async Task LoadProfileAsync_FullProfile_ExposesImageCreditAndDiscography()
+    {
+        // [AC] REQ-MSRC-08/09: photo + credit + discography are exposed to the page
+        var sut = CreateSut();
+        _profileMock.Setup(p => p.GetAsync("mbid", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ArtistProfileDto("https://x/y.jpg", "Jane, CC BY", "https://cc", null,
+                [new ReleaseGroupDto("rg", "Help!", "1965")]));
+
+        await sut.LoadProfileAsync("mbid");
+
+        Assert.True(sut.HasProfileImage);
+        Assert.Equal("Jane, CC BY", sut.ProfileImageCredit);
+        Assert.Single(sut.Discography);
+        Assert.True(sut.HasDiscography);
+    }
+
+    [Fact]
+    public async Task LoadProfileAsync_EditModeWithPhoto_AsksServiceToAdoptAndShowsIt()
+    {
+        // [AC] REQ-MSRC-15: the loaded profile photo is adopted by the service and shown in the form
+        var sut = CreateSut();
+        var dto = new ArtistProfileDto("https://x/y.jpg", "Jane, CC BY", "https://cc", null, []);
+        _profileMock.Setup(p => p.GetAsync("mbid", It.IsAny<CancellationToken>())).ReturnsAsync(dto);
+        _profileMock.Setup(p => p.AdoptPhotoIfMissingAsync(5, dto, It.IsAny<CancellationToken>())).ReturnsAsync("img/a.jpg");
+
+        await sut.LoadProfileAsync("mbid", 5);
+
+        _profileMock.Verify(p => p.AdoptPhotoIfMissingAsync(5, dto, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

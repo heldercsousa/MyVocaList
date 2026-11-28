@@ -2,7 +2,7 @@
 <appbars:AppBarBase
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     x:Class="MyVocaList.UI.Components.AppBars.SmallAppBar"
     x:Name="self">
@@ -17,10 +17,12 @@
           Padding="4,0">
 
         <!-- Leading: Navigation icon (optional) -->
-        <dx:DXButton Grid.Column="0"
+        <ImageButton Grid.Column="0"
                      x:Name="navButton"
-                     Icon="{Binding NavigationIcon, Source={x:Reference self}}"
-                     Style="{StaticResource NavigationIconButton}"
+                     Source="{Binding NavigationIcon, Source={x:Reference self}}"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurface}"
+                     VerticalOptions="Center"
                      IsVisible="{Binding HasNavigationIcon, Source={x:Reference self}}"
                      SemanticProperties.Description="Navigate back"
                      Command="{Binding NavigationCommand, Source={x:Reference self}}" />
@@ -46,28 +48,34 @@
         </VerticalStackLayout>
 
         <!-- Trailing action 1 -->
-        <dx:DXButton Grid.Column="2"
+        <ImageButton Grid.Column="2"
                      x:Name="action1Button"
-                     Icon="{Binding Action1Icon, Source={x:Reference self}}"
-                     Style="{StaticResource StandardIconButton}"
+                     Source="{Binding Action1Icon, Source={x:Reference self}}"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                     VerticalOptions="Center"
                      IsVisible="{Binding HasAction1, Source={x:Reference self}}"
                      SemanticProperties.Description="Action"
                      Command="{Binding Action1Command, Source={x:Reference self}}" />
 
         <!-- Trailing action 2 -->
-        <dx:DXButton Grid.Column="3"
+        <ImageButton Grid.Column="3"
                      x:Name="action2Button"
-                     Icon="{Binding Action2Icon, Source={x:Reference self}}"
-                     Style="{StaticResource StandardIconButton}"
+                     Source="{Binding Action2Icon, Source={x:Reference self}}"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                     VerticalOptions="Center"
                      IsVisible="{Binding HasAction2, Source={x:Reference self}}"
                      SemanticProperties.Description="Action"
                      Command="{Binding Action2Command, Source={x:Reference self}}" />
 
         <!-- Trailing action 3 -->
-        <dx:DXButton Grid.Column="4"
+        <ImageButton Grid.Column="4"
                      x:Name="action3Button"
-                     Icon="{Binding Action3Icon, Source={x:Reference self}}"
-                     Style="{StaticResource StandardIconButton}"
+                     Source="{Binding Action3Icon, Source={x:Reference self}}"
+                     Style="{StaticResource SfIconButton}"
+                     behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                     VerticalOptions="Center"
                      IsVisible="{Binding HasAction3, Source={x:Reference self}}"
                      SemanticProperties.Description="Action"
                      Command="{Binding Action3Command, Source={x:Reference self}}" />

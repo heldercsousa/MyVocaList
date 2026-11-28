@@ -10,9 +10,12 @@
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:SecondsToMinutesConverter x:Key="SecondsToMinutesConverter" />
             <converters:ImageReferenceConverter x:Key="ImageReferenceConverter" />
+            <converters:SheetStateConverter x:Key="SheetStateToSf" />
+            <converters:SheetStateToIsOpenConverter x:Key="SheetStateToSfIsOpen" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/MaterialColors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/MaterialStyles.xaml" />
+                <ResourceDictionary Source="Resources/Styles/SyncfusionTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

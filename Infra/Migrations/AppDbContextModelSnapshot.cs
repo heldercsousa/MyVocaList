@@ -387,6 +387,11 @@ namespace MyVocaList.Infra.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ReleaseMbid")
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -440,6 +445,16 @@ namespace MyVocaList.Infra.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(0);
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
 
                     b.HasKey("SongId", "VideoId");
 

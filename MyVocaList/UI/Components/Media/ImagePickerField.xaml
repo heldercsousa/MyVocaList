@@ -2,7 +2,7 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:behaviors="clr-namespace:MyVocaList.UI.Behaviors"
     x:Class="MyVocaList.UI.Components.Media.ImagePickerField"
     x:Name="self">
 
@@ -36,12 +36,12 @@
                 </Border.GestureRecognizers>
 
                 <Grid>
-                    <dx:DXImage Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
-                                TintColor="{StaticResource OnSurfaceVariant}"
-                                WidthRequest="48"
-                                HeightRequest="48"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center" />
+                    <Image Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
+                           behaviors:IconTint.Color="{StaticResource OnSurfaceVariant}"
+                           WidthRequest="48"
+                           HeightRequest="48"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
 
                     <Image x:Name="thumbnailImage"
                            Source="{Binding ThumbnailSource, Source={x:Reference self}}"
@@ -55,22 +55,18 @@
 
             <!-- The remove button (REQ-IPF-03): a round tonal icon button over the top-end corner of the picture.
                  Visible only with a form picture (ApplyState); disabled while busy (REQ-IPF-04). Style reuses
-                 StandardIconButton; the tonal background, the 40 dp size, the icon colour and the centring
+                 SfIconButton; the tonal background, the 40 dp size, the icon colour and the centring
                  (Padding 0, explicit 24 dp icon, vertical content centring) are local overrides. Icon is the
                  trash can (delete_outlined), not the close icon (device check fix 1). -->
-            <dx:DXButton x:Name="removeButton"
-                         Icon="delete_outlined"
-                         Style="{StaticResource StandardIconButton}"
+            <ImageButton x:Name="removeButton"
+                         Source="delete_outlined"
+                         Style="{StaticResource SfIconButton}"
                          WidthRequest="40"
                          HeightRequest="40"
                          CornerRadius="20"
-                         Padding="0"
-                         IconWidth="24"
-                         IconHeight="24"
-                         HorizontalContentAlignment="Center"
-                         VerticalContentAlignment="Center"
+                         Padding="8"
                          BackgroundColor="{StaticResource SecondaryContainer}"
-                         IconColor="{StaticResource OnSecondaryContainer}"
+                         behaviors:IconTint.Color="{StaticResource OnSecondaryContainer}"
                          HorizontalOptions="End"
                          VerticalOptions="Start"
                          Margin="4"

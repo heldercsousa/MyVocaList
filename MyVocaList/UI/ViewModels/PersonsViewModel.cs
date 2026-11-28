@@ -30,7 +30,7 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
     public ObservableRangeCollection<PersonListItemDto> Persons { get; }
     public ObservableRangeCollection<PersonListItemDto> SelectedPersons { get; }
 
-    /// <summary>Non-generic wrapper for binding to DXCollectionView SelectedItems (requires IList).</summary>
+    /// <summary>Non-generic wrapper for binding to the collection view SelectedItems (requires IList).</summary>
     public System.Collections.IList SelectedPersonsRaw => SelectedPersons;
 
     public IAsyncRelayCommand AddPersonCommand { get; }

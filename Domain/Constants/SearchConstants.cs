@@ -27,13 +27,13 @@ public static class SearchConstants
     /// </summary>
     public const int MaxSearchResults = 5;
 
-    /// <summary>Rows kept and grouped out of one Deezer track answer (REQ-SLD-10).</summary>
+    /// <summary>Rows kept and grouped out of one remote track answer (REQ-SLD-10).</summary>
     public const int RemoteSongFetchCount = 25;
 
     /// <summary>
-    /// Debounce delay, in milliseconds, before an autocomplete field requests options after the last keystroke.
-    /// REQ-ACF-14 (shared autocomplete field); makes REQ-DXAC-07's ≈300 ms concrete. One value for every autocomplete
-    /// field (Helder 2026-09-23/24).
+    /// Debounce delay, in milliseconds, before a search runs after the last keystroke: the autocomplete fields and the
+    /// CRUD list search. REQ-ACF-14 (shared autocomplete field); makes REQ-DXAC-07's ≈300 ms concrete. One value for
+    /// every search (Helder 2026-09-23/24; the CRUD list moved from a literal 400 ms on 2026-11-25).
     /// </summary>
     public const int AutocompleteDebounceMilliseconds = 300;
 

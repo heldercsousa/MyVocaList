@@ -2,39 +2,45 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
-    x:Class="MyVocaList.UI.Components.Sheets.UpdateRequiredBottomSheet"
-    x:Name="self">
+    xmlns:bottomsheet="clr-namespace:Syncfusion.Maui.Toolkit.BottomSheet;assembly=Syncfusion.Maui.Toolkit"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+    x:Class="MyVocaList.UI.Components.Sheets.UpdateRequiredBottomSheet">
 
     <!--
-        MD3 Modal bottom sheet — hard update block (non-dismissible).
-        AllowDismiss="False" — user cannot bypass this.
-        No grabber shown — reinforces non-dismissibility.
+        MD3 Modal bottom sheet - hard update block (non-dismissible).
+        Swiping and overlay-tap collapse are disabled; no grabber shown.
     -->
-    <dx:BottomSheet x:Name="Sheet"
-                    HalfExpandedRatio="0.35"
-                    AllowedState="HalfExpanded"
-                    IsModal="True"
-                    ShowGrabber="False"
-                    AllowDismiss="False"
-                    BackgroundColor="{StaticResource Surface}"
-                    CornerRadius="28">
-        <VerticalStackLayout>
-            <Label StyleClass="Title.Medium"
-                   Text="Update Required"
-                   TextColor="{StaticResource OnSurface}"
-                   HorizontalTextAlignment="Center"
-                   Margin="24,20,24,4" />
-            <Label x:Name="MessageLabel"
-                   StyleClass="Body.Medium"
-                   TextColor="{StaticResource OnSurfaceVariant}"
-                   HorizontalTextAlignment="Center"
-                   Margin="24,0,24,16" />
-            <BoxView Style="{StaticResource Divider}" />
-            <dx:DXButton Content="Update Now"
-                         Style="{StaticResource BottomSheetDestructiveAction}"
-                         Clicked="OnUpdateNowClicked" />
-        </VerticalStackLayout>
-    </dx:BottomSheet>
+    <bottomsheet:SfBottomSheet x:Name="Sheet"
+                               AllowedState="HalfExpanded"
+                               HalfExpandedRatio="0.35"
+                               ContentPadding="0"
+                               IsModal="True"
+                               ShowGrabber="False"
+                               EnableSwiping="False"
+                               CollapseOnOverlayTap="False"
+                               CornerRadius="28,28,0,0">
+        <bottomsheet:SfBottomSheet.Background>
+            <SolidColorBrush Color="{StaticResource Surface}" />
+        </bottomsheet:SfBottomSheet.Background>
+
+        <bottomsheet:SfBottomSheet.BottomSheetContent>
+            <VerticalStackLayout>
+                <Label StyleClass="Title.Medium"
+                       Text="Update Required"
+                       TextColor="{StaticResource OnSurface}"
+                       HorizontalTextAlignment="Center"
+                       Margin="24,20,24,4" />
+                <Label x:Name="MessageLabel"
+                       StyleClass="Body.Medium"
+                       TextColor="{StaticResource OnSurfaceVariant}"
+                       HorizontalTextAlignment="Center"
+                       Margin="24,0,24,16" />
+                <BoxView Style="{StaticResource Divider}" />
+                <buttons:SfButton Text="Update Now"
+                                  Style="{StaticResource SfBottomSheetDestructiveAction}"
+                                  Clicked="OnUpdateNowClicked" />
+            </VerticalStackLayout>
+        </bottomsheet:SfBottomSheet.BottomSheetContent>
+    </bottomsheet:SfBottomSheet>
 
 </ContentView>

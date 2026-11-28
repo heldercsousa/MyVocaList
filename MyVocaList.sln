@@ -1,4 +1,4 @@
-﻿﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11519.219
@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{2C8F9F
 		Docs\Design\MyVocaList_Iconography_MD3_Guideline.md = Docs\Design\MyVocaList_Iconography_MD3_Guideline.md
 		Docs\Design\Tongues.pdf = Docs\Design\Tongues.pdf
 		Docs\Design\tooling-evaluations.md = Docs\Design\tooling-evaluations.md
+		Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch-Infografico.md = Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch-Infografico.md
+		Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch.html = Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch.html
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C1B-4E22-4CEE-85FF-453BD80607BD}"
@@ -2065,6 +2067,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-component-library-licens
 		Docs\Management\cross-cutting\ui-component-library-licensing\README.md = Docs\Management\cross-cutting\ui-component-library-licensing\README.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\findings.md = Docs\Management\cross-cutting\ui-component-library-licensing\findings.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md = Docs\Management\cross-cutting\ui-component-library-licensing\task-log.md
+		Docs\Management\cross-cutting\ui-component-library-licensing\task-log-archive-2026-11.md = Docs\Management\cross-cutting\ui-component-library-licensing\task-log-archive-2026-11.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\requirements.md = Docs\Management\cross-cutting\ui-component-library-licensing\requirements.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\design.md = Docs\Management\cross-cutting\ui-component-library-licensing\design.md
 		Docs\Management\cross-cutting\ui-component-library-licensing\plan.md = Docs\Management\cross-cutting\ui-component-library-licensing\plan.md
@@ -2088,6 +2091,122 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons", "2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons", "{9B43FB31-D4BC-53F8-82EB-A0BDAEC80060}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-22-deezer-vs-musicbrainz-systematic-comparison-with-pros-and-cons\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap", "2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap", "{B1D5DC76-CB8A-57DA-AD94-30EBB84CE801}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\findings.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-research-shared-code-between-the-autocomplete-field-and-the-crud-list-inline-or-full-screen-configurable-tap\findings.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race", "2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race", "{70B0BAD8-E30C-5F30-B258-F594049C2489}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\README.md
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\task-log.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-11-24-BUG-089-crud-list-search-load-more-and-pull-to-refresh-can-overwrite-newer-search-results-suspected-race\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only", "{BBFD3D31-960F-5EB4-9EC6-441DFC777D87}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-search-error-handling-short-message-for-users-full-detail-for-developers-only\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it", "{2E7F8EE0-35A1-5A28-B725-8D53C0FF7B72}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-remove-dead-search-code-after-confirming-nothing-uses-it\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-timing-tests-for-the-autocomplete-search", "2026-11-24-timing-tests-for-the-autocomplete-search", "{E44A45D4-1BC1-5839-87FD-04D13B2D7266}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-timing-tests-for-the-autocomplete-search\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-24-one-search-delay-for-all-searches-300-ms", "2026-11-24-one-search-delay-for-all-searches-300-ms", "{1471FFB1-4FDB-532F-967A-18C4FD01E1F5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-24-one-search-delay-for-all-searches-300-ms\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-minor-findings-autocomplete-and-crud-list-search", "2026-11-25-minor-findings-autocomplete-and-crud-list-search", "{8270C5F5-5D5F-54CC-B4D1-108DEABBC267}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{9C89A657-02DD-5053-A885-274423C3E918}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread", "2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread", "{64439375-4B5C-5EC2-A94F-6162F7EEACF5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-measure-whether-autocomplete-field-searches-block-the-ui-thread\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-dispose-the-last-search-cancellation-source", "2026-11-25-dispose-the-last-search-cancellation-source", "{6AD19464-A1CD-574C-9558-1452981214CC}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-dispose-the-last-search-cancellation-source\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-dispose-the-last-search-cancellation-source\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-dispose-the-last-search-cancellation-source\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-dispose-the-last-search-cancellation-source\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-venue-map-picker-search-can-be-cancelled", "2026-11-25-venue-map-picker-search-can-be-cancelled", "{1A0E934D-BD3B-5CD5-B3EF-0088CA839AA4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-venue-map-picker-search-can-be-cancelled\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-venue-map-picker-search-can-be-cancelled\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-venue-map-picker-search-can-be-cancelled\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-venue-map-picker-search-can-be-cancelled\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen", "2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen", "{E806B2DC-E225-5419-81CF-ED66AB36D576}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\README.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-25-minor-findings-autocomplete-and-crud-list-search\changes\2026-11-25-autocomplete-field-cancels-its-pending-search-when-it-leaves-the-screen\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-BUG-090-person-migration-fails-on-upgrade-ck-persons-emailorbirthday-check-constraint-failed-on-existing-rows", "2026-11-25-BUG-090-person-migration-fails-on-upgrade-ck-persons-emailorbirthday-check-constraint-failed-on-existing-rows", "{70F0ABAF-4076-5A0F-9C29-2BA079568EA4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\bugs\2026-11-25-BUG-090-person-migration-fails-on-upgrade-ck-persons-emailorbirthday-check-constraint-failed-on-existing-rows\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-11-25-BUG-090-person-migration-fails-on-upgrade-ck-persons-emailorbirthday-check-constraint-failed-on-existing-rows\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{0B3E0B59-524E-54F4-9328-F76E7847780B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet", "2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet", "{FE9A6B4F-22F8-5A79-AE33-037335CF024D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\ui-component-library-licensing\bugs\2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet\README.md = Docs\Management\cross-cutting\ui-component-library-licensing\bugs\2026-11-25-BUG-091-appshell-sheet-attach-fails-when-page-root-is-sfbottomsheet\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer", "2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer", "{2CEFA2B1-9B07-571C-B052-8DA69F36DE1C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\README.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\tasks.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\tasks.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\plan.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\plan.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\task-log.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-26-youtube-without-key-musicbrainz-catalog-wikidata-artist-images-replacing-deezer\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-26-BUG-092-song-form-the-artist-field-shows-no-suggestions", "2026-11-26-BUG-092-song-form-the-artist-field-shows-no-suggestions", "{2506D09E-74C3-5A10-9004-0093A0E2A1BD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-26-BUG-092-song-form-the-artist-field-shows-no-suggestions\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-26-BUG-092-song-form-the-artist-field-shows-no-suggestions\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback", "2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback", "{F20C26BD-1891-56E0-ACA9-672B09181169}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\README.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\task-log.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{43BD647C-BDC4-50AB-B77B-28A7362C3462}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open", "2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open", "{F03FB816-F5E5-5FE9-9019-1A1BF177ED47}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\bugs\2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\bugs\2026-11-27-BUG-093-app-crashes-on-navigation-after-a-youtube-link-is-shared-while-the-app-is-open\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret", "2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret", "{DC3F7D30-A96C-56B5-B843-313899946780}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-27-taptoeditfield-autocompletefield-first-keystroke-stays-editing-dropdown-below-field-visible-caret\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build", "2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build", "{67CC4313-C4E6-5DFC-8D94-8865312CC2C3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build\README.md
 	EndProjectSection
 EndProject
 Global
@@ -2536,6 +2655,28 @@ Global
 		{357FDA73-0F7F-5A1C-A904-36F0818BBF1A} = {7F5E9DB0-20B5-5C11-99A2-46035572E448}
 		{8C9C1BED-BD76-5D80-8086-ED06BDC6FD01} = {FA1234BC-0001-4000-8000-0000000000D5}
 		{9B43FB31-D4BC-53F8-82EB-A0BDAEC80060} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
+		{B1D5DC76-CB8A-57DA-AD94-30EBB84CE801} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{70B0BAD8-E30C-5F30-B258-F594049C2489} = {FA1234BC-0001-4000-8000-000000000039}
+		{BBFD3D31-960F-5EB4-9EC6-441DFC777D87} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{2E7F8EE0-35A1-5A28-B725-8D53C0FF7B72} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{E44A45D4-1BC1-5839-87FD-04D13B2D7266} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{1471FFB1-4FDB-532F-967A-18C4FD01E1F5} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{8270C5F5-5D5F-54CC-B4D1-108DEABBC267} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{9C89A657-02DD-5053-A885-274423C3E918} = {8270C5F5-5D5F-54CC-B4D1-108DEABBC267}
+		{64439375-4B5C-5EC2-A94F-6162F7EEACF5} = {9C89A657-02DD-5053-A885-274423C3E918}
+		{6AD19464-A1CD-574C-9558-1452981214CC} = {9C89A657-02DD-5053-A885-274423C3E918}
+		{1A0E934D-BD3B-5CD5-B3EF-0088CA839AA4} = {9C89A657-02DD-5053-A885-274423C3E918}
+		{E806B2DC-E225-5419-81CF-ED66AB36D576} = {9C89A657-02DD-5053-A885-274423C3E918}
+		{70F0ABAF-4076-5A0F-9C29-2BA079568EA4} = {FA1234BC-0001-4000-8000-000000000034}
+		{0B3E0B59-524E-54F4-9328-F76E7847780B} = {CB86F9BF-7F5F-51C3-B9F9-1A2E81A3D4A4}
+		{FE9A6B4F-22F8-5A79-AE33-037335CF024D} = {0B3E0B59-524E-54F4-9328-F76E7847780B}
+		{2CEFA2B1-9B07-571C-B052-8DA69F36DE1C} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
+		{2506D09E-74C3-5A10-9004-0093A0E2A1BD} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{F20C26BD-1891-56E0-ACA9-672B09181169} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
+		{43BD647C-BDC4-50AB-B77B-28A7362C3462} = {FA1234BC-0001-4000-8000-0000000000D5}
+		{F03FB816-F5E5-5FE9-9019-1A1BF177ED47} = {43BD647C-BDC4-50AB-B77B-28A7362C3462}
+		{DC3F7D30-A96C-56B5-B843-313899946780} = {FA1234BC-0001-4000-8000-00000000007F}
+		{67CC4313-C4E6-5DFC-8D94-8865312CC2C3} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

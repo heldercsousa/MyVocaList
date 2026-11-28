@@ -4,6 +4,9 @@ public partial class SongsPage : CrudListPageBase
 {
     private readonly SongsViewModel _viewModel;
 
+    /// <summary>Exposed for bindings inside DataTemplates.</summary>
+    public SongsViewModel ViewModel => _viewModel;
+
     protected override ICrudListViewModel ListViewModel => _viewModel;
 
     public SongsPage(SongsViewModel viewModel)

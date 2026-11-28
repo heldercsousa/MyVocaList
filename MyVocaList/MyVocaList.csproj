@@ -118,11 +118,12 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
 
-		<!-- DevExpress MAUI Packages -->
-		<PackageReference Include="DevExpress.Maui.Core" />
-		<PackageReference Include="DevExpress.Maui.CollectionView" />
-		<PackageReference Include="DevExpress.Maui.Controls" />
-		<PackageReference Include="DevExpress.Maui.Editors" />
+		<!-- Syncfusion MAUI Packages (Syncfusion.Licensing is transitive; referenced because MauiProgram calls it) -->
+		<PackageReference Include="Syncfusion.Maui.Toolkit" />
+		<PackageReference Include="Syncfusion.Maui.Core" />
+		<PackageReference Include="Syncfusion.Maui.Inputs" />
+		<PackageReference Include="Syncfusion.Maui.Buttons" />
+		<PackageReference Include="Syncfusion.Licensing" />
 
 		<!-- Serilog Packages -->
 		<PackageReference Include="Serilog" />
@@ -156,11 +157,6 @@
 		<ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
 	</ItemGroup>
 
-	<!-- Exclude DevExpress Samples from Release builds -->
-	<ItemGroup Condition="'$(Configuration)' == 'Release'">
-		<None Include="UI\Pages\Samples\**\*.cs" />
-		<None Include="UI\Pages\Samples\**\*.xaml" />
-	</ItemGroup>
 	<!-- Only include working CollectionView samples in Debug builds -->
 
 	<ItemGroup>
@@ -169,11 +165,6 @@
 		<EmbeddedResource Include="appsettings.template.json" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<!-- Frozen custom autocomplete (D-AC1, 2026-07-19) - kept as reference for guideline (1), excluded from build. -->
-		<Compile Remove="UI\Components\AutocompleteField\**\*.cs" />
-		<MauiXaml Remove="UI\Components\AutocompleteField\**\*.xaml" />
-	</ItemGroup>
 
 	<!-- Build identity (spec: Docs/Management/DevCycleCraft/app-versioning/changes/2026-11-09-build-identity-*).
 	     Build timestamp is read by the About page via AssemblyMetadataAttribute. -->
@@ -186,7 +177,7 @@
 	     copied ApplicationDisplayVersion/ApplicationVersion into the manifest inputs. DependsOnTargets="MinVer"
 	     pulls MinVer forward so MinVerVersion exists before either consumer runs. -->
 	<Target Name="SetVersionFromMinVer" DependsOnTargets="MinVer" BeforeTargets="_GetAndroidPackageName;GenerateAssemblyInfo" Condition="'$(DesignTimeBuild)' != 'true'">
-		<Exec Command="git rev-list --count --first-parent HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" ContinueOnError="true" IgnoreExitCode="true" StandardErrorImportance="low">
+		<Exec Command="git rev-list --count HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" ContinueOnError="true" IgnoreExitCode="true" StandardErrorImportance="low">
 			<Output TaskParameter="ConsoleOutput" PropertyName="_BidCount" />
 		</Exec>
 		<Error Condition="'$(_BidCount)' == '' Or !$([System.Text.RegularExpressions.Regex]::IsMatch('$(_BidCount)', '^\d+$'))" Text="versionCode: git rev-list --count failed - git history is required (REQ-BID-06)." />
@@ -221,6 +212,19 @@
 		<Exec Command="python &quot;$(MSBuildThisFileDirectory)../.claude/scripts/backlog/backlog_gen.py&quot; --root &quot;$(MSBuildThisFileDirectory)..&quot; snapshot &gt; &quot;$(_BidStatusFile)&quot;" ContinueOnError="true" IgnoreExitCode="true" />
 		<ItemGroup Condition="Exists('$(_BidStatusFile)')">
 			<EmbeddedResource Include="$(_BidStatusFile)" LogicalName="build-status.txt" />
+		</ItemGroup>
+	</Target>
+
+	<!-- Syncfusion license key (REQ-UIMIG-16/17/18): read from the build environment, compiled into a generated file under obj/
+	     (never tracked). Release builds fail when the variable is empty; Debug builds fall back to the trial notice. -->
+	<Target Name="GenerateSyncfusionLicense" BeforeTargets="BeforeBuild;CoreCompile">
+		<Error Condition="'$(Configuration)' == 'Release' and '$(SYNCFUSION_LICENSE_KEY)' == ''" Text="SYNCFUSION_LICENSE_KEY is not set — required for Release builds." />
+		<PropertyGroup>
+			<_SyncfusionLicenseFile>$(IntermediateOutputPath)SyncfusionLicense.g.cs</_SyncfusionLicenseFile>
+		</PropertyGroup>
+		<WriteLinesToFile File="$(_SyncfusionLicenseFile)" Lines="namespace MyVocaList%3B internal static class SyncfusionLicense { public const string Key = @&quot;$(SYNCFUSION_LICENSE_KEY)&quot;%3B }" Overwrite="true" WriteOnlyWhenDifferent="true" />
+		<ItemGroup>
+			<Compile Include="$(_SyncfusionLicenseFile)" />
 		</ItemGroup>
 	</Target>
 

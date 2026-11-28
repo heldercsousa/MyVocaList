@@ -40,26 +40,31 @@ After    Trials       iOS simulator/device trial · Windows build trial  (non-bl
 
 ### Control mapping
 
-**V** = verified in the POC on 2026-11-21, **U** = unverified. Every **U** row is checked in Phase 0 (task "control verification", see Key Decisions) before any task that needs it is dispatched.
+**V** = verified (POC 2026-11-21, or Phase 0 control verification T0.1a–c on 2026-11-23, emulator screenshots `artifacts/parity/t0.1/`), **U** = unverified. Every **U** row is checked before any task that needs it is dispatched.
+
+*Phase 0 note (2026-11-23):* exact Toolkit API names come from `Syncfusion.Maui.Toolkit.xml` in the nupkg, not from Context7, which was wrong in 4 places (`StateChangedEventArgs.OldState/NewState`; no `ShimmerType.RectanglePersona`; `PopupButtonAppearanceMode.TwoButton`; `Entry.IsPassword`). Several guessed suite property names crash at launch (XAML parse); the suite's real names are listed below.
 
 | DX control | Primary replacement | Fallback | Status |
 |---|---|---|---|
-| `DXCollectionView` | `SfListView` (Community suite) | stock `CollectionView` + `DataTemplateSelector` for the selected row + code-behind gesture forwarding | primary U · fallback V (renders; tap/long-press need forwarding; no selected template) |
-| `BottomSheet` | `SfBottomSheet` (Toolkit) | — | V (show/close, grabber, back) |
-| `ShimmerView` | `SfShimmer` (Toolkit) with `ShimmerBackground`/`WaveColor` from tokens | stock skeleton `Border`s with an opacity animation | U (builds; default light colors seen on device) |
-| `DXButton` | `SfButton` (Toolkit) | stock `Button` / `ImageButton` + CommunityToolkit `IconTintColorBehavior` | primary U · fallback V for text buttons |
-| `TextEdit` | `SfTextInputLayout` + `Entry` (Toolkit, outlined) | stock `Entry` inside a styled `Border` (MD3 outlined field) | primary **failed** in the search bar · fallback V |
-| `MultilineEdit` | `SfTextInputLayout` + `Editor` | stock `Editor` in a styled `Border` | U |
-| `PasswordEdit` | `SfTextInputLayout` with its password toggle | stock `Entry IsPassword` + toggle `ImageButton` | U |
-| `ComboBoxEdit` | `SfComboBox` (Community suite) | — (escalate) | U |
-| `AutoCompleteEdit` (+ async items provider) | `SfAutocomplete` (Community suite) with a custom filter calling the existing suggestion services | — (escalate) | U |
-| `ChoiceChipGroup` / `FilterChipGroup` | `SfChipGroup` (Toolkit), choice / filter type | — (escalate) | U |
-| `CheckEdit` | `SfCheckBox` (Community suite) | stock `CheckBox` | U |
-| `DXPopup` | `SfPopup` (Toolkit) | — (escalate) | U (back handling via `PopupBackHandler` may become unneeded) |
-| `DXImage` | stock `Image` | — | U |
-| `DXBorder` | stock `Border` | — | U |
-| `DXScrollView` | stock `ScrollView` | — | U |
-| `{dx:ThemeColor Primary}` | `{StaticResource Primary}` | — | U |
+| `DXCollectionView` | `SfListView` (Community suite) | stock `CollectionView` + `DataTemplateSelector` for the selected row + code-behind gesture forwarding | primary **V** (T2.0, 2026-11-23; `Syncfusion.Maui.ListView` 35.2.12, arrives with `Syncfusion.Maui.Inputs`; see § Decision: List control) · fallback V (renders; tap/long-press need forwarding; no selected template) |
+| `BottomSheet` half-height ratios in `CrudListView` (0.28 confirm, 0.22 item actions, of the window) | `SfBottomSheet` `HalfExpandedRatio` 0.32 / 0.25, measured against the whole control | — | accepted deviation (T2.8, 2026-11-24): keeps the DX heights (≈ 250 dp / 196 dp) plus the 30 dp grabber; checked on device in T2.9 |
+| `DXCollectionView` pull-to-refresh (`IsPullToRefreshEnabled`) | `SfPullToRefresh` (Toolkit) wrapping the `SfListView` | stock `RefreshView` | V in build (T2.8, 2026-11-24); device check in T2.9 |
+| `BottomSheet` | `SfBottomSheet` (Toolkit) | — | V (T0.1a): `State` (`Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState`: `Collapsed, HalfExpanded, FullExpanded, Hidden`) **plus `IsOpen`**, since setting `State` alone does not show it; half-expanded supported; a drag down from full ends in `Collapsed`; **Android Back does not close it** (it pops the page), so the Sf page closes the sheet in `OnBackButtonPressed` through the ViewModel (checked in T2.9 P10) |
+| `ShimmerView` | `SfShimmer` (Toolkit) with `ShimmerBackground`/`WaveColor`/`Fill` from tokens | stock skeleton `Border`s with an opacity animation | V (T0.1a) for a built-in `Type` (`Article`, `Feed`, …); a `CustomView` skeleton renders white, so custom row skeletons use a built-in `Type` or the fallback |
+| `DXButton` | `SfButton` (Toolkit) | stock `Button` / `ImageButton` + CommunityToolkit `IconTintColorBehavior` | V (T0.1a) for text and filled buttons: XAML `Command` binding fires; a disabled button needs an explicit token style; outlined needs `StrokeThickness`; icon placement via `ImageAlignment`. **Icon buttons use the fallback** (T0.4a): `IconTintColorBehavior` throws `NotSupportedException` on an `SfButton`, and the app's icons are SVGs that need tinting, so style `SfIconButton` targets a stock `ImageButton` + `IconTint.Color` (accepted deviation: Syncfusion has no tintable SVG icon button). `SfFlyoutMenuButton` stays an `SfButton`: its `Content` DataTemplate holds an `Image` tinted through `IconTint.Color` plus a `Label`, both bound to the button's `ImageSource` and `Text` (T0.4a fix round 1) |
+| `TextEdit` | `SfTextInputLayout` + `Entry` (Toolkit, outlined) | stock `Entry` inside a styled `Border` (MD3 outlined field) | primary V on a plain page (T0.1a: the POC sizing failure did not reproduce on 1.0.12; the hint needs `HintLabelStyle` with a token color and `Entry.TextColor` set explicitly) · **failed** in the POC search bar, so `SearchBarSf` uses the fallback (`OutlinedTextFieldSf`) unless the primary is shown working there · fallback V |
+| `MultilineEdit` | `SfTextInputLayout` + `Editor` | stock `Editor` in a styled `Border` | V (T0.1a; same hint styling as `TextEdit`) |
+| `PasswordEdit` | `SfTextInputLayout` with its password toggle | stock `Entry IsPassword` + toggle `ImageButton` | V (T0.1a): `EnablePasswordVisibilityToggle="True"` on the layout + `IsPassword="True"` on the `Entry` |
+| `ComboBoxEdit` | `SfComboBox` (Community suite) | — (escalate) | V (T0.1b): `ItemsSource`, `SelectedItem`, `DisplayMemberPath`, `TextMemberPath`, `Placeholder`; dark styling through `TextColor`, `Background`, `DropDownBackground`, `SelectedDropDownItemBackground` and `SelectedDropDownItemTextStyle` (needed: the selected row otherwise shows dark text on `Primary`) |
+| `AutoCompleteEdit` (+ async items provider) | `SfAutocomplete` (Community suite) with a custom filter calling the existing suggestion services | — (escalate) | V (T0.1b): `Syncfusion.Maui.Inputs.IAutocompleteFilterBehavior.GetMatchingItemsAsync(SfAutocomplete source, AutocompleteFilterInfo filterInfo)` returns `Task<object>` (awaited; `filterInfo.Text`), set through `SfAutocomplete.FilterBehavior`; also `MinimumPrefixCharacters`, `TextSearchMode` |
+| `ChoiceChipGroup` / `FilterChipGroup` | `SfChipGroup` (Toolkit), choice / filter type | — (escalate) | V (T0.1a): `ChipType="Choice"` (`ChoiceMode` `Single`/`SingleOrNone`) or `"Filter"` (multi, check mark); react to `SelectionChanged` (the `ChipClicked` sender is the `SfChip`, not the group); set `ChipTextColor`, `SelectedChipBackground`, `SelectedChipTextColor` from tokens |
+| `CheckEdit` | `SfCheckBox` (Community suite) | stock `CheckBox` | V (T0.1b): `IsChecked` (bindable, two-way), `CheckedColor`, `UncheckedColor`, `TickColor` (not `CheckMarkColor`) |
+| `DXPopup` | `SfPopup` (Toolkit) | — (escalate) | V (T0.1a): `Show()`/`Dismiss()`/`IsOpen`, `ShowRelativeToView`, templates; Android Back closes it by itself, so `PopupBackHandler` is likely unneeded (confirm on `MenuSf`) |
+| `DXImage` | stock `Image` | — | V (T0.1c; tint through `IconTintColorBehavior`) |
+| `DXButton` used as a display-only icon (`InputTransparent`, no command) | stock `Image` + `IconTint.Color` | — | V (T2.3, `EmptyStateSf`; accepted: nothing to press) |
+| `DXBorder` | stock `Border` | — | V (T0.1c) |
+| `DXScrollView` | stock `ScrollView` | — | V (T0.1c; renders, not swipe-tested) |
+| `{dx:ThemeColor Primary}` | `{StaticResource Primary}` | — | V (T0.1c): the only usage is `ListItemCheckbox.xaml:22`; `Primary` exists in `MaterialColors.xaml` |
 
 **Rules:**
 - "Zero DevExpress" allows stock MAUI and app-built controls as fallbacks (Syncfusion first, stock when Syncfusion has no equivalent).
@@ -104,15 +109,20 @@ Today, `ICrudListViewModel.ItemActionsSheetState` and `ConfirmSheetState` are De
   - Sf XAML references only that key, never a DevExpress type, so REQ-UIMIG-11 holds.
   - This file and its unit test `Tests/Unit/Migration/DxSheetStateConverterTests.cs` are the only exceptions to REQ-UIMIG-12 (both deleted in Phase 5). *(Test file added 2026-11-22 during planning: the test must name the DX enum.)*
 
-State table (`SfBottomSheet` state property name: **U**, confirmed in Phase 0 control verification):
+State table (confirmed 2026-11-23, T0.1a: property `State`, enum `Syncfusion.Maui.Toolkit.BottomSheet.BottomSheetState` with `Collapsed, HalfExpanded, FullExpanded, Hidden`; the sheet shows only when `IsOpen` is also true):
 
 | ViewModel value (DX) | Sf sheet | Back to the ViewModel when the user acts |
 |---|---|---|
-| `Hidden` | closed | user swipes or backs the sheet closed → `Hidden` |
+| `Hidden` | closed (`IsOpen=false`, `State=Hidden`) | user swipes the sheet down (`Collapsed`) or backs it closed → `Hidden` |
 | `HalfExpanded` | open, half-expanded | user drags it to full → `FullExpanded` |
 | `FullExpanded` | open, full | user drags it to half → `HalfExpanded` |
 
-If `SfBottomSheet` has no half-expanded state, `HalfExpanded` maps to open at `HalfExpandedRatio`, and the deviation is listed in § Control mapping.
+<!-- impl decision (orchestrator, 2026-11-23, from the T0.1a result): one converter cannot drive both State and IsOpen -->
+The bridge file holds **two** converters:
+- `DxSheetStateConverter` (key `DxSheetStateToSf`, bound to `State`). `ConvertBack` maps Sf `Collapsed` to DX `Hidden`.
+- `DxSheetStateToIsOpenConverter` (key `DxSheetStateToSfIsOpen`, bound to `IsOpen`). `Hidden` → `false`, any other value → `true`; `ConvertBack` maps `false` → `Hidden` and `true` → `Binding.DoNothing`.
+
+Unknown input → `Binding.DoNothing`. Android Back does not close an `SfBottomSheet`, so the Sf page's `OnBackButtonPressed` closes it through the ViewModel (see § Control mapping).
 
 **Phase 5:**
 - An app-owned `public enum SheetState { Hidden, HalfExpanded, FullExpanded }` in `MyVocaList.UI.ViewModels` replaces `BottomSheetState` in `CrudListViewModelBase` and `ICrudListViewModel`.
@@ -127,12 +137,33 @@ If `SfBottomSheet` has no half-expanded state, `HalfExpanded` maps to open at `H
   - It contains `internal static class SyncfusionLicense { public const string Key = "<value of $(SYNCFUSION_LICENSE_KEY)>"; }`.
   - It uses `WriteOnlyWhenDifferent`, so incremental builds recompile only when the variable changes.
 - `<Error Condition="'$(Configuration)' == 'Release' and '$(SYNCFUSION_LICENSE_KEY)' == ''" Text="SYNCFUSION_LICENSE_KEY is not set — required for Release builds." />` (REQ-UIMIG-18).
-- `MauiProgram.CreateMauiApp` first calls `Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(SyncfusionLicense.Key)`, then `.ConfigureSyncfusionToolkit()` and the Community-suite host call. The exact call names come from the suite's official docs, checked in Phase 0.
+- `MauiProgram.CreateMauiApp` first calls `Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(SyncfusionLicense.Key)`, then `.ConfigureSyncfusionToolkit()` and the Community-suite host call. *Confirmed 2026-11-23 (T0.1b, T0.3):*
+  - Host calls: `ConfigureSyncfusionCore()` (`Syncfusion.Maui.Core.Hosting`) and `ConfigureSyncfusionToolkit()` (`Syncfusion.Maui.Toolkit.Hosting`). They coexist without collision.
+  - `RegisterLicense` runs only when the key is non-empty.
+  - Packages: `Syncfusion.Maui.Toolkit` 1.0.12 and `Syncfusion.Maui.Inputs` / `Buttons` / `Core` / `Licensing` 35.2.12, all with a plain `net10.0` asset.
+  - The 35.x packages require `Microsoft.Maui.Controls` ≥ 10.0.110, so T0.3 bumped MAUI from 10.0.41 in its own commit, with the tests and the DX pages verified.
+  - A Debug build without a key showed no trial popup, banner or watermark on the emulator.
+  - The test project references the app project, so `dotnet test -c Release` also needs the key.
 - `.claude/library/dev-env-setup.md` documents the variable.
 
 ### Theme mapping (Phase 0)
 
 - A new `MyVocaList/Resources/Styles/SyncfusionTheme.xaml` merges the Toolkit's `SyncfusionThemeResourceDictionary` in dark mode and overrides its color keys with the tokens in `MaterialColors.xaml` (`Surface`, `OnSurface`, `Primary`, `SurfaceContainer*`, `Outline`, …).
+  - *Confirmed 2026-11-23 (T0.1a):*
+    - The type is `Syncfusion.Maui.Toolkit.Themes.SyncfusionThemeResourceDictionary`, set to dark with `VisualTheme="MaterialDark"` (enum `SfVisuals`). The merged dictionary is `DarkThemeColors`.
+    - Its keys are Syncfusion names, not Material tokens:
+      - `Primary{Background,Foreground,Border}` and `Secondary{…}`, each with the `Disabled`, `Hovered`, `Pressed`, `Selected` and `Focused` suffixes;
+      - `Content{Background,BackgroundAlt1..5,Foreground,ForegroundAlt1,…}`;
+      - `Error*`, `Disabled*`, `Overlay*`, `Outlined{Normal,Hover,Focused,Disabled,Error}` and `Filled`.
+    - T0.4a dumps the full key list from `new DarkThemeColors().Keys` and maps each key to a token.
+  - The dictionary themes controls only in part: the popup is dark, but the text-field hint, the disabled button and the shimmer custom view are not. So the per-control styles below are required, not optional.
+  - *Found in T0.4a (2026-11-23):*
+    - **Two override layers.** At load, the Toolkit resolves its common keys (`PrimaryBackground`, `ContentForeground`, …) into about 654 per-control `Sf*` keys (`SfChipGroup*`, `SfTextInputLayout*`, `SfBottomSheet*`, `SfShimmer*`, `SfPopup*`, `SfButton*`, `SfEffectsView*`). Overriding only the common keys does not recolor controls. `SyncfusionTheme.xaml` therefore overrides both layers, 107 common keys and 67 control keys, each mapped to a `MaterialColors.xaml` token.
+    - **The theme keys are authoritative.** Controls bind those keys dynamically, so a `Style` setter on the same property loses. Use a style setter only where no theme key exists.
+    - **XAML namespaces.** Syncfusion XAML in the app uses `clr-namespace:` prefixes, not the `http://schemas.syncfusion.com/maui/toolkit` URI. The URI does not resolve in the plain `net10.0` build that the pre-commit gate compiles (XC0000).
+    - **Not themed through keys.** `SfShimmer.ShimmerBackground` cannot be set from XAML (XC0001), so the `SfShimmerNormalBackground` key covers it. State layers with alpha and the `*Disabled*` keys keep the Toolkit defaults, because there is no alpha token. A disabled `SfButton` uses a `VisualStateManager` state at opacity 0.38.
+    - **Setters that do nothing (T1.10, 2026-11-23).** In an implicit style, the `SfTextInputLayout` `ContainerType` setter and the `SfChipGroup` `ChipFontAttributes` setter have no effect at runtime. Every `SfTextInputLayout` therefore sets `ContainerType="Outlined"` explicitly, because DX text fields are outlined; a chip font weight is set on the chip group itself. The Sf button styles set `FontAttributes=Bold` (as in DX) and `Padding=0` (the `SfButton` inner padding otherwise stretches the buttons).
+    - **Toolkit upgrade.** Dump the keys again (`new DarkThemeColors().Keys`) and diff them against `SyncfusionTheme.xaml`.
 - Every Sf control that paints its own background (shimmer, bottom sheet, list, popup, chips) gets its token explicitly in `MaterialStyles.xaml`, as new keyed or implicit styles targeting the Syncfusion type.
 - Existing DX style keys stay untouched until Phase 5.
 
@@ -158,7 +189,10 @@ The 60 Material Symbols SVGs in `Resources/Images/` stay, referenced by name. Sf
 - **Preview routes:** each Sf page gets a preview route `<route>-sf`, registered in `AppShell.xaml.cs` inside `#if DEBUG`.
 - **Preview entry:** a Debug-only flyout item, "Syncfusion preview", opens `SyncfusionPreviewPage`. That page lists the Sf pages not yet cut over, each opening its preview route.
 - **Previewing forms without a runtime flag:** forms are pushed by the shared ViewModels via fixed route names (e.g. `venue-form`). In Debug, the Sf form is also registered as a **contextual route** under the Sf list's preview route, e.g. `Routing.RegisterRoute("venues-sf/venue-form", typeof(VenueFormSfPage))`. Navigating to `venue-form` from inside `venues-sf` then resolves to the Sf form, while every user-facing route still opens the DX form.
-  - Shell contextual-route resolution is **U**: verify it in Phase 0 against Microsoft Learn plus a one-screen check.
+  - Shell contextual-route resolution: **does not resolve** (T0.1c, 2026-11-23).
+    - With the global `venue-form` registered, `GoToAsync("venue-form")` from a page on `venues-sf` (whether a `ShellContent` or a registered route) opened the global `VenueFormPage`.
+    - The page registered at `venues-sf/venue-form` never opened.
+    - **The fallback below applies**, and `PreviewRoutes` registers no contextual entries (plan T0.6b step 4).
   - **Fallback if it does not resolve:** the preview page opens each Sf form directly on its own `-sf` route with a fixed sample record, and Sf lists push DX forms until their forms are cut over.
 - **Cut-over (REQ-UIMIG-10):**
   - flyout page: the `ShellContent` `ContentTemplate` in `AppShell.xaml` changes from `XPage` to `XSfPage`, and so does the page's entry in `NavigationConfig.PageTypes` (`NavigationService.PushAsync` resolves menu pages through it). `SettingsPage` sits on two routes (`preferences`, `settings`); its cut-over changes both `ShellContent`s and its one `PageTypes` entry. *(Added 2026-11-22 during planning.)*
@@ -246,6 +280,14 @@ Run per page, on the emulator, for both the DX original and the Sf copy. Every s
 - If it meets all three, use `SfListView`.
 - Otherwise use the § Control mapping fallback (stock `CollectionView` + `DataTemplateSelector` + forwarding).
 - The orchestrator records the outcome in this decision; Helder confirms before `CrudListViewSf` is dispatched.
+
+**Outcome (T2.0, 2026-11-23): `SfListView` wins; the fallback is not needed.** Checked on the emulator against the real `VenuesViewModel` (`artifacts/parity/t2.0/`):
+- **Selected look (REQ-UIMIG-03).** `SelectedItemTemplate` for the selected row; `SelectionMode` toggles with the VM's `IsSelectionMode`. `SelectedItems` is get-only, so `CrudListViewSf` syncs it both ways with the VM in code-behind (view-only plumbing; pattern in the T2.0 report).
+- **Gestures (REQ-UIMIG-06).** Tap and long-press reach the VM through the `ItemTapped` / `ItemLongPress` events, forwarded from code-behind. The XAML `TapCommand`/`LongPressCommand` also fire, but they pass the event args, not the item.
+- **Load-more.** `LoadMoreOption="AutoOnScroll"` with `LoadMoreCommand` bound to the VM paging (20 → 200 items). `LoadMoreOption` must switch to `None` when the VM has no more items, which T2.8a handles.
+- **Not tested in T2.0, so checked in T2.9 parity:** end-of-data behavior, pull-to-refresh, back clearing the selection, search and the shimmer.
+
+**Confirmation.** Helder's confirmation before T2.8a is covered by his 2026-11-22 autonomy grant. Recorded by the orchestrator on 2026-11-23.
 
 **Alternatives considered:** Stock `CollectionView` only, as in the POC; it failed REQ-UIMIG-03.
 **Reversibility:** Reversible with effort.

@@ -1,3 +1,4 @@
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Unit.Services;
@@ -5,10 +6,11 @@ namespace MyVocaList.Tests.Unit.Services;
 public class SongKaraokeUrlServiceTests
 {
     private readonly Mock<ISongKaraokeUrlRepository> _repoMock = new();
+    private readonly Mock<IYouTubeOEmbedClient> _oEmbedMock = new();
     private readonly Mock<ILogger<SongKaraokeUrlService>> _loggerMock = new();
 
     private SongKaraokeUrlService CreateSut() =>
-        new(_repoMock.Object, PassthroughUnitOfWork.Over(_repoMock), _loggerMock.Object);
+        new(_repoMock.Object, PassthroughUnitOfWork.Over(_repoMock), _oEmbedMock.Object, _loggerMock.Object);
 
     // ── ExtractVideoId ───────────────────────────────────────────────────────
 
@@ -80,6 +82,80 @@ public class SongKaraokeUrlServiceTests
         Assert.NotNull(dto);
         Assert.Equal("dQw4w9WgXcQ", dto!.VideoId);
         _repoMock.Verify(r => r.AddAsync(It.Is<SongKaraokeUrl>(u => u.VideoId == "dQw4w9WgXcQ"), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // ── REQ-MSRC-14: video title and thumbnail ───────────────────────────────
+
+    [Fact]
+    // [AC] REQ-MSRC-14: both come from oEmbed and are stored on the row when it is added
+    public async Task AddUrlAsync_OEmbedAnswers_StoresTitleAndThumbnailOnTheRow()
+    {
+        _oEmbedMock.Setup(o => o.GetVideoInfoAsync("dQw4w9WgXcQ", It.IsAny<CancellationToken>()))
+                   .ReturnsAsync(new YouTubeVideoInfo("Never Gonna Give You Up", "https://i.ytimg.com/vi/x.jpg"));
+        var sut = CreateSut();
+
+        var (success, _, dto) = await sut.AddUrlAsync(1, "https://youtu.be/dQw4w9WgXcQ");
+
+        Assert.True(success);
+        Assert.Equal("Never Gonna Give You Up", dto!.Title);
+        Assert.Equal("https://i.ytimg.com/vi/x.jpg", dto.ThumbnailUrl);
+        _repoMock.Verify(r => r.AddAsync(
+            It.Is<SongKaraokeUrl>(u => u.Title == "Never Gonna Give You Up" && u.ThumbnailUrl == "https://i.ytimg.com/vi/x.jpg"),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-MSRC-14: offline or on failure the row is still saved, with no title (falls back to the video id)
+    public async Task AddUrlAsync_OEmbedFails_StillSavesRowWithoutTitle()
+    {
+        _oEmbedMock.Setup(o => o.GetVideoInfoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                   .ReturnsAsync((YouTubeVideoInfo?)null);
+        var sut = CreateSut();
+
+        var (success, _, dto) = await sut.AddUrlAsync(1, "https://youtu.be/dQw4w9WgXcQ");
+
+        Assert.True(success);
+        Assert.Null(dto!.Title);
+        Assert.Equal("dQw4w9WgXcQ", dto.DisplayTitle);
+        Assert.False(dto.HasThumbnail);
+    }
+
+    [Fact]
+    // [AC] REQ-MSRC-14: existing rows are filled lazily, in place; rows that already have a title are not fetched again
+    public async Task FillMissingVideoInfoAsync_FillsOnlyRowsWithoutTitle_InPlace()
+    {
+        var missing = new SongKaraokeUrl { SongId = 1, VideoId = "aaaaaaaaaaa", AddedAt = DateTime.UtcNow };
+        var known = new SongKaraokeUrl { SongId = 1, VideoId = "bbbbbbbbbbb", AddedAt = DateTime.UtcNow, Title = "Known" };
+        _repoMock.Setup(r => r.GetBySongIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync([missing, known]);
+        _oEmbedMock.Setup(o => o.GetVideoInfoAsync("aaaaaaaaaaa", It.IsAny<CancellationToken>()))
+                   .ReturnsAsync(new YouTubeVideoInfo("Filled", "https://i.ytimg.com/a.jpg"));
+        var sut = CreateSut();
+
+        var filled = await sut.FillMissingVideoInfoAsync(1);
+
+        var row = Assert.Single(filled);
+        Assert.Equal("aaaaaaaaaaa", row.VideoId);
+        Assert.Equal("Filled", row.Title);
+        _repoMock.Verify(r => r.UpdateVideoInfoAsync(1, "aaaaaaaaaaa", "Filled", "https://i.ytimg.com/a.jpg", It.IsAny<CancellationToken>()), Times.Once);
+        _repoMock.Verify(r => r.UpdateVideoInfoAsync(1, "bbbbbbbbbbb", It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        _oEmbedMock.Verify(o => o.GetVideoInfoAsync("bbbbbbbbbbb", It.IsAny<CancellationToken>()), Times.Never);
+        _repoMock.Verify(r => r.RemoveAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-MSRC-14: a failed lookup leaves the row untouched
+    public async Task FillMissingVideoInfoAsync_LookupFails_ChangesNothing()
+    {
+        _repoMock.Setup(r => r.GetBySongIdAsync(1, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync([new SongKaraokeUrl { SongId = 1, VideoId = "aaaaaaaaaaa", AddedAt = DateTime.UtcNow }]);
+        _oEmbedMock.Setup(o => o.GetVideoInfoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                   .ReturnsAsync((YouTubeVideoInfo?)null);
+        var sut = CreateSut();
+
+        var filled = await sut.FillMissingVideoInfoAsync(1);
+
+        Assert.Empty(filled);
+        _repoMock.Verify(r => r.UpdateVideoInfoAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // ── ExtractVideoId — FsCheck property-based tests ────────────────────────

@@ -73,7 +73,7 @@ public class SongKaraokeUrlServiceReadScopeTests
         var recordingUow = new RecordingUnitOfWork(host.Resolve<IUnitOfWork>());
         var repo = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongKaraokeUrlRepository>();
         var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<SongKaraokeUrlService>>();
-        var sut = new SongKaraokeUrlService(repo, recordingUow, logger);
+        var sut = new SongKaraokeUrlService(repo, recordingUow, new Mock<IYouTubeOEmbedClient>().Object, logger);
 
         await sut.GetUrlsForSongAsync(songId);
         await sut.GetUrlsForSongAsync(songId);

@@ -42,6 +42,19 @@ else
   echo "pre-commit: build + tests green."
 fi
 
+# Migration script tests, when the scripts themselves change.
+if printf '%s
+' "$STAGED" | grep -Eq '^\.claude/scripts/migration/'; then
+  echo "pre-commit: migration scripts staged — running their tests..."
+  if ! (cd .claude/scripts/migration/tests && python -m unittest discover -p "test_*.py"); then
+    echo ""
+    echo "pre-commit: BLOCKED — migration script tests failed."
+    echo "            To commit anyway: git commit --no-verify"
+    exit 1
+  fi
+  echo "pre-commit: migration script tests passed."
+fi
+
 # Does the commit touch BACKLOG frontmatter (item README.md, BACKLOG.md itself,
 # or an archive month file)?
 BACKLOG_TOUCHED=$(printf '%s\n' "$STAGED" | grep -E \
