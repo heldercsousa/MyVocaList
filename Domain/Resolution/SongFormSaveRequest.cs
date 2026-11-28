@@ -35,6 +35,10 @@ namespace MyVocaList.Domain.Resolution;
 /// The pick lookup of the held catalog pick (REQ-LYR-02), or null when there is none. Used by the add-mode lyrics origin
 /// (REQ-SLD-26); ignored in edit mode.
 /// </param>
+/// <param name="ReleaseMbid">
+/// REQ-MSRC-16: the MusicBrainz release id of the held pick, stored on the song for the list album cover. Null keeps the
+/// stored value (edit mode); a non-null value replaces it.
+/// </param>
 public sealed record SongFormSaveRequest(
     int? SongId,
     string Title, string? Lyrics,
@@ -48,7 +52,8 @@ public sealed record SongFormSaveRequest(
     string? ArtistImageUrl = null,
     bool ImageChanged = false,
     LyricsLookupResult? PickLyricsLookup = null,
-    string? ArtistExternalId = null);
+    string? ArtistExternalId = null,
+    string? ReleaseMbid = null);
 
 /// <summary>The user's answer to the near-duplicate artist sheet (REQ-SFT-19).</summary>
 public abstract record ArtistDecision

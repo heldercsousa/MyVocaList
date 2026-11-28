@@ -14,6 +14,8 @@ public class Song
     public string? ExternalId { get; set; }
     /// <summary>Absolute https cover URL, or null (REQ-ART-05). Bytes are never stored.</summary>
     public string? ImageUrl { get; set; }
+    /// <summary>MusicBrainz release id of the pick this song was saved from; feeds the list album cover (REQ-MSRC-16).</summary>
+    public string? ReleaseMbid { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

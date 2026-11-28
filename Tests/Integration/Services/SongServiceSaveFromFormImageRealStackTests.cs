@@ -62,6 +62,53 @@ public class SongServiceSaveFromFormImageRealStackTests
         Assert.Equal(ArtistImage, artist.ImageUrl);
     }
 
+    private const string Mbid1 = "76df3287-6cda-33eb-8e9a-044b5e15ffdd";
+    private const string Mbid2 = "0c5c4b3e-1111-4222-8333-444455556666";
+
+    // [AC] REQ-MSRC-16: a song saved from a MusicBrainz pick stores the release MBID
+    [Fact]
+    public async Task SaveFromFormAsync_AddModeWithReleaseMbid_StoresReleaseMbid()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+
+        var outcome = await host.Resolve<ISongService>().SaveFromFormAsync(
+            Request(null, "Release Song", null, "Release Artist", null, null) with { ReleaseMbid = Mbid1 });
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        await using var db = FreshContext(host);
+        Assert.Equal(Mbid1, (await db.Songs.SingleAsync(s => s.Title == "Release Song")).ReleaseMbid);
+    }
+
+    // [AC] REQ-MSRC-16: an edit without a new pick keeps the stored release MBID; a new pick replaces it
+    [Fact]
+    public async Task SaveFromFormAsync_EditMode_KeepsStoredReleaseMbidUnlessNewPick()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var service = host.Resolve<ISongService>();
+        var added = await service.SaveFromFormAsync(
+            Request(null, "Edit Release Song", null, "Edit Release Artist", null, null) with { ReleaseMbid = Mbid1 });
+        Assert.Equal(SongFormSaveKind.Saved, added.Kind);
+        int songId, artistId;
+        await using (var db = FreshContext(host))
+        {
+            var stored = await db.Songs.SingleAsync(s => s.Title == "Edit Release Song");
+            songId = stored.Id;
+            artistId = stored.ArtistId;
+        }
+
+        var keep = await service.SaveFromFormAsync(
+            Request(songId, "Edit Release Song", artistId, null, null, null) with { Lyrics = "new lyrics" });
+        Assert.Equal(SongFormSaveKind.Saved, keep.Kind);
+        await using (var db = FreshContext(host))
+            Assert.Equal(Mbid1, (await db.Songs.SingleAsync(s => s.Id == songId)).ReleaseMbid);
+
+        var replace = await service.SaveFromFormAsync(
+            Request(songId, "Edit Release Song", artistId, null, null, null) with { ReleaseMbid = Mbid2 });
+        Assert.Equal(SongFormSaveKind.Saved, replace.Kind);
+        await using (var db = FreshContext(host))
+            Assert.Equal(Mbid2, (await db.Songs.SingleAsync(s => s.Id == songId)).ReleaseMbid);
+    }
+
     // [AC] REQ-ART-16: an existing artist with no image, picked by id, is filled with the pending artist image.
     [Fact]
     public async Task SaveFromFormAsync_ExistingArtistByIdWithoutImage_FillsArtistImage()
