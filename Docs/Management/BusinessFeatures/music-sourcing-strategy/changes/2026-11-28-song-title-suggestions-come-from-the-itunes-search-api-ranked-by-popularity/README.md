@@ -26,7 +26,7 @@ Risk note: the Apple page states that the Search API content is meant for promot
 ## Requirements
 
 **(a) Remote title suggestions from iTunes.**
-- REQ-ITS-01: Remote title suggestions come from `https://itunes.apple.com/search?entity=song&limit=15&term=<query>` (keyless). The request is a GET with no API key.
+- REQ-ITS-01: Remote title suggestions come from `https://itunes.apple.com/search?entity=song&limit=25&term=<query>` (keyless). The request is a GET with no API key. <!-- impl decision 2026-11-28: limit raised 15 → 25 so the re-rank can reach rows past the 15th (Option B, coordinator decision) -->
 - REQ-ITS-02: The popularity order returned by the API is kept (no re-ranking of remote rows). One row per (title, artist) pair; the first occurrence is kept.
 - REQ-ITS-03: Free text "title artist" works (the query is sent as the term, with the artist words included).
 
@@ -46,8 +46,12 @@ Risk note: the Apple page states that the Search API content is meant for promot
 
 **(g) Typo tolerance and local re-rank (coordinator addition, 2026-11-28; no remote source tolerates typos, see `findings-song-search-alternatives-2026-11-28.md` on develop).**
 - REQ-ITS-14: When iTunes returns fewer than 3 rows and the query has 2 or more words, the query is retried once with its last word dropped; retry rows are appended after the first answer's rows, duplicates removed.
-- REQ-ITS-15: Typo-tolerant word match: two words match when they are equal, or when their Levenshtein distance is at most 2, the shorter word has 3 or more characters and the longer has 4 or more (case-insensitive; apostrophes removed). The local step only re-orders and filters rows iTunes returned; it never adds rows. Example: "crie" matches "cry" (distance 2, lengths 4 and 3).
-- REQ-ITS-16: Remote candidates are re-ranked by token score = share of query words that match a title word (REQ-ITS-15). Higher score first; ties keep the iTunes popularity order. Acceptance example for tests: query "Don't crie" with candidates "Dance Floor" (iTunes first) then "Don't Cry" ranks "Don't Cry" first (score 2 of 2 against 0 of 2).
+- REQ-ITS-15: Typo-tolerant word match: two words match when they are equal, or when their Levenshtein distance is at most 2, the shorter word has 3 or more characters and the longer has 4 or more (case-insensitive; apostrophes removed). Impl decision 2026-11-28: the two words must also share their first letter ("crie"/"cry" yes; "dont"/"out" no). The local step only re-orders and filters rows iTunes returned; it never adds rows. Example: "crie" matches "cry" (distance 2, lengths 4 and 3).
+- REQ-ITS-16 (amended 2026-11-28, Option B, coordinator decision under Helder's standing instruction): each remote row is scored, then sorted by (1) coverage desc: query words matched by a title or artist word (REQ-ITS-15 typo match, or a prefix of 3+ query letters, e.g. "gun" → "Guns"); (2) title fit asc: title words (bracketed suffix ignored) that no query word matches; (3) a bracketed title suffix ("(Live…)", "(Alternate Lyrics)", "[2022 Remaster]") sorts last; (4) iTunes order. The local step only re-orders; it never adds or drops rows.
+  <!-- impl decision 2026-11-28: scoring implemented in SongTitleMatcher.RankRows; the earlier stable-partition rule is superseded. -->
+- REQ-ITS-16a (2026-11-28, not implemented): a corrected-query retry (typo words replaced by their closest title word, rows merged and re-scored) is needed only if the recorded "Don't crie" response fails REQ-ITS-18 check 3 after the 25-row fetch. It does not fail, so it is not built.
+- REQ-ITS-17 (added 2026-11-28): only the latest query's results are shown; a response for an earlier query is discarded (AutocompleteField cancels the superseded search; the title search rethrows cancellation).
+- REQ-ITS-18 (added 2026-11-28, acceptance): recorded iTunes fixtures under `Tests/Fixtures/iTunes/` (captured 2026-11-28) drive these checks: "Don't Cry" → first row "Don't Cry" by "Guns N' Roses"; "don't cry gun" → first row "Don't Cry" by "Guns N' Roses"; "Don't crie" → a "Don't Cry" by "Guns N' Roses" row in the top 3. **Resolved 2026-11-28 (Option B, REQ-ITS-16):** the three checks are asserted against the recorded limit-25 responses in `SongSuggestionITunesFixtureTests`.
 - Apple terms: no preview or artwork file is stored; artwork is referenced by URL only (REQ-ITS-10).
 
 **(e) Attribution.**

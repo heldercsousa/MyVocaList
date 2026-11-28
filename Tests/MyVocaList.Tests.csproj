@@ -25,6 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Recorded iTunes Search API responses (REQ-ITS-18), read by SongSuggestionITunesFixtureTests -->
+    <None Include="Fixtures\iTunes\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Domain, Contracts, Infra, Services — non-MAUI projects only -->
     <ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
     <ProjectReference Include="..\Contracts\MyVocaList.Contracts.csproj" />

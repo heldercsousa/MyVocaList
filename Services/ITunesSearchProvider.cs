@@ -11,7 +11,7 @@ namespace MyVocaList.Services;
 /// </summary>
 public sealed class ITunesSearchProvider : IMusicMetadataProvider
 {
-    private const int SongLimit = 15;
+    private const int SongLimit = 25;   // REQ-ITS-01 amended 2026-11-28: fetch 25 rows so the re-rank can reach them
     private const string SmallArtworkSize = "100x100bb";
     private const string SuggestionArtworkSize = "250x250bb";
 

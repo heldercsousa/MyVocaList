@@ -2,9 +2,12 @@ using MyVocaList.Services;
 
 namespace MyVocaList.Tests.Unit.Services;
 
-/// <summary>Typo-tolerant word matching and local re-rank of iTunes title rows (REQ-ITS-15, REQ-ITS-16). Pure logic, no I/O.</summary>
+/// <summary>Typo-tolerant word matching and the scored re-rank of iTunes title rows (REQ-ITS-15, REQ-ITS-16). Pure logic, no I/O.</summary>
 public class SongTitleMatcherTests
 {
+    private static IReadOnlyList<(string Title, string Artist)> Rank(string query, params (string Title, string Artist)[] rows) =>
+        SongTitleMatcher.RankRows(query, rows, r => r.Title, r => r.Artist);
+
     [Fact]
     public void WordsMatch_CrieAndCry_MatchWithinTwoEdits()
     {
@@ -35,34 +38,55 @@ public class SongTitleMatcherTests
     }
 
     [Fact]
-    public void Rerank_DontCrie_PutsDontCryFirstDespiteItunesOrder()
+    public void RankRows_DontCrie_BareDontCryAboveDanceFloor()
     {
-        // [AC] REQ-ITS-16: "Don't crie" ranks "Don't Cry" above "Dance Floor" (iTunes order had it second)
-        var titles = new[] { "Dance Floor", "Don't Cry" };
+        // [AC] REQ-ITS-16: "Don't crie" ranks the bare "Don't Cry" above "Dance Floor" (iTunes order had it first)
+        var ranked = Rank("Don't crie", ("Dance Floor", "Band A"), ("Don't Cry", "Guns N' Roses"));
 
-        var ranked = SongTitleMatcher.RerankByTokenScore("Don't crie", titles, t => t);
-
-        Assert.Equal(new[] { "Don't Cry", "Dance Floor" }, ranked);
+        Assert.Equal("Don't Cry", ranked[0].Title);
     }
 
     [Fact]
-    public void Rerank_TiesKeepItunesOrder()
+    public void RankRows_ArtistWordCoversQuery_CoveringRowMovesAboveTopHit()
     {
-        // [AC] REQ-ITS-16: equal scores keep the popularity order from iTunes
-        var titles = new[] { "Don't Cry (Live)", "Don't Cry" };
+        // [AC] REQ-ITS-16: "gun" covers the artist "Shiny Toy Guns" (prefix match), so it outranks the partial top hit
+        var ranked = Rank("don't cry gun", ("Cry", "Benson Boone"), ("Don't Cry Out", "Shiny Toy Guns"));
 
-        var ranked = SongTitleMatcher.RerankByTokenScore("Don't Cry", titles, t => t);
-
-        Assert.Equal(new[] { "Don't Cry (Live)", "Don't Cry" }, ranked);
+        Assert.Equal(("Don't Cry Out", "Shiny Toy Guns"), ranked[0]);
     }
 
     [Fact]
-    public void Rerank_NeverAddsOrDropsRows()
+    public void RankRows_TitleFit_RowWithUnmatchedTitleWordsRanksBelow()
+    {
+        // [AC] REQ-ITS-16: "Don't Cry Out" has an unmatched title word ("Out"); bare "Don't Cry" ranks above it
+        var ranked = Rank("don't cry gun", ("Don't Cry Out", "Shiny Toy Guns"), ("Don't Cry", "Guns N' Roses"));
+
+        Assert.Equal(("Don't Cry", "Guns N' Roses"), ranked[0]);
+    }
+
+    [Fact]
+    public void RankRows_BracketedSuffix_SortsLastEvenWhenTitleFitIsEqual()
+    {
+        // [AC] REQ-ITS-16: "(Live)" is ignored for title fit but the bare title stays above it
+        var ranked = Rank("Don't Cry", ("Don't Cry (Live)", "Guns N' Roses"), ("Don't Cry", "J Dilla"));
+
+        Assert.Equal(("Don't Cry", "J Dilla"), ranked[0]);
+    }
+
+    [Fact]
+    public void RankRows_TiesKeepItunesOrder()
+    {
+        // [AC] REQ-ITS-16: equal keys keep the popularity order from iTunes
+        var ranked = Rank("Don't Cry", ("Don't Cry", "First"), ("Don't Cry", "Second"));
+
+        Assert.Equal(("Don't Cry", "First"), ranked[0]);
+    }
+
+    [Fact]
+    public void RankRows_NeverAddsOrDropsRows()
     {
         // [AC] REQ-ITS-15: the local step only re-orders the rows iTunes returned
-        var titles = new[] { "A", "Bb", "Ccc" };
-
-        var ranked = SongTitleMatcher.RerankByTokenScore("zzzz", titles, t => t);
+        var ranked = Rank("zzzz", ("A", "x"), ("Bb", "y"), ("Ccc", "z"));
 
         Assert.Equal(3, ranked.Count);
     }
