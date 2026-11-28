@@ -1,4 +1,4 @@
-﻿﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11519.219
@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{2C8F9F
 		Docs\Design\MyVocaList_Iconography_MD3_Guideline.md = Docs\Design\MyVocaList_Iconography_MD3_Guideline.md
 		Docs\Design\Tongues.pdf = Docs\Design\Tongues.pdf
 		Docs\Design\tooling-evaluations.md = Docs\Design\tooling-evaluations.md
+		Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch-Infografico.md = Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch-Infografico.md
+		Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch.html = Docs\Design\Up-to-date-UI_UX-tools-GeminiResearch.html
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C1B-4E22-4CEE-85FF-453BD80607BD}"
