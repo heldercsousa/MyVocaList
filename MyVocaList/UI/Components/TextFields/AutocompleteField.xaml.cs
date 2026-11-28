@@ -159,6 +159,36 @@ public partial class AutocompleteField : ContentView
         set => SetValue(IsSearchEnabledProperty, value);
     }
 
+    // ── IsSearching ────────────────────────────────────────────────────────
+
+    /// <summary>Identifies the <see cref="IsSearching"/> bindable property.</summary>
+    public static readonly BindableProperty IsSearchingProperty = BindableProperty.Create(
+        nameof(IsSearching), typeof(bool), typeof(AutocompleteField), false);
+
+    /// <summary>
+    /// True while an option search runs (after its debounce, until its answer arrives). Shows the progress
+    /// indicator in the field's trailing area (MD3 circular progress indicator, REQ-ITS-07, REQ-ITS-13). Set by the
+    /// control only, on the UI thread.
+    /// </summary>
+    public bool IsSearching
+    {
+        get => (bool)GetValue(IsSearchingProperty);
+        private set => SetValue(IsSearchingProperty, value);
+    }
+
+    // ── DebounceMilliseconds ───────────────────────────────────────────────
+
+    /// <summary>Identifies the <see cref="DebounceMilliseconds"/> bindable property.</summary>
+    public static readonly BindableProperty DebounceMillisecondsProperty = BindableProperty.Create(
+        nameof(DebounceMilliseconds), typeof(int), typeof(AutocompleteField), SearchConstants.AutocompleteDebounceMilliseconds);
+
+    /// <summary>Delay after the last keystroke before the option search runs. Default: the shared autocomplete debounce.</summary>
+    public int DebounceMilliseconds
+    {
+        get => (int)GetValue(DebounceMillisecondsProperty);
+        set => SetValue(DebounceMillisecondsProperty, value);
+    }
+
     // ── HasError ───────────────────────────────────────────────────────────
 
     /// <summary>Identifies the <see cref="HasError"/> bindable property.</summary>
@@ -513,13 +543,23 @@ public partial class AutocompleteField : ContentView
 
         var pickCountAtStart = _pickCount;
 
-        await Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds, token);
+        await Task.Delay(DebounceMilliseconds, token);
 
         var source = OptionSource;
         if (source is null)
             return null;
 
-        var options = await source.SearchAsync(query, token);
+        // REQ-ITS-07: the indicator is visible while the search (local and remote) runs, never during the debounce.
+        IsSearching = true;
+        IReadOnlyList<AutocompleteSuggestion> options;
+        try
+        {
+            options = await source.SearchAsync(query, token);
+        }
+        finally
+        {
+            IsSearching = false;
+        }
         token.ThrowIfCancellationRequested();
 
         // REQ-ACF-26: a pick routed while this search ran must not reopen the menu (the pick already closed it).
