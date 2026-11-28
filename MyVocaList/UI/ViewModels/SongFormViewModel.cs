@@ -107,7 +107,8 @@ public partial class SongFormViewModel : ViewModelBase
     private const string SongPlaceholderIcon = "music_note_outlined";
     private const string ArtistPlaceholderIcon = "account_circle_outlined";
     private const string LibrarySourceText = "Library";
-    private const string RemoteSourceText = ProviderNames.MusicBrainz;
+    // REQ-ITS-12: attribution label on remote title rows (the iTunes Search API source).
+    private const string RemoteSourceText = "Apple Music";
 
     // ── Form picture (REQ-PIC-17..22) ─────────────────────────────────────
     private const string ImageHint = "Square picture (1:1), 512 x 512 px or larger. Other shapes are cropped to the centre.";
@@ -521,12 +522,14 @@ public partial class SongFormViewModel : ViewModelBase
 
         ct.ThrowIfCancellationRequested();   // stale query: never touch the note
 
-        if (query.Trim().Length >= SearchConstants.MinimumRemoteQueryLength)
+        if (query.Trim().Length >= SearchConstants.SongTitleRemoteMinimumLength)
         {
+            var noRows = local.Count == 0 && remote.Promoted.Count == 0 && remote.Remote.Count == 0;
             var note = remote.Status switch
             {
                 RemoteSearchStatus.Offline => OfflineNote,
                 RemoteSearchStatus.Unavailable => SearchNotes.Unavailable,
+                _ when noRows => SearchNotes.NoResults,   // REQ-ITS-08 (supporting-text form, see task-log)
                 _ => string.Empty
             };
             RunOnUiThread(() => TitleSupportingText = note);
@@ -574,6 +577,7 @@ public partial class SongFormViewModel : ViewModelBase
     /// <summary>REQ-SLD-39: a Title text change releases the pick: the identity and the picked title go, the Title text stays.</summary>
     private void ReleaseRemotePickOnTitleChange()
     {
+        _remotePickSerial++;        // REQ-ITS-11: a pending MusicBrainz id lookup of the released pick must not apply
         SelectedExternalId = string.Empty;
         SelectedProvider = string.Empty;
         _pickedTitle = null;
@@ -582,20 +586,25 @@ public partial class SongFormViewModel : ViewModelBase
     private void ApplyRemotePick(SongSuggestionDto dto)
     {
         _pickedTitle = null;         // the pick's own Title write must not release the pick it is making
+        _remotePickSerial++;
         SongTitle = dto.Title;
         IsTitleLocked = true;
         SelectedExternalId = dto.ExternalId ?? string.Empty;
         SelectedProvider = dto.ExternalProvider ?? string.Empty;
-        _pendingImageUrl = dto.ImageUrl;             // REQ-ART-11: the cover, not the row-image fallback
+        // REQ-ITS-10: an iTunes row (no external identity) shows its artwork as a display fallback only; it is never saved as a file.
+        var isITunesRow = dto.IsRemote && dto.ExternalProvider is null;
+        _pendingImageUrl = isITunesRow ? null : dto.ImageUrl;   // REQ-ART-11: the cover, not the row-image fallback
         _pendingArtistImageUrl = dto.ArtistImageUrl;
         _pendingArtistExternalId = dto.ArtistExternalId;   // REQ-MSRC-13
         _pendingReleaseMbid = dto.ReleaseMbid;               // REQ-MSRC-16: album cover fallback, built with no call
-        _fallbackArtistImageReference = dto.ArtistImageUrl;  // REQ-MSRC-16
+        _fallbackArtistImageReference = isITunesRow ? dto.ImageUrl : dto.ArtistImageUrl;  // REQ-MSRC-16; REQ-ITS-10 display-only artwork
         _imageRemoved = false;                       // REQ-PIC-20: a later pick sets a picture again
         _pickedTitle = dto.Title;                    // REQ-PIC-27: the identity survives an unchanged Title
         NotifyArtistFrozenChanged();                 // REQ-SLD-14: the pick now holds the identity
         NotifyFormImageChanged();                    // REQ-PIC-19: an upload stays first
         StartLyricsLookup(dto);                      // REQ-LYR-01: before the artist branch, so every pick starts it
+        if (isITunesRow)
+            StartMusicBrainzIdLookup(dto.Title, dto.ArtistName);   // REQ-ITS-11: after the pick, never awaited by it
 
         if (dto.LocalArtistId.HasValue)
         {
@@ -612,6 +621,40 @@ public partial class SongFormViewModel : ViewModelBase
         IsArtistLocked = true;
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
+    }
+
+    // ── MusicBrainz ids after an iTunes pick (REQ-ITS-11) ─────────────────
+
+    private int _remotePickSerial;
+    private CancellationTokenSource? _musicBrainzIdLookupCts;
+
+    /// <summary>Starts the MusicBrainz artist and release id lookup for an iTunes pick. The pick does not await it.</summary>
+    private void StartMusicBrainzIdLookup(string title, string artistName)
+    {
+        _musicBrainzIdLookupCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        _musicBrainzIdLookupCts = cts;
+        _ = ApplyMusicBrainzIdsAsync(_remotePickSerial, title, artistName, cts.Token);
+    }
+
+    // Applies the ids only while the same pick is still held (version check). A failure leaves the ids empty (REQ-ITS-11).
+    private async Task ApplyMusicBrainzIdsAsync(int pickSerial, string title, string artistName, CancellationToken ct)
+    {
+        try
+        {
+            var (artistMbid, releaseMbid) = await _songSuggestions.ResolveMusicBrainzIdsAsync(title, artistName, ct);
+            RunOnUiThread(() =>
+            {
+                if (pickSerial != _remotePickSerial)
+                    return;
+                _pendingArtistExternalId = artistMbid;   // REQ-MSRC-13
+                _pendingReleaseMbid = releaseMbid;       // REQ-MSRC-16
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // A newer pick or a Title change replaced this lookup.
+        }
     }
 
     // ── Lyrics lookup on a MusicBrainz pick (REQ-LYR-01…04, 09…13) ───────────

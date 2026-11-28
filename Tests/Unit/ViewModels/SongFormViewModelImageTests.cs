@@ -220,7 +220,7 @@ public class SongFormViewModelImageTests
 
         var option = await SingleTitleOption(CreateSut());
 
-        Assert.Equal("MusicBrainz", option.TrailingText);
+        Assert.Equal("Apple Music", option.TrailingText);   // REQ-ITS-12
         Assert.DoesNotContain("Deezer", option.SupportingText);
     }
 
