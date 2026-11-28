@@ -96,4 +96,14 @@ public class TapToEditFieldLogicTests
 
         Assert.Equal(expected, endEditing);
     }
+
+    // [AC] REQ-PIC-24: an editor that holds focus keeps the editor state even when IsEditing was never set
+    // (focus given before the wrapper subscribed): the first typed character must not switch to the text state.
+    [Fact]
+    public void ShowsText_EditorFocusedButNotEditing_ReturnsFalse()
+    {
+        var showsText = TapToEditFieldLogic.ShowsText("d", isEditing: false, hasError: false, isEditorFocused: true);
+
+        Assert.False(showsText);
+    }
 }
