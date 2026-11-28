@@ -28,6 +28,7 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-22 | ↳ Deezer vs MusicBrainz — systematic comparison with pros and cons | 💡 Pending |
 | 2026-11-27 | ↳ App crashes on navigation after a YouTube link is shared while the app is open | 💡 Pending |
 | 2026-11-27 | ↳ Share-to-song form, YouTube video titles and thumbnails, artist photo adoption and song image fallback | 💡 Pending |
+| 2026-11-28 | ↳ Song title suggestions come from the iTunes Search API, ranked by popularity | 🟡 In Progress |
 | — | **Cross-cutting** | — |
 <!-- BACKLOG:GENERATED:END business-features -->
 

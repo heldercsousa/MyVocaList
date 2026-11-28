@@ -2209,6 +2209,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-versioncode-coun
 		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-27-versioncode-counts-all-commits-so-a-develop-build-is-never-below-a-branch-build\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-28-song-title-suggestions-come-from-the-itunes-search-api-ranked-by-popularity", "2026-11-28-song-title-suggestions-come-from-the-itunes-search-api-ranked-by-popularity", "{8BFC8E26-B546-5D42-A5AA-C36C8E05C7D5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-28-song-title-suggestions-come-from-the-itunes-search-api-ranked-by-popularity\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-28-song-title-suggestions-come-from-the-itunes-search-api-ranked-by-popularity\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2677,6 +2682,7 @@ Global
 		{F03FB816-F5E5-5FE9-9019-1A1BF177ED47} = {43BD647C-BDC4-50AB-B77B-28A7362C3462}
 		{DC3F7D30-A96C-56B5-B843-313899946780} = {FA1234BC-0001-4000-8000-00000000007F}
 		{67CC4313-C4E6-5DFC-8D94-8865312CC2C3} = {53BA9A45-08FE-5E6D-BEEE-79E6EA05FB9D}
+		{8BFC8E26-B546-5D42-A5AA-C36C8E05C7D5} = {8C9C1BED-BD76-5D80-8086-ED06BDC6FD01}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
