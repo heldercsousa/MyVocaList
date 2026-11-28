@@ -43,7 +43,7 @@ public class SongRepository : ISongRepository
         """
         SELECT s.Id AS Id, s.Title AS Title, s.ArtistId AS OriginalArtistId, a.Name AS OriginalArtistName,
                s.ExternalProvider AS ExternalProvider,
-               COALESCE(s.ImageUrl, a.ImageUrl) AS ImageUrl
+               s.ImageUrl AS SongImageUrl, a.ImageUrl AS ArtistImageUrl, s.ReleaseMbid AS ReleaseMbid
         FROM SongSearch
         JOIN Songs s ON s.Id = SongSearch.rowid
         JOIN Artists a ON a.Id = s.ArtistId
@@ -89,7 +89,9 @@ public class SongRepository : ISongRepository
                     s.ArtistId,
                     s.OriginalArtist.Name,
                     s.ExternalProvider,
-                    s.ImageUrl ?? s.OriginalArtist.ImageUrl))
+                    s.ImageUrl,
+                    s.OriginalArtist.ImageUrl,
+                    s.ReleaseMbid))
                 .ToListAsync(ct);
             return (allItems, allCount);
         }
@@ -146,7 +148,9 @@ public class SongRepository : ISongRepository
                 s.ArtistId,
                 s.OriginalArtist.Name,
                 s.ExternalProvider,
-                s.ImageUrl ?? s.OriginalArtist.ImageUrl))
+                s.ImageUrl,
+                    s.OriginalArtist.ImageUrl,
+                    s.ReleaseMbid))
             .ToListAsync(ct);
 
         return (items, totalCount);

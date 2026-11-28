@@ -222,7 +222,7 @@ public class SongService : ISongService
         int? artistId, string? newArtistName,
         CancellationToken ct,
         bool imageChanged = false, string? songImageReference = null,
-        string? artistImageUrl = null, bool fillArtistImage = false)
+        string? artistImageUrl = null, bool fillArtistImage = false, string? releaseMbid = null)
     {
         // REQ-SFT-28 / REQ-SFT-21: at most one of artistId / newArtistName (blank name = not
         // supplied). Pure input validation stays OUTSIDE the lambda (REQ-UOW-41).
@@ -345,6 +345,10 @@ public class SongService : ISongService
             if (imageChanged)
                 song.ImageUrl = songImageReference;
 
+            // REQ-MSRC-16: a new MusicBrainz pick replaces the stored release id; no pick keeps it.
+            if (releaseMbid is not null)
+                song.ReleaseMbid = releaseMbid;
+
             await songRepository.UpdateAsync(song, ct);
 
             // REQ-CATPROP-03: an author change moves the derived row, after every refusal above. A row the
@@ -386,7 +390,7 @@ public class SongService : ISongService
         string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct,
         string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false,
-        LyricsLookupResult? pickLyricsLookup = null, string? artistExternalId = null)
+        LyricsLookupResult? pickLyricsLookup = null, string? artistExternalId = null, string? releaseMbid = null)
     {
         // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
         // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
@@ -478,6 +482,7 @@ public class SongService : ISongService
                 ExternalId = externalId,
                 ExternalProvider = externalProvider,
                 ImageUrl = songImageUrl,
+                ReleaseMbid = releaseMbid,   // REQ-MSRC-16
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -607,7 +612,8 @@ public class SongService : ISongService
                 request.Lyrics, externalId, externalProvider,
                 request.PendingUrls ?? [], ct,
                 songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup,
-                resolved.NewArtistName is null ? null : artistMbid);
+                resolved.NewArtistName is null ? null : artistMbid,
+                releaseMbid: string.IsNullOrWhiteSpace(request.ReleaseMbid) ? null : request.ReleaseMbid.Trim());
 
             if (!created || song is null)
                 return SaveFailed(createMessage, failedField);
@@ -628,7 +634,8 @@ public class SongService : ISongService
             externalId: null, externalProvider: null,
             artistId: resolved.ArtistId, newArtistName: resolved.NewArtistName, ct: ct,
             imageChanged: request.ImageChanged, songImageReference: songImageUrl,
-            artistImageUrl: artistImageUrl, fillArtistImage: resolved.FillArtistImage);
+            artistImageUrl: artistImageUrl, fillArtistImage: resolved.FillArtistImage,
+            releaseMbid: string.IsNullOrWhiteSpace(request.ReleaseMbid) ? null : request.ReleaseMbid.Trim());
 
         return updated
             ? SaveSucceeded(updateMessage, songId)

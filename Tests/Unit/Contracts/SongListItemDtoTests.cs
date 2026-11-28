@@ -30,4 +30,17 @@ public class SongListItemDtoTests
 
         Assert.Equal(string.Empty, dto.SupportingText);
     }
+
+    // [AC] REQ-MSRC-16: song picture, then album cover from the release MBID, then artist picture, then none
+    [Fact]
+    public void ImageUrl_FollowsSongCoverArtistPriority()
+    {
+        const string mbid = "76df3287-6cda-33eb-8e9a-044b5e15ffdd";
+        const string cover = "https://coverartarchive.org/release/76df3287-6cda-33eb-8e9a-044b5e15ffdd/front-250";
+
+        Assert.Equal("s", new SongListItemDto(1, "T", 2, "A", null, "s", "a", mbid).ImageUrl);
+        Assert.Equal(cover, new SongListItemDto(1, "T", 2, "A", null, null, "a", mbid).ImageUrl);
+        Assert.Equal("a", new SongListItemDto(1, "T", 2, "A", null, null, "a", null).ImageUrl);
+        Assert.Null(new SongListItemDto(1, "T", 2, "A", null).ImageUrl);
+    }
 }

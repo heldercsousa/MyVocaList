@@ -899,6 +899,7 @@ public partial class SongFormViewModel : ViewModelBase
 
                 _storedImageReference = song.ImageUrl;   // REQ-PIC-18 (2): edit mode shows the stored picture
                 _fallbackArtistImageReference = song.OriginalArtist?.ImageUrl;   // REQ-MSRC-16
+                _pendingReleaseMbid = song.ReleaseMbid;   // REQ-MSRC-16: stored release feeds the display fallback
                 NotifyFormImageChanged();
             }
             finally
@@ -1083,7 +1084,9 @@ public partial class SongFormViewModel : ViewModelBase
             ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved),
             // REQ-SLD-26: the outcome of the held pick's lookup; the Service decides the origin from it.
             PickLyricsLookup: IsEditMode ? null : _pickLyricsLookup,
-            ArtistExternalId: artistExternalId);
+            ArtistExternalId: artistExternalId,
+            // REQ-MSRC-16: the held pick's release id, so lists can show the album cover; a null keeps the stored one.
+            ReleaseMbid: HoldsRemotePick ? _pendingReleaseMbid : null);
     }
 
     /// <summary>Maps the Service outcome to fields, sheets, the snackbar and navigation (REQ-SFT-51).</summary>

@@ -101,6 +101,82 @@ public class SongListItemProjectionTests : IAsyncLifetime
         Assert.Equal(ArtistPictureUrl, items.Single().ImageUrl);
     }
 
+    private const string Mbid = "76df3287-6cda-33eb-8e9a-044b5e15ffdd";
+    private const string MbidCover = "https://coverartarchive.org/release/76df3287-6cda-33eb-8e9a-044b5e15ffdd/front-250";
+
+    // [AC] REQ-MSRC-16: a song with no picture but a release id shows the album cover before the artist picture (plain list)
+    [Fact]
+    public async Task GetPagedAsync_SongWithReleaseMbid_RowImageIsAlbumCoverBeforeArtist()
+    {
+        var artist = await SeedArtistAsync("Artist With Picture", ArtistPictureUrl);
+        var song = await SeedSongAsync(artist.Id, "Song With Release", null);
+        song.ReleaseMbid = Mbid;
+        await _db.SaveChangesAsync();
+
+        var (items, _) = await _songs.GetPagedAsync(1, 20, null, CancellationToken.None);
+
+        Assert.Equal(MbidCover, items.Single().ImageUrl);
+    }
+
+    // [AC] REQ-MSRC-16: the song's own picture still wins over the album cover (plain list)
+    [Fact]
+    public async Task GetPagedAsync_SongWithImageAndReleaseMbid_RowImageIsSongImage()
+    {
+        var artist = await SeedArtistAsync("Artist With Picture", ArtistPictureUrl);
+        var song = await SeedSongAsync(artist.Id, "Song With Both", CoverUrl);
+        song.ReleaseMbid = Mbid;
+        await _db.SaveChangesAsync();
+
+        var (items, _) = await _songs.GetPagedAsync(1, 20, null, CancellationToken.None);
+
+        Assert.Equal(CoverUrl, items.Single().ImageUrl);
+    }
+
+    // [AC] REQ-MSRC-16: the album cover applies on the search (full-text) list path too
+    [Fact]
+    public async Task GetPagedAsync_SearchPath_SongWithReleaseMbid_RowImageIsAlbumCover()
+    {
+        var artist = await SeedArtistAsync("Artist With Picture", ArtistPictureUrl);
+        var song = await SeedSongAsync(artist.Id, "Wonderwall Release", null);
+        song.ReleaseMbid = Mbid;
+        await _db.SaveChangesAsync();
+
+        var (items, _) = await _songs.GetPagedAsync(1, 20, "Wonderwall", CancellationToken.None);
+
+        Assert.Equal(MbidCover, items.Single().ImageUrl);
+    }
+
+    // [AC] REQ-MSRC-16: the album cover applies on the short-query (prefix) list path too
+    [Fact]
+    public async Task GetPagedAsync_PrefixPath_SongWithReleaseMbid_RowImageIsAlbumCover()
+    {
+        var artist = await SeedArtistAsync("Artist With Picture", ArtistPictureUrl);
+        var song = await SeedSongAsync(artist.Id, "Zz Release", null);
+        song.ReleaseMbid = Mbid;
+        await _db.SaveChangesAsync();
+
+        var (items, _) = await _songs.GetPagedAsync(1, 20, "Zz", CancellationToken.None);
+
+        Assert.Equal(MbidCover, items.Single().ImageUrl);
+    }
+
+    // [AC] REQ-MSRC-16: the album cover applies on the catalog list too
+    [Fact]
+    public async Task GetPagedByArtistAsync_SongWithReleaseMbid_RowImageIsAlbumCover()
+    {
+        var original = await SeedArtistAsync("Original Artist", ArtistPictureUrl);
+        var performer = await SeedArtistAsync("Performer", null);
+        var song = await SeedSongAsync(original.Id, "Catalog Release", null);
+        song.ReleaseMbid = Mbid;
+        _db.Catalog.Add(new Catalog { ArtistId = performer.Id, SongId = song.Id });
+        await _db.SaveChangesAsync();
+
+        var (items, _) = await _catalog.GetPagedByArtistAsync(
+            performer.Id, 1, 20, null, CancellationToken.None);
+
+        Assert.Equal(MbidCover, items.Single().ImageUrl);
+    }
+
     private async Task<Artist> SeedArtistAsync(string name, string? imageUrl)
     {
         var artist = new Artist
