@@ -125,7 +125,9 @@ public class SongSuggestionServiceGroupingTests
 
         var result = await sut.SearchTitleRemoteAsync("radiohead", []);
 
-        Assert.Equal(new List<string> { "Creep", "Karma Police", "Zebra" }, result.Remote.Select(r => r.Title).ToList());
+        // [AC] REQ-ITS-16 (Option B, 2026-11-28): the query "radiohead" matches artists only, so title fit ranks the rows
+        // with fewer unmatched title words first ("Creep" 1, "Zebra" 1, "Karma Police" 2); one row per artist id is unchanged.
+        Assert.Equal(new List<string> { "Creep", "Zebra", "Karma Police" }, result.Remote.Select(r => r.Title).ToList());
     }
 
     // [AC] REQ-SLD-07 (reduced by REQ-RMV-08): the kept row of a group is the first row, in Deezer's order.

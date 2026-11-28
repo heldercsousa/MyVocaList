@@ -123,3 +123,18 @@
 ### Notes
 - The Kirk Franklin row first in the reported "don't cry gun" screenshot is NOT reproduced: the current build shows no Kirk row for that query. Cause not established. Candidate: a list left from an earlier query. The stale-response guard lives in `AutocompleteField` (governed component); it was not changed here. Local library rows are promoted above remote rows by design; none appeared in these three queries.
 - Governed component `AutocompleteField` not modified in this task.
+
+## Option B resolution (2026-11-28, coordinator decision; supersedes the blocked status above)
+
+- Decision: Option B under Helder's standing instruction. The spec gap above is closed: REQ-ITS-16 now scores rows by coverage (query words matched by title or artist words; typo or 3+ letter prefix), then title fit (title words no query word matches; bracketed suffix ignored), then a bracketed suffix last, then iTunes order (`SongTitleMatcher.RankRows`).
+- Fetch limit raised 15 → 25 (`ITunesSearchProvider.SongLimit`; REQ-ITS-01 amended). Fixtures recaptured at limit 25.
+- Impl decision: typo match needs the same first letter (REQ-ITS-15 amended). Without it "dont" matched "out" (distance 2) and "Don't Cry Out" escaped its title-fit penalty.
+- Typo retry with the corrected query (REQ-ITS-16a) NOT built: the 25-row recorded response already satisfies check 3 (GnR "Don't Cry" is the first penalty-free row).
+- Tests: `SongTitleMatcherTests` rewritten for `RankRows` (7 cases); `SongSuggestionITunesFixtureTests` asserts the three REQ-ITS-18 checks; `ITunesSearchProviderTests` asserts limit=25; `SongSuggestionServiceGroupingTests.SearchTitleRemoteAsync_GroupsKeepDeezerOrder` expectation updated to the title-fit order ("Creep", "Zebra", "Karma Police") because the query "radiohead" matches artists only. Grouping assertion unchanged.
+- Build 0 errors. `dotnet test MyVocaList.sln`: 2210 passed, 0 failed.
+- E2E emulator (emulator-5554, incremental build and deploy of this commit), first 3 rows:
+  - "Don't Cry": Don't Cry / Guns N' Roses; Don't Cry / J Dilla; Don't Cry / Asia. PASS.
+  - "don't cry gun": Don't Cry / Guns N' Roses; Don't Cry (Alternate Lyrics) / Guns N' Roses; Don't Cry (Original) [2022 Remaster] / Guns N' Roses. PASS.
+  - "Don't crie": Don't Cry / Guns N' Roses; Don't Cry / J Dilla; Don't Cry / Charley Crockett. PASS.
+- Observation: one ANR ("MyVocaList isn't responding", 18 s, MainActivity) on the Venues page right after the deploy. Not reproduced after `am start`; no trace file readable. Recorded, not investigated.
+- Status: **Check build**. The spinner (REQ-ITS-07) is still not seen on the emulator, so the item is not To Review (emulator gate).

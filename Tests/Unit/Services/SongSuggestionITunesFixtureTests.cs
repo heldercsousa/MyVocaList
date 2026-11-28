@@ -91,27 +91,22 @@ public class SongSuggestionITunesFixtureTests
     }
 
     [Fact]
-    public async Task SearchTitleRemoteAsync_DontCryGun_CoveringRowsKeepItunesOrderAndNoPartialRowTakesTheTop()
+    public async Task SearchTitleRemoteAsync_DontCryGun_GunsNRosesFirst()
     {
-        // [AC] REQ-ITS-16 (rule invariant on the recorded "don't cry gun" response). Every row in this response covers
-        // the query, so the coverage re-rank keeps the iTunes top hit first.
-        // Open spec gap (REQ-ITS-18 check 2): the recorded order puts "Don't Cry Out" by Shiny Toy Guns first, not
-        // "Don't Cry" by Guns N' Roses as the acceptance expects.
+        // [AC] REQ-ITS-18 check 2: "don't cry gun" → first row "Don't Cry" by "Guns N' Roses" (recorded fixture)
         var result = await CreateSut().SearchTitleRemoteAsync("don't cry gun", []);
 
-        var recorded = RecordedRows("itunes-dont-cry-gun.json").ToList();
-        Assert.Equal(recorded[0], (result.Remote[0].Title, result.Remote[0].ArtistName));
+        var first = result.Remote[0];
+        Assert.Equal("Don't Cry", first.Title);
+        Assert.Equal("Guns N' Roses", first.ArtistName);
     }
 
     [Fact]
-    public async Task SearchTitleRemoteAsync_DontCrie_ReturnsRecordedRowsInItunesOrderWithinTheCap()
+    public async Task SearchTitleRemoteAsync_DontCrie_GunsNRosesInTopThree()
     {
-        // [AC] REQ-ITS-16 / REQ-ITS-15: the typo query only re-orders the recorded rows and never adds one.
-        // Open spec gap (REQ-ITS-18 check 3): "Don't Cry" by Guns N' Roses is recorded at position 7, outside the top 3.
+        // [AC] REQ-ITS-18 check 3: "Don't crie" → a "Don't Cry" by "Guns N' Roses" row in the top 3 (recorded fixture)
         var result = await CreateSut().SearchTitleRemoteAsync("Don't crie", []);
 
-        var recordedTitles = RecordedRows("itunes-dont-crie.json").Select(r => r.Title).ToHashSet();
-        Assert.All(result.Remote, r => Assert.Contains(r.Title, recordedTitles));
-        Assert.Equal(SearchConstants.MaxSearchResults, result.Remote.Count);
+        Assert.Contains(result.Remote.Take(3), r => r.Title == "Don't Cry" && r.ArtistName == "Guns N' Roses");
     }
 }

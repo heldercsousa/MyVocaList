@@ -1,14 +1,20 @@
+using System.Text.RegularExpressions;
+
 namespace MyVocaList.Services;
 
 /// <summary>
-/// Typo-tolerant word matching and coverage re-rank for remote song-title rows (REQ-ITS-14..16).
-/// Pure logic: it orders and filters rows the provider already returned, it never adds rows.
+/// Typo-tolerant word matching and the scored re-rank of remote song-title rows (REQ-ITS-14..16).
+/// Pure logic: it orders the rows the provider already returned, it never adds or drops rows.
 /// </summary>
 public static class SongTitleMatcher
 {
     private const int MaxEditDistance = 2;
     private const int MinShorterLength = 3;
     private const int MinLongerLength = 4;
+    private const int MinPrefixQueryLength = 3;
+
+    private static readonly Regex BracketedSuffix = new(@"\s*[\(\[][^\)\]]*[\)\]]", RegexOptions.Compiled);
+    private static readonly Regex AnyBracket = new(@"[\(\[]", RegexOptions.Compiled);
 
     /// <summary>Two words match when equal, or within <see cref="MaxEditDistance"/> edits with lengths 3+ and 4+ (REQ-ITS-15).</summary>
     public static bool WordsMatch(string left, string right)
@@ -25,32 +31,40 @@ public static class SongTitleMatcher
         if (shorter < MinShorterLength || longer < MinLongerLength)
             return false;
 
+        // impl decision 2026-11-28: a typo keeps the first letter ("crie"→"cry" yes; "dont"→"out" no, distance 2 by accident).
+        if (a[0] != b[0])
+            return false;
+
         return Levenshtein(a, b) <= MaxEditDistance;
     }
 
     /// <summary>
-    /// Moves rows whose text covers every query word ahead of the rest. Both groups keep the input (popularity)
-    /// order, so a partial match never moves above a covering row and only covering rows can move up (REQ-ITS-16).
+    /// Orders rows by: coverage (query words matched by a title or artist word, most first), then title fit (title words
+    /// that no query word matches, fewest first), then a bracketed title suffix last, then the iTunes order (REQ-ITS-16).
     /// </summary>
-    public static IReadOnlyList<T> RerankByCoverage<T>(string query, IEnumerable<T> rows, Func<T, string> textOf)
+    public static IReadOnlyList<T> RankRows<T>(string query, IEnumerable<T> rows, Func<T, string> titleOf, Func<T, string> artistOf)
     {
         var rowList = rows.ToList();
         var queryWords = Tokens(query);
         if (queryWords.Count == 0)
             return rowList;
 
-        var covering = new List<T>();
-        var partial = new List<T>();
-        foreach (var row in rowList)
-        {
-            if (Covers(queryWords, textOf(row)))
-                covering.Add(row);
-            else
-                partial.Add(row);
-        }
-
-        covering.AddRange(partial);
-        return covering;
+        return rowList
+            .Select((row, index) =>
+            {
+                var title = titleOf(row);
+                var coverage = queryWords.Count(q => Tokens($"{title} {artistOf(row)}").Any(w => MatchesQueryWord(q, w)));
+                var titleOnly = Tokens(BracketedSuffix.Replace(title, string.Empty));
+                var penalty = titleOnly.Count(t => !queryWords.Any(q => MatchesQueryWord(q, t)));
+                var bracketed = AnyBracket.IsMatch(title);
+                return (row, index, coverage, penalty, bracketed);
+            })
+            .OrderByDescending(x => x.coverage)
+            .ThenBy(x => x.penalty)
+            .ThenBy(x => x.bracketed)
+            .ThenBy(x => x.index)
+            .Select(x => x.row)
+            .ToList();
     }
 
     /// <summary>Returns the query without its last word, or null when the query has fewer than two words (REQ-ITS-14).</summary>
@@ -60,14 +74,13 @@ public static class SongTitleMatcher
         return words.Length < 2 ? null : string.Join(' ', words[..^1]);
     }
 
-    private static bool Covers(IReadOnlyList<string> queryWords, string text)
-    {
-        var words = Tokens(text);
-        return queryWords.All(q => words.Any(t => WordsMatch(q, t)));
-    }
+    /// <summary>A query word matches a text word by typo tolerance (REQ-ITS-15) or as a prefix of 3+ query letters ("gun" → "guns").</summary>
+    private static bool MatchesQueryWord(string queryWord, string textWord) =>
+        WordsMatch(queryWord, textWord)
+        || (queryWord.Length >= MinPrefixQueryLength && textWord.StartsWith(queryWord, StringComparison.Ordinal));
 
     private static List<string> Tokens(string text) =>
-        text.Split([' ', '-', '(', ')', ',', '.', '&', '/', '!', '?'], StringSplitOptions.RemoveEmptyEntries)
+        text.Split([' ', '-', '(', ')', ',', '.', '&', '/', '!', '?', '[', ']'], StringSplitOptions.RemoveEmptyEntries)
             .Select(NormalizeWord)
             .Where(w => w.Length > 0)
             .ToList();

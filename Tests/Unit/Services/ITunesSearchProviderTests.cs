@@ -37,7 +37,7 @@ public class ITunesSearchProviderTests
     }
 
     [Fact]
-    public async Task SearchSongsAsync_SendsKeylessSongQueryWithLimit15()
+    public async Task SearchSongsAsync_SendsKeylessSongQueryWithLimit25()
     {
         // [AC] REQ-ITS-01: keyless song search, limit 15, term URL-encoded
         var (provider, handler, _) = Create(_ => Json("""{"resultCount":0,"results":[]}"""));
@@ -47,7 +47,7 @@ public class ITunesSearchProviderTests
         var uri = Assert.Single(handler.Requests);
         Assert.Equal("/search", uri.AbsolutePath);
         Assert.Contains("entity=song", uri.Query);
-        Assert.Contains("limit=15", uri.Query);
+        Assert.Contains("limit=25", uri.Query);
         Assert.Contains("term=Don%27t%20cry", uri.Query);
         Assert.DoesNotContain("key", uri.Query);
     }
