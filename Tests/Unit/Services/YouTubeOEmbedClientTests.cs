@@ -37,6 +37,20 @@ public class YouTubeOEmbedClientTests
         Assert.Contains(Uri.EscapeDataString("https://www.youtube.com/watch?v=dQw4w9WgXcQ"), uri);
     }
 
+    // [AC] REQ-MSRC-12: the channel name travels with the title so the cleaning can remove it
+    [Fact]
+    public async Task GetVideoInfoAsync_Success_ReturnsChannelName()
+    {
+        var (sut, _) = CreateSut(() => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"title\":\"Song\",\"author_name\":\" Sing King \"}")
+        });
+
+        var info = await sut.GetVideoInfoAsync("dQw4w9WgXcQ");
+
+        Assert.Equal("Sing King", info!.AuthorName);
+    }
+
     // [AC] REQ-MSRC-14: offline or on failure the caller gets null (the row falls back to the video id)
     [Theory]
     [InlineData(HttpStatusCode.NotFound)]

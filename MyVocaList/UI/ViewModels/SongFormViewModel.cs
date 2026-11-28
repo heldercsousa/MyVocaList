@@ -23,6 +23,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ILogger<SongFormViewModel> _logger;
     private readonly ISongKaraokeUrlService _karaokeUrlService;
     private readonly ISharedLinkInbox _sharedLinkInbox;
+    private readonly ISharedVideoService _sharedVideoService;
     private readonly INavigationService _navigationService;
     private readonly ISongSuggestionService _songSuggestions;
     private readonly IImageStore _imageStore;
@@ -63,6 +64,9 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isLyricsLoading;
     /// <summary>The running lyrics lookup; tests await it. The pick itself never awaits it (design § 2.5).</summary>
     public Task LyricsLookupTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>REQ-MSRC-12: the prefill of the add form from a shared video; completes when its answer is applied or dropped. Exposed for tests.</summary>
+    public Task SharedPrefillTask { get; private set; } = Task.CompletedTask;
     /// <summary>REQ-SLD-19: the lookup on open; a completed null task when none runs. Tests await it.</summary>
     public Task<string?> LyricsOnOpenTask { get; private set; } = Task.FromResult<string?>(null);
     /// <summary>REQ-LYR-09: the Lyrics placeholder while a lookup runs.</summary>
@@ -99,6 +103,7 @@ public partial class SongFormViewModel : ViewModelBase
     private LyricsLookupResult? _pickLyricsLookup;       // REQ-SLD-26: the outcome of the pick lookup of the held pick
     private string? _pendingImageUrl;        // REQ-ART-11: MusicBrainz cover held between a pick and Save
     private string? _pendingArtistImageUrl;  // REQ-ART-11: MusicBrainz artist picture held between a pick and Save
+    private string? _pendingArtistExternalId; // REQ-MSRC-13: MusicBrainz artist id held between a pick and Save
     private const string SongPlaceholderIcon = "music_note_outlined";
     private const string ArtistPlaceholderIcon = "account_circle_outlined";
     private const string LibrarySourceText = "Library";
@@ -221,6 +226,7 @@ public partial class SongFormViewModel : ViewModelBase
         ILogger<SongFormViewModel> logger,
         ISongKaraokeUrlService karaokeUrlService,
         ISharedLinkInbox sharedLinkInbox,
+        ISharedVideoService sharedVideoService,
         INavigationService navigationService,
         ISongSuggestionService songSuggestions,
         IImageStore imageStore,
@@ -234,6 +240,7 @@ public partial class SongFormViewModel : ViewModelBase
         _logger = logger;
         _karaokeUrlService = karaokeUrlService;
         _sharedLinkInbox = sharedLinkInbox;
+        _sharedVideoService = sharedVideoService;
         _navigationService = navigationService;
         _songSuggestions = songSuggestions;
         _imageStore = imageStore;
@@ -492,6 +499,7 @@ public partial class SongFormViewModel : ViewModelBase
         SelectedProvider = string.Empty;
         _pendingImageUrl = null;             // REQ-ART-13: X on Artist drops both pending images
         _pendingArtistImageUrl = null;
+        _pendingArtistExternalId = null;     // REQ-MSRC-13
         _pendingReleaseMbid = null;          // REQ-MSRC-16
         _fallbackArtistImageReference = null;
         _pickedTitle = null;
@@ -580,9 +588,10 @@ public partial class SongFormViewModel : ViewModelBase
         SelectedProvider = dto.ExternalProvider ?? string.Empty;
         _pendingImageUrl = dto.ImageUrl;             // REQ-ART-11: the cover, not the row-image fallback
         _pendingArtistImageUrl = dto.ArtistImageUrl;
+        _pendingArtistExternalId = dto.ArtistExternalId;   // REQ-MSRC-13
         _pendingReleaseMbid = dto.ReleaseMbid;               // REQ-MSRC-16: album cover fallback, built with no call
         _fallbackArtistImageReference = dto.ArtistImageUrl;  // REQ-MSRC-16
-        _imageRemoved = false;                      // REQ-PIC-20: a later pick sets a picture again
+        _imageRemoved = false;                       // REQ-PIC-20: a later pick sets a picture again
         _pickedTitle = dto.Title;                    // REQ-PIC-27: the identity survives an unchanged Title
         NotifyArtistFrozenChanged();                 // REQ-SLD-14: the pick now holds the identity
         NotifyFormImageChanged();                    // REQ-PIC-19: an upload stays first
@@ -1050,6 +1059,11 @@ public partial class SongFormViewModel : ViewModelBase
             ? _pendingArtistImageUrl
             : null;
 
+        // REQ-MSRC-13: the MusicBrainz artist id travels under the same rule as the artist picture.
+        var artistExternalId = !IsEditMode && string.Equals(ArtistSearchText, _pickedArtistName, StringComparison.Ordinal)
+            ? _pendingArtistExternalId
+            : null;
+
         return new SongFormSaveRequest(
             SongId,
             title,
@@ -1068,7 +1082,8 @@ public partial class SongFormViewModel : ViewModelBase
             ArtistImageUrl: artistImage,
             ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved),
             // REQ-SLD-26: the outcome of the held pick's lookup; the Service decides the origin from it.
-            PickLyricsLookup: IsEditMode ? null : _pickLyricsLookup);
+            PickLyricsLookup: IsEditMode ? null : _pickLyricsLookup,
+            ArtistExternalId: artistExternalId);
     }
 
     /// <summary>Maps the Service outcome to fields, sheets, the snackbar and navigation (REQ-SFT-51).</summary>
@@ -1313,6 +1328,40 @@ public partial class SongFormViewModel : ViewModelBase
 
         PasteUrlInput = shared;
         await AddFromPasteAsync();
+
+        // REQ-MSRC-12: an add form that is still blank is prefilled from the video; never an edit form, never typed text.
+        if (!SongId.HasValue && IsFormBlank() && _karaokeUrlService.ExtractVideoId(shared) is { Length: > 0 } videoId)
+            SharedPrefillTask = PrefillFromVideoAsync(videoId);
+    }
+
+    private bool IsFormBlank() => string.IsNullOrWhiteSpace(SongTitle) && string.IsNullOrWhiteSpace(ArtistSearchText);
+
+    /// <summary>
+    /// REQ-MSRC-12: asks the Service for the cleaned video title and the best recording, off the UI thread, and applies the
+    /// answer only while the form is still blank. The pick is applied exactly as a tap on a suggestion would (REQ-SFT-05).
+    /// A failure is logged and leaves the form as it is.
+    /// </summary>
+    private async Task PrefillFromVideoAsync(string videoId)
+    {
+        try
+        {
+            var prefill = await Task.Run(() => _sharedVideoService.PrefillAsync(videoId));
+            if (prefill is null) return;
+
+            RunOnUiThread(() =>
+            {
+                if (SongId.HasValue || !IsFormBlank()) return;   // the user got there first
+
+                if (prefill.Match is { } match)
+                    ApplyRemotePick(match);
+                else if (!string.IsNullOrWhiteSpace(prefill.CleanedTitle))
+                    SongTitle = prefill.CleanedTitle;
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Prefilling the song form from video {VideoId} failed", videoId);
+        }
     }
 
     /// <summary>Starts reacting to links shared while this form is open (call from OnAppearing).</summary>

@@ -125,6 +125,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISongResolutionService, SongResolutionService>();
         services.AddScoped<ISongSuggestionService, SongSuggestionService>();
         services.AddScoped<IArtistSuggestionService, ArtistSuggestionService>();
+        services.AddScoped<ISharedVideoService, SharedVideoService>(); // REQ-MSRC-11, -12
 
         // YouTube Karaoke
         services.AddScoped<ISongKaraokeUrlRepository, SongKaraokeUrlRepository>();

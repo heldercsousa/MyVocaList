@@ -44,6 +44,7 @@ public class SongFormViewModelLoadingTests
             new Mock<ILogger<SongFormViewModel>>().Object,
             _urlServiceMock.Object,
             new Mock<ISharedLinkInbox>().Object,
+            new Mock<ISharedVideoService>().Object,
             _navigationMock.Object,
             _suggestionsMock.Object,
             TestImageStore.PassThrough().Object,

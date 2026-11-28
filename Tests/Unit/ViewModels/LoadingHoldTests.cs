@@ -136,6 +136,7 @@ public class LoadingHoldTests
             new Mock<ILogger<SongFormViewModel>>().Object,
             urls.Object,
             new Mock<ISharedLinkInbox>().Object,
+            new Mock<ISharedVideoService>().Object,
             new Mock<INavigationService>().Object,
             suggestions.Object,
             TestImageStore.PassThrough().Object,

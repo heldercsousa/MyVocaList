@@ -100,6 +100,7 @@ public class SongSuggestionTitleSearchRealStackTests
             new Mock<ILogger<SongFormViewModel>>().Object,
             new Mock<ISongKaraokeUrlService>().Object,
             new Mock<ISharedLinkInbox>().Object,
+            new Mock<ISharedVideoService>().Object,
             new Mock<INavigationService>().Object,
             host.Resolve<ISongSuggestionService>(),
             TestImageStore.PassThrough().Object,

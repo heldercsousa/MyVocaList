@@ -38,6 +38,14 @@ public class SongKaraokeUrlRepository : ISongKaraokeUrlRepository
               .AnyAsync(u => u.SongId == songId && u.VideoId == videoId, ct);
 
     /// <inheritdoc />
+    public async Task<int?> FindSongIdByVideoIdAsync(string videoId, CancellationToken ct = default)
+        => await _db.SongKaraokeUrls
+            .Where(u => u.VideoId == videoId)
+            .OrderBy(u => u.SongId)
+            .Select(u => (int?)u.SongId)
+            .FirstOrDefaultAsync(ct);
+
+    /// <inheritdoc />
     public Task AddAsync(SongKaraokeUrl url, CancellationToken ct = default)
     {
         _db.SongKaraokeUrls.Add(url);

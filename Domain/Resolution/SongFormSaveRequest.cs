@@ -27,6 +27,10 @@ namespace MyVocaList.Domain.Resolution;
 /// <paramref name="ImageUrl"/> (null removes it). False keeps the stored reference whatever
 /// <paramref name="ImageUrl"/> holds (REQ-PIC-21). Ignored in add mode.
 /// </param>
+/// <param name="ArtistExternalId">
+/// REQ-MSRC-13: the MusicBrainz artist id of the held pick, sent only while the Artist text is the picked name. An artist
+/// created by this Save carries it, and its profile photo is fetched then. Ignored in edit mode.
+/// </param>
 /// <param name="PickLyricsLookup">
 /// The pick lookup of the held catalog pick (REQ-LYR-02), or null when there is none. Used by the add-mode lyrics origin
 /// (REQ-SLD-26); ignored in edit mode.
@@ -43,7 +47,8 @@ public sealed record SongFormSaveRequest(
     string? ImageUrl = null,
     string? ArtistImageUrl = null,
     bool ImageChanged = false,
-    LyricsLookupResult? PickLyricsLookup = null);
+    LyricsLookupResult? PickLyricsLookup = null,
+    string? ArtistExternalId = null);
 
 /// <summary>The user's answer to the near-duplicate artist sheet (REQ-SFT-19).</summary>
 public abstract record ArtistDecision
