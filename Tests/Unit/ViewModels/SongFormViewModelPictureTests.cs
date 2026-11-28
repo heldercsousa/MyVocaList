@@ -208,6 +208,22 @@ public class SongFormViewModelPictureTests
         Assert.Null(sut.FormImageThumbnailSource);
     }
 
+    [Fact]
+    public async Task FormDisplaySource_PickWithReleaseAndArtistImage_ShowsAlbumCoverThenArtistWithoutAFormPicture()
+    {
+        // [AC] REQ-MSRC-16: no picture of its own: the album cover is drawn first, never saved as the form picture.
+        var sut = CreateSut();
+        const string mbid = "76df3287-6cda-33eb-8e9a-044b5e15ffdd";
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto(image: null, artistImage: ArtistPic) with { ReleaseMbid = mbid }));
+
+        Assert.False(sut.HasFormImage);
+        Assert.Null(sut.FormImageSource);
+        _ = sut.FormDisplayImageSource;
+        _imageStoreMock.Verify(s => s.ResolveDisplaySource(
+            "https://coverartarchive.org/release/" + mbid + "/front-250", ImageSize.Large), Times.AtLeastOnce);
+    }
+
     // ── REQ-PIC-13 / 16: size and hint ───────────────────────────────────
 
     [Fact]

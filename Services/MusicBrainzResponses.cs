@@ -17,6 +17,7 @@ internal sealed record MbArtistCredit(
     [property: JsonPropertyName("artist")] MbArtist? Artist);
 
 internal sealed record MbRelease(
+    [property: JsonPropertyName("id")] string? Id,
     [property: JsonPropertyName("title")] string? Title);
 
 internal sealed record MbRecording(

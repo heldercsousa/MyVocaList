@@ -52,7 +52,8 @@ public sealed class MusicBrainzProvider : IMusicMetadataProvider
             .Select(r =>
             {
                 var credit = r.ArtistCredit?.FirstOrDefault();
-                var album = r.Releases?.FirstOrDefault()?.Title?.Trim();
+                var firstRelease = r.Releases?.FirstOrDefault();
+                var album = firstRelease?.Title?.Trim();
                 return new MusicSearchResultDto(
                     ExternalId: r.Id,
                     Provider: ProviderName,
@@ -60,7 +61,8 @@ public sealed class MusicBrainzProvider : IMusicMetadataProvider
                     SongTitle: r.Title,
                     AlbumTitle: string.IsNullOrEmpty(album) ? null : album,
                     DurationSeconds: r.Length is > 0 ? r.Length / 1000 : null,
-                    ExternalArtistId: credit?.Artist?.Id);
+                    ExternalArtistId: credit?.Artist?.Id,
+                    ReleaseMbid: firstRelease?.Id);
             })
             .ToList()
             ?? [];
