@@ -55,6 +55,16 @@ public static class ServiceCollectionExtensions
         // above and injecting an unconfigured HttpClient (no BaseAddress/User-Agent) (BUG-082).
         services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<MusicBrainzProvider>());
 
+        // iTunes Search API (REQ-ITS-01, -06): keyless song-title suggestions; one shared 20-calls-per-minute budget.
+        services.AddSingleton<ITunesRequestBudget>();
+        services.AddHttpClient<ITunesSearchProvider>(client =>
+        {
+            client.BaseAddress = new Uri("https://itunes.apple.com/");
+            var version = typeof(ITunesSearchProvider).Assembly.GetName().Version?.ToString(2) ?? "1.0";
+            client.DefaultRequestHeaders.UserAgent.ParseAdd($"MyVocaList/{version}");
+        });
+        services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<ITunesSearchProvider>());
+
         // Artist profile (REQ-MSRC-08..10): MusicBrainz + Wikidata + Commons; same User-Agent and shared limiter, typed client (BUG-082).
         services.AddHttpClient<ArtistProfileService>(client =>
         {

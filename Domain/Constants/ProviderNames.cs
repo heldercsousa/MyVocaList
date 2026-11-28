@@ -5,4 +5,7 @@ public static class ProviderNames
 {
     /// <summary>MusicBrainz catalog provider; the exact stored string.</summary>
     public const string MusicBrainz = "MusicBrainz";
+
+    /// <summary>iTunes Search API, the remote source of song-title suggestions (REQ-ITS-01). Not stored as ExternalProvider.</summary>
+    public const string ITunes = "iTunes";
 }

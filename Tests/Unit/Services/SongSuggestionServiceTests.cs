@@ -29,7 +29,7 @@ public class SongSuggestionServiceTests
     public SongSuggestionServiceTests()
     {
         _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.ITunes);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         // Moq returns null for Task<IReadOnlyList<T>> by default; make every lookup explicit-empty.
@@ -210,11 +210,11 @@ public class SongSuggestionServiceTests
     // ── SearchTitleRemoteAsync ───────────────────────────────────────────
 
     [Theory]
-    [InlineData("ab")]
-    [InlineData(" ab ")]
-    public async Task SearchTitleRemoteAsync_BelowThreeTrimmedChars_NoProviderCall(string query)
+    [InlineData("a")]
+    [InlineData(" a ")]
+    public async Task SearchTitleRemoteAsync_BelowTwoTrimmedChars_NoProviderCall(string query)
     {
-        // [AC] REQ-SFT-03: fewer than 3 trimmed characters starts no Deezer search
+        // [AC] REQ-ITS-04: fewer than 2 trimmed characters starts no iTunes search (supersedes the 3-character REQ-SFT-03 minimum for titles)
         var sut = CreateSut();
 
         var result = await sut.SearchTitleRemoteAsync(query, []);
@@ -223,25 +223,6 @@ public class SongSuggestionServiceTests
         Assert.Empty(result.Promoted);
         Assert.Equal(RemoteSearchStatus.Ok, result.Status);
         VerifyNoProviderCall();
-    }
-
-    [Fact]
-    public async Task SearchTitleRemoteAsync_ExternalIdentityMatchNotShown_Promoted()
-    {
-        // [AC] REQ-SFT-05: a Deezer hit already in the library by external id is promoted as the local row
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep"));
-        _songRepoMock
-            .Setup(r => r.FindByExternalIdsAsync(
-                "MusicBrainz", It.Is<IReadOnlyCollection<string>>(ids => ids.Contains("dz-1")), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "MusicBrainz", "dz-1") });
-        var sut = CreateSut();
-
-        var result = await sut.SearchTitleRemoteAsync("creep", []);
-
-        var promoted = Assert.Single(result.Promoted);
-        Assert.Equal(7, promoted.LocalId);
-        Assert.False(promoted.IsRemote);
-        Assert.Empty(result.Remote);
     }
 
     [Fact]
@@ -267,11 +248,11 @@ public class SongSuggestionServiceTests
     [Fact]
     public async Task SearchTitleRemoteAsync_MatchAlreadyShownLocally_DroppedNotPromoted()
     {
-        // [AC] REQ-SFT-05: a match already listed among the local options is dropped, not promoted twice
+        // [AC] REQ-SFT-05: a match already listed among the local options is dropped, not promoted twice (iTunes rows match by name, REQ-ITS-10)
         SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep"));
         _songRepoMock
-            .Setup(r => r.FindByExternalIdsAsync(
-                It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindByTitleAndArtistNamesAsync(
+                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit> { Hit(7, "Creep", "Radiohead", 3, "MusicBrainz", "dz-1") });
         var sut = CreateSut();
 
@@ -325,7 +306,8 @@ public class SongSuggestionServiceTests
         // [AC] REQ-SFT-06: any failure after the Deezer fetch (library dedupe) degrades to Unavailable + Warning, never an exception
         SetupDeezer(new MusicSearchResultDto("1", "Deezer", "Niska", "Commando"));
         _songRepoMock
-            .Setup(r => r.FindByExternalIdsAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindByTitleAndArtistNamesAsync(
+                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("collation failure"));
         var sut = CreateSut();
 

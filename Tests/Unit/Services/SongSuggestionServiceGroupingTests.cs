@@ -26,7 +26,7 @@ public class SongSuggestionServiceGroupingTests
     public SongSuggestionServiceGroupingTests()
     {
         _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.ITunes);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         _songRepoMock
@@ -213,9 +213,10 @@ public class SongSuggestionServiceGroupingTests
         Assert.Equal(5, result.Remote.Select(r => r.Title).Distinct().Count());
     }
 
-    // [AC] REQ-SLD-11: rows without a Deezer artist id are never merged, even with the same title.
+    // [AC] REQ-ITS-02 (supersedes REQ-SLD-11 for iTunes rows, which carry no artist id): rows with the same
+    // (title, artist name) pair merge into one row, first occurrence kept.
     [Fact]
-    public async Task SearchTitleRemoteAsync_RowsWithoutArtistId_NeverMerged()
+    public async Task SearchTitleRemoteAsync_RowsWithoutArtistId_MergedByTitleAndArtistName()
     {
         SetupDeezer(
             Row("dz-1", "Radiohead", "Creep", artistId: null),
@@ -224,6 +225,6 @@ public class SongSuggestionServiceGroupingTests
 
         var result = await sut.SearchTitleRemoteAsync("creep", []);
 
-        Assert.Equal(2, result.Remote.Count);
+        Assert.Single(result.Remote);
     }
 }
