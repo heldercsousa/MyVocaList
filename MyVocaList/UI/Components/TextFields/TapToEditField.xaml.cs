@@ -223,6 +223,10 @@ public partial class TapToEditField : ContentView
         _innerEditor = inner;
         inner.Focused += OnInnerEditorFocused;
         inner.Unfocused += OnInnerEditorUnfocused;
+
+        // Focus given before this subscription (e.g. a page focusing the editor on appearing) raised no Focused.
+        if (inner.IsFocused)
+            IsEditing = true;
     }
 
     private void Detach()
@@ -285,7 +289,7 @@ public partial class TapToEditField : ContentView
         if (textPresenter is null || editorHost is null)
             return;
 
-        var showsText = TapToEditFieldLogic.ShowsText(Text, IsEditing, HasError);
+        var showsText = TapToEditFieldLogic.ShowsText(Text, IsEditing, HasError, _innerEditor?.IsFocused == true);
 
         // Hiding a focused editor (e.g. IsEditing reset by the page) would leave the keyboard open.
         if (showsText && _innerEditor?.IsFocused == true)
@@ -363,6 +367,9 @@ public partial class TapToEditField : ContentView
 
             if (TapToEditFieldLogic.ShouldEndEditingAfterBlur(blurred.IsFocused, _autocomplete?.IsDropDownOpen ?? false))
                 IsEditing = false;
+
+            // IsEditing may already be false (focus never set it): re-evaluate so the text state shows.
+            ApplyState();
         });
     }
 
@@ -384,7 +391,10 @@ public partial class TapToEditField : ContentView
         Dispatcher.Dispatch(() =>
         {
             if (ReferenceEquals(sender, _autocomplete) && _autocomplete.IsLocked)
+            {
                 IsEditing = false;
+                ApplyState();
+            }
         });
     }
 }

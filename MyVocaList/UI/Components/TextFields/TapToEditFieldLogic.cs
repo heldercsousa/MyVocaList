@@ -13,11 +13,13 @@ internal static class TapToEditFieldLogic
     public const int BlurSettleMilliseconds = 250;
 
     /// <summary>
-    /// The text state (REQ-PIC-23) shows WHILE the value is not blank, the field is not being edited and
-    /// shows no error; otherwise the editor state shows (REQ-PIC-24).
+    /// The text state (REQ-PIC-23) shows WHILE the value is not blank, the field is not being edited, the inner
+    /// editor does not hold focus and the field shows no error; otherwise the editor state shows (REQ-PIC-24).
+    /// A focused editor always keeps the editor state: focus can arrive before the wrapper subscribed to it
+    /// (so <paramref name="isEditing"/> was never set), and the first typed character must not hide the editor.
     /// </summary>
-    public static bool ShowsText(string? text, bool isEditing, bool hasError)
-        => !isEditing && !hasError && !string.IsNullOrWhiteSpace(text);
+    public static bool ShowsText(string? text, bool isEditing, bool hasError, bool isEditorFocused = false)
+        => !isEditing && !hasError && !isEditorFocused && !string.IsNullOrWhiteSpace(text);
 
     /// <summary>
     /// A tap on the text releases the picked state of the wrapped field when the wrapper is set to
