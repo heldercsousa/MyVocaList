@@ -1062,6 +1062,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "music-sourcing-strategy", "
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\README.md
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\estrategia-gemini-2026-11-14.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\estrategia-gemini-2026-11-14.md
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\findings.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\findings.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\findings-song-search-alternatives-2026-11-28.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\findings-song-search-alternatives-2026-11-28.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "social-features", "social-features", "{FA1234BC-0001-4000-8000-00000000005D}"
