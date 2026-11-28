@@ -121,9 +121,9 @@ public class SongSuggestionService : ISongSuggestionService
                 fetched = [.. fetched, .. retry];
         }
 
-        // REQ-ITS-02: one row per (title, artist) pair; REQ-ITS-16: token re-rank, iTunes order kept as tie-break.
+        // REQ-ITS-02: one row per (title, artist) pair; REQ-ITS-16: covering rows (title or artist) first, iTunes order kept.
         var distinct = DistinctByTitleAndArtistName(fetched.Take(SearchConstants.RemoteSongFetchCount));
-        var raw = SongTitleMatcher.RerankByTokenScore(q, distinct, r => r.SongTitle ?? string.Empty);
+        var raw = SongTitleMatcher.RerankByCoverage(q, distinct, r => $"{r.SongTitle} {r.ArtistName}");
 
         // No HTTP inside the read scope: the fetch above has completed (REQ-UOW-43).
         var (promotedHits, remaining) = await _uow.ExecuteReadAsync(

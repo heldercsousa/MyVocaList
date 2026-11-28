@@ -1,7 +1,7 @@
 namespace MyVocaList.Services;
 
 /// <summary>
-/// Typo-tolerant word matching and token-score re-rank for remote song-title rows (REQ-ITS-14..16).
+/// Typo-tolerant word matching and coverage re-rank for remote song-title rows (REQ-ITS-14..16).
 /// Pure logic: it orders and filters rows the provider already returned, it never adds rows.
 /// </summary>
 public static class SongTitleMatcher
@@ -28,16 +28,29 @@ public static class SongTitleMatcher
         return Levenshtein(a, b) <= MaxEditDistance;
     }
 
-    /// <summary>Re-orders rows by the share of query words that match a title word; ties keep the input order (REQ-ITS-16).</summary>
-    public static IReadOnlyList<T> RerankByTokenScore<T>(string query, IEnumerable<T> rows, Func<T, string> titleOf)
+    /// <summary>
+    /// Moves rows whose text covers every query word ahead of the rest. Both groups keep the input (popularity)
+    /// order, so a partial match never moves above a covering row and only covering rows can move up (REQ-ITS-16).
+    /// </summary>
+    public static IReadOnlyList<T> RerankByCoverage<T>(string query, IEnumerable<T> rows, Func<T, string> textOf)
     {
+        var rowList = rows.ToList();
         var queryWords = Tokens(query);
-        return rows
-            .Select((row, index) => (row, index, score: TokenScore(queryWords, titleOf(row))))
-            .OrderByDescending(x => x.score)
-            .ThenBy(x => x.index)
-            .Select(x => x.row)
-            .ToList();
+        if (queryWords.Count == 0)
+            return rowList;
+
+        var covering = new List<T>();
+        var partial = new List<T>();
+        foreach (var row in rowList)
+        {
+            if (Covers(queryWords, textOf(row)))
+                covering.Add(row);
+            else
+                partial.Add(row);
+        }
+
+        covering.AddRange(partial);
+        return covering;
     }
 
     /// <summary>Returns the query without its last word, or null when the query has fewer than two words (REQ-ITS-14).</summary>
@@ -47,14 +60,10 @@ public static class SongTitleMatcher
         return words.Length < 2 ? null : string.Join(' ', words[..^1]);
     }
 
-    private static double TokenScore(IReadOnlyList<string> queryWords, string title)
+    private static bool Covers(IReadOnlyList<string> queryWords, string text)
     {
-        if (queryWords.Count == 0)
-            return 0;
-
-        var titleWords = Tokens(title);
-        var matched = queryWords.Count(q => titleWords.Any(t => WordsMatch(q, t)));
-        return (double)matched / queryWords.Count;
+        var words = Tokens(text);
+        return queryWords.All(q => words.Any(t => WordsMatch(q, t)));
     }
 
     private static List<string> Tokens(string text) =>
