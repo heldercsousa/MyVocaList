@@ -28,6 +28,8 @@ Requested by Helder on 2026-11-27 after the on-device test of APK 8270f468. Appr
 | REQ-MSRC-17 | MusicBrainz title suggestions are distinct. | One row per (title, artist) pair, keeping the best-scored recording. Done on the fetched page, display-only, with no extra request. |
 | REQ-MSRC-18 | Every autocomplete suggestion row shows a picture. | The song's own picture comes first. The album cover comes next, as the Cover Art Archive `release/{mbid}/front-250` URL built from the recording's release with no extra API call and loaded lazily by the image. The artist picture comes next. The current note/avatar icon is used last. |
 
+> **Spec updated [2026-11-28]:** REQ-MSRC-16 — the release MBID is stored on `Song` (nullable `ReleaseMbid`) when the song is saved from a MusicBrainz pick; an edit keeps the stored value unless a new pick replaces it. The song lists use it for the Cover Art Archive cover, in the order: song picture, album cover, artist picture, icon.
+
 ## Constraints
 - Song rows are edited in place and never recreated.
 - Keyless sources only: YouTube oEmbed, MusicBrainz at 1 request per second with the User-Agent from local config, Wikidata/Commons and Cover Art Archive.
