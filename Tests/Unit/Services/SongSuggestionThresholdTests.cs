@@ -22,7 +22,7 @@ public class SongSuggestionThresholdTests
 
     public SongSuggestionThresholdTests()
     {
-        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.ITunes);
         _networkStatusMock.SetupGet(n => n.HasInternetAccess).Returns(true);
     }
 
@@ -88,11 +88,12 @@ public class SongSuggestionThresholdTests
     [Fact]
     // [AC] REQ-UOW-52: a 2-character remote query is below MinimumRemoteQueryLength — the provider
     // fetch is never issued.
-    public async Task SearchTitleRemoteAsync_TwoCharQuery_ProviderNeverInvoked()
+    public async Task SearchTitleRemoteAsync_OneCharQuery_ProviderNeverInvoked()
     {
+        // [AC] REQ-ITS-04: the iTunes title search starts at 2 trimmed characters
         var sut = CreateSut();
 
-        var result = await sut.SearchTitleRemoteAsync("ab", []);
+        var result = await sut.SearchTitleRemoteAsync("a", []);
 
         Assert.Empty(result.Promoted);
         Assert.Empty(result.Remote);

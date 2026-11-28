@@ -42,8 +42,10 @@ public class MusicBrainzRegistrationTests
 
         var providers = scope.ServiceProvider.GetServices<IMusicMetadataProvider>().ToList();
 
-        var single = Assert.Single(providers);
-        Assert.Equal("MusicBrainz", single.ProviderName);
+        // [AC] REQ-ITS-01: the iTunes provider joins MusicBrainz; MusicBrainz stays registered for artist search and the post-pick lookup
+        Assert.Equal(2, providers.Count);
+        Assert.Contains(providers, p => p.ProviderName == "MusicBrainz");
+        Assert.Contains(providers, p => p.ProviderName == "iTunes");
     }
 
     [Fact]

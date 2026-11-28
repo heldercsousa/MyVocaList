@@ -25,7 +25,7 @@ public class SongSuggestionServiceImageTests
     public SongSuggestionServiceImageTests()
     {
         _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.ITunes);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         _songRepoMock
@@ -151,9 +151,10 @@ public class SongSuggestionServiceImageTests
         SetupDeezer(new MusicSearchResultDto(
             "dz-1", "Deezer", "Radiohead", "Creep",
             "https://dz/cover.jpg", "https://dz/artist.jpg", "Pablo Honey"));
+        // [AC] REQ-ITS-10: iTunes rows carry no external id, so the promotion matches the stored row by (title, artist) name.
         _songRepoMock
-            .Setup(r => r.FindByExternalIdsAsync(
-                "MusicBrainz", It.Is<IReadOnlyCollection<string>>(ids => ids.Contains("dz-1")), It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindByTitleAndArtistNamesAsync(
+                It.IsAny<IReadOnlyCollection<(string Title, string ArtistName)>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<SongSearchHit>
             {
                 Hit(7, "Creep", "Radiohead", 3, "https://stored/song.jpg", "https://stored/artist.jpg", "MusicBrainz", "dz-1"),

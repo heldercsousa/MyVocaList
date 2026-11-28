@@ -40,6 +40,7 @@
          no "No Results Found" row (empty NoResultsFoundText), no pre-selected row, no auto-appended text.
          Menu rows share one height (the control has no public auto-fit): code-behind measures this row template for the
          shapes in each result and sets DropDownItemHeight to the tallest (ApplyRowHeight). -->
+    <Grid>
     <core:SfTextInputLayout x:Name="layout"
                             Style="{StaticResource AutocompleteFieldSfLayout}"
                             Hint="{Binding LabelText, Source={x:Reference self}}"
@@ -136,4 +137,19 @@
             </ImageButton>
         </core:SfTextInputLayout.TrailingView>
     </core:SfTextInputLayout>
+
+    <!-- REQ-ITS-07: MD3 circular progress indicator in the trailing area while a search runs. The margin keeps it
+         clear of the clear (X) button at the end of the field. -->
+    <ActivityIndicator x:Name="searchIndicator"
+                       IsRunning="{Binding IsSearching, Source={x:Reference self}}"
+                       IsVisible="{Binding IsSearching, Source={x:Reference self}}"
+                       Color="{StaticResource OnSurfaceVariant}"
+                       WidthRequest="24"
+                       HeightRequest="24"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Margin="0,0,44,0"
+                       InputTransparent="True"
+                       SemanticProperties.Description="Searching" />
+    </Grid>
 </ContentView>

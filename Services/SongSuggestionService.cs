@@ -16,7 +16,9 @@ namespace MyVocaList.Services;
 /// <inheritdoc />
 public class SongSuggestionService : ISongSuggestionService
 {
-    private const string MusicProviderName = ProviderNames.MusicBrainz;
+    // Remote title suggestions come from iTunes (REQ-ITS-01); MusicBrainz serves only the post-pick MBID lookup (REQ-ITS-11).
+    private const string MusicProviderName = ProviderNames.ITunes;
+    private const string MusicBrainzProviderName = ProviderNames.MusicBrainz;
 
     private readonly ISongRepository _songRepository;
     private readonly IArtistRepository _artistRepository;
@@ -75,7 +77,7 @@ public class SongSuggestionService : ISongSuggestionService
         string query, IReadOnlyCollection<int> shownLocalSongIds, CancellationToken ct = default)
     {
         var q = query.NormalizeSearchQuery();
-        if (q.Length < SearchConstants.MinimumRemoteQueryLength)
+        if (q.Length < SearchConstants.SongTitleRemoteMinimumLength)
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Ok);
 
         // Any failure of the remote path degrades to Unavailable with a logged warning, so the caller
@@ -111,8 +113,17 @@ public class SongSuggestionService : ISongSuggestionService
         if (fetched.Count == 0)
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Ok);
 
-        // One row per song group, before the library check (REQ-SLD-06 to 09, 10).
-        var raw = CollapseSongGroups(fetched.Take(SearchConstants.RemoteSongFetchCount).ToList());
+        // REQ-ITS-14: fewer than 3 rows → one retry with the last word dropped; retry rows follow the first answer's rows.
+        if (fetched.Count < SearchConstants.SongTitleRetryBelowRowCount && SongTitleMatcher.DropLastWord(q) is { } shorter)
+        {
+            var retry = await TryFetchRemoteAsync(shorter, ct);
+            if (retry is not null)
+                fetched = [.. fetched, .. retry];
+        }
+
+        // REQ-ITS-02: one row per (title, artist) pair; REQ-ITS-16: token re-rank, iTunes order kept as tie-break.
+        var distinct = DistinctByTitleAndArtistName(fetched.Take(SearchConstants.RemoteSongFetchCount));
+        var raw = SongTitleMatcher.RerankByTokenScore(q, distinct, r => r.SongTitle ?? string.Empty);
 
         // No HTTP inside the read scope: the fetch above has completed (REQ-UOW-43).
         var (promotedHits, remaining) = await _uow.ExecuteReadAsync(
@@ -128,61 +139,57 @@ public class SongSuggestionService : ISongSuggestionService
         var top = remaining.Take(SearchConstants.MaxSearchResults).ToList();
         var remote = await ResolveLocalArtistsAsync(top, ct);
         _logger.LogInformation(
-            "Remote title search '{Query}': {Raw} from MusicBrainz, {Promoted} matched the library, {Remote} remote options",
+            "Remote title search '{Query}': {Raw} from iTunes, {Promoted} matched the library, {Remote} remote options",
             q, fetched.Count, promoted.Count, remote.Count);
         return new SongRemoteSearchResult(promoted, remote, RemoteSearchStatus.Ok);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────
-
-    // Groups rows by (provider artist id, short title), compared ordinally with no text rewriting (HARD RULE).
-    // A row without an artist id, or without a title, is its own group. The kept row is the first row of its
-    // group, in the provider order (REQ-SLD-06, 11; REQ-RMV-08: no version-based collapse step).
-    private static List<MusicSearchResultDto> CollapseSongGroups(IReadOnlyList<MusicSearchResultDto> rows)
+    /// <inheritdoc />
+    // [AC] REQ-ITS-11: MusicBrainz ids for the artist and the release of a picked iTunes row, looked up after the pick.
+    // A row matches when its title and artist text equal the pick exactly (no rewriting, HARD RULE). Any failure or
+    // timeout gives no ids (failure-silent); caller cancellation is rethrown.
+    public async Task<(string? ArtistMbid, string? ReleaseMbid)> ResolveMusicBrainzIdsAsync(
+        string title, string artistName, CancellationToken ct = default)
     {
-        var groups = new List<List<MusicSearchResultDto>>();
-        var groupsByArtist = new Dictionary<string, Dictionary<string, List<MusicSearchResultDto>>>(StringComparer.Ordinal);
+        var provider = _providers.FirstOrDefault(p => p.ProviderName == MusicBrainzProviderName);
+        if (provider is null || string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(artistName))
+            return (null, null);
 
-        foreach (var row in rows)
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        // The limiter's wait (and one 503 retry) happens inside the call, so the bound adds room for it.
+        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds + 2 * MusicBrainzRateLimiter.MinimumIntervalMs);
+        try
         {
-            if (string.IsNullOrWhiteSpace(row.ExternalArtistId) || row.SongTitle is null)
-            {
-                groups.Add([row]);
-                continue;
-            }
-
-            if (!groupsByArtist.TryGetValue(row.ExternalArtistId, out var byTitle))
-            {
-                byTitle = new Dictionary<string, List<MusicSearchResultDto>>(StringComparer.Ordinal);
-                groupsByArtist[row.ExternalArtistId] = byTitle;
-            }
-
-            if (!byTitle.TryGetValue(row.SongTitle, out var group))
-            {
-                group = [];
-                byTitle[row.SongTitle] = group;
-                groups.Add(group);
-            }
-
-            group.Add(row);
+            var rows = await provider.SearchSongsAsync(title, artistName, linked.Token);
+            var match = rows.FirstOrDefault(r =>
+                string.Equals(r.SongTitle, title, StringComparison.Ordinal)
+                && string.Equals(r.ArtistName, artistName, StringComparison.Ordinal)
+                && !string.IsNullOrEmpty(r.ExternalArtistId));
+            return match is null ? (null, null) : (match.ExternalArtistId, match.ReleaseMbid);
         }
-
-        return DistinctByTitleAndArtistName(groups.Select(group => group[0]));
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogInformation(ex, "MusicBrainz id lookup after a pick failed for '{Title}'; no ids stored", title);
+            return (null, null);
+        }
     }
 
-    // [AC] REQ-MSRC-17: one row per (title, artist name) pair on the fetched page. MusicBrainz lists one
-    // artist under several ids (or none), which the id-based grouping above cannot merge. Ordinal in-memory
-    // comparison of the provider's own text, display-only (HARD RULE: no rewriting). The provider order is its
-    // relevance order, so the first row of a pair is its best-scored recording.
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    // [AC] REQ-ITS-02 (supersedes the artist-id grouping of REQ-SLD-06/11 for iTunes rows, which carry no artist id):
+    // one row per (title, artist name) pair, first occurrence kept, in the provider's popularity order. Ordinal
+    // in-memory comparison of the provider's own text, display-only (HARD RULE: no rewriting).
     private static List<MusicSearchResultDto> DistinctByTitleAndArtistName(IEnumerable<MusicSearchResultDto> rows)
     {
         var seen = new HashSet<(string Title, string Artist)>();
         var result = new List<MusicSearchResultDto>();
         foreach (var row in rows)
         {
-            // Rows without an artist id are never merged (REQ-SLD-11).
-            if (string.IsNullOrWhiteSpace(row.ExternalArtistId)
-                || string.IsNullOrWhiteSpace(row.SongTitle) || string.IsNullOrWhiteSpace(row.ArtistName)
+            if (string.IsNullOrWhiteSpace(row.SongTitle) || string.IsNullOrWhiteSpace(row.ArtistName)
                 || seen.Add((row.SongTitle, row.ArtistName)))
                 result.Add(row);
         }
@@ -201,14 +208,12 @@ public class SongSuggestionService : ISongSuggestionService
         var provider = _providers.FirstOrDefault(p => p.ProviderName == MusicProviderName);
         if (provider is null)
         {
-            _logger.LogWarning("MusicBrainz provider is not registered; remote title search unavailable");
+            _logger.LogWarning("iTunes provider is not registered; remote title search unavailable");
             return null;
         }
 
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        // The MusicBrainz limiter's wait (and one 503 retry) happens inside the call, so the bound adds room for it;
-        // the request itself keeps the full RemoteSearchTimeoutMilliseconds.
-        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds + 2 * MusicBrainzRateLimiter.MinimumIntervalMs);
+        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds);
         try
         {
             var results = await provider.SearchSongsAsync(q, null, linked.Token);
@@ -220,7 +225,7 @@ public class SongSuggestionService : ISongSuggestionService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "MusicBrainz title search failed or timed out for query '{Query}'", q);
+            _logger.LogWarning(ex, "iTunes title search failed or timed out for query '{Query}'", q);
             return null;
         }
     }
@@ -233,19 +238,10 @@ public class SongSuggestionService : ISongSuggestionService
         var songRepository = sp.GetRequiredService<ISongRepository>();
         var promoted = new List<SongSearchHit>();
 
-        var ids = raw.Select(r => r.ExternalId).Where(i => !string.IsNullOrEmpty(i)).Distinct().ToList();
-        IReadOnlyList<SongSearchHit> byIdentity = ids.Count > 0
-            ? await songRepository.FindByExternalIdsAsync(MusicProviderName, ids, ct)
-            : [];
-        promoted.AddRange(byIdentity);
-        var matchedIds = byIdentity.Select(h => h.ExternalId).ToHashSet();
-
+        // iTunes rows carry no external identity (REQ-ITS-10), so the match is the collated (title, artist) pair only.
         var remaining = new List<MusicSearchResultDto>();
         foreach (var row in raw)
         {
-            if (matchedIds.Contains(row.ExternalId))
-                continue;
-
             if (string.IsNullOrWhiteSpace(row.SongTitle))
             {
                 remaining.Add(row);
@@ -289,8 +285,11 @@ public class SongSuggestionService : ISongSuggestionService
             Artist? artist = null;
             if (r.ArtistName is not null)
                 resolved.TryGetValue(r.ArtistName, out artist);
+            // iTunes track ids are not stored (REQ-ITS-10 and Apple terms): an iTunes row carries no external identity.
+            var isITunes = r.Provider == ProviderNames.ITunes;
             return new SongSuggestionDto(
-                null, r.SongTitle ?? string.Empty, r.ArtistName, artist?.Id, r.ExternalId, r.Provider,
+                null, r.SongTitle ?? string.Empty, r.ArtistName, artist?.Id,
+                isITunes ? null : r.ExternalId, isITunes ? null : r.Provider,
                 true, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle,
                 r.DurationSeconds, r.ExternalArtistId, r.ReleaseMbid);
         }).ToList();

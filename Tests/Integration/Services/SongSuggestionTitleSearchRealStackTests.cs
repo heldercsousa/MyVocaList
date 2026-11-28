@@ -20,12 +20,12 @@ namespace MyVocaList.Tests.Integration.Services;
 /// </summary>
 public class SongSuggestionTitleSearchRealStackTests
 {
-    // Real payload shape: unicode escape, title_version, extra unknown fields, top results not by the typed artist.
+    // iTunes Search payload shape (REQ-ITS-01): popularity-ordered tracks, artwork at the 100 size, unknown fields present.
     private const string Payload = """
-        {"recordings":[
-         {"id":"11111111-1111-1111-1111-111111111111","title":"Commando","length":195000,"artist-credit":[{"name":"Niska","artist":{"id":"a1111111-1111-1111-1111-111111111111","name":"Niska"}}],"releases":[{"title":"Commando"}]},
-         {"id":"22222222-2222-2222-2222-222222222222","title":"Comando","length":180000,"artist-credit":[{"name":"Banda X","artist":{"id":"a2222222-2222-2222-2222-222222222222","name":"Banda X"}}],"releases":[{"title":"A"}]},
-         {"id":"33333333-3333-3333-3333-333333333333","title":"Chasse à l'homme","artist-credit":[{"name":"Zaz","artist":{"id":"a3333333-3333-3333-3333-333333333333","name":"Zaz"}}]}
+        {"resultCount":3,"results":[
+         {"wrapperType":"track","kind":"song","trackId":1001,"trackName":"Commando","artistName":"Niska","collectionName":"Commando","artworkUrl100":"https://a.example/100x100bb.jpg","trackTimeMillis":195000},
+         {"wrapperType":"track","kind":"song","trackId":1002,"trackName":"Comando","artistName":"Banda X","collectionName":"A","artworkUrl100":"https://a.example/100x100bb.jpg","trackTimeMillis":180000},
+         {"wrapperType":"track","kind":"song","trackId":1003,"trackName":"Chasse à l'homme","artistName":"Zaz","previewUrl":"https://a.example/p.m4a"}
         ]}
         """;
 
@@ -45,12 +45,12 @@ public class SongSuggestionTitleSearchRealStackTests
 
     private static UnitOfWorkTestHost CreateHost() => UnitOfWorkTestHost.Create(services =>
     {
-        services.RemoveAll<IMusicMetadataProvider>();   // drop the production (real-network) MusicBrainz registration
+        services.RemoveAll<IMusicMetadataProvider>();   // drop the production (real-network) registrations
         services.AddSingleton<INetworkStatus, OnlineNetwork>();
-        services.AddScoped<IMusicMetadataProvider>(_ => new MusicBrainzProvider(
-            new HttpClient(new StubHandler()) { BaseAddress = new Uri("https://musicbrainz.org/ws/2/") },
-            new MusicBrainzRateLimiter(),
-            NullLogger<MusicBrainzProvider>.Instance));
+        services.AddScoped<IMusicMetadataProvider>(_ => new ITunesSearchProvider(
+            new HttpClient(new StubHandler()) { BaseAddress = new Uri("https://itunes.apple.com/") },
+            new ITunesRequestBudget(TimeProvider.System),
+            NullLogger<ITunesSearchProvider>.Instance));
     });
 
     // [AC] REQ-SFT-03/06: a title not stored locally still surfaces MusicBrainz options through the real stack.

@@ -20,7 +20,7 @@ public class SongSuggestionServiceDistinctTests
 
     public SongSuggestionServiceDistinctTests()
     {
-        _providerMock.SetupGet(p => p.ProviderName).Returns(ProviderNames.MusicBrainz);
+        _providerMock.SetupGet(p => p.ProviderName).Returns(ProviderNames.ITunes);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
         _songRepoMock
             .Setup(r => r.FindByExternalIdsAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
@@ -45,7 +45,7 @@ public class SongSuggestionServiceDistinctTests
             .ReturnsAsync(results.ToList());
 
     private static MusicSearchResultDto Row(string id, string artist, string title, string? artistId)
-        => new(ExternalId: id, Provider: ProviderNames.MusicBrainz, ArtistName: artist, SongTitle: title, ExternalArtistId: artistId);
+        => new(ExternalId: id, Provider: ProviderNames.ITunes, ArtistName: artist, SongTitle: title, ExternalArtistId: artistId);
 
     // [AC] REQ-MSRC-17: the same (title, artist name) under different provider artist ids is one row.
     // Rows without an artist id stay unmerged (REQ-SLD-11).

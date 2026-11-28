@@ -49,21 +49,22 @@ public class MusicBrainzSuggestionServiceTests
         [_musicBrainzMock.Object], new SimilarityScorer(), _networkMock.Object, _artistLoggerMock.Object);
 
     [Fact]
-    public async Task SearchTitleRemoteAsync_MusicBrainzAnswers_ReturnsRowsWithMbidAndProvider()
+    public async Task SearchTitleRemoteAsync_ITunesAnswers_ReturnsRowsWithoutExternalIdentity()
     {
-        // [AC] REQ-MSRC-02: the remote title search is served by the MusicBrainz provider; the MBID is the external id
-        _musicBrainzMock
+        // [AC] REQ-ITS-10: the remote title search is served by the iTunes provider; no iTunes id or provider is stored on the row
+        var itunesMock = new Mock<IMusicMetadataProvider>();
+        itunesMock.SetupGet(p => p.ProviderName).Returns(ProviderNames.ITunes);
+        itunesMock
             .Setup(p => p.SearchSongsAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([new MusicSearchResultDto("mbid-1", ProviderNames.MusicBrainz, "Radiohead", "Creep")]);
+            .ReturnsAsync([new MusicSearchResultDto("1440803", ProviderNames.ITunes, "Radiohead", "Creep")]);
 
-        var result = await CreateSongSut().SearchTitleRemoteAsync("creep", []);
+        var result = await CreateSongSut(itunesMock.Object).SearchTitleRemoteAsync("creep", []);
 
         Assert.Equal(RemoteSearchStatus.Ok, result.Status);
         var row = Assert.Single(result.Remote);
-        Assert.Equal("mbid-1", row.ExternalId);
-        Assert.Equal(ProviderNames.MusicBrainz, row.ExternalProvider);
-        _songRepoMock.Verify(r => r.FindByExternalIdsAsync(
-            ProviderNames.MusicBrainz, It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.True(row.IsRemote);
+        Assert.Null(row.ExternalId);
+        Assert.Null(row.ExternalProvider);
     }
 
     [Fact]

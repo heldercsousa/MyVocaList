@@ -23,6 +23,8 @@ public partial class SongFormPage : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
+        // REQ-ITS-05: the title field waits 350 ms after the last keystroke before the iTunes search (artist field keeps the shared debounce).
+        titleField.DebounceMilliseconds = MyVocaList.Domain.Constants.SearchConstants.RemoteTitleDebounceMilliseconds;
         viewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 

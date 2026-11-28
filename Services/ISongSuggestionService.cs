@@ -13,4 +13,10 @@ public interface ISongSuggestionService
     /// <param name="ct">Caller cancellation; rethrown (stale query).</param>
     Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
         string query, IReadOnlyCollection<int> shownLocalSongIds, CancellationToken ct = default);
+
+    /// <summary>MusicBrainz artist and release ids for a picked iTunes row, looked up after the pick (REQ-ITS-11). Failure gives (null, null).</summary>
+    /// <param name="title">The picked title, exact text.</param>
+    /// <param name="artistName">The picked artist name, exact text.</param>
+    Task<(string? ArtistMbid, string? ReleaseMbid)> ResolveMusicBrainzIdsAsync(
+        string title, string artistName, CancellationToken ct = default);
 }

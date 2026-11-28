@@ -4,6 +4,7 @@ using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Navigation;
+using MyVocaList.UI.Constants;
 using MyVocaList.Tests.Infrastructure;
 using MyVocaList.UI.Services;
 
@@ -135,7 +136,7 @@ public class SongFormViewModelTests
         var option = Assert.Single(options);
         Assert.Equal("Creep", option.Headline);
         Assert.Equal("Radiohead", option.SupportingText);
-        Assert.Equal("MusicBrainz", option.TrailingText);
+        Assert.Equal("Apple Music", option.TrailingText);   // REQ-ITS-12
     }
 
     // [AC] REQ-SFT-05: one row per song; local first, then promoted (local rows), then remote.
@@ -208,7 +209,9 @@ public class SongFormViewModelTests
         SetupSearch([], [], [], RemoteSearchStatus.Ok);
         await SearchTitle(sut, "creep");
 
-        Assert.Equal(string.Empty, sut.TitleSupportingText);
+        // REQ-ITS-08: an Ok answer with no rows shows "No results" in place of the offline note.
+        Assert.NotEqual(OfflineNoteText, sut.TitleSupportingText);
+        Assert.Equal(SearchNotes.NoResults, sut.TitleSupportingText);
     }
 
     // [AC] REQ-SFT-06: a remote query that succeeds after a failure clears the unavailable note.
@@ -244,17 +247,17 @@ public class SongFormViewModelTests
         Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
     }
 
-    // [AC] REQ-SFT-06: a query below 3 characters (no remote call ran) leaves the current note as it is.
+    // [AC] REQ-SFT-06 (threshold superseded to 2 characters by REQ-ITS-04): a query below the remote minimum (no remote call ran) leaves the current note as it is.
     [Fact]
     public async Task TitleOptionSource_QueryBelowRemoteThreshold_KeepsExistingNote()
     {
         var sut = CreateAddFormSut();
         SetupRemoteStatus("don", RemoteSearchStatus.Unavailable);
-        SetupRemoteStatus("do", RemoteSearchStatus.Ok);   // the service answers Ok, without a call, below 3 characters
+        SetupRemoteStatus("d", RemoteSearchStatus.Ok);   // the service answers Ok, without a call, below 2 characters
         await SearchTitle(sut, "don");
         Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
 
-        await SearchTitle(sut, "do");
+        await SearchTitle(sut, "d");
 
         Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
     }

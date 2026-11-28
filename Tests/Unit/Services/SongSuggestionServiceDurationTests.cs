@@ -23,7 +23,7 @@ public class SongSuggestionServiceDurationTests
     public SongSuggestionServiceDurationTests()
     {
         _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("OtherProvider");
-        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.MusicBrainz);
+        _deezerMock.SetupGet(p => p.ProviderName).Returns(MyVocaList.Domain.Constants.ProviderNames.ITunes);
         _networkMock.SetupGet(n => n.HasInternetAccess).Returns(true);
 
         _songRepoMock

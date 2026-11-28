@@ -27,6 +27,15 @@ public static class SearchConstants
     /// </summary>
     public const int MaxSearchResults = 5;
 
+    /// <summary>Minimum trimmed characters before a remote song-title search (iTunes), REQ-ITS-04. Artist search keeps <see cref="MinimumRemoteQueryLength"/>.</summary>
+    public const int SongTitleRemoteMinimumLength = 2;
+
+    /// <summary>Remote title answers below this many rows trigger the last-word-dropped retry, REQ-ITS-14.</summary>
+    public const int SongTitleRetryBelowRowCount = 3;
+
+    /// <summary>Debounce, in milliseconds, before a remote song-title search runs after the last keystroke, REQ-ITS-05.</summary>
+    public const int RemoteTitleDebounceMilliseconds = 350;
+
     /// <summary>Rows kept and grouped out of one remote track answer (REQ-SLD-10).</summary>
     public const int RemoteSongFetchCount = 25;
 
