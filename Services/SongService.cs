@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Contracts.Enums;
@@ -386,7 +386,7 @@ public class SongService : ISongService
         string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct,
         string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false,
-        LyricsLookupResult? pickLyricsLookup = null)
+        LyricsLookupResult? pickLyricsLookup = null, string? artistExternalId = null)
     {
         // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
         // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
@@ -424,7 +424,9 @@ public class SongService : ISongService
                 // and the unit of work skips the save and rolls back.
                 var artistService = sp.GetRequiredService<IArtistService>();
                 var (artistCreated, artistMessage, newArtist) =
-                    await artistService.CreateArtistAsync(newArtistName!, ct: ct);
+                    await artistService.CreateArtistAsync(
+                        newArtistName!, artistExternalId,
+                        artistExternalId is null ? null : MyVocaList.Domain.Constants.ProviderNames.MusicBrainz, ct);   // REQ-MSRC-13
                 if (!artistCreated || newArtist is null)
                     return (false, artistMessage, null, SaveField.Artist);
 
@@ -541,6 +543,9 @@ public class SongService : ISongService
 
         var isAddMode = request.SongId is null;
 
+        // REQ-MSRC-13: the MusicBrainz artist id of the pick travels in add mode only; a blank one is no id.
+        var artistMbid = isAddMode && !string.IsNullOrWhiteSpace(request.ArtistExternalId) ? request.ArtistExternalId.Trim() : null;
+
         // Rules 2–3 are reads only. SaveFromFormAsync opens no write unit of work (REQ-SFT-46): the
         // only writes are CreateSongWithUrlsAsync / UpdateSongAsync below, each with its own unit of
         // work. Resolving the governed services from sp (REQ-UOW-37) also keeps SongService free of
@@ -601,11 +606,17 @@ public class SongService : ISongService
                 resolved.ArtistId, resolved.NewArtistName, request.Title,
                 request.Lyrics, externalId, externalProvider,
                 request.PendingUrls ?? [], ct,
-                songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup);
+                songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup,
+                resolved.NewArtistName is null ? null : artistMbid);
 
-            return created && song is not null
-                ? SaveSucceeded(createMessage, song.Id)
-                : SaveFailed(createMessage, failedField);
+            if (!created || song is null)
+                return SaveFailed(createMessage, failedField);
+
+            // REQ-MSRC-13: the artist this Save created gets its profile photo now (after the commit, never fails the save).
+            if (artistMbid is not null && resolved.NewArtistName is not null)
+                await AdoptNewArtistPhotoAsync(song.ArtistId, artistMbid, ct);
+
+            return SaveSucceeded(createMessage, song.Id);
         }
 
         // REQ-SFT-27: edit mode passes a null external identity — the stored identity is kept,
@@ -625,6 +636,33 @@ public class SongService : ISongService
     }
 
     /// <summary>
+    /// REQ-MSRC-13/15: fetches the MusicBrainz profile of an artist this Save created and adopts its photo. The profile
+    /// service is resolved only when there is an artist id to look up. Any failure is logged and the save stands.
+    /// </summary>
+    private async Task AdoptNewArtistPhotoAsync(int artistId, string artistMbid, CancellationToken ct)
+    {
+        try
+        {
+            var profileService = await _uow.ExecuteReadAsync<IArtistProfileService?>(
+                sp => Task.FromResult<IArtistProfileService?>(sp.GetService<IArtistProfileService>()), ct);
+            if (profileService is null) return;
+
+            var profile = await profileService.GetAsync(artistMbid, ct);
+            if (profile is null) return;
+
+            await profileService.AdoptPhotoIfMissingAsync(artistId, profile, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Adopting the profile photo of new artist {ArtistId} failed", artistId);
+        }
+    }
+
+    /// <summary>
     /// Rule 2 (REQ-SFT-18/19/20/41/52): decides which artist the song is saved with. A picked id or a
     /// "Use existing" decision is used as is; a "Create" decision creates the typed name; otherwise
     /// the typed name — never the song's external identity (REQ-SFT-41) — goes to
@@ -633,6 +671,9 @@ public class SongService : ISongService
     private async Task<SaveFormResolution> ResolveFormArtistAsync(
         IServiceProvider sp, SongFormSaveRequest request, CancellationToken ct)
     {
+        // REQ-MSRC-13: the artist's own MusicBrainz id (never the song's identity, REQ-SFT-41) lets the resolver reuse a known artist.
+        var artistMbid = request.SongId is null && !string.IsNullOrWhiteSpace(request.ArtistExternalId) ? request.ArtistExternalId.Trim() : null;
+
         if (request.ArtistId is { } pickedArtistId)
             return SaveFormResolution.Proceed(pickedArtistId, newArtistName: null);
 
@@ -654,7 +695,10 @@ public class SongService : ISongService
 
         var artistResolutionService = sp.GetRequiredService<IArtistResolutionService>();
         var resolution = await artistResolutionService.ResolveAsync(
-            new ArtistCandidate(typedName, ExternalProvider: null, ExternalId: null), ct);
+            new ArtistCandidate(
+                typedName,
+                ExternalProvider: artistMbid is null ? null : MyVocaList.Domain.Constants.ProviderNames.MusicBrainz,
+                ExternalId: artistMbid), ct);
 
         switch (resolution.Kind)
         {

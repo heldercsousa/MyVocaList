@@ -13,6 +13,9 @@ public interface ISongKaraokeUrlRepository
     /// <summary>Returns true if the video ID is already associated with the song.</summary>
     Task<bool> ExistsAsync(int songId, string videoId, CancellationToken ct = default);
 
+    /// <summary>REQ-MSRC-11: the id of a song that holds the video id, or null when none does.</summary>
+    Task<int?> FindSongIdByVideoIdAsync(string videoId, CancellationToken ct = default);
+
     Task AddAsync(SongKaraokeUrl url, CancellationToken ct = default);
     Task RemoveAsync(int songId, string videoId, CancellationToken ct = default);
 

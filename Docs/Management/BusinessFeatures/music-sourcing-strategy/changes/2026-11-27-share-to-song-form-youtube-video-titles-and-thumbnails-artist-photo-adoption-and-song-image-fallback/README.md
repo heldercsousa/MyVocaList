@@ -39,8 +39,10 @@ Requested by Helder on 2026-11-27 after the on-device test of APK 8270f468. Appr
 
 ## Tasks
 - [x] S1 oEmbed client + title/thumbnail on `SongKaraokeUrl` (migration, in place) — REQ-MSRC-14
-- [ ] S2 Share → Song form routing, replacing the snackbar — REQ-MSRC-11
-- [ ] S3 Prefill from the video title (cleaning + MusicBrainz + lyrics) — REQ-MSRC-12, -13
+- [x] S2 Share → Song form routing, replacing the snackbar — REQ-MSRC-11
+- [x] S3 Prefill from the video title (cleaning + MusicBrainz + lyrics) — REQ-MSRC-12, -13
 - [x] S4 Artist photo adoption — REQ-MSRC-15
 - [ ] S5 Song image fallback (Cover Art Archive, then the artist) — REQ-MSRC-16, -18
 - [x] S6 Distinct MusicBrainz title suggestions — REQ-MSRC-17
+
+> **Spec updated [2026-11-27]:** S2/S3 impl decisions. A song form already open takes a shared link itself (REQ-MSRC-06 path); with none open the app navigates to `song-form` (edit mode `?songId=N` when a stored song holds the video, else add mode with the link pending). MusicBrainz search is a phrase query on the recording title, so the cleaned "A - B" text is split at its separators and a recording is taken only when its artist agrees with the other half; a text with no separator takes the first recording. Prefill never overwrites a typed Title/Artist and never runs in edit mode. A new artist from a pick is resolved by its MusicBrainz id first, stored with it, and its photo adopted after the Save commit; a failed lookup never fails the Save.

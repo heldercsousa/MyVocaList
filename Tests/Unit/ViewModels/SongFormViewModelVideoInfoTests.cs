@@ -25,6 +25,7 @@ public class SongFormViewModelVideoInfoTests
             _loggerMock.Object,
             _urlServiceMock.Object,
             new Mock<ISharedLinkInbox>().Object,
+            new Mock<ISharedVideoService>().Object,
             new Mock<INavigationService>().Object,
             new Mock<ISongSuggestionService>().Object,
             TestImageStore.PassThrough().Object,

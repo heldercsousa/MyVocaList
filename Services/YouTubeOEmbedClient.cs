@@ -40,7 +40,8 @@ public sealed class YouTubeOEmbedClient : IYouTubeOEmbedClient
             if (body is null || string.IsNullOrWhiteSpace(body.Title)) return null;
 
             return new YouTubeVideoInfo(body.Title.Trim(),
-                string.IsNullOrWhiteSpace(body.ThumbnailUrl) ? null : body.ThumbnailUrl);
+                string.IsNullOrWhiteSpace(body.ThumbnailUrl) ? null : body.ThumbnailUrl,
+                string.IsNullOrWhiteSpace(body.AuthorName) ? null : body.AuthorName.Trim());
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -55,5 +56,6 @@ public sealed class YouTubeOEmbedClient : IYouTubeOEmbedClient
 
     private record OEmbedResponse(
         [property: JsonPropertyName("title")] string? Title,
-        [property: JsonPropertyName("thumbnail_url")] string? ThumbnailUrl);
+        [property: JsonPropertyName("thumbnail_url")] string? ThumbnailUrl,
+        [property: JsonPropertyName("author_name")] string? AuthorName = null);
 }

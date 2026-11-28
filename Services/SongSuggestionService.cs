@@ -292,7 +292,7 @@ public class SongSuggestionService : ISongSuggestionService
             return new SongSuggestionDto(
                 null, r.SongTitle ?? string.Empty, r.ArtistName, artist?.Id, r.ExternalId, r.Provider,
                 true, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle,
-                r.DurationSeconds);
+                r.DurationSeconds, r.ExternalArtistId);
         }).ToList();
     }
 }

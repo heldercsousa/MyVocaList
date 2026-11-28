@@ -9,5 +9,5 @@ public record MusicSearchResultDto(
     string? ArtistImageUrl = null,
     string? AlbumTitle = null,
     int? DurationSeconds = null,
-    /// <summary>The provider's artist id as text, used only to group rows; never stored.</summary>
+    /// <summary>The provider's artist id as text: groups rows, and is stored on an artist a Save creates from the pick (REQ-MSRC-13).</summary>
     string? ExternalArtistId = null);

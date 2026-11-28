@@ -2186,6 +2186,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback", "2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback", "{F20C26BD-1891-56E0-ACA9-672B09181169}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\README.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\task-log.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\changes\2026-11-27-share-to-song-form-youtube-video-titles-and-thumbnails-artist-photo-adoption-and-song-image-fallback\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{43BD647C-BDC4-50AB-B77B-28A7362C3462}"
