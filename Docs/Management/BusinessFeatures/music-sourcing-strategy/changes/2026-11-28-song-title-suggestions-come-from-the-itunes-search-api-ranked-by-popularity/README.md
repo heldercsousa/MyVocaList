@@ -44,6 +44,12 @@ Risk note: the Apple page states that the Search API content is meant for promot
 - REQ-ITS-10: The artwork URL (`artworkUrl100`, rewritten to the 250 px size) is used as the suggestion row image and as the form fallback image. It is not downloaded or stored as a file.
 - REQ-ITS-11: The MusicBrainz MBID lookup for the artist and the release runs AFTER the pick, non-blocking, and failure-silent. When MusicBrainz answers, REQ-MSRC-13, REQ-MSRC-15 and REQ-MSRC-16 keep working. When it does not, the pick still completes.
 
+**(g) Typo tolerance and local re-rank (coordinator addition, 2026-11-28; no remote source tolerates typos, see `findings-song-search-alternatives-2026-11-28.md` on develop).**
+- REQ-ITS-14: When iTunes returns fewer than 3 rows and the query has 2 or more words, the query is retried once with its last word dropped; retry rows are appended after the first answer's rows, duplicates removed.
+- REQ-ITS-15: Typo-tolerant word match: two words match when they are equal, or when their Levenshtein distance is at most 2, the shorter word has 3 or more characters and the longer has 4 or more (case-insensitive; apostrophes removed). The local step only re-orders and filters rows iTunes returned; it never adds rows. Example: "crie" matches "cry" (distance 2, lengths 4 and 3).
+- REQ-ITS-16: Remote candidates are re-ranked by token score = share of query words that match a title word (REQ-ITS-15). Higher score first; ties keep the iTunes popularity order. Acceptance example for tests: query "Don't crie" with candidates "Dance Floor" (iTunes first) then "Don't Cry" ranks "Don't Cry" first (score 2 of 2 against 0 of 2).
+- Apple terms: no preview or artwork file is stored; artwork is referenced by URL only (REQ-ITS-10).
+
 **(e) Attribution.**
 - REQ-ITS-12: Remote rows show an "Apple Music" source label in place of the "MusicBrainz" label.
 
