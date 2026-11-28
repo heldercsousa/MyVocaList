@@ -42,5 +42,5 @@ Requested by Helder on 2026-11-27 after the on-device test of APK 8270f468. Appr
 - [ ] S2 Share → Song form routing, replacing the snackbar — REQ-MSRC-11
 - [ ] S3 Prefill from the video title (cleaning + MusicBrainz + lyrics) — REQ-MSRC-12, -13
 - [x] S4 Artist photo adoption — REQ-MSRC-15
-- [ ] S5 Song image fallback (Cover Art Archive, then the artist) — REQ-MSRC-16, -18
+- [x] S5 Song image fallback (Cover Art Archive, then the artist) — REQ-MSRC-16, -18
 - [x] S6 Distinct MusicBrainz title suggestions — REQ-MSRC-17

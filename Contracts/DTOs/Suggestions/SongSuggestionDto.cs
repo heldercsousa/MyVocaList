@@ -16,6 +16,7 @@ namespace MyVocaList.Contracts.DTOs.Suggestions;
 /// <param name="ArtistImageUrl">Artist image URL; null when none (REQ-ART-06).</param>
 /// <param name="AlbumTitle">Album title; set on remote rows only, null when none (REQ-ART-07).</param>
 /// <param name="DurationSeconds">Track duration in seconds; set on remote rows only, null when none (REQ-LYR-01).</param>
+/// <param name="ReleaseMbid">MusicBrainz release id of the recording's first release; remote rows only (REQ-MSRC-18).</param>
 public sealed record SongSuggestionDto(
     int? LocalId,
     string Title,
@@ -28,8 +29,9 @@ public sealed record SongSuggestionDto(
     string? ImageUrl = null,
     string? ArtistImageUrl = null,
     string? AlbumTitle = null,
-    int? DurationSeconds = null)
+    int? DurationSeconds = null,
+    string? ReleaseMbid = null)
 {
-    /// <summary>The image a row shows: the song image, else the artist image, else null (REQ-ART-06).</summary>
-    public string? RowImageUrl => ImageUrl ?? ArtistImageUrl;
+    /// <summary>The image a row shows: song image, album cover, artist image, else null (REQ-ART-06, REQ-MSRC-18).</summary>
+    public string? RowImageUrl => SongImageResolver.Resolve(ImageUrl, ReleaseMbid, ArtistImageUrl);
 }

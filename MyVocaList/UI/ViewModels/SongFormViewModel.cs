@@ -128,11 +128,24 @@ public partial class SongFormViewModel : ViewModelBase
     private string? FormImageReference =>
         _imageRemoved ? null : _uploadedImageReference ?? (IsEditMode ? _storedImageReference : _pendingImageUrl);
 
+    private string? _pendingReleaseMbid;           // REQ-MSRC-16: release of the held MusicBrainz pick (album cover fallback)
+    private string? _fallbackArtistImageReference; // REQ-MSRC-16: the song's artist picture (display fallback only, never saved)
+
+    /// <summary>What the picture shows: the form picture, else the album cover, else the artist picture (REQ-MSRC-16).</summary>
+    private string? FormDisplayReference =>
+        SongImageResolver.Resolve(FormImageReference, _pendingReleaseMbid, _fallbackArtistImageReference);
+
     /// <summary>Display source of the form picture, large size (REQ-PIC-13); null shows the placeholder.</summary>
     public string? FormImageSource => _imageStore.ResolveDisplaySource(FormImageReference, ImageSize.Large);
 
     /// <summary>Display source of the form picture, thumbnail size, drawn under the large one.</summary>
     public string? FormImageThumbnailSource => _imageStore.ResolveDisplaySource(FormImageReference, ImageSize.Thumbnail);
+
+    /// <summary>What the picture field draws, large: <see cref="FormImageSource"/> or the fallback (REQ-MSRC-16). Never saved.</summary>
+    public string? FormDisplayImageSource => _imageStore.ResolveDisplaySource(FormDisplayReference, ImageSize.Large);
+
+    /// <summary>What the picture field draws, thumbnail size, under the large one (REQ-MSRC-16).</summary>
+    public string? FormDisplayThumbnailSource => _imageStore.ResolveDisplaySource(FormDisplayReference, ImageSize.Thumbnail);
 
     /// <summary>True when the form has a picture (REQ-PIC-15/16 switch the buttons and the hint).</summary>
     public bool HasFormImage => FormImageReference is not null;
@@ -394,6 +407,8 @@ public partial class SongFormViewModel : ViewModelBase
     {
         if (suggestion?.Data is not ArtistListItem artist) return;
         LockArtist(artist.Id, artist.Name);
+        _fallbackArtistImageReference = artist.ImageUrl;   // REQ-MSRC-16
+        NotifyFormImageChanged();
     }
 
     /// <summary>
@@ -477,6 +492,8 @@ public partial class SongFormViewModel : ViewModelBase
         SelectedProvider = string.Empty;
         _pendingImageUrl = null;             // REQ-ART-13: X on Artist drops both pending images
         _pendingArtistImageUrl = null;
+        _pendingReleaseMbid = null;          // REQ-MSRC-16
+        _fallbackArtistImageReference = null;
         _pickedTitle = null;
         _pickedArtistName = null;
         NotifyFormImageChanged();            // REQ-PIC-19: an upload stays the form picture
@@ -563,7 +580,9 @@ public partial class SongFormViewModel : ViewModelBase
         SelectedProvider = dto.ExternalProvider ?? string.Empty;
         _pendingImageUrl = dto.ImageUrl;             // REQ-ART-11: the cover, not the row-image fallback
         _pendingArtistImageUrl = dto.ArtistImageUrl;
-        _imageRemoved = false;                       // REQ-PIC-20: a later pick sets a picture again
+        _pendingReleaseMbid = dto.ReleaseMbid;               // REQ-MSRC-16: album cover fallback, built with no call
+        _fallbackArtistImageReference = dto.ArtistImageUrl;  // REQ-MSRC-16
+        _imageRemoved = false;                      // REQ-PIC-20: a later pick sets a picture again
         _pickedTitle = dto.Title;                    // REQ-PIC-27: the identity survives an unchanged Title
         NotifyArtistFrozenChanged();                 // REQ-SLD-14: the pick now holds the identity
         NotifyFormImageChanged();                    // REQ-PIC-19: an upload stays first
@@ -742,6 +761,8 @@ public partial class SongFormViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(FormImageSource));
         OnPropertyChanged(nameof(FormImageThumbnailSource));
+        OnPropertyChanged(nameof(FormDisplayImageSource));
+        OnPropertyChanged(nameof(FormDisplayThumbnailSource));
         OnPropertyChanged(nameof(HasFormImage));
     }
 
@@ -868,6 +889,7 @@ public partial class SongFormViewModel : ViewModelBase
                 IsArtistLocked = true;
 
                 _storedImageReference = song.ImageUrl;   // REQ-PIC-18 (2): edit mode shows the stored picture
+                _fallbackArtistImageReference = song.OriginalArtist?.ImageUrl;   // REQ-MSRC-16
                 NotifyFormImageChanged();
             }
             finally
